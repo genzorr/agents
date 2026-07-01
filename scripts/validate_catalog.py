@@ -229,11 +229,12 @@ def check_duplicate_ids(catalog: dict) -> list[str]:
     return errors
 
 
-# `is_repo_managed_skill` in install-{codex,claude}.sh is expected to look like a
-# bash case/list of skill names. This regex is intentionally loose: it only pulls
-# out bare identifier-looking tokens, since the installer scripts don't exist yet
-# and their eventual shape is a later task's contract.
-SKILL_NAME_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+# `is_repo_managed_skill` in install-{codex,claude}.sh is a bash `case` statement
+# whose patterns are `name1|name2|...) return 0 ;;` lines. This matches only the
+# pattern list on a `return 0` line, not comments or the wildcard `*) return 1`
+# fallback, so single-word ids (e.g. `diagnose`, `tdd`) are captured correctly
+# alongside hyphenated ones.
+SKILL_ALLOWLIST_LINE_RE = re.compile(r"^\s*([A-Za-z0-9_.|-]+)\)\s*return 0\b", re.MULTILINE)
 
 
 def catalog_skill_ids(catalog: dict, platform: str) -> set[str]:
@@ -265,7 +266,9 @@ def check_installer_allowlist_parity(catalog: dict, repo: Path) -> list[str]:
             )
             continue
         body = match.group(1)
-        allowlist = {tok for tok in SKILL_NAME_TOKEN_RE.findall(body) if "-" in tok or "_" in tok}
+        allowlist: set[str] = set()
+        for pattern_list in SKILL_ALLOWLIST_LINE_RE.findall(body):
+            allowlist.update(pattern_list.split("|"))
         catalog_ids = catalog_skill_ids(catalog, platform)
         missing_from_allowlist = catalog_ids - allowlist
         extra_in_allowlist = allowlist - catalog_ids
