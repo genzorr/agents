@@ -55,6 +55,7 @@ per-platform variants are preserved, never flattened.
 # Validate catalog and skill identity (no mutation):
 python3 scripts/validate_catalog.py
 python3 scripts/validate_skills.py
+bash scripts/test-prune-safety.sh
 
 # Consistency check of this repo's Harness state:
 harness check

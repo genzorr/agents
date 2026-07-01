@@ -10,9 +10,9 @@ never edits, merges, deprecates, or deletes a skill or doc. Whole-skill merge/de
 reviewed action gated on operator approval; the bounded execution of accepted proposals is a
 separate implementation task.
 
-`docs/harness-skill-lifecycle-policy.md` is the decision policy (defer-to-native ladder; add /
+`/Users/example/dev/os/repos/harness/docs/harness-skill-lifecycle-policy.md` is the decision policy (defer-to-native ladder; add /
 change / merge / deprecate / remove gates; Codex/Claude ownership rules) and
-`docs/harness-skill-audit.md` is its audit method (signals, categories, thresholds). This skill
+`/Users/example/dev/os/repos/harness/docs/harness-skill-audit.md` is its audit method (signals, categories, thresholds). This skill
 runs that policy on demand and emits proposals — it does not restate the gates; read those docs
 for the exact thresholds.
 
@@ -33,7 +33,7 @@ Every new or edited skill must follow this norm; proposals to slim are measured 
   alongside the skill for 1:1 content, a shared `docs/` file only when several skills repeat the
   same material. Keep twins semantically aligned, not file-shape identical: never pad an
   already-lean twin for symmetry. The same shape applies to commands and agent definitions. Full
-  convention: `docs/harness-skill-lifecycle-policy.md` §8.
+  convention: `/Users/example/dev/os/repos/harness/docs/harness-skill-lifecycle-policy.md` §8.
 - **Composable.** Reference or hand off to other skills instead of duplicating their logic
   (e.g. delegate diff critique to `review-change`, task creation to `harness-add-tasks`). Name
   the skill; do not inline its body.
@@ -69,7 +69,7 @@ Compare by description **and** body, never by name alone. Propose one category p
 
 Old process artifacts should not masquerade as current truth (destination over journey): the
 durable record — an ADR, Evidence (`E-N`), a task `# Outcome`, or the canonical board (see
-`docs/harness-knowledge-homes.md` for where each lives) — is the truth; the artifact that
+`/Users/example/dev/os/repos/harness/docs/harness-knowledge-homes.md` for where each lives) — is the truth; the artifact that
 produced it is provenance. **Flag, do not delete.** Candidates:
 
 - A PRD/design doc whose decisions have shipped and are now captured in a durable record, with no

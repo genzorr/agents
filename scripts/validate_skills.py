@@ -9,18 +9,17 @@ Hard failures (exit 1):
     - a skill directory is missing its `SKILL.md`
     - `name:` is missing or does not match the directory name
     - `description:` is missing or empty
+    - static doc references (`docs/*.md` strings under a skill directory) that
+      do not resolve to a repo file, unless explicitly marked as known example
+      placeholders.
 
 Warnings (do not fail):
     - cross-tree presence parity — a skill present in one tree but not the
       other. Informational because some skills legitimately live in one tree
       only (e.g. the `codex-project-init` / `custom-init` project-init twins
       are a deliberate cross-name counterpart gap, not a parity bug).
-    - static doc references (`docs/*.md` strings under a skill directory) that
-      do not resolve to a repo file. This mirrors the installers' doc-travel
-      discovery (same regex, same `RUN_ID`/`YYYYMMDD` exclusions) and flags
-      refs that would not travel into the install tree. Warning-only because
-      the repo legitimately contains illustrative example paths that are not
-      meant to resolve — hard-failing would be a false positive.
+    - explicitly known example-only doc placeholders that are not meant to
+      resolve or travel.
 
 Deferred on purpose: cross-tree *frontmatter* parity (`model`/`effort`/
 `allowed-tools`/`argument-hint`). Codex skills omit those Claude-runtime fields
@@ -45,8 +44,10 @@ from pathlib import Path
 # Listed here only to document the deliberate cross-tree parity deferral.
 CLAUDE_RUNTIME_FIELDS = ("model", "effort", "allowed-tools", "argument-hint")
 
-# Static doc references a skill directory may point at. Same shape the installers
-# discover (`scripts/install-*.sh`): `docs/<path>.md`.
+# Relative static doc references a skill directory may point at. Same shape the
+# installers discover (`scripts/install-*.sh`): `docs/<path>.md`. Absolute
+# cross-repo references such as `/Users/.../docs/name.md` are intentionally not
+# travel candidates for this repo.
 DOC_REF_RE = re.compile(r"docs/[A-Za-z0-9/_.-]+\.md")
 
 # Run-local templated / generated doc paths (e.g. `docs/harness/ops/RUN_ID/*`,
@@ -54,6 +55,7 @@ DOC_REF_RE = re.compile(r"docs/[A-Za-z0-9/_.-]+\.md")
 # and never exist as static repo files; the installers skip them on copy and the
 # validator skips them on check.
 TEMPLATED_DOC_MARKERS = ("RUN_ID", "YYYYMMDD")
+EXAMPLE_DOC_REFS = {"docs/architecture.md", "docs/loop-closure.md"}
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -116,11 +118,14 @@ def doc_references(text: str) -> list[str]:
     Run-local templated/generated paths (`RUN_ID`, `YYYYMMDD`) are excluded — the
     installers skip them on copy, so the validator skips them on check.
     """
-    refs = {
-        ref
-        for ref in DOC_REF_RE.findall(text)
-        if not any(marker in ref for marker in TEMPLATED_DOC_MARKERS)
-    }
+    refs = set()
+    for match in DOC_REF_RE.finditer(text):
+        if match.start() > 0 and text[match.start() - 1] == "/":
+            continue
+        ref = match.group(0)
+        if any(marker in ref for marker in TEMPLATED_DOC_MARKERS):
+            continue
+        refs.add(ref)
     return sorted(refs)
 
 
@@ -132,22 +137,27 @@ def skill_directory_text(skill_dir: Path) -> str:
     return "\n".join(chunks)
 
 
-def check_doc_references(skill_dir: Path, repo_root: Path) -> list[str]:
-    """Return warning messages for static doc refs that do not resolve to a file.
+def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], list[str]]:
+    """Return (hard errors, warnings) for static doc refs.
 
-    Warning-only by design: templated/generated paths are excluded, and a missing
-    static ref is surfaced (it would not travel into the install tree) without
-    failing — the repo legitimately contains illustrative example paths. The scan
-    covers every file under the skill directory, matching installer discovery.
+    Missing refs are packaging failures because they would not travel into the
+    install tree. A tiny explicit allowlist covers example-only placeholders in
+    reference material.
     """
     skill_file = skill_dir / "SKILL.md"
     if not skill_file.is_file():
-        return []
-    return [
-        f"{skill_dir.name}: doc reference not found: {ref}"
-        for ref in doc_references(skill_directory_text(skill_dir))
-        if not (repo_root / ref).is_file()
-    ]
+        return [], []
+    errors: list[str] = []
+    warnings: list[str] = []
+    for ref in doc_references(skill_directory_text(skill_dir)):
+        if (repo_root / ref).is_file():
+            continue
+        message = f"{skill_dir.name}: doc reference not found: {ref}"
+        if ref in EXAMPLE_DOC_REFS:
+            warnings.append(f"{message} (example-only)")
+        else:
+            errors.append(message)
+    return errors, warnings
 
 
 def _skill_names(tree_dir: Path) -> list[str]:
@@ -175,9 +185,9 @@ def validate_trees(codex_dir: Path, claude_dir: Path) -> tuple[list[str], list[s
         repo_root = tree.parent.parent
         for name in _skill_names(tree):
             errors.extend(f"{label}/{msg}" for msg in check_skill(tree / name))
-            warnings.extend(
-                f"{label}/{msg}" for msg in check_doc_references(tree / name, repo_root)
-            )
+            doc_errors, doc_warnings = check_doc_references(tree / name, repo_root)
+            errors.extend(f"{label}/{msg}" for msg in doc_errors)
+            warnings.extend(f"{label}/{msg}" for msg in doc_warnings)
     warnings.extend(cross_tree_parity(_skill_names(codex_dir), _skill_names(claude_dir)))
     return errors, warnings
 

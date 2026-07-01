@@ -38,7 +38,7 @@ If there is no discoverable diff, PR, branch comparison, or path scope, ask one 
 
 ## Optional Deep Review
 
-For normal or small diffs, inline review by this agent is the right default. For a **substantial change** — many files, large diffs, public API/data-contract changes, or a run-produced branch — prefer an independent reviewer pass when the runtime supports it (a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or cross-model review), even if the user did not explicitly ask; when such a pass is warranted but unavailable, note the residual risk. In a Harness repo this is Tier 1+ on the review-independence ladder (`docs/harness-ops-operator-guide.md` → *Review Independence*). Also run independent passes whenever the user explicitly asks for multi-agent, deep, parallel, or adversarial review.
+For normal or small diffs, inline review by this agent is the right default. For a **substantial change** — many files, large diffs, public API/data-contract changes, or a run-produced branch — prefer an independent reviewer pass when the runtime supports it (a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or cross-model review), even if the user did not explicitly ask; when such a pass is warranted but unavailable, note the residual risk. In a Harness repo this is Tier 1+ on the review-independence ladder (`/Users/example/dev/os/repos/harness/docs/harness-ops-operator-guide.md` → *Review Independence*). Also run independent passes whenever the user explicitly asks for multi-agent, deep, parallel, or adversarial review.
 
 Recommended independent lenses:
 

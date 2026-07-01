@@ -24,11 +24,9 @@ Hard failures (exit 1):
       the source-path check above, and is what makes it impossible to silently
       omit a moved asset from the catalog.
 
-Soft checks (warn, do not fail):
-    - if `scripts/install-codex.sh` / `scripts/install-claude.sh` exist, warn if
-      their `is_repo_managed_skill` allowlist does not match this catalog's
-      per-platform skill id set. These installer scripts do not exist yet (a
-      later task adds them); their absence is not a failure.
+    - if `scripts/install-codex.sh` / `scripts/install-claude.sh` exist, their
+      `is_repo_managed_skill` allowlist does not match this catalog's
+      per-platform skill id set.
 
 Usage:
     python3 scripts/validate_catalog.py            # validate this repo
@@ -246,14 +244,12 @@ def catalog_skill_ids(catalog: dict, platform: str) -> set[str]:
 
 
 def check_installer_allowlist_parity(catalog: dict, repo: Path) -> list[str]:
-    """Return warnings if an installer script's allowlist diverges from the catalog.
+    """Return hard failures if an installer skill allowlist diverges from the catalog.
 
-    Soft check only: `scripts/install-codex.sh` / `scripts/install-claude.sh` do not
-    exist yet (a later task adds them per the S-17 board), so their absence is not
-    a failure — this only warns when the file IS present and its
-    `is_repo_managed_skill` allowlist looks out of sync with the catalog.
+    Legacy cleanup names are not allowed here. Cleanup of pre-extraction names is
+    a separate explicit migration action, not normal prune/uninstall behavior.
     """
-    warnings: list[str] = []
+    errors: list[str] = []
     for platform, script_name in (("codex", "install-codex.sh"), ("claude", "install-claude.sh")):
         script_path = repo / "scripts" / script_name
         if not script_path.is_file():
@@ -261,7 +257,7 @@ def check_installer_allowlist_parity(catalog: dict, repo: Path) -> list[str]:
         text = script_path.read_text(encoding="utf-8", errors="ignore")
         match = re.search(r"is_repo_managed_skill\(\)\s*\{(.*?)\n\}", text, re.DOTALL)
         if not match:
-            warnings.append(
+            errors.append(
                 f"{script_name}: could not locate `is_repo_managed_skill` body to check parity"
             )
             continue
@@ -273,14 +269,14 @@ def check_installer_allowlist_parity(catalog: dict, repo: Path) -> list[str]:
         missing_from_allowlist = catalog_ids - allowlist
         extra_in_allowlist = allowlist - catalog_ids
         for skill_id in sorted(missing_from_allowlist):
-            warnings.append(
+            errors.append(
                 f"{script_name}: catalog skill `{skill_id}` not found in is_repo_managed_skill allowlist"
             )
         for skill_id in sorted(extra_in_allowlist):
-            warnings.append(
+            errors.append(
                 f"{script_name}: allowlist token `{skill_id}` has no matching catalog skill"
             )
-    return warnings
+    return errors
 
 
 def main() -> int:
@@ -305,17 +301,15 @@ def main() -> int:
     errors.extend(check_duplicate_ids(catalog))
     errors.extend(check_disk_coverage(catalog, repo))
 
-    warnings = check_installer_allowlist_parity(catalog, repo)
+    errors.extend(check_installer_allowlist_parity(catalog, repo))
 
-    for warning in warnings:
-        print(f"WARN  {warning}")
     for error in errors:
         print(f"FAIL  {error}", file=sys.stderr)
 
     if errors:
         print(f"\n{len(errors)} catalog error(s).", file=sys.stderr)
         return 1
-    print(f"OK — catalog valid ({len(warnings)} warning(s)).")
+    print("OK — catalog valid.")
     return 0
 
 

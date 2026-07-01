@@ -33,15 +33,12 @@ tree, never hand-maintained as a separate claim.
 
 ## 2. Command surface
 
-The target shape below is what future implementations (including a future Agents
-CLI/script) should converge on. **Today's Harness scripts do not implement this
-shape** — `install-claude.sh` / `install-codex.sh` are single-mode scripts that
-always sync (copy + optionally merge hooks) and take flags, not verbs
-(`--dry-run`, `--diff`, `--prune`); there is no separate `uninstall`, `update`, or
-`status` command today, and `validate` is a wholly separate script
-(`validate_skills.py`). This contract's command surface is the durable target that
-new implementations (the Agents installer first) should implement; it does not
-retroactively claim the existing Harness scripts already have these verbs.
+The target shape below is what future implementations may converge on. **Current
+repo support is intentionally uneven and documented in §10**: Agents implements
+install/prune/uninstall flags, Harness has single-mode scripts with
+`--dry-run`/`--diff`/`--prune`, and session-harvester has a single-skill
+install/uninstall script. This contract describes semantics and ownership
+invariants first; it does not claim every repo already exposes every verb.
 
 | Command | Mutates? | Idempotent? | What it does |
 |---|---|---|---|
@@ -88,6 +85,14 @@ This is the invariant that prevents the cross-repo violation named in the S-17
 board: after the generic personal/global assets move from Harness to Agents, the
 Harness allowlist **must** drop those names, or Harness's own `--prune` would
 delete Agents-installed assets it no longer sources.
+
+Legacy cleanup is outside the normal managed set. If an operator wants to remove
+pre-extraction names such as `dynamic-workflow-prompt`,
+`gpt-pro-context-prompt`, `add-tasks`, `investigate`, `session-start`,
+`task-checkpoint`, `task-done`, `task-start`, `branching-and-prs.md`, or
+`adversarial-review.md`, do it through a separate explicit migration run after a
+dry-run review and operator approval. Do not place those names in ordinary
+install/prune/uninstall allowlists unless their source exists in the owning repo.
 
 ## 4. Scratch-home testing
 
@@ -244,7 +249,7 @@ them. This mechanism is repo-neutral:
 | Repo | Managed set | `validate` | `status`/`diff` | `install` | `uninstall` | `update` | `prune` |
 |---|---|---|---|---|---|---|---|
 | **agents** | everything in `agents/catalog.json` (generic personal/global skills, commands, subagents, rules, Codex `AGENTS.md`, Claude notification hook) | yes | yes | yes | yes | yes | yes |
-| **harness** | `harness-*` skills (both platforms), Claude `execute` command, Claude `harness-task-bootstrap`/`task-verifier` subagents, the Codex Stop-gate hook (`hooks.json` + `hooks/stop.sh` + `hooks/notifications.sh`, kept together because `stop.sh` sources `notifications.sh` as a sibling) | yes | yes | yes | yes | yes | yes |
+| **harness** | `harness-*` skills (both platforms), Claude `execute` command, Claude `harness-task-bootstrap`/`task-verifier` subagents, the Codex Stop-gate hook (`hooks.json` + `hooks/stop.sh` + `hooks/notifications.sh`, kept together because `stop.sh` sources `notifications.sh` as a sibling) | yes (`uv run python scripts/validate_skills.py`) | partial: `--dry-run --diff` reports source-vs-installed drift | yes | unsupported/deferred; not exposed by current scripts | re-run install | yes (`--prune`) |
 | **session-harvester** | `harvest-sessions` (Claude skill) only | yes | not applicable — single asset, `status` adds no value over checking one path | yes | yes | not applicable — re-run `install` | not applicable — single asset, delete manually or via `uninstall` |
 
 session-harvester satisfies this contract with a minimal `install`/`uninstall` for

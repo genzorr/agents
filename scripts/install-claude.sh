@@ -49,9 +49,6 @@ removed=0
 is_repo_managed_skill() {
     case "$1" in
         architecture-review|ask-oracle|babysit-pr|custom-init|diagnose|doc-audit|docker-optimize|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|prepare-dynamic-workflow|prototype|research-prompt|review-change|session-handoff|skill-lifecycle|tdd|zoom-out) return 0 ;;
-        # Legacy generic name (pre-rename), kept so --prune cleans it up from
-        # older installs that predate this repo's extraction from Harness.
-        dynamic-workflow-prompt) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -73,9 +70,6 @@ is_repo_managed_command() {
 is_repo_managed_rule() {
     case "$1" in
         conciseness.md|reading-discipline.md|surgical-changes.md|think-before-coding.md) return 0 ;;
-        # Legacy: previously managed by Harness before all rules moved here.
-        # Kept so --prune cleans them up from older installs.
-        branching-and-prs.md|adversarial-review.md) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -131,12 +125,14 @@ sync_flat() {
 }
 
 # The static repo docs that skills reference and should travel into the install
-# tree, so a `docs/<name>.md` reference inside a skill resolves after install.
-# The set is discovered dynamically from the source skill bodies, then filtered:
-# run-local templated paths (docs/harness/ops/RUN_ID/*, docs/audits/YYYYMMDD-*)
-# are skipped because they are generated inside a run directory at runtime, and
-# any reference that is not a real repo file (illustrative example paths) is
-# skipped too. Echoes one repo-relative path per line, sorted and unique.
+# tree, so a relative `docs/<name>.md` reference inside a skill resolves after
+# install. The set is discovered dynamically from the source skill bodies, then
+# filtered: absolute cross-repo paths (`/.../docs/<name>.md`) are not travel
+# candidates for this repo; run-local templated paths (docs/harness/ops/RUN_ID/*,
+# docs/audits/YYYYMMDD-*) are skipped because they are generated inside a run
+# directory at runtime; and any reference that is not a real repo file
+# (illustrative example paths) is skipped too. Echoes one repo-relative path per
+# line, sorted and unique.
 managed_doc_set() {
     [[ -d "$SRC_ROOT/skills" ]] || return 0
     local doc
@@ -147,7 +143,11 @@ managed_doc_set() {
         esac
         [[ -f "$REPO_DIR/$doc" ]] || continue
         printf '%s\n' "$doc"
-    done < <(grep -rhoE 'docs/[A-Za-z0-9/_.-]+\.md' "$SRC_ROOT/skills" 2>/dev/null | sort -u)
+    done < <(
+        find "$SRC_ROOT/skills" -type f -print0 |
+            xargs -0 perl -ne 'while (/(^|[^\/])(docs\/[A-Za-z0-9\/_.-]+\.md)/g) { print "$2\n" }' |
+            sort -u
+    )
 }
 
 # Merge hooks.json into settings.json. Claude Code reads hooks from settings.json;

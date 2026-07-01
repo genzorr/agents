@@ -63,9 +63,6 @@ is_repo_managed_skill() {
 
     case "$skill_name" in
         architecture-review|ask-oracle|babysit-pr|codex-project-init|diagnose|doc-audit|docker-optimize|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|prepare-dynamic-workflow|prototype|research-prompt|review-change|session-handoff|skill-lifecycle|tdd|zoom-out) return 0 ;;
-        # Legacy pre-rename names, kept so --prune cleans them up from older
-        # installs that predate this repo's extraction from Harness.
-        dynamic-workflow-prompt|gpt-pro-context-prompt) return 0 ;;
         *) return 1 ;;
     esac
 }
@@ -190,12 +187,14 @@ for skill_dir in "$SKILLS_SRC"/*/; do
 done
 
 # The static repo docs that skills reference and should travel into the install
-# tree, so a `docs/<name>.md` reference inside a skill resolves after install.
-# The set is discovered dynamically from the source skill bodies, then filtered:
-# run-local templated paths (docs/harness/ops/RUN_ID/*, docs/audits/YYYYMMDD-*)
-# are skipped because they are generated inside a run directory at runtime, and
-# any reference that is not a real repo file (illustrative example paths) is
-# skipped too. Echoes one repo-relative path per line, sorted and unique.
+# tree, so a relative `docs/<name>.md` reference inside a skill resolves after
+# install. The set is discovered dynamically from the source skill bodies, then
+# filtered: absolute cross-repo paths (`/.../docs/<name>.md`) are not travel
+# candidates for this repo; run-local templated paths (docs/harness/ops/RUN_ID/*,
+# docs/audits/YYYYMMDD-*) are skipped because they are generated inside a run
+# directory at runtime; and any reference that is not a real repo file
+# (illustrative example paths) is skipped too. Echoes one repo-relative path per
+# line, sorted and unique.
 managed_doc_set() {
     [[ -d "$SKILLS_SRC" ]] || return 0
     local doc
@@ -206,7 +205,11 @@ managed_doc_set() {
         esac
         [[ -f "$REPO_DIR/$doc" ]] || continue
         printf '%s\n' "$doc"
-    done < <(grep -rhoE 'docs/[A-Za-z0-9/_.-]+\.md' "$SKILLS_SRC" 2>/dev/null | sort -u)
+    done < <(
+        find "$SKILLS_SRC" -type f -print0 |
+            xargs -0 perl -ne 'while (/(^|[^\/])(docs\/[A-Za-z0-9\/_.-]+\.md)/g) { print "$2\n" }' |
+            sort -u
+    )
 }
 
 CURRENT_DOCS="$(managed_doc_set)"
