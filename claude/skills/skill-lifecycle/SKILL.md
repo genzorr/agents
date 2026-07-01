@@ -19,6 +19,9 @@ for the exact thresholds.
 ## Authoring norm (small / self-contained / composable / progressively disclosed)
 
 Every new or edited skill must follow this norm; proposals to slim are measured against it.
+Use `docs/skill-authoring-principles.md` as the compact craft rubric for invocation cost,
+information hierarchy, completion criteria, leading terms, no-ops, duplication, sediment, and
+sprawl. `skill-creator` owns mechanics; this skill owns lifecycle policy and audit decisions.
 
 - **Small — as small as correct.** One responsibility, one clear invocation boundary. Not
   uniformly tiny: keep the guardrails, the verification steps, and anything a fresh agent could
