@@ -1,0 +1,484 @@
+{
+  "$comment": "Authoritative catalog of assets physically present in repos/agents. Generic personal/global Codex+Claude assets extracted from repos/harness under Personal OS slice S-17. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
+  "skills": [
+    {
+      "id": "architecture-review",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/architecture-review/SKILL.md",
+        "claude": "claude/skills/architecture-review/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/architecture-review",
+        "claude": "~/.claude/skills/architecture-review"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "ask-oracle",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/ask-oracle/SKILL.md",
+        "claude": "claude/skills/ask-oracle/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/ask-oracle",
+        "claude": "~/.claude/skills/ask-oracle"
+      },
+      "counterpart": "identical"
+    },
+    {
+      "id": "babysit-pr",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/babysit-pr/SKILL.md",
+        "claude": "claude/skills/babysit-pr/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/babysit-pr",
+        "claude": "~/.claude/skills/babysit-pr"
+      },
+      "counterpart": "identical"
+    },
+    {
+      "id": "codex-project-init",
+      "kind": "skill",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/codex-project-init/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/codex-project-init"
+      },
+      "counterpart": "cross-name twin: claude custom-init (same role: project init; no same-name match)"
+    },
+    {
+      "id": "diagnose",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/diagnose/SKILL.md",
+        "claude": "claude/skills/diagnose/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/diagnose",
+        "claude": "~/.claude/skills/diagnose"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "doc-audit",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/doc-audit/SKILL.md",
+        "claude": "claude/skills/doc-audit/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/doc-audit",
+        "claude": "~/.claude/skills/doc-audit"
+      },
+      "counterpart": "twin (70 vs 167 ln)"
+    },
+    {
+      "id": "docker-optimize",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/docker-optimize/SKILL.md",
+        "claude": "claude/skills/docker-optimize/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/docker-optimize",
+        "claude": "~/.claude/skills/docker-optimize"
+      },
+      "counterpart": "identical"
+    },
+    {
+      "id": "fix-build",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/fix-build/SKILL.md",
+        "claude": "claude/skills/fix-build/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/fix-build",
+        "claude": "~/.claude/skills/fix-build"
+      },
+      "counterpart": "twin (34 vs 72 ln)"
+    },
+    {
+      "id": "goal-prompt",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/goal-prompt/SKILL.md",
+        "claude": "claude/skills/goal-prompt/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/goal-prompt",
+        "claude": "~/.claude/skills/goal-prompt"
+      },
+      "counterpart": "twin (169 vs 151 ln)"
+    },
+    {
+      "id": "grill-with-docs",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/grill-with-docs/SKILL.md",
+        "claude": "claude/skills/grill-with-docs/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/grill-with-docs",
+        "claude": "~/.claude/skills/grill-with-docs"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "gtsam-doc",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/gtsam-doc/SKILL.md",
+        "claude": "claude/skills/gtsam-doc/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/gtsam-doc",
+        "claude": "~/.claude/skills/gtsam-doc"
+      },
+      "counterpart": "twin (59 vs 192 ln)",
+      "tags": ["domain:robotics"]
+    },
+    {
+      "id": "integrate-research",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/integrate-research/SKILL.md",
+        "claude": "claude/skills/integrate-research/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/integrate-research",
+        "claude": "~/.claude/skills/integrate-research"
+      },
+      "counterpart": "twin (79 vs 175 ln)"
+    },
+    {
+      "id": "prepare-dynamic-workflow",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/prepare-dynamic-workflow/SKILL.md",
+        "claude": "claude/skills/prepare-dynamic-workflow/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/prepare-dynamic-workflow",
+        "claude": "~/.claude/skills/prepare-dynamic-workflow"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "prototype",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/prototype/SKILL.md",
+        "claude": "claude/skills/prototype/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/prototype",
+        "claude": "~/.claude/skills/prototype"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "research-prompt",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/research-prompt/SKILL.md",
+        "claude": "claude/skills/research-prompt/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/research-prompt",
+        "claude": "~/.claude/skills/research-prompt"
+      },
+      "counterpart": "twin (71 vs 165 ln)"
+    },
+    {
+      "id": "review-change",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/review-change/SKILL.md",
+        "claude": "claude/skills/review-change/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/review-change",
+        "claude": "~/.claude/skills/review-change"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "session-handoff",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/session-handoff/SKILL.md",
+        "claude": "claude/skills/session-handoff/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/session-handoff",
+        "claude": "~/.claude/skills/session-handoff"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "skill-lifecycle",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/skill-lifecycle/SKILL.md",
+        "claude": "claude/skills/skill-lifecycle/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/skill-lifecycle",
+        "claude": "~/.claude/skills/skill-lifecycle"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "tdd",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/tdd/SKILL.md",
+        "claude": "claude/skills/tdd/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/tdd",
+        "claude": "~/.claude/skills/tdd"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "zoom-out",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/zoom-out/SKILL.md",
+        "claude": "claude/skills/zoom-out/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/zoom-out",
+        "claude": "~/.claude/skills/zoom-out"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
+      "id": "custom-init",
+      "kind": "skill",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/skills/custom-init/SKILL.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/skills/custom-init"
+      },
+      "counterpart": "cross-name twin: codex codex-project-init (same role: project init; no same-name match)"
+    }
+  ],
+  "commands": [
+    {
+      "id": "dual-review",
+      "kind": "command",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/commands/dual-review.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/commands/dual-review.md"
+      },
+      "counterpart": "none (Codex has no dual-review)"
+    },
+    {
+      "id": "plan",
+      "kind": "command",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/commands/plan.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/commands/plan.md"
+      },
+      "counterpart": "asymmetric: codex harness-plan skill is harness-framed and stays Harness-owned; this generic command has no same-name Codex counterpart"
+    }
+  ],
+  "subagents": [
+    {
+      "id": "code-reviewer",
+      "kind": "subagent",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/code-reviewer.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/agents/code-reviewer.md"
+      },
+      "counterpart": "none (Codex has no agents/ subagent surface)"
+    },
+    {
+      "id": "planner",
+      "kind": "subagent",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/planner.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/agents/planner.md"
+      },
+      "counterpart": "none"
+    }
+  ],
+  "rules": [
+    {
+      "id": "conciseness",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/conciseness.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/conciseness.md"
+      },
+      "counterpart": "codex/AGENTS.md section (Codex packages rules inline, not as discrete files)"
+    },
+    {
+      "id": "reading-discipline",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/reading-discipline.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/reading-discipline.md"
+      },
+      "counterpart": "codex/AGENTS.md section"
+    },
+    {
+      "id": "surgical-changes",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/surgical-changes.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/surgical-changes.md"
+      },
+      "counterpart": "codex/AGENTS.md section"
+    },
+    {
+      "id": "think-before-coding",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/think-before-coding.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/think-before-coding.md"
+      },
+      "counterpart": "codex/AGENTS.md section"
+    }
+  ],
+  "hooks": [
+    {
+      "id": "claude-notifications",
+      "kind": "hook",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": ["claude/hooks/notifications.sh", "claude/hooks.json"]
+      },
+      "install_target": {
+        "claude": "~/.claude/hooks/notifications.sh (merged into ~/.claude/settings.json via hooks.json)"
+      },
+      "counterpart": "codex/hooks/notifications.sh stays Harness-owned: it is sourced as a sibling by the Codex Stop-gate hooks/stop.sh, which is Harness-coupled. Only the Claude notification hook moved to agents."
+    }
+  ],
+  "global_instructions": [
+    {
+      "id": "codex-agents-md",
+      "kind": "global_instructions",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/AGENTS.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/AGENTS.md"
+      },
+      "counterpart": "claude/rules/*.md (Claude packages the same rule content as discrete files; Codex folds it inline into AGENTS.md — container difference, not a content twin)"
+    }
+  ],
+  "boundary_notes": {
+    "$comment": "Documentation only. These owners are NOT installable/prunable through this catalog — this repo never manages, prunes, or removes them. See AGENTS.md Boundary section and docs/skill-installer-contract.md.",
+    "harness": {
+      "owner": "repos/harness",
+      "manage": false,
+      "assets": [
+        "all harness-* skills (codex and claude, 22 and 17 ids respectively)",
+        "claude commands/execute.md",
+        "claude agents/harness-task-bootstrap.md, agents/task-verifier.md",
+        "codex hooks.json + hooks/stop.sh (Stop-gate) and hooks/notifications.sh (sourced as a sibling dependency of stop.sh, so it stays with Harness even though the Claude notification hook moved here)",
+        "the Harness CLI / data model these skills and hooks call"
+      ],
+      "note": "Source-owned by repos/harness. This catalog never lists these as installable entries; the Harness repo's own installer/prune allowlist manages them."
+    },
+    "session_harvester": {
+      "owner": "repos/session-harvester",
+      "manage": false,
+      "assets": ["harvest-sessions (claude skill)"],
+      "note": "Source-owned by repos/session-harvester. Not represented as an installable entry in this catalog."
+    },
+    "foreign": {
+      "owner": "foreign",
+      "manage": false,
+      "assets": ["codex-primary-runtime"],
+      "note": "Installed-only, source unknown (likely a Codex companion plugin). Visible-only; never installed, updated, or pruned by any repo in this workspace."
+    }
+  }
+}

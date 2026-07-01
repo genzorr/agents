@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ask Oracle"
+  short_description: "Package neutral source bundles for Oracle-powered GPT Pro consults."
+  default_prompt: "Use Oracle to create a neutral GPT Pro context bundle from the relevant project files and tell me only where the bundle was written."
