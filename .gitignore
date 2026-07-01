@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.tmp
+.DS_Store
+# Scratch install homes used by install/uninstall verification.
+.scratch-home/
+scratch-home*/
