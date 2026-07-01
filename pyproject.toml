@@ -1,0 +1,9 @@
+[project]
+name = "agents"
+version = "0.1.0"
+description = "Personal/global Codex and Claude agent asset source and install surface."
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.uv]
+package = false

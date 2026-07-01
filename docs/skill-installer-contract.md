@@ -156,15 +156,13 @@ makes install idempotent and non-destructive to a user's own configuration.
   first line means the destination is unmanaged and is skipped (with a "skipped
   unmanaged global file" message) — the file is never appended to or partially
   merged.
-- `hooks.json` is written only if the destination **either** is byte-identical to
-  the current source `hooks.json` (fast-path `diff -q` match) **or** contains
-  exactly one `"command":` entry whose value matches one of the known forms of the
-  managed Stop-gate command (`.../hooks/stop.sh`, `$HOME/.codex/hooks/stop.sh`, or
-  the unrendered `__CODEX_HOME__/hooks/stop.sh` placeholder). Any other shape
-  (extra hooks, a different single command, multiple commands that aren't the
-  exact match) is treated as unmanaged and skipped.
+- Harness-owned `hooks.json` updates only the Harness Stop-gate entry. The
+  installer merges the rendered Stop hook into an existing JSON object, removes
+  prior Harness Stop hook spellings, and preserves other unmanaged hook entries.
+  If the existing file is not valid/mergeable JSON, the merge is skipped instead
+  of overwriting it.
 - The `__CODEX_HOME__` placeholder in the source `hooks.json` is rendered to the
-  real `$CODEX_HOME` value before comparison/write.
+  real `$CODEX_HOME` value before comparison/write/merge.
 
 **Both platforms:** install targets (`~/.codex`, `~/.claude`) are **outputs only,
 never hand-edited**. Any user who wants to change installed behavior edits the

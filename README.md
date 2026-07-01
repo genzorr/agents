@@ -39,6 +39,7 @@ claude/
 scripts/
   install-claude.sh   # install/uninstall/prune claude/ -> $CLAUDE_HOME (default ~/.claude)
   install-codex.sh    # install/uninstall/prune codex/ -> $CODEX_HOME (default ~/.codex)
+  check_cross_repo_consistency.py # verifies Agents/Harness/session-harvester ownership split
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
   validate_skills.py  # SKILL.md frontmatter identity check (dir id == name, description present)
 docs/
@@ -55,6 +56,7 @@ per-platform variants are preserved, never flattened.
 # Validate catalog and skill identity (no mutation):
 python3 scripts/validate_catalog.py
 python3 scripts/validate_skills.py
+python3 scripts/check_cross_repo_consistency.py
 bash scripts/test-prune-safety.sh
 
 # Consistency check of this repo's Harness state:
@@ -72,3 +74,23 @@ CODEX_HOME="$PWD/.scratch-home/codex"  bash scripts/install-codex.sh  --dry-run 
 - Mutating commands run against scratch homes by default in verification. **Live global
   install/update/prune requires explicit operator approval.**
 - Install is copy-based and idempotent; `--prune`/`--uninstall` only remove assets this repo owns.
+
+## Tooling
+
+This repo has a minimal `uv` project for consistent local tooling:
+
+```bash
+uv run python scripts/validate_catalog.py
+uv run python scripts/validate_skills.py
+uv run python scripts/check_cross_repo_consistency.py
+```
+
+The scripts are still stdlib-only and also run with system `python3`.
+
+## Branching and publishing
+
+- Default branch: `main`.
+- Use short feature branches for non-trivial changes; keep commits reviewable.
+- Planned GitHub remote: private `git@github.com:genzorr/agents.git`.
+- Do not push, delete branches, create GitHub repos, or mutate live global installs without explicit
+  operator approval.

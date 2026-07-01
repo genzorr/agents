@@ -48,8 +48,19 @@ Ask the operator before:
 ```bash
 python3 scripts/validate_catalog.py            # catalog <-> source + allowlist parity
 python3 scripts/validate_skills.py             # SKILL.md frontmatter identity
+python3 scripts/check_cross_repo_consistency.py # cross-repo ownership split
 bash scripts/test-prune-safety.sh              # scratch prune/uninstall ownership guard
 harness check                                  # Harness state consistency
 CLAUDE_HOME=... bash scripts/install-claude.sh --dry-run --diff   # scratch-home dry run
 CODEX_HOME=...  bash scripts/install-codex.sh  --dry-run --diff
 ```
+
+`uv` is available for consistent tooling (`uv run python ...`), but the validation scripts remain
+stdlib-only and may also be run with system `python3`.
+
+## Branching and publishing
+
+- Default branch: `main`.
+- Use short feature branches for non-trivial changes.
+- Planned remote is private `git@github.com:genzorr/agents.git`; GitHub creation and pushes are
+  external-effect actions and require explicit operator approval.
