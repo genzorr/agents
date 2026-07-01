@@ -62,5 +62,5 @@ stdlib-only and may also be run with system `python3`.
 
 - Default branch: `main`.
 - Use short feature branches for non-trivial changes.
-- Planned remote is private `git@github.com:genzorr/agents.git`; GitHub creation and pushes are
+- Remote is private `git@github.com:genzorr/agents.git`; GitHub changes and pushes are
   external-effect actions and require explicit operator approval.

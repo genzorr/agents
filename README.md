@@ -91,6 +91,6 @@ The scripts are still stdlib-only and also run with system `python3`.
 
 - Default branch: `main`.
 - Use short feature branches for non-trivial changes; keep commits reviewable.
-- Planned GitHub remote: private `git@github.com:genzorr/agents.git`.
+- GitHub remote: private `git@github.com:genzorr/agents.git`.
 - Do not push, delete branches, create GitHub repos, or mutate live global installs without explicit
   operator approval.
