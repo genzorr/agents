@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check skill ownership consistency across agents, harness, and session-harvester.
+"""Check asset ownership consistency across agents, harness, and session-harvester.
 
 This is a read-only S-17 guard. It verifies the repo split at the level that
-matters for install safety: physical skill source ownership and installer scope.
-It does not inspect installed global homes.
+matters for install safety: physical skill/command/subagent source ownership and
+installer scope. It does not inspect installed global homes.
 """
 
 from __future__ import annotations
@@ -16,6 +16,8 @@ from pathlib import Path
 
 HARNESS_COMMANDS = {"execute.md"}
 HARNESS_AGENTS = {"harness-task-bootstrap.md", "task-verifier.md"}
+AGENTS_COMMANDS = {"dual-review.md", "plan.md"}
+AGENTS_AGENTS = {"code-reviewer.md", "planner.md"}
 SESSION_SKILL = "harvest-sessions"
 FOREIGN_SKILLS = {"codex-primary-runtime"}
 
@@ -48,16 +50,29 @@ def md_names(root: Path) -> set[str]:
     return {path.name for path in root.iterdir() if path.is_file() and path.suffix == ".md"}
 
 
-def catalog_skill_ids(agents: Path) -> set[str]:
-    catalog = json.loads((agents / "catalog.json").read_text(encoding="utf-8"))
-    return {entry["id"] for entry in catalog.get("skills", [])}
+def load_json(path: Path, label: str) -> tuple[dict, list[str]]:
+    if not path.is_file():
+        return {}, [f"{label}: missing required file: {path}"]
+    try:
+        return json.loads(path.read_text(encoding="utf-8")), []
+    except json.JSONDecodeError as exc:
+        return {}, [f"{label}: invalid JSON in {path}: {exc}"]
 
 
-def bash_return_zero_patterns(script: Path, function_name: str) -> set[str]:
+def catalog_skill_ids(agents: Path) -> tuple[set[str], list[str]]:
+    catalog, errors = load_json(agents / "catalog.json", "agents")
+    if errors:
+        return set(), errors
+    return {entry["id"] for entry in catalog.get("skills", [])}, []
+
+
+def bash_return_zero_patterns(script: Path, function_name: str) -> tuple[set[str], list[str]]:
+    if not script.is_file():
+        return set(), [f"missing required installer script: {script}"]
     text = script.read_text(encoding="utf-8", errors="ignore")
     match = re.search(rf"{re.escape(function_name)}\(\)\s*\{{(.*?)\n\}}", text, re.DOTALL)
     if not match:
-        return set()
+        return set(), [f"{script.name}: could not locate `{function_name}` body"]
     patterns: set[str] = set()
     for line in match.group(1).splitlines():
         if "return 0" not in line:
@@ -65,13 +80,16 @@ def bash_return_zero_patterns(script: Path, function_name: str) -> set[str]:
         token = line.strip().split(")", 1)[0].strip()
         if token and token != "*":
             patterns.update(token.split("|"))
-    return patterns
+    if not patterns:
+        return set(), [f"{script.name}: `{function_name}` has no managed return-0 patterns"]
+    return patterns, []
 
 
 def check_agents(agents: Path) -> list[str]:
     errors: list[str] = []
     physical = skill_dirs(agents, "codex") | skill_dirs(agents, "claude")
-    catalog = catalog_skill_ids(agents)
+    catalog, catalog_errors = catalog_skill_ids(agents)
+    errors.extend(catalog_errors)
     boundary = {name for name in physical | catalog if name.startswith("harness-")}
     boundary |= (physical | catalog) & ({SESSION_SKILL} | FOREIGN_SKILLS)
     for name in sorted(boundary):
@@ -81,6 +99,22 @@ def check_agents(agents: Path) -> list[str]:
             "agents: physical skill dirs and catalog skill ids differ "
             f"(physical-only={sorted(physical - catalog)}, catalog-only={sorted(catalog - physical)})"
         )
+
+    commands = md_names(agents / "claude" / "commands")
+    harness_commands = commands & HARNESS_COMMANDS
+    unexpected_commands = commands - AGENTS_COMMANDS - HARNESS_COMMANDS
+    if unexpected_commands:
+        errors.append(f"agents: unexpected Claude commands present: {sorted(unexpected_commands)}")
+    if harness_commands:
+        errors.append(f"agents: Harness-owned Claude commands present: {sorted(harness_commands)}")
+
+    agents_files = md_names(agents / "claude" / "agents")
+    harness_agents = agents_files & HARNESS_AGENTS
+    unexpected_agents = agents_files - AGENTS_AGENTS - HARNESS_AGENTS
+    if unexpected_agents:
+        errors.append(f"agents: unexpected Claude agents present: {sorted(unexpected_agents)}")
+    if harness_agents:
+        errors.append(f"agents: Harness-owned Claude agents present: {sorted(harness_agents)}")
     return errors
 
 
@@ -107,7 +141,11 @@ def check_harness(harness: Path) -> list[str]:
         errors.append("harness: Codex global AGENTS.md should stay owned by agents")
 
     for script_name in ("install-codex.sh", "install-claude.sh"):
-        patterns = bash_return_zero_patterns(harness / "scripts" / script_name, "is_repo_managed_skill")
+        patterns, pattern_errors = bash_return_zero_patterns(
+            harness / "scripts" / script_name,
+            "is_repo_managed_skill",
+        )
+        errors.extend(f"harness: {error}" for error in pattern_errors)
         invalid = {pattern for pattern in patterns if pattern != "harness-*"}
         if invalid:
             errors.append(f"harness: {script_name} skill allowlist has non-harness entries: {sorted(invalid)}")
@@ -139,17 +177,35 @@ def check_session_harvester(harvester: Path) -> list[str]:
 
 def check_disjoint_ownership(agents: Path, harness: Path) -> list[str]:
     errors: list[str] = []
-    owned = {
+    skill_owned = {
         "agents": skill_dirs(agents, "codex") | skill_dirs(agents, "claude"),
         "harness": skill_dirs(harness, "codex") | skill_dirs(harness, "claude"),
         "session-harvester": {SESSION_SKILL},
     }
-    labels = sorted(owned)
+    labels = sorted(skill_owned)
     for i, left in enumerate(labels):
         for right in labels[i + 1 :]:
-            overlap = owned[left] & owned[right]
+            overlap = skill_owned[left] & skill_owned[right]
             if overlap:
                 errors.append(f"duplicate skill ownership between {left} and {right}: {sorted(overlap)}")
+
+    command_overlap = md_names(agents / "claude" / "commands") & md_names(
+        harness / "claude" / "commands"
+    )
+    if command_overlap:
+        errors.append(
+            "duplicate Claude command ownership between agents and harness: "
+            f"{sorted(command_overlap)}"
+        )
+
+    agent_overlap = md_names(agents / "claude" / "agents") & md_names(
+        harness / "claude" / "agents"
+    )
+    if agent_overlap:
+        errors.append(
+            "duplicate Claude subagent ownership between agents and harness: "
+            f"{sorted(agent_overlap)}"
+        )
     return errors
 
 
@@ -184,7 +240,7 @@ def main() -> int:
         print(f"\n{len(errors)} cross-repo consistency error(s).", file=sys.stderr)
         return 1
 
-    print("OK — cross-repo skill ownership is consistent.")
+    print("OK — cross-repo asset ownership is consistent.")
     return 0
 
 
