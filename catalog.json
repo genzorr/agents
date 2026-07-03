@@ -32,6 +32,21 @@
       "counterpart": "identical"
     },
     {
+      "id": "ask-chatgpt-pro",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/ask-chatgpt-pro/SKILL.md",
+        "claude": "claude/skills/ask-chatgpt-pro/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/ask-chatgpt-pro",
+        "claude": "~/.claude/skills/ask-chatgpt-pro"
+      },
+      "counterpart": "identical"
+    },
+    {
       "id": "babysit-pr",
       "kind": "skill",
       "platforms": ["codex", "claude"],
