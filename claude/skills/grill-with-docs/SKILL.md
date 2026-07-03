@@ -6,7 +6,9 @@ description: Stress-test a plan or design against code, docs, ADRs, and project 
 # Grill With Docs
 
 Interview the user one decision at a time until the plan, design, or existing slice/task-set is
-coherent enough to execute or reject.
+coherent enough to execute or reject. Maintain a private pool of possible questions, but ask only
+the few that materially change the work; infer the rest from repo evidence and present those
+inferences for verification.
 
 ## Targets
 
@@ -22,12 +24,22 @@ horizontal, mis-ordered, or stale). When the target is an existing slice/task-se
 
 ## Workflow
 
-1. Read the user's plan and identify the highest-risk unresolved decision.
+1. Read the user's plan and build an initial pool of unresolved decisions, risks, and fuzzy areas.
 2. Explore the codebase or docs before asking anything answerable from local context.
 3. Read relevant context/glossary docs, ADRs, harness task notes, and tests.
-4. Ask one pointed question at a time. Include your recommended answer and why it matters.
-5. After each answer, update the decision tree and ask the next load-bearing question.
-6. When decisions stabilize, stop grilling and emit the **Decision Summary** (see below),
+4. Classify the pool:
+   - **Ask now** — a load-bearing branch where a wrong guess changes the implementation shape,
+     ownership, data contract, migration/rollback path, or verification strategy.
+   - **Infer + verify** — a question whose likely answer follows from code, docs, project
+     vocabulary, prior task notes, or a low-risk conservative default.
+   - **Fog** — an area that is probably relevant later but cannot be phrased sharply until another
+     decision lands. Do not pre-split fog into fake questions.
+5. Ask the single most important **Ask now** question. Include your recommended answer, why it
+   matters, and any immediately relevant inferred defaults the user can correct.
+6. After each answer, update and re-rank the pool. Promote fog only when it becomes a sharp
+   question; demote questions whose answers are now inferable.
+7. When no remaining **Ask now** question would materially change the work, stop grilling and emit
+   the **Decision Summary** (see below),
    then recommend the durable capture path it identifies — a glossary/context update, an ADR
    for a durable tradeoff, an update to an existing harness task, or new task(s)/a slice for
    net-new work. Recommend the capture skill; do not create tasks yourself.
@@ -44,12 +56,27 @@ Each question should expose a real branch in the design:
 
 Do not ask preference questions that the repo already answers.
 
+## Inference Standard
+
+Infer instead of asking when the evidence is strong enough for a future implementer to rely on:
+
+- established local naming, glossary, ADR, or API vocabulary;
+- existing module ownership and dependency direction;
+- tests or nearby implementation patterns that show the expected contract;
+- a conservative reversible default that can be called out explicitly.
+
+Do not infer when the answer chooses product behavior, deletes or migrates user data, changes a
+public contract, creates irreversible work, or would invalidate a plausible alternate architecture.
+Those remain **Ask now** questions.
+
 ## Output While Grilling
 
 ```markdown
 Question: <one question>
 Recommended answer: <your recommendation>
 Why it matters: <consequence of this branch>
+Inferred defaults to verify:
+- <inference> — <evidence/rationale>      # omit this section when there are none
 ```
 
 ## Decision Summary
@@ -62,7 +89,11 @@ becomes structured work instead of unstructured chat. It must stand alone — th
 ## Decision summary — <topic>
 
 ### Resolved decisions
-- <decision>: <chosen answer> — <one-line rationale>
+- <decision>: <chosen answer> — <one-line rationale> (<user-confirmed | inferred from evidence>)
+
+### Inferred decisions to verify
+- <decision>: <inferred answer> — <evidence/rationale, and what would change if wrong>
+  (or "none")
 
 ### Open questions / stop gates
 - <question or gate still unresolved> (or "none")
@@ -93,5 +124,9 @@ not invent work to capture. For where each kind of durable knowledge lives, see
 
 - Ask one question and wait. Do not dump an interview checklist.
 - If the answer is discoverable locally, discover it instead of asking.
+- Build and maintain the broader question pool internally; surface only the top question plus
+  concise inferred defaults that need verification.
+- Do not ask just to confirm a low-risk inference. Put it in **Inferred decisions to verify** and
+  let the user correct it before capture.
 - Do not edit docs until the user confirms the decision or asks for capture.
 - When the plan is ready, emit the Decision Summary and recommend its capture path (`/harness-add-tasks`, `/harness-add-inbox` → `/harness-process-inbox`, `/plan`, `/architecture-review`, ADR, glossary update, existing-task update/rescope, or no-op). Do not create tasks automatically.
