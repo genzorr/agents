@@ -17,6 +17,22 @@
       "counterpart": "twin (differs)"
     },
     {
+      "id": "archify",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/archify/SKILL.md",
+        "claude": "claude/skills/archify/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/archify",
+        "claude": "~/.claude/skills/archify"
+      },
+      "counterpart": "twin (Codex/Claude invocation wording differs)",
+      "tags": ["domain:diagrams", "origin:tt-a1i/archify"]
+    },
+    {
       "id": "ask-oracle",
       "kind": "skill",
       "platforms": ["codex", "claude"],

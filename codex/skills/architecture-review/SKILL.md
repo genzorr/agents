@@ -65,7 +65,7 @@ Candidates:
 Recommended next step: <one action>
 ```
 
-For large architecture reviews, offer to turn the candidates into a temp-file HTML report with diagrams. Do not create report files unless the user asks for that artifact.
+For large architecture reviews, offer to turn the candidates into a temp-file report and use `archify` for requested diagram artifacts. Do not create report files unless the user asks for that artifact.
 
 ## Rules
 
