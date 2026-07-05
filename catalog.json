@@ -302,6 +302,22 @@
       "counterpart": "twin (differs)"
     },
     {
+      "id": "thermo-nuclear-code-quality-review",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/thermo-nuclear-code-quality-review/SKILL.md",
+        "claude": "claude/skills/thermo-nuclear-code-quality-review/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/thermo-nuclear-code-quality-review",
+        "claude": "~/.claude/skills/thermo-nuclear-code-quality-review"
+      },
+      "counterpart": "identical",
+      "tags": ["origin:cursor/plugins/cursor-team-kit"]
+    },
+    {
       "id": "tdd",
       "kind": "skill",
       "platforms": ["codex", "claude"],
