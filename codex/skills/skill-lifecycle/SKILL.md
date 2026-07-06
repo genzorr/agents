@@ -39,7 +39,10 @@ sprawl. `skill-creator` owns mechanics; this skill owns lifecycle policy and aud
   convention: `/Users/example/dev/os/repos/harness/docs/harness-skill-lifecycle-policy.md` §8.
 - **Composable.** Reference or hand off to other skills instead of duplicating their logic
   (e.g. delegate diff critique to `review-change`, task creation to `harness-add-tasks`). Name
-  the skill; do not inline its body.
+  the skill; do not inline its body. Know each skill's **composition role** — driver, router,
+  lens, helper, or protocol — and the precedence `protocol > driver > router > helper > lens`
+  (`docs/skill-authoring-principles.md` §Composition Roles / §Orchestration Discipline). A
+  lens-shaped skill must not relax a protocol or seize the driver seat.
 
 ## What to audit
 
@@ -67,6 +70,11 @@ Compare by description **and** body, never by name alone. Propose one category p
   Harness has no per-skill invocation telemetry, so disuse-based deprecate/remove needs operator
   confirmation; never infer it. Removal is never automatic.
 - **Keep + watch** — thin or contested evidence. The default when a finding is not strong.
+
+Also flag **composition-role hazards** as `change`: a skill that behaves like a driver but is
+framed as a lens (or vice versa), a lens that relaxes a protocol, or two skills claiming the
+driver seat for one lifecycle. Check every new or edited skill for role clarity and protocol
+safety, not only duplication.
 
 ## Process-sediment rubric (docs)
 

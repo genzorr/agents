@@ -33,6 +33,44 @@ For model-invoked descriptions:
 - Include one trigger per real branch, not several synonyms for the same branch.
 - Keep body-only identity out of the description. The description is for discovery.
 
+## Composition Roles
+
+Skills compose. Name the role a skill plays when combined with others, so an agent running
+several at once knows which one is in charge.
+
+- **Driver** — owns a task or workflow end to end: plans, sequences, and decides when it is
+  done. Exactly one skill drives at a time.
+- **Router** — selects the right skill or path and hands off. It does not own execution after
+  the handoff; the skill it selects becomes the driver.
+- **Lens** — adds checks, questions, or quality criteria to whatever the driver is doing. It
+  never takes lifecycle ownership and never relaxes a protocol.
+- **Helper** — performs one bounded sub-step on request (create a task, critique a diff, run a
+  search) and returns. The caller stays the driver.
+- **Protocol** — a strict rule set that must hold regardless of what else runs (task-backed
+  implementation, ledgers, review gates). It is authoritative; other roles work within it.
+
+Precedence when roles combine: **protocol > driver > router > helper > lens.** Exactly one
+skill drives unless a router is actively selecting and handing off. Lenses and helpers compose
+freely with the driver, but lens guidance may only add checks or questions — it must not relax
+a protocol or take lifecycle ownership. When a lens and a protocol disagree, the protocol wins.
+
+## Orchestration Discipline
+
+When a driver delegates work to other agents (subagents, headless jobs, run packets), it stays
+the orchestrator and owns the outcome. This is different from a router: a router owns selection
+only until it hands off to the selected driver. Apply this discipline whenever a driver delegates
+to a worker agent.
+
+- **Worker output is evidence, not a verdict.** The orchestrator owns acceptance: verify the
+  actual result — diff, files changed, checks re-run — never a worker's self-report.
+- **Every delegation prompt carries its contract:** objective, scope and ownership, permissions
+  (read-only vs. write, commit/lifecycle authority), success criteria, required proof, and
+  return format. A prompt missing any of these under-specifies the work.
+- **Broad discovery narrows into an exact follow-up.** A scout or survey result is an input to
+  a specific next action, not a finish line.
+- **Launching is not finishing.** Orchestration is incomplete while a worker is merely running;
+  it completes only when the returned work is reviewed, accepted, and integrated.
+
 ## Information Hierarchy
 
 Keep the body focused on what the agent must do now.
