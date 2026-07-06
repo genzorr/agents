@@ -43,8 +43,9 @@ scripts/
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
   validate_skills.py  # SKILL.md frontmatter identity check (dir id == name, description present)
 docs/
-  skill-installer-contract.md
-docs/harness/          # this repo's own Harness state for follow-up work
+  skill-authoring-principles.md   # craft rubric for writing/reviewing skills
+  skill-installer-contract.md     # reusable per-repo installer contract (shared by all repos)
+docs/harness/          # this repo's own Harness task/slice/decision tracking state (not narrative docs)
 ```
 
 Codex/Claude same-name skills are deliberate **platform twins**, not automatically identical — the
