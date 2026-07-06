@@ -25,13 +25,20 @@ Exceptions: detailed explanations, walkthroughs, plans, ADRs, handoffs, and genu
 
 Every changed line should trace to the user's request.
 
+- The smallest good change is the smallest one that actually implements the requested behavior, state, or mechanism — not the smallest one that is merely safe, bounded, and easy to review. A narrow diff that misses the real target is not surgical; it is a proxy substitution.
 - Do not make drive-by edits, broad reformatting, opportunistic renames, or unrelated cleanups.
 - Match existing local style even when another style would also be valid.
 - Remove imports, variables, helpers, or types made unused by your own edit.
 - Leave pre-existing unrelated dead code alone unless asked to remove it.
 - If a related but out-of-scope issue appears, surface it instead of fixing it silently.
 
-Before reporting done, inspect the diff and make sure each changed line has a task-related reason.
+Before reporting done, inspect the diff and make sure each changed line has a task-related reason, and that the change set as a whole addresses the actual request rather than a convenient proxy for it.
+
+## Background and Long-Running Jobs
+
+- Prefer a tool's native blocking wait or status/result command over a manual polling loop.
+- Do not tight-poll a long-running or background job (e.g. every few seconds); it burns tokens without adding information.
+- When polling is unavoidable, use a task-sized interval — minutes, not seconds — long enough that most checks find real progress.
 
 ## Think Before Coding
 

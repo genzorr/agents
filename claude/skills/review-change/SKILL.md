@@ -53,7 +53,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 ## Review Checklist
 
 - **Correctness**: wrong conditions, stale assumptions, broken invariants, off-by-one errors, bad async/order behavior, incorrect state transitions, data loss.
-- **Requirements**: mismatch with user request, task acceptance criteria, docs, API contract, or PR intent.
+- **Requirements**: mismatch with user request, task acceptance criteria, docs, API contract, or PR intent. A clean, well-tested implementation of the wrong or narrowed target is still a requirements failure — flag it even if the diff itself is high quality.
 - **Edge cases**: empty/null inputs, boundary sizes, malformed external input, retries, concurrent operations, partial failures.
 - **Security and privacy**: authz/authn gaps, secret leakage, injection, path traversal, unsafe deserialization, excessive logging, PII exposure.
 - **Performance**: avoidable N+1 queries, unbounded loops, repeated expensive work, cache invalidation, large memory spikes, slow startup/build paths.
