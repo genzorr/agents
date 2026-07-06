@@ -106,6 +106,21 @@
       "counterpart": "twin (differs)"
     },
     {
+      "id": "distill-source",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/distill-source/SKILL.md",
+        "claude": "claude/skills/distill-source/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/distill-source",
+        "claude": "~/.claude/skills/distill-source"
+      },
+      "counterpart": "twin (differs)"
+    },
+    {
       "id": "doc-audit",
       "kind": "skill",
       "platforms": ["codex", "claude"],
