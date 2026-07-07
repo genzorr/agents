@@ -30,6 +30,16 @@ capture pipeline, not a memory system, and not ML knowledge distillation.
   `skill-lifecycle`'s add/change/merge/deprecate gates decide whether a distilled idea becomes a
   durable skill. This skill never bypasses those gates.
 
+## When the source is not yet readable
+
+This skill only runs on an already-available source (pasted, linked, or attached). If the source is
+a Telegram channel/post or an X post/thread that first needs a bounded local capture, that capture
+is a separate, prior step: use the `source-capture` tool (`tools/source-capture/` and its workflow-contract doc, in a
+Personal-OS-managed repo) to produce a packet, then run this
+skill on that packet's `distill-source-input.md` as the already-available source. Do not scrape,
+crawl, poll, or otherwise expand this skill into a capture pipeline - if `source-capture` is not
+available, ask before improvising a capture method.
+
 ## Workflow
 
 1. **Parse the source and target.** Extract the source pointer (URL, file path, or pasted text)
@@ -110,6 +120,9 @@ summary of the brief - never just "done."
 
 ## Composes with (do not duplicate)
 
+- `source-capture` (`tools/source-capture/`) - run first, not by this skill, when the source is a
+  Telegram or X source needing a bounded local packet before distillation (see "When the source is
+  not yet readable" above).
 - `ask-oracle` / `research-prompt` - hand off when the source needs an external deep-research
   consult beyond what is already provided.
 - `prepare-dynamic-workflow` - hand off when there are many sources, or the extraction itself needs
