@@ -43,6 +43,7 @@ Escalate findings when you see:
 - feature-specific logic leaking into shared or lower-level code;
 - thin abstractions that add vocabulary without hiding complexity;
 - duplicated logic or bespoke helpers where a canonical utility already exists;
+- new code, dependencies, helpers, CLIs, abstractions, or skills that should have been avoided by reusing repo/native/stdlib capability or by changing configuration instead;
 - cast-heavy or optional-heavy contracts that obscure the real invariant;
 - special-case edge handling embedded in a function that already has too many reasons to change;
 - partial-update flows that can leave related state harder to reason about;

@@ -1,16 +1,5 @@
 {
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "__CLAUDE_HOME__/hooks/notifications.sh \"Claude Code session started\""
-          }
-        ]
-      }
-    ],
     "PermissionRequest": [
       {
         "hooks": [

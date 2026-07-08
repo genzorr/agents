@@ -54,5 +54,6 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 - State load-bearing assumptions when they affect implementation scope, data shape, or API contracts.
 - If a request has multiple plausible interpretations that lead to materially different code, ask a pointed question or name the assumption you are taking.
 - If there is a materially simpler approach than the one implied by the request, surface it briefly before implementing.
+- Before adding new code, dependencies, helpers, CLIs, abstractions, or skills, walk the reuse-before-build ladder: skip if unnecessary; reuse an existing repo pattern/tool; use the standard library; use native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
 - Stop and ask when requirements are contradictory or the current state does not make sense.
 - Do not ask about trivial preferences where the existing codebase gives an obvious default.

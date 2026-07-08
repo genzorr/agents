@@ -38,7 +38,7 @@ If there is no discoverable diff, PR, branch comparison, or path scope, ask one 
 
 ## Optional Deep Review
 
-For normal or small diffs, inline review by this agent is the right default. For a **substantial change** — many files, large diffs, public API/data-contract changes, or a run-produced branch — prefer an independent reviewer pass when the runtime supports it (a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or cross-model review), even if the user did not explicitly ask; when such a pass is warranted but unavailable, note the residual risk. In a Harness repo this is Tier 1+ on the review-independence ladder (`/Users/example/dev/os/repos/harness/docs/harness-ops-operator-guide.md` → *Review Independence*). Also run independent passes whenever the user explicitly asks for multi-agent, deep, parallel, or adversarial review.
+Inline review by this agent is the right default. Use independent reviewer passes only when the user explicitly asks for multi-agent, deep, parallel, or adversarial review and the runtime supports it — do not fan them out on your own just because a change looks substantial. When asked, run them with a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or via cross-model review. A project-mandated review gate still applies where a project defines one: in a Harness repo, satisfy the review-independence ladder the project requires (`/Users/example/dev/os/repos/harness/docs/harness-runs-operator-guide.md` → *Review Independence*), and note residual risk if a required pass is unavailable.
 
 Recommended independent lenses:
 
@@ -59,6 +59,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 - **Performance**: avoidable N+1 queries, unbounded loops, repeated expensive work, cache invalidation, large memory spikes, slow startup/build paths.
 - **Interfaces**: breaking API changes, migration gaps, inconsistent names/types, confusing return values, missing compatibility handling.
 - **Maintainability**: over-engineering, duplicated logic, unnecessary abstractions, hidden coupling, complex code where a simpler local pattern exists.
+- **Reuse-before-build**: new code, helpers, CLIs, abstractions, dependencies, or skills that skipped an obvious lower rung — existing repo pattern/tool, standard library, native platform/framework capability, existing dependency, or config/flag/rule change.
 - **Verification**: missing or weak tests for risky behavior, tests that do not exercise the changed contract, CI gaps.
 
 ## What Not To Flag

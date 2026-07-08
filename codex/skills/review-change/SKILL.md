@@ -59,6 +59,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 - **Performance**: avoidable N+1 queries, unbounded loops, repeated expensive work, cache invalidation, large memory spikes, slow startup/build paths.
 - **Interfaces**: breaking API changes, migration gaps, inconsistent names/types, confusing return values, missing compatibility handling.
 - **Maintainability**: over-engineering, duplicated logic, unnecessary abstractions, hidden coupling, complex code where a simpler local pattern exists.
+- **Reuse-before-build**: new code, helpers, CLIs, abstractions, dependencies, or skills that skipped an obvious lower rung — existing repo pattern/tool, standard library, native platform/framework capability, existing dependency, or config/flag/rule change.
 - **Verification**: missing or weak tests for risky behavior, tests that do not exercise the changed contract, CI gaps.
 
 ## What Not To Flag
