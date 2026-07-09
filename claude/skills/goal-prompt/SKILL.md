@@ -81,7 +81,15 @@ Before writing the prompt, inspect enough local context to make it project-speci
    - commit cadence: commit coherent chunks after relevant verification, unless the user explicitly says not to commit;
    - final accounting: require a P0/P1 board with done/blocked/deferred status, commits, measurements, verification, benchmark paths, and remaining unsafe claims.
 11. For timeboxed autonomous research, include a `Primary Work / Fallback Policy` section in the GOAL file. It must set a concrete minimum effort bar before any fallback work, and hygiene fallback is disabled unless the user explicitly allowed it.
-12. Keep gathering proportional. Do not re-audit the whole project when the user already supplied enough context. The goal is a strong handoff prompt, not full implementation.
+12. Add model/effort recommendations to the goal spec when the target run is long, expensive,
+    quality-sensitive, or likely to spawn Claude workers. Keep them recommendations, not hard requirements,
+    unless the user explicitly named settings:
+   - model = capability: recommend stronger models for ambiguity, unfamiliar domains, subtle bugs,
+     architecture, security-sensitive reasoning, and final review; cheaper models for precise mechanical work;
+   - effort = thoroughness: recommend higher effort when success depends on reading broadly, trying multiple
+     steps, running tests, or double-checking; use default effort when unsure;
+   - do not confuse Claude effort with Codex reasoning effort or the Research Goal Mode "minimum effort bar".
+13. Keep gathering proportional. Do not re-audit the whole project when the user already supplied enough context. The goal is a strong handoff prompt, not full implementation.
 
 ## Output
 
@@ -112,6 +120,9 @@ If the goal spec is under-specified in a way that would change the work, ask bef
 - **Completion Contract (required in every GOAL file).** Include a concise section that defines success exit, continue conditions, stop/ask gates, blocked exit evidence, and non-goals/deferred work. Do not let "tests pass" alone define success unless the task is purely mechanical and the acceptance criteria are fully covered by those tests.
 - **Validation loop (required in the verification section).** Name the *smallest trustworthy validation loop* for the change: the deterministic tests/checks the agent runs, plus an explicit manual-QA step with recorded evidence (steps + observed result) where behavior cannot be proven automatically (UI, interactive, external state). Do not add an independent-review pass as a default global tax. Require a separate fresh-context review only when the user explicitly asks for it or the target project's task/finalization policy mandates it; in Harness repos, reference `/Users/example/dev/os/repos/harness/docs/harness-runs-operator-guide.md` → *Review Independence* for that project-specific gate.
 - **Final Handoff (required in every GOAL file).** Include a `Final Handoff` section requiring the implementation agent to leave a **standard review handoff before exiting**, persisted durably (not only in chat) so the generic lifecycle review/finalize skills (`harness-review-work`, `harness-finalize-work`) can consume it. For harness work, the normal implementer handoff is the task's `# Last Session` block via `harness-task-checkpoint`, even when the implementer believes the acceptance criteria are met; make that checkpoint outcome-shaped by using the existing `# Outcome` sections as labels (What Landed / Verification / Not Landed / Follow-ups / Evidence), and include branch, commits, verification run with results, what is not done, and follow-ups. Reserve `harness-task-done` and the terminal `# Outcome` record for `harness-finalize-work`, unless the operator explicitly tells the implementation agent to close the task. For non-harness work, require an equivalent durable handoff file (objective status, changed files, verification, not-landed, follow-ups). Anchor to the existing `# Outcome` shape; do not invent a competing schema.
+- **Model/effort recommendations.** When relevant, include a concise `Recommended Runtime` or equivalent
+  line in the goal spec. For Claude targets or Claude workers, recommend model for capability and effort for
+  thoroughness. Avoid hard settings unless the user requested them or the delegation mechanism requires them.
 - Use **Research Goal Mode** only when success requires experimental evidence and the target agent may need to choose the next attempt after seeing results. Strong signals include words like "hypothesis", "research", "try approaches", "benchmark candidates", "investigate", "diagnose", "accept/reject", "promote defaults", "find what works", or "continue after failures". Do not use Research Goal Mode for fixed implementation tasks, exact benchmark runs, simple bug fixes, or ordinary handoffs.
 - In Research Goal Mode, the GOAL file must include `Hypothesis Loop And Exit Conditions` even when no timebox was requested:
   - State the real problem and distinguish it from the first suspected mechanism.

@@ -129,6 +129,10 @@ The script runs under Claude Code's `Workflow` runtime. Key rules to encode:
 - Use `schema` to force structured output — validated at the tool layer, so no parsing and the agent retries
   on mismatch.
 - Route stages to a cheaper/stronger `model` deliberately; omit when unsure (inherits the session model).
+- Treat model as capability and effort as thoroughness. In prompt-only specs or workflow recommendations,
+  suggest stronger models for ambiguous, architecture-heavy, security-sensitive, or final-review stages; suggest
+  higher effort only when the stage must read broadly, try several steps, run tests, or double-check. Keep
+  defaults when unsure, and do not confuse Claude effort with research "minimum effort bar" wording.
 - Use `isolation: 'worktree'` only when agents mutate files in parallel and would conflict (migrations).
 - No silent caps: `log()` anything dropped (top-N, no-retry, sampling).
 - `Date.now()` / `Math.random()` / argless `new Date()` are unavailable — pass timestamps via `args`; vary

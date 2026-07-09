@@ -447,6 +447,19 @@
       "counterpart": "codex/AGENTS.md section (Codex packages rules inline, not as discrete files)"
     },
     {
+      "id": "model-and-effort",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/model-and-effort.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/model-and-effort.md"
+      },
+      "counterpart": "codex/AGENTS.md section"
+    },
+    {
       "id": "reading-discipline",
       "kind": "rule",
       "platforms": ["claude"],

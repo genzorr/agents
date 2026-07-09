@@ -57,3 +57,19 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 - Before adding new code, dependencies, helpers, CLIs, abstractions, or skills, walk the reuse-before-build ladder: skip if unnecessary; reuse an existing repo pattern/tool; use the standard library; use native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
 - Stop and ask when requirements are contradictory or the current state does not make sense.
 - Do not ask about trivial preferences where the existing codebase gives an obvious default.
+
+## Model And Effort
+
+- Treat model choice as capability and effort as thoroughness. Before changing either, fix the prompt,
+  scope, tools, skills, or context if those are the real cause of a bad result.
+- Current-session settings are fixed: you cannot change your own model or reasoning effort mid-turn. Use
+  this guidance when recommending settings, starting a new goal/run, or delegating work.
+- For Codex-native work, recommend the current/default reasoning effort unless task risk justifies changing
+  it. Raise effort for hard debugging, architecture, security, broad verification, or ambiguous multi-step
+  work; lower it only for mechanical, well-scoped passes with an external check.
+- When delegating to Claude, choose the Claude model for what the worker must know or infer: stronger
+  models for ambiguity, unfamiliar domains, subtle bugs, architecture, security, and final review; cheaper
+  models for precise mechanical edits or bounded extraction.
+- Choose Claude effort for how thoroughly the worker should act: raise it when success depends on reading
+  more files, trying multiple steps, running tests, or double-checking; keep the model's default when unsure.
+  Do not confuse Claude effort with Codex reasoning effort or with "minimum effort bar" research wording.
