@@ -19,7 +19,7 @@ copyable handoff prompt backed by a durable spec. Never tell a Codex session to 
 
 This skill is intentionally separate from `goal-prompt`:
 
-- Use `goal-prompt` for durable Codex `/goal` handoffs or ordinary Claude Code handoffs that read `GOAL.md`.
+- Use `goal-prompt` for durable Codex `/goal` handoffs or ordinary Claude Code handoffs that read the durable goal spec it creates.
 - Use this skill when a task is workflow-shaped (below), or when the user explicitly asks for Claude Code's
   workflow feature / `ultracode`.
 - A task being long-running does not by itself mean it needs a workflow.

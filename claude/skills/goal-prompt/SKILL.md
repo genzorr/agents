@@ -1,6 +1,6 @@
 ---
 name: goal-prompt
-description: Create a short copyable prompt for a Claude Code handoff that points to GOAL.md. Use when the user invokes goal-prompt, /goal-prompt, asks for a prompt that a Claude Code session should use to read a durable goal spec, asks for a long-running autonomous goal, or needs PRD-backed goal setup.
+description: Create a short copyable prompt for a Claude Code handoff that points to a durable goal spec. Use when the user invokes goal-prompt, /goal-prompt, asks for a prompt that a Claude Code session should use to read a durable goal spec, asks for a long-running autonomous goal, or needs PRD-backed goal setup.
 ---
 
 # Goal Prompt
@@ -11,9 +11,9 @@ Create a short prompt for a Claude Code session.
 > bodies are intentional tree-framed twins (Claude direct prompt vs Codex `/goal` set-goal
 > bootstrap), not duplication to extract — keep their section structure in sync when editing either.
 
-The output is a direct task prompt that points the target agent to a durable `GOAL.md` or `/tmp/GOAL.md` file, then tells it to follow that file and execute. Claude Code does not have Codex-style set-goal functionality, so do not instruct the target agent to set a goal or create a meta-prompt for a goal mechanism.
+The output is a direct task prompt that points the target agent to a durable goal spec file, then tells it to follow that file and execute. Claude Code does not have Codex-style set-goal functionality, so do not instruct the target agent to set a goal or create a meta-prompt for a goal mechanism.
 
-Optimize for compaction resistance by putting the detailed instructions in the durable goal spec, not in the generated prompt.
+By default the goal spec is a unique per-handoff file at `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md` (see Gather step 3). Optimize for compaction resistance by putting the detailed instructions in that durable goal spec, not in the generated prompt.
 
 ## Input
 
@@ -26,7 +26,7 @@ Optimize for compaction resistance by putting the detailed instructions in the d
 ## Target Agent
 
 - This Claude-side skill targets **Claude Code**.
-- Produce a direct task prompt. Do not tell Claude to set a goal, use `/goal`, create a meta-prompt, or call goal tooling. Claude should read `GOAL.md` or `/tmp/GOAL.md` and execute the spec directly.
+- Produce a direct task prompt. Do not tell Claude to set a goal, use `/goal`, create a meta-prompt, or call goal tooling. Claude should read the goal spec and execute it directly.
 
 ## Gather
 
@@ -34,9 +34,9 @@ Before writing the prompt, inspect enough local context to make it project-speci
 
 1. Read applicable `AGENTS.md`, `CLAUDE.md`, README, and command docs only when they are not already known in the active session or likely to affect the handoff.
 2. Find relevant docs, harness tasks, ADRs, plans, or source entry points named by the seed context.
-3. Create or update one durable goal spec file before writing the prompt:
-   - Prefer `<project-root>/GOAL.md` when writing in the project is appropriate.
-   - Use `/tmp/GOAL.md` when the user only wants a portable temporary spec, the project should not be modified, or the current directory is not a project.
+3. Create or update one durable goal spec file before writing the prompt. Default to a unique per-handoff path so concurrent handoffs never collide and no earlier spec is overwritten:
+   - **Default:** `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md`, where `<repo>` is the target repo/worktree name and `<task-slug>` is a short kebab-case summary of the goal. Create the directory if needed.
+   - Only write the goal spec inside the project (for example a committed `docs/.../<topic>-goal.md`) when the user explicitly wants a durable in-repo copy; keep it out of the default handoff path.
 4. Before drafting the GOAL file, define a concise `Completion Contract` for every goal, regardless of mode. It must state:
    - **Success exit:** the exact observable conditions that allow the agent to claim the goal is complete, including required verification evidence.
    - **Continue conditions:** signals that mean the agent must keep working instead of stopping after a partial win.
@@ -50,9 +50,9 @@ Before writing the prompt, inspect enough local context to make it project-speci
    - **Long-Run Goal Mode**: run a broad autonomous task for many hours or avoid premature closure. Strong signals include "overnight", "6-8 hours", "xhigh/max", "do not stop early", "hard exit conditions", "improve speed by X", "broad audit", "rewrite/refactor", or "large autonomous run". Combine this mode with Research or Timeboxed Mode when evidence or elapsed time controls success.
 6. Decide whether the goal needs a PRD or PRD-like durable spec. Create or update one when the work is product-shaped, architecture-shaped, benchmark-policy-shaped, multi-hour, spans several modules, has ambiguous success criteria, or should survive multiple goal runs.
    - The PRD is the durable **what/why/success contract**: problem, users, goals/non-goals, definitions, constraints, acceptance model, risks, and round-specific completion contract.
-   - `GOAL.md` is the **execution routing contract**: branch, task order, references, mode, verification, stop gates, and final handoff requirements.
+   - The goal spec is the **execution routing contract**: branch, task order, references, mode, verification, stop gates, and final handoff requirements.
    - Harness tasks are the **tracked units of work**.
-   - Put the PRD under an existing project docs area when obvious, such as `docs/.../<topic>-prd.md`; otherwise use `/tmp/<topic>-prd.md`, label it temporary in `GOAL.md`, and require final accounting to say whether it should be promoted into the repo.
+   - Put the PRD under an existing project docs area when obvious, such as `docs/.../<topic>-prd.md`; otherwise use `/tmp/<topic>-prd.md`, label it temporary in the goal spec, and require final accounting to say whether it should be promoted into the repo.
    - Do not create a PRD for tiny fixes, mechanical edits, exact one-off commands, or ordinary task continuations where the harness task already contains enough durable context.
 7. If the current project uses harness, check `harness status` or `harness snapshot` when useful. Make the GOAL file a concise routing index that points to concrete harness references supplied by the user or already active:
    - active or named slice file
@@ -93,12 +93,12 @@ Before writing the prompt, inspect enough local context to make it project-speci
 
 ## Output
 
-Return exactly one fenced Markdown block, plus a one-line lead-in if useful. Use `text` as the fence language so the app renders a copy button. Keep the generated prompt brief; do not copy the full contents of `GOAL.md` into it.
+Return exactly one fenced Markdown block, plus a one-line lead-in if useful. Use `text` as the fence language so the app renders a copy button. Keep the generated prompt brief; do not copy the full contents of the goal spec into it. Substitute the actual goal-spec path into the prompt.
 
 ```text
 You are in <project/repo>.
 
-Read <GOAL.md or /tmp/GOAL.md> first. That file, plus the files it references, is the durable source of truth; do not rely on this prompt after compaction.
+Read <goal-spec path, e.g. /tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md> first. That file, plus the files it references, is the durable source of truth; do not rely on this prompt after compaction.
 
 Follow the goal spec directly, including any deadline or stop gates from that file, and execute it. Inspect only the project context needed to follow the goal spec. Before each harness task/slice transition, activate and read the relevant harness item named in the goal spec.
 
@@ -107,19 +107,19 @@ If the goal spec is under-specified in a way that would change the work, ask bef
 
 ## Prompt Requirements
 
-- Keep the generated prompt short. It should be a direct task prompt pointing to `GOAL.md` or `/tmp/GOAL.md`, not a duplicate of the goal spec.
+- Keep the generated prompt short. It should be a direct task prompt pointing to the goal spec, not a duplicate of it.
 - Do not include large pasted seed context, conversation summaries, or project excerpts in the generated prompt. Put necessary details in the GOAL file instead.
 - Include concrete local paths, task IDs, docs, commands, or known constraints in the GOAL file, then reference that file from the generated prompt.
-- Prefer durable-reference-first prompts. The prompt should reference `GOAL.md` or `/tmp/GOAL.md`, and that goal spec should reference any other durable files the target agent must re-read after compaction.
+- Prefer durable-reference-first prompts. The prompt should reference the goal spec, and that goal spec should reference any other durable files the target agent must re-read after compaction.
 - Preserve uncertainty explicitly instead of hiding it. Put unresolved questions in the generated prompt as stop gates.
 - Prefer autonomous exploration wording over implementation certainty when the seed is exploratory.
-- Always write or update a durable goal spec before producing the prompt. Prefer `GOAL.md` in the project root when appropriate; otherwise write `/tmp/GOAL.md`. Reference that file from the prompt. Do not use the long chat prompt as the only durable source for important requirements.
-- For PRD-backed goals, write or update the PRD before finalizing `GOAL.md`, and make `GOAL.md` reference it. The generated prompt should still point primarily to `GOAL.md`; do not paste the PRD into the prompt.
+- Always write or update a durable goal spec before producing the prompt. Default to the unique `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md` path; write an in-repo copy only when the user explicitly asks. Reference that file from the prompt. Do not use the long chat prompt as the only durable source for important requirements.
+- For PRD-backed goals, write or update the PRD before finalizing the goal spec, and make the goal spec reference it. The generated prompt should still point primarily to the goal spec; do not paste the PRD into the prompt.
 - For harness projects, make the GOAL file small: a routing index with user-provided or already active slice/task files, named spec/result docs, task order, deadline, verification, stop gates, and instructions to respect active task state and lifecycle rules.
 - For non-harness projects, make the GOAL file complete enough to continue after compaction: context, constraints, success criteria, verification, durable references, stop gates, and deadline.
 - **Completion Contract (required in every GOAL file).** Include a concise section that defines success exit, continue conditions, stop/ask gates, blocked exit evidence, and non-goals/deferred work. Do not let "tests pass" alone define success unless the task is purely mechanical and the acceptance criteria are fully covered by those tests.
 - **Validation loop (required in the verification section).** Name the *smallest trustworthy validation loop* for the change: the deterministic tests/checks the agent runs, plus an explicit manual-QA step with recorded evidence (steps + observed result) where behavior cannot be proven automatically (UI, interactive, external state). Do not add an independent-review pass as a default global tax. Require a separate fresh-context review only when the user explicitly asks for it or the target project's task/finalization policy mandates it; in Harness repos, reference `/Users/example/dev/os/repos/harness/docs/harness-runs-operator-guide.md` → *Review Independence* for that project-specific gate.
-- **Final Handoff (required in every GOAL file).** Include a `Final Handoff` section requiring the implementation agent to leave a **standard review handoff before exiting**, persisted durably (not only in chat) so the generic lifecycle review/finalize skills (`harness-review-work`, `harness-finalize-work`) can consume it. For harness work, the normal implementer handoff is the task's `# Last Session` block via `harness-task-checkpoint`, even when the implementer believes the acceptance criteria are met; make that checkpoint outcome-shaped by using the existing `# Outcome` sections as labels (What Landed / Verification / Not Landed / Follow-ups / Evidence), and include branch, commits, verification run with results, what is not done, and follow-ups. Reserve `harness-task-done` and the terminal `# Outcome` record for `harness-finalize-work`, unless the operator explicitly tells the implementation agent to close the task. For non-harness work, require an equivalent durable handoff file (objective status, changed files, verification, not-landed, follow-ups). Anchor to the existing `# Outcome` shape; do not invent a competing schema.
+- **Final Handoff (required in every GOAL file).** Include a `Final Handoff` section requiring the implementation agent to leave a **standard review handoff before exiting**, persisted durably (not only in chat) so the generic lifecycle review/finalize skills (`harness-review-work`, `harness-finalize-work`) can consume it. For harness work, the normal implementer handoff is the task's outcome-shaped `# Last Session` block via `harness-task-checkpoint`, even when the implementer believes the acceptance criteria are met. Match that skill's committed contract: use the `# Outcome` sections as labels (What Landed / Verification / Not Landed / Follow-ups / Evidence) plus a Status line and branch/commits, and keep "tests passed" separate from "browser/external state verified". Reserve `harness-task-done` and the terminal `# Outcome` record for `harness-finalize-work` — closure and terminal Outcome stay finalizer-owned unless the operator explicitly tells the implementation agent to close the task. For non-harness work, require an equivalent durable handoff file (objective status, changed files, verification, not-landed, follow-ups). Anchor to the existing `# Outcome` / `# Last Session` shape; do not invent a competing schema.
 - **Model/effort recommendations.** When relevant, include a concise `Recommended Runtime` or equivalent
   line in the goal spec. For Claude targets or Claude workers, recommend model for capability and effort for
   thoroughness. Avoid hard settings unless the user requested them or the delegation mechanism requires them.

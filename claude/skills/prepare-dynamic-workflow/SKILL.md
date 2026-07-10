@@ -19,7 +19,7 @@ workflow, **which** pattern fits, and **what** to do with the result (run / save
 
 This skill is intentionally separate from `/goal-prompt`:
 
-- Use `/goal-prompt` for ordinary durable handoffs that read `GOAL.md`.
+- Use `/goal-prompt` for ordinary durable handoffs that read the durable goal spec it creates.
 - Use this skill when a task is workflow-shaped (below), or when the user explicitly asks for the workflow
   feature / `ultracode`.
 - A task being long-running does not by itself mean it needs a workflow.
