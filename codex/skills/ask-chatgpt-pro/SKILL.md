@@ -1,18 +1,20 @@
 ---
 name: ask-chatgpt-pro
-description: Prepare a manual ChatGPT Pro consult for a hard codebase question using ChatGPT's GitHub connector instead of a bundled context pack. Use when the user wants Pro to inspect one or more GitHub repos, branches, commits, PRs, or named files directly; especially when local changes must be committed and pushed so Pro can see them.
+description: Prepare a neutral, mid-sized manual ChatGPT Pro consult document that uses ChatGPT's GitHub connector for an independent codebase review. Use when Pro should inspect one or more GitHub repos, commits, branches, PRs, or named files directly; especially when local changes must be committed and pushed before Pro can see them.
 ---
 
 # Ask ChatGPT Pro
 
-Use this when ChatGPT Pro should answer a hard or complex question by reading GitHub repositories directly through its GitHub connector/plugin.
+## Goal
 
-This skill produces a GitHub-visible state and a copyable prompt. It does not drive ChatGPT Web, and it does not create an Oracle context bundle.
+Produce a neutral Markdown consult document for ChatGPT Pro, not an answer to the underlying task.
+
+Use GitHub as the primary source. The document must be concise enough to paste into ChatGPT Pro and must direct Pro to inspect the named repositories and pinned commits itself. Do not drive ChatGPT Web or create an Oracle context bundle.
 
 ## When To Use This Instead Of Ask Oracle
 
 Use this skill when:
-- the relevant material lives in GitHub repos ChatGPT Pro can access;
+- relevant material lives in GitHub repos ChatGPT Pro can access;
 - the question benefits from Pro inspecting repo structure, history, branches, PRs, or files directly;
 - local changes must be committed and pushed before Pro can evaluate them.
 
@@ -23,92 +25,120 @@ Use `ask-oracle` instead when:
 
 ## Workflow
 
-1. Clarify the exact question and output requested.
-   Done when the prompt can state the decision, review, diagnosis, plan, or critique Pro should produce.
-2. Identify the GitHub repos and refs Pro must inspect.
-   Use `gh repo view owner/repo` or `git remote -v` to verify repo names when needed.
-   Done when each repo has an `owner/name`, branch/PR/commit if relevant, and target paths or search terms.
-3. Check whether local changes are part of the evidence.
-   Run `git status --short`, inspect the diff, and decide whether the unpushed state matters.
-   Done when the prompt either points to already-visible refs or names the local changes that must become visible.
-4. If local changes must be visible, commit them and push a branch before writing the final prompt.
-   Respect repo stop/ask gates for commits, branch creation, and remote pushes. If policy requires approval, ask before pushing.
-   Done when `git rev-parse HEAD` names the commit Pro should inspect and `git status --short` has no relevant uncommitted evidence.
-5. Capture recent validation only when it matters.
-   Include commands and concise results, not full logs unless the logs are in GitHub or attached elsewhere.
-   Done when Pro can distinguish verified facts from unchecked assumptions.
-6. Write the ChatGPT Pro handoff prompt to a Markdown file.
-   Prefer `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact.
-   Done when the file includes the template sections below and is ready to paste into ChatGPT Pro.
-7. Return the prompt path and the GitHub refs Pro should open.
-   Do not paste the whole prompt unless the user asks.
+1. State a neutral task, desired output, scope, non-goals, and success criteria. Do not include a suspected cause, preferred solution, reviewer conclusion, or implementation plan unless the user explicitly asks Pro to evaluate it.
+2. Identify each GitHub repo and its stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, target paths, symbols, and search strings. For a change review, record both the base and head commits.
+3. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then run `git status --short` and inspect the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
+4. Select only the sources needed to answer the task. Include a minimal source manifest and omit generated files, dependency directories, unrelated modules, PR descriptions, review threads, issue commentary, and prior AI reports unless the user explicitly asks for comparison. Retain a durable experiment/result record only when its directly recorded measurements, commands, or artifacts are needed and available at the pinned ref.
+5. Verify every named manifest path at its pinned commit before writing the document. Use `git cat-file -e <sha>:<path>` when the commit is available locally, or an equivalent GitHub API/connector lookup. Remove an unresolved path, or state its access limitation and use a search string instead.
+6. Include validation only when it materially changes the review. Record concise command results as secondary framing, not proof that overrides GitHub source.
+7. Write `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact. Use the template below.
+8. Return the document path, refs to inspect, and any commit/push status affecting Pro's visibility. Do not paste the document unless asked.
 
-## Handoff Prompt Requirements
+## Neutrality And Evidence Rules
 
-The prompt must tell ChatGPT Pro to use its GitHub connector/plugin to inspect the named repos and refs. Do not rely on Codex summaries for primary evidence when the source is available in GitHub.
+- Treat GitHub source at the named commits as primary evidence. A durable experiment/result record is primary only for its directly recorded measurements, commands, artifacts, and provenance; its agent-written interpretations remain secondary framing. Treat the consult document, source selection rationale, validation summaries, and other agent-written text as secondary framing.
+- Ask Pro to inspect primary evidence before relying on secondary framing. The document's Current State must contain only ref and visibility facts, not conclusions about the code.
+- Do not include information that anchors an independent reviewer: suspected causes, proposed fixes, desired findings, reviewer opinions, PR descriptions, review threads, issue comments, or prior AI analyses.
+- If the user explicitly provides a hypothesis, label it `user-provided hypothesis` and ask Pro to test it against the GitHub evidence and competing explanations.
+- Preserve exact repositories, commits, PRs, branches, files, symbols, commands, config keys, error strings, and issue numbers.
+- Separate primary-evidence facts, secondary framing, assumptions, inferences, and recommendations. State uncertainty, contradictions, stale context, missing access, and missing evidence explicitly.
+- Do not invent implementation details or operational constraints such as urgency, budget, runtime, risk, or priority.
+- For an audit or independent review, do not request recommendations, next actions, or an implementation plan unless the user explicitly requests decision support or execution planning.
+- Require repository, commit/ref, file-path, and line-range citations where possible. Each recommendation must cite primary evidence or be labeled as an inference with confidence and missing evidence.
+- Keep the consult read-only: instruct Pro not to create or modify issues, PRs, branches, commits, or repository files.
 
-Include:
-- exact repo names, for example `genzorr/agents`;
-- branch names, PR URLs, or commit SHAs;
-- target files, directories, symbols, issue numbers, or search strings;
-- the user question and desired output format;
-- constraints, non-goals, and any stop conditions;
-- known facts, assumptions, and recent validation;
-- evidence rules requiring file/path citations and explicit uncertainty.
+## Artifact Policy
 
-## Prompt Template
+Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words excluding citations. Use a Markdown file by default and also request a PDF when file generation is available. If files cannot be generated, require the complete Markdown report in the response.
+
+Use short sections and citations instead of long excerpts, appendices, or a duplicated source manifest. Request a table or diagram only when it materially clarifies comparisons, architecture, workflow, causal mechanism, or tradeoffs.
+
+## Consult Document Template
 
 ```markdown
 # Task
 
-[Hard question for ChatGPT Pro.]
+[Precise neutral task for ChatGPT Pro.]
 
 # GitHub Context
 
-Use your GitHub connector/plugin. Inspect these repos and refs directly; do not rely on this prompt as the primary source when GitHub source is available.
+Use your GitHub connector/plugin. Inspect the repositories and pinned refs below directly. Treat GitHub source at these refs as primary evidence; treat this document as secondary framing. Do not inspect PR descriptions, review threads, issue comments, or prior AI reports unless the task explicitly names them as evidence.
+
+Every named path in this source manifest was mechanically verified at its pinned ref before this document was prepared.
+
+## Source Manifest
 
 - `owner/repo`
-  - Ref: `branch-or-commit-or-PR`
-  - Start with:
-    - `path/to/file`
-    - `path/to/directory`
-  - Also search for:
-    - `symbol_or_error_string`
+  - Pinned ref: `full-commit-sha`
+  - Branch / PR: `branch-name` or `PR URL`
+  - Start with: `path/to/file`, `path/to/directory`
+  - Search for: `symbol_or_error_string`
+  - Relevance: [why this source is needed]
+
+# Goal
+
+[Concrete result to provide.]
+
+# Success Criteria
+
+A good answer must:
+- [criterion 1]
+- [criterion 2]
+- [criterion 3]
 
 # Current State
 
-- Relevant commit(s): `sha`
-- Relevant branch/PR: `name or URL`
-- Validation already run:
-  - `command`: `result`
-- Known facts:
-  - ...
-- Assumptions / uncertainty:
-  - ...
+- GitHub-visible commit(s): `sha`
+- Relevant branch / PR: `name or URL`
+- For a change review: base `sha`, head `sha`
+- Local-evidence visibility: [already visible / pushed as above / unavailable to the connector]
+- Material validation, if any (secondary framing): `command` — `concise result`
+- User-provided hypothesis to evaluate, if any (not a fact): [hypothesis]
 
 # Constraints
 
-- Preserve exact names of files, functions, commands, branches, and config keys.
-- Separate facts found in GitHub from inferences and recommendations.
-- Cite file paths and line ranges where possible.
-- Say when evidence is missing instead of guessing.
-- Do not propose changes outside the named scope unless they are necessary to answer the task.
+- Evaluate independently and neutrally; do not assume any hypothesis, cause, or solution is correct.
+- Preserve exact technical names. Do not invent facts or unstated operational constraints.
+- Separate primary evidence, secondary framing, assumptions, inferences, and recommendations.
+- State uncertainty, contradictions, and missing evidence explicitly.
+- Do not extend beyond the named scope unless necessary to answer it; identify any necessary scope expansion.
+- Do not create or modify GitHub resources.
+
+# Evidence Rules
+
+- Inspect GitHub source at the pinned ref before relying on this document.
+- Treat a durable experiment/result record as primary only for its directly recorded measurements, commands, artifacts, and provenance; treat its interpretations as secondary framing.
+- Cite repository, commit/ref, file path, and line range where possible.
+- If evidence is missing or the connector cannot access a source, say so and do not guess.
+- Support each recommendation with primary evidence or label it as an inference with confidence and missing evidence.
 
 # Required Output
 
-Return:
-1. Direct answer / recommendation
-2. Evidence from GitHub
-3. Alternatives or competing interpretations
-4. Risks and failure modes
-5. Concrete next steps or validation checks
+For an independent audit or review, return:
+1. Unsupported or weakly supported claims
+2. Evidence gaps and contradictions
+3. Competing interpretations
+4. Questions or checks needed before deciding
+
+For decision support or execution planning explicitly requested in the task, return:
+1. Executive summary
+2. Main analysis
+3. Recommendations with citations or explicit inference labels
+4. Alternatives, risks, and failure modes
+5. Validation plan and next actions
+
+# Artifact Output
+
+Create one downloadable Markdown report of 800–1,200 words, excluding citations. Also create a PDF if file generation is available. If downloadable files are unavailable, output the complete Markdown report directly. Use a table or diagram only when it materially clarifies the result.
 ```
+
+For coding tasks, name target files, interfaces, current and desired behavior, tests, acceptance criteria, and do-not-change constraints. For debugging tasks, name the exact error, reproduction steps, environment, recent changes, implicated files, prior attempts, and expected versus actual behavior.
 
 ## Final Output Rule
 
 Return only:
-- the prompt file path;
-- the repo refs Pro should inspect;
+- the consult document path;
+- the GitHub refs Pro should inspect;
 - any push/commit status that affects whether Pro can see the evidence.
 
-If a push was required but not allowed or failed, state that the prompt is incomplete until the branch is visible on GitHub.
+If a required push was not allowed or failed, state that the document is incomplete until the branch is visible on GitHub.

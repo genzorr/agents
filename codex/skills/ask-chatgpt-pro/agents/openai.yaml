@@ -1,4 +1,4 @@
 interface:
   display_name: "Ask ChatGPT Pro"
-  short_description: "Prepare GitHub-backed ChatGPT Pro consult prompts for hard repo questions."
-  default_prompt: "Prepare a ChatGPT Pro handoff prompt that points at the relevant GitHub repo refs and files instead of bundling source context."
+  short_description: "Prepare neutral GitHub-backed Pro consult documents."
+  default_prompt: "Use $ask-chatgpt-pro to prepare a neutral ChatGPT Pro consult for relevant GitHub refs and files."
