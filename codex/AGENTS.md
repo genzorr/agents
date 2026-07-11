@@ -60,16 +60,21 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 
 ## Model And Effort
 
-- Treat model choice as capability and effort as thoroughness. Before changing either, fix the prompt,
-  scope, tools, skills, or context if those are the real cause of a bad result.
-- Current-session settings are fixed: you cannot change your own model or reasoning effort mid-turn. Use
-  this guidance when recommending settings, starting a new goal/run, or delegating work.
-- For Codex-native work, recommend the current/default reasoning effort unless task risk justifies changing
-  it. Raise effort for hard debugging, architecture, security, broad verification, or ambiguous multi-step
-  work; lower it only for mechanical, well-scoped passes with an external check.
-- When delegating to Claude, choose the Claude model for what the worker must know or infer: stronger
-  models for ambiguity, unfamiliar domains, subtle bugs, architecture, security, and final review; cheaper
-  models for precise mechanical edits or bounded extraction.
-- Choose Claude effort for how thoroughly the worker should act: raise it when success depends on reading
-  more files, trying multiple steps, running tests, or double-checking; keep the model's default when unsure.
-  Do not confuse Claude effort with Codex reasoning effort or with "minimum effort bar" research wording.
+- Prefer improving the prompt, scope, context, tools, and workflow before considering a more expensive
+  model or higher reasoning effort.
+
+### Preserve Thread Model
+
+- Never change an existing thread's model. The model for the current chat is fixed; the user will change
+  it manually if needed.
+- Do not change an existing thread's reasoning effort silently. If a different effort level would help,
+  stop and explicitly tell the user before changing it, and wait for the user's approval.
+- Entering goal mode, resuming work, finalizing a branch, reviewing a run, or encountering difficult work
+  does not authorize a model or effort change.
+- When sending a message to an existing thread, omit model and effort overrides so its current settings are
+  preserved.
+- When creating a thread, use the model and effort explicitly requested by the user. If none were
+  requested, preserve the configured default rather than selecting a stronger model.
+- Never upgrade Luna or Terra work to Sol automatically. If the current model appears insufficient, explain
+  why and ask the user to change it manually.
+- State any intentional model or effort override before launching a new thread.
