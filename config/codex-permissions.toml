@@ -1,0 +1,60 @@
+# Source-managed profile for normal autonomous local development.
+# Permission profiles replace legacy sandbox_mode/sandbox_workspace_write settings.
+default_permissions = "agentic-local"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+
+[permissions.agentic-local]
+description = "Workspace development with local state, network, and Auto-review outside the profile."
+extends = ":workspace"
+
+[permissions.agentic-local.workspace_roots]
+"~/dev" = true
+
+[permissions.agentic-local.filesystem]
+# Preserve the broad read behavior of the previous workspace-write default.
+":root" = "read"
+# Explicitly retain the temporary directories supplied by :workspace.
+":tmpdir" = "write"
+":slash_tmp" = "write"
+
+[permissions.agentic-local.filesystem.":workspace_roots"]
+"." = "write"
+".git" = "write"
+".codex" = "write"
+
+[permissions.agentic-local.filesystem."~/.local/state/claude-headless/jobs"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/session-env"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/projects"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/file-history"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/tasks"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/shell-snapshots"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/telemetry"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/debug"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.claude/cache"]
+"." = "write"
+
+[permissions.agentic-local.network]
+enabled = true
+# SSH and private benchmark hosts may resolve to RFC1918/local addresses.
+allow_local_binding = true
+
+[permissions.agentic-local.network.domains]
+# Package registries, GitHub, Claude, SSH, and operator-selected benchmark hosts.
+"*" = "allow"

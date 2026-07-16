@@ -1,0 +1,8 @@
+model = "gpt-5.6-luna"
+approval_policy = "never"
+approvals_reviewer = "user"
+sandbox_mode = "workspace-write"
+sandbox_workspace_write = { network_access = true }
+
+[history]
+persistence = "save-all"

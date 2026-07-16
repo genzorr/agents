@@ -29,6 +29,8 @@ catalog.json          # authoritative catalog of agents-owned assets (identity +
 codex/
   AGENTS.md           # global Codex instructions (generic agent behavior)
   skills/<id>/SKILL.md
+config/
+  codex-permissions.toml # source-managed named Custom permission profile
 claude/
   skills/<id>/SKILL.md
   commands/*.md       # generic slash commands (dual-review, plan)
@@ -39,6 +41,8 @@ claude/
 scripts/
   install-claude.sh   # install/uninstall/prune claude/ -> $CLAUDE_HOME (default ~/.claude)
   install-codex.sh    # install/uninstall/prune codex/ -> $CODEX_HOME (default ~/.codex)
+  install-codex-permissions.py # backup-preserving named Custom profile installer/rollback
+  test-codex-permissions.sh    # scratch-home profile/config parser check
   check_cross_repo_consistency.py # verifies Agents/Harness/session-harvester ownership split
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
   validate_skills.py  # SKILL.md frontmatter identity check (dir id == name, description present)
@@ -67,6 +71,11 @@ harness check
 # Dry-run / diff an install against a scratch home (never touches real ~/.codex / ~/.claude):
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --dry-run --diff
 CODEX_HOME="$PWD/.scratch-home/codex"  bash scripts/install-codex.sh  --dry-run --diff
+
+# Install the source-managed Codex Custom profile (backs up ~/.codex/config.toml first)
+python3 scripts/install-codex-permissions.py --dry-run
+python3 scripts/install-codex-permissions.py
+bash scripts/test-codex-permissions.sh
 ```
 
 ## Safety

@@ -37,6 +37,8 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 ## Sandbox Escalation
 
 - When an in-scope command fails with a likely sandbox denial (`EPERM`, `EACCES`, `Operation not permitted`, `Permission denied`, or `Read-only file system`), distinguish it from an application failure. If the action is non-destructive and still required, request one narrowly scoped escalation for the exact command. Do not broaden the command, invent a workaround, or retry a command that may have partially mutated state. If Auto-review denies the escalation, follow the denial or ask the user.
+- Do not turn a sandbox boundary into a separate workflow or human-approval gate. When the user has already authorized an in-scope action, do not ask them to authorize the same action again; execute it inside the sandbox or request the required sandbox escalation. Workflow stop gates are for explicit project/operator decisions, not for permissions that Codex already enforces.
+- Do not synthesize an approval gate in a run, plan, or handoff unless the user, authoritative project policy, or typed input explicitly requires it.
 
 ## Background and Long-Running Jobs
 
