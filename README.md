@@ -43,6 +43,7 @@ scripts/
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
   validate_skills.py  # SKILL.md frontmatter identity check (dir id == name, description present)
 docs/
+  destructive-command-guard.md # external cross-agent command guard decision and setup
   skill-authoring-principles.md   # craft rubric for writing/reviewing skills
   skill-installer-contract.md     # reusable per-repo installer contract (shared by all repos)
 docs/harness/          # this repo's own Harness task/slice/decision tracking state (not narrative docs)
