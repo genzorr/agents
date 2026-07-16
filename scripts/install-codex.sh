@@ -34,7 +34,7 @@ for arg in "$@"; do
         --help|-h)
             echo "Usage: $0 [--dry-run] [--diff] [--prune] [--uninstall]"
             echo "  --dry-run    Show what would be copied without writing"
-            echo "  --diff       Show diffs between source and installed files"
+            echo "  --diff       Show diffs between source and installed files; makes no changes"
             echo "  --prune      Remove repo-managed installed skills not present in the source tree"
             echo "  --uninstall  Remove ALL repo-owned install targets, regardless of source state"
             exit 0
@@ -42,6 +42,9 @@ for arg in "$@"; do
         *) echo "Unknown option: $arg"; exit 1 ;;
     esac
 done
+
+# --diff is observational: showing a diff must never also perform the install.
+if $SHOW_DIFF; then DRY_RUN=true; fi
 
 changed=0
 skipped=0

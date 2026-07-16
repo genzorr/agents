@@ -159,8 +159,9 @@ The `Workflow` tool description is authoritative for the full API. Non-obvious r
   parameterize (a research question, a path list, a config object) rather than editing the script per run.
 - If a workflow script invokes the upstream `claude` executable directly, every invocation must include
   an explicit `--model <model>` in argv. Never rely on Claude settings, environment variables, or an
-  inherited configured model. Prefer `claude-headless start --model <model>` for scripted Claude jobs;
-  this protection does not cover raw commands that bypass the wrapper.
+  inherited configured model. Prefer `claude-headless run --spec <spec.json>` for scripted Claude jobs,
+  with an explicit `"model"` declared inside the JSON spec; this protection does not cover raw commands
+  that bypass the wrapper.
 - Save a run's script from the `/workflows` view (`s`) to project or personal `.claude/workflows/`.
 - Pair repeatable workflows (triage, research, verification) with `/loop` for scheduled runs and `/goal`
   for a hard completion bar.

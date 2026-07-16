@@ -143,8 +143,9 @@ The script runs under Claude Code's `Workflow` runtime. Key rules to encode:
   config) rather than be edited per run.
 - If a workflow script invokes the upstream `claude` executable directly, every invocation must include
   an explicit `--model <model>` in argv. Never rely on Claude settings, environment variables, or an
-  inherited configured model. Prefer `claude-headless start --model <model>` for scripted Claude jobs;
-  this protection does not cover raw commands that bypass the wrapper.
+  inherited configured model. Prefer `claude-headless run --spec <spec.json>` for scripted Claude jobs,
+  with an explicit `"model"` declared inside the JSON spec; this protection does not cover raw commands
+  that bypass the wrapper.
 
 ## Prompt-only handoff (+ durable WORKFLOW.md)
 
