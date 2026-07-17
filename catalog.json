@@ -535,7 +535,7 @@
       "owner": "repos/harness",
       "manage": false,
       "assets": [
-        "all harness-* skills (codex and claude, 22 and 17 ids respectively)",
+        "all harness-* skills (codex and claude, 21 and 17 ids respectively)",
         "claude commands/execute.md",
         "claude agents/harness-task-bootstrap.md, agents/task-verifier.md",
         "codex hooks.json + hooks/stop.sh (Stop-gate) and hooks/notifications.sh (sourced as a sibling dependency of stop.sh, so it stays with Harness even though the Claude notification hook moved here)",

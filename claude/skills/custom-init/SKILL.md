@@ -12,13 +12,13 @@ description: Set up .claude/ folder for the current project using personal meta-
 
 ## Instructions
 
-You are setting up a `.claude/` folder for the current project using templates from `/home/example/configs/claude/`.
+You are setting up a `.claude/` folder for the current project using templates from `~/configs/claude/`.
 
 ### Step 1: Read Meta-Configuration
 
 Read these files to understand the setup process:
-1. `/home/example/configs/claude/CLAUDE.md` - Overview and decision trees
-2. `/home/example/configs/claude/workflow.md` - Detailed process
+1. `~/configs/claude/CLAUDE.md` - Overview and decision trees
+2. `~/configs/claude/workflow.md` - Detailed process
 
 ### Step 2: Discover Project
 
@@ -52,14 +52,14 @@ Use AskUserQuestion to clarify:
 ### Step 4: Select Templates
 
 Based on project type, read the appropriate example:
-- Python: `/home/example/configs/claude/examples/python.md`
-- C++: `/home/example/configs/claude/examples/cpp.md`
-- pybind11: `/home/example/configs/claude/examples/pybind11.md`
+- Python: `~/configs/claude/examples/python.md`
+- C++: `~/configs/claude/examples/cpp.md`
+- pybind11: `~/configs/claude/examples/pybind11.md`
 
 And templates:
-- `/home/example/configs/claude/templates/settings-json.md`
-- `/home/example/configs/claude/templates/claude-md.md`
-- `/home/example/configs/claude/templates/rules.md`
+- `~/configs/claude/templates/settings-json.md`
+- `~/configs/claude/templates/claude-md.md`
+- `~/configs/claude/templates/rules.md`
 
 ### Step 5: Create Files
 

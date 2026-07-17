@@ -7,8 +7,9 @@ Use model and effort as separate levers when creating workflows, delegated jobs,
 - Any script or workflow that invokes the upstream `claude` executable directly (including
   `claude -p` or `claude --print`) must pass an explicit `--model <model>` in argv for every
   invocation. Never rely on Claude settings, environment variables, or an inherited configured model
-  for scripted execution. `claude-headless` enforces this only for its own `start` command; commands
-  that bypass it are outside that protection.
+  for scripted execution. `claude-headless run --spec` requires a non-empty `model` in the
+  JobRequest and passes it through; callers that bypass that interface remain outside its request
+  validation.
 
 - **Fix context first.** If an answer is poor because the prompt, scope, files, tools, or skills were wrong,
   improve those before changing model or effort.

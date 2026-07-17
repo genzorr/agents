@@ -4,11 +4,11 @@ Render `diagram_type: "sequence"` JSON files into the standard Archify HTML
 template.
 
 ```bash
-node archify/renderers/sequence/render-sequence.mjs input.sequence.json output.html
+node renderers/sequence/render-sequence.mjs input.sequence.json output.html
 ```
 
 Run `npm install` once in the skill folder first — the renderer validates the
-input against `archify/schemas/sequence.schema.json` via ajv. Without it, the
+input against `schemas/sequence.schema.json` via ajv. Without it, the
 renderer prints a warning and skips schema validation; its own layout checks
 still run.
 
@@ -39,12 +39,12 @@ Sequence JSON files must set:
 The timeline scales with the viewBox height: a taller `meta.viewBox` buys more
 message room, a shorter one shrinks the readable band instead of clipping. A
 complete worked example lives at
-`archify/examples/cache-miss-request.sequence.json`.
+`examples/cache-miss-request.sequence.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/sequence.schema.json
+schemas/sequence.schema.json
 ```
 
 ## Layout budget

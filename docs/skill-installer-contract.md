@@ -246,7 +246,7 @@ them. This mechanism is repo-neutral:
 
 | Repo | Managed set | `validate` | `status`/`diff` | `install` | `uninstall` | `update` | `prune` |
 |---|---|---|---|---|---|---|---|
-| **agents** | everything in `agents/catalog.json` (generic personal/global skills, commands, subagents, rules, Codex `AGENTS.md`, Claude notification hook) | yes | yes | yes | yes | yes | yes |
+| **agents** | everything in `catalog.json` (generic personal/global skills, commands, subagents, rules, Codex `AGENTS.md`, Claude notification hook) | yes | yes | yes | yes | yes | yes |
 | **harness** | `harness-*` skills (both platforms), Claude `execute` command, Claude `harness-task-bootstrap`/`task-verifier` subagents, the Codex Stop-gate hook (`hooks.json` + `hooks/stop.sh` + `hooks/notifications.sh`, kept together because `stop.sh` sources `notifications.sh` as a sibling) | yes (`uv run python scripts/validate_skills.py`) | partial: `--dry-run --diff` reports source-vs-installed drift | yes | unsupported/deferred; not exposed by current scripts | re-run install | yes (`--prune`) |
 | **session-harvester** | `harvest-sessions` (Claude skill) only | yes | not applicable — single asset, `status` adds no value over checking one path | yes | yes | not applicable — re-run `install` | not applicable — single asset, delete manually or via `uninstall` |
 

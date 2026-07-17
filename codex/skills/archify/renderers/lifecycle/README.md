@@ -4,11 +4,11 @@ Render `diagram_type: "lifecycle"` JSON files into the standard Archify HTML
 template.
 
 ```bash
-node archify/renderers/lifecycle/render-lifecycle.mjs input.lifecycle.json output.html
+node renderers/lifecycle/render-lifecycle.mjs input.lifecycle.json output.html
 ```
 
 Run `npm install` once in the skill folder first — the renderer validates the
-input against `archify/schemas/lifecycle.schema.json` via ajv. Without it, the
+input against `schemas/lifecycle.schema.json` via ajv. Without it, the
 renderer prints a warning and skips schema validation; its own layout checks
 still run.
 
@@ -40,12 +40,12 @@ to the top phase band; `terminal` maps to the bottom outcome band; every other
 lane id (up to 4 lanes total) shares the single middle event band. The three
 band headers render from your lane labels — the middle band joins the labels of
 all event lanes with ` + `. A complete worked example lives at
-`archify/examples/agent-run.lifecycle.json`.
+`examples/agent-run.lifecycle.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/lifecycle.schema.json
+schemas/lifecycle.schema.json
 ```
 
 ## Layout budget

@@ -69,8 +69,9 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 Any script or workflow that invokes the upstream `claude` executable directly (including
 `claude -p` or `claude --print`) must pass an explicit `--model <model>` in argv for every
 invocation. Never rely on Claude settings, environment variables, or an inherited configured model
-for scripted execution. `claude-headless` enforces this only for its own `start` command; commands
-that bypass it are outside that protection.
+for scripted execution. `claude-headless run --spec` requires a non-empty `model` in the
+JobRequest and passes it through; callers that bypass that interface remain outside its request
+validation.
 
 - Prefer improving the prompt, scope, context, tools, and workflow before considering a more expensive
   model or higher reasoning effort.

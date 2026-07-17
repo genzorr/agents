@@ -4,11 +4,11 @@ Render `diagram_type: "workflow"` JSON files into the standard Archify HTML
 template.
 
 ```bash
-node archify/renderers/workflow/render-workflow.mjs input.workflow.json output.html
+node renderers/workflow/render-workflow.mjs input.workflow.json output.html
 ```
 
 Run `npm install` once in the skill folder first — the renderer validates the
-input against `archify/schemas/workflow.schema.json` via ajv. Without it, the
+input against `schemas/workflow.schema.json` via ajv. Without it, the
 renderer prints a warning and skips schema validation; its own layout checks
 still run.
 
@@ -18,7 +18,7 @@ or falls back to `workflow.html` in the current working directory.
 After rendering, run the artifact checker:
 
 ```bash
-node archify/scripts/check-render-output.mjs output.html
+node scripts/check-render-output.mjs output.html
 ```
 
 It catches final-SVG issues that are easiest to see in a browser: non-finite
@@ -50,12 +50,12 @@ Workflow JSON files must set:
 Omit `meta.viewBox` for the common case: the width is fixed at 720 and the
 height is derived from the lane count, so lanes and legend always fit. A
 complete worked example lives at
-`archify/examples/agent-tool-call.workflow.json`.
+`examples/agent-tool-call.workflow.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/workflow.schema.json
+schemas/workflow.schema.json
 ```
 
 ## Layout budget
