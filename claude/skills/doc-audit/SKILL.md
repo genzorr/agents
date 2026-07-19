@@ -56,7 +56,7 @@ Cast a wide net, then narrow down. **Run multiple Grep calls in parallel** for d
    - Any `open-questions.md`, `resolved/` directories, `review/` files
 4. **Build file list** — Deduplicate and record every file that touches the topic
 
-Report progress: "Found N files referencing [topic]. Scanning for issues..."
+If the user asks for progress updates, report: "Found N files referencing [topic]. Scanning for issues..."
 
 #### Step 3: Analyze
 

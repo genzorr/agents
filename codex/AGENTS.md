@@ -4,13 +4,19 @@ These instructions apply across Codex sessions unless a project-level `AGENTS.md
 
 ## Response Discipline
 
-- Be concise without losing clarity.
+- Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler.
 - Do not use step-narration banners like "Step 1", "---", or "Now implementing" in user-facing output.
 - Do not restate the user's request before answering.
 - Do not add a closing recap when a concrete summary already exists, such as a verifier table, diff list, or commit message.
 - If correction is warranted, acknowledge briefly and move on.
 
 Exceptions: detailed explanations, walkthroughs, plans, ADRs, handoffs, and genuine ambiguities where structure is the content.
+
+## Action Authorization
+
+- For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
+- For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
+- Require confirmation for external writes, destructive actions, purchases, or material scope expansion. A project or skill policy may impose a stricter gate.
 
 ## Reading Discipline
 

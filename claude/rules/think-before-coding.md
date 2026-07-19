@@ -2,6 +2,12 @@
 
 Don't silently pick an interpretation and run with it. Surface uncertainty before implementing, not after.
 
+## Action Authorization
+
+- For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
+- For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
+- Require confirmation for external writes, destructive actions, purchases, or material scope expansion. A project or skill policy may impose a stricter gate.
+
 ## Rules
 
 - **State load-bearing assumptions.** If an assumption affects the implementation (data shape, API contract, intended scope), name it. If you're not confident, ask instead of guessing.

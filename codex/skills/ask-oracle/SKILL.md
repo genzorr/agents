@@ -1,6 +1,6 @@
 ---
 name: ask-oracle
-description: Use the Oracle CLI to prepare a neutral source bundle for GPT-5.5 Pro / Extended or another GPT Pro model from repository files, documents, papers, logs, research notes, or a curated context pack. Use when the user wants an Oracle-ready bundle, manual ChatGPT Web handoff, API/browser Oracle consult, or context pack instead of manually attaching files.
+description: Use the Oracle CLI to prepare a neutral source bundle for GPT-5.6 or another GPT Pro model from repository files, documents, papers, logs, research notes, or a curated context pack. Use when the user wants an Oracle-ready bundle, manual ChatGPT Web handoff, API/browser Oracle consult, or context pack instead of manually attaching files.
 ---
 
 # Ask Oracle
@@ -135,7 +135,7 @@ Use this structure and tailor the lists to the task:
 ```markdown
 # Task
 
-[Precise task for GPT-5.5 Pro / Extended.]
+[Precise task for GPT-5.6 or another GPT Pro model.]
 
 # Context
 

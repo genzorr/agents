@@ -1,6 +1,6 @@
 ---
 name: prepare-dynamic-workflow
-description: Decide whether a task warrants a Claude Code dynamic workflow, then author, run, save, or reuse one — or produce a copyable handoff prompt backed by a durable WORKFLOW.md. Reach for it on research and investigations, large migrations, repo-wide audits/sweeps, scaled sorting/triage, adversarial verification, and multi-angle planning — work that benefits from many isolated agents or cross-checking. Not for small, single-context, single-pass-trustworthy tasks.
+description: Decide whether a task warrants a Claude Code dynamic workflow, then author, run, save, or reuse a durable workflow artifact or copyable handoff. Use for research/investigation, large migrations, repo-wide audits/sweeps, scaled sorting/triage, adversarial verification, and multi-angle planning. Not for small, single-context tasks.
 argument-hint: "[task/goal; author | run | save | find | prompt-only; constraints, timebox]"
 model: opus
 effort: high

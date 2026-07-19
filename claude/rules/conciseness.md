@@ -1,6 +1,6 @@
 # Conciseness
 
-Reduce tokens without losing clarity. These rules apply to every output unless the user explicitly asks for detail.
+Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler unless the user explicitly asks for detail.
 
 ## Bans
 
