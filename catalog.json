@@ -91,6 +91,22 @@
       "counterpart": "cross-name twin: claude custom-init (same role: project init; no same-name match)"
     },
     {
+      "id": "design-experiment",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/design-experiment/SKILL.md",
+        "claude": "claude/skills/design-experiment/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/design-experiment",
+        "claude": "~/.claude/skills/design-experiment"
+      },
+      "counterpart": "identical",
+      "tags": ["domain:experiment-workflow"]
+    },
+    {
       "id": "diagnose",
       "kind": "skill",
       "platforms": ["codex", "claude"],
@@ -178,7 +194,7 @@
         "codex": "~/.codex/skills/goal-prompt",
         "claude": "~/.claude/skills/goal-prompt"
       },
-      "counterpart": "twin (169 vs 151 ln)"
+      "counterpart": "twin (199 vs 181 ln)"
     },
     {
       "id": "grill-with-docs",
@@ -285,6 +301,22 @@
         "claude": "~/.claude/skills/review-change"
       },
       "counterpart": "twin (differs)"
+    },
+    {
+      "id": "review-experiment",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/review-experiment/SKILL.md",
+        "claude": "claude/skills/review-experiment/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/review-experiment",
+        "claude": "~/.claude/skills/review-experiment"
+      },
+      "counterpart": "identical",
+      "tags": ["domain:experiment-workflow"]
     },
     {
       "id": "session-handoff",

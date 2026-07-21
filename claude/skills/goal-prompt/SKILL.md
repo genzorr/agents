@@ -91,6 +91,24 @@ Before writing the prompt, inspect enough local context to make it project-speci
    - do not confuse Claude effort with Codex reasoning effort or the Research Goal Mode "minimum effort bar".
 13. Keep gathering proportional. Do not re-audit the whole project when the user already supplied enough context. The goal is a strong handoff prompt, not full implementation.
 
+## Frozen Protocol composition
+
+When the seed describes a decision-bearing experiment, the handoff must carry the
+frozen Protocol reference (`protocol`, `protocol_sha256`, and its path) plus
+routing and stop gates. It must not copy or regenerate the Protocol's question,
+baseline, metrics, commands, artifacts, gates, abort conditions, or deviation
+policy. Those remain owned by `design-experiment` and the frozen Protocol.
+
+Label an exploratory handoff as exploratory and state that it makes no
+confirmatory claim and grants no Area Brief or adoption authority. A handoff
+cannot silently promote exploratory work to confirmatory/regression work; route
+that transition through a new frozen Protocol from `design-experiment`.
+
+`goal-prompt` only carries identity and routing. It never writes a Readout,
+mutates an Area Brief, creates an ADR, or authorizes a default. Completed runs
+route to `review-experiment`, which writes or validates the one canonical
+Readout when Harness is present.
+
 ## Output
 
 Return exactly one fenced Markdown block, plus a one-line lead-in if useful. Use `text` as the fence language so the app renders a copy button. Keep the generated prompt brief; do not copy the full contents of the goal spec into it. Substitute the actual goal-spec path into the prompt.

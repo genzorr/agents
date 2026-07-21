@@ -25,6 +25,17 @@ If the branch is ambiguous and the user is not available, choose the branch that
 - Surface relevant state directly in the prototype output or UI.
 - When the question is answered, record the decision in the conversation, issue, ADR, or task notes, then delete or absorb the prototype.
 
+## Experiment composition
+
+- A prototype is feasibility work only. It may explore an idea, but it cannot
+  make a confirmatory or regression claim, write a traveling or canonical
+  Readout, mutate the singleton Area Brief, promote legacy `E-*` knowledge, or
+  authorize adoption/defaults.
+- Make the feasibility question and its limits explicit in the output. If the
+  result justifies a decision-bearing experiment, route the next step to
+  `design-experiment` to freeze a Protocol; do not create Protocol fields or a
+  Readout inside the prototype.
+
 ## Boundaries
 
 - Do not present prototype code as production-ready.
