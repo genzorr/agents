@@ -29,19 +29,33 @@ Pick exactly one `mode` and hold the Protocol to it:
 
 If the user's request doesn't make the mode obvious, ask one concise question naming the three options rather than guessing.
 
+## Research design gate
+
+Before freezing, make the design decision-bearing and interpretable. Resolve the following; do not add fields to the portable contract—encode them in the existing fields as indicated:
+
+- **Decision and claim boundary:** state what decision the result can inform, the present stage (sanity, research, representative, or scale), and what it cannot establish. Put this in `question` and the promotion/next-stage rule in `gates`.
+- **Mechanism and falsifiers:** state the expected mechanism, credible competing explanations, and observations that would count against it in `question`.
+- **Design structure:** identify the experimental unit, factors and levels, control/comparator, and material sources of variation in `units`.
+- **Metric roles:** prefix every metric with `primary:`, `guardrail:`, `diagnostic:`, or `resource:`. Put practical decision thresholds—not merely statistical detectability—in `gates`.
+- **Baseline and variation:** use `baseline_ref` for an immutable, reproducible baseline manifest that names its stage/tier. Put the planned seeds, trials, tasks, datasets, environments, and their coverage/count rationale in `units`; `run_set` holds the corresponding closed run/commit references once assigned.
+- **Provenance and verification:** freeze source/data/config/environment identifiers in `commands`; require raw outputs, provenance, and applicable validation outputs in `artifacts`.
+- **Analysis and validity:** predeclare aggregation, uncertainty treatment, exclusions, missing-run handling, and important validity threats in `deviation_policy`. Use `abort_conditions` for invalid, unsafe, futile, or over-budget execution—not for stopping when results look convenient.
+
+A confirmatory or regression Protocol must not freeze while any applicable item is unresolved. An exploratory Protocol may mark a genuine unknown explicitly, but its `deviation_policy` and `gates` must prevent silent promotion of the result into a stronger claim.
+
 ## Steps
 
 1. **Determine mode.** exploratory, confirmatory, or regression (see above). This drives how strict `gates` must be.
 2. **Gather each frozen field in `templates/protocol.md`**, one at a time. Do not accept a field as complete until it is concrete enough that a different agent could execute `commands` and check `gates` without asking a follow-up question:
-   - `question` — the one question this experiment answers.
+   - `question` — the decision, bounded question, expected mechanism, and credible alternatives/falsifiers.
    - `baseline_ref` — the stable id of a `templates/baseline-manifest.md` instance (create it — see step 5 — before finishing this field).
-   - `units` — the unit(s) of measurement/analysis.
-   - `metrics` — exact metric names this Protocol reports.
-   - `gates` — one exact pass/fail (or non-regression) threshold per metric or decision.
-   - `commands` — exact commands that produce the metrics and artifacts. Freeze these; do not run them here.
-   - `artifacts` — output paths/files the commands must produce.
+   - `units` — units of analysis plus factors, levels, control, planned variation, and the rationale for coverage/counts.
+   - `metrics` — exact, role-prefixed metric names this Protocol reports.
+   - `gates` — exact practical thresholds, guardrails, permitted claim boundary, and next-stage rule.
+   - `commands` — exact commands plus source, data, config, and environment identities that produce the metrics and artifacts. Freeze these; do not run them here.
+   - `artifacts` — raw output, provenance, and applicable validation paths/files the commands must produce.
    - `abort_conditions` — conditions that stop execution early.
-   - `deviation_policy` — what counts as an allowed deviation during execution versus what forces a new Protocol.
+   - `deviation_policy` — analysis, uncertainty, exclusions, missing-run handling, validity threats, and what counts as an allowed deviation versus what forces a new Protocol or weaker claim.
 3. **Assign `run_set`.** The closed list of run/commit references this Protocol declares as belonging to it. An empty list is valid at freeze time if runs haven't been scheduled yet, but the list itself is still closed — it is not appended to later; a Protocol successor is created instead.
 4. **Compute `protocol_sha256`.** Build the canonical object below in this exact key order, serialize with no extra whitespace, and hash it. Run this via a shell tool — do not hand-compute the digest:
 

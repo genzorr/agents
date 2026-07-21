@@ -10,7 +10,8 @@
 
 ## description
 
-<!-- What this baseline represents and why it is the right comparison point. -->
+<!-- What this baseline represents, why it is the right comparison point, and its tier:
+     sanity, research, representative, or scale. -->
 
 ## metrics_at_baseline
 

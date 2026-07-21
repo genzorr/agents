@@ -13,7 +13,8 @@
 
 ## question
 
-<!-- The one question this experiment answers. -->
+<!-- Decision, bounded question/claim, expected mechanism, credible competing explanations,
+     and observations that would falsify the explanation. -->
 
 ## baseline_ref
 
@@ -21,44 +22,47 @@
 
 ## units
 
-<!-- Unit(s) of measurement/analysis. Flat list. -->
+<!-- Unit(s) of analysis; factors/levels; control; sources of variation; planned seeds, trials,
+     tasks, datasets, and environments; and the coverage/count rationale. Flat list. -->
 
 -
 
 ## metrics
 
-<!-- Exact metric names this Protocol reports. Flat list. -->
+<!-- Exact metric names, prefixed primary:, guardrail:, diagnostic:, or resource:. Flat list. -->
 
 -
 
 ## gates
 
-<!-- One exact pass/fail (or non-regression) threshold per metric or decision, decided before any run. -->
+<!-- Practical thresholds and guardrails, permitted claim boundary, and next-stage rule,
+     all decided before any run. -->
 
 -
 
 ## commands
 
-<!-- Exact commands that produce the metrics and artifacts below. design-experiment freezes
-     these; it never runs them. -->
+<!-- Exact commands plus source/data/config/environment identities that produce the metrics
+     and artifacts below. design-experiment freezes these; it never runs them. -->
 
 -
 
 ## artifacts
 
-<!-- Output paths/files the commands above must produce. -->
+<!-- Raw-output, provenance, and applicable validation paths/files the commands above must produce. -->
 
 -
 
 ## abort_conditions
 
-<!-- Conditions that stop execution early. -->
+<!-- Invalid, unsafe, futile, or over-budget conditions that stop execution early. -->
 
 -
 
 ## deviation_policy
 
-<!-- What counts as an allowed deviation during execution, and what instead forces a new Protocol. -->
+<!-- Predeclared aggregation, uncertainty treatment, exclusions, missing-run handling, validity
+     threats, and what forces a new Protocol or weaker claim. -->
 
 ## run_set
 
