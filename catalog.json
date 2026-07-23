@@ -243,6 +243,21 @@
       "counterpart": "twin (79 vs 175 ln)"
     },
     {
+      "id": "logging-optimize",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/logging-optimize/SKILL.md",
+        "claude": "claude/skills/logging-optimize/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/logging-optimize",
+        "claude": "~/.claude/skills/logging-optimize"
+      },
+      "counterpart": "identical"
+    },
+    {
       "id": "prepare-dynamic-workflow",
       "kind": "skill",
       "platforms": ["codex", "claude"],
