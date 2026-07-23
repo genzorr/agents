@@ -1,27 +1,21 @@
 ---
 name: thermo-nuclear-code-quality-review
-description: Run an extremely strict maintainability review for structural code quality, abstraction quality, file sprawl, spaghetti branching, type-boundary drift, and missed simplification opportunities. Use when the user asks for a thermo-nuclear or thermonuclear review, harsh code-quality audit, deep maintainability review, or ambitious structural review of a branch, PR, diff, or implementation.
+description: Apply an explicitly requested thermo-nuclear structural-maintainability lens to a code review. Use only when the user asks for a thermo-nuclear or thermonuclear structural review, harsh maintainability audit, or deep simplification critique; `review-change` remains the general review driver.
 ---
 
 # Thermo-Nuclear Code Quality Review
 
-Review the change as a strict maintainability gate. Default to read-only review; do not edit code unless the user explicitly asks to fix findings.
+Apply this lens to a review driven by `review-change` or another active project review driver. If no review driver is active, start or use `review-change` as the driver, then apply this lens. Default to read-only review; do not edit code unless the user explicitly asks to fix findings.
 
-This skill is narrower than `review-change`: prioritize structure, simplicity, locality, abstraction quality, and long-term maintainability. Still flag correctness risk when it follows from tangled structure, unclear invariants, or leaky boundaries.
+This skill adds structural-maintainability checks; it does not resolve the target, own the review lifecycle, replace general correctness review, or define a separate final output contract. The active driver owns those responsibilities.
 
-## Workflow
+## Structural lens
 
-1. Resolve the review target:
-   - explicit PR URL/number, branch, commit range, path list, or user-provided diff;
-   - otherwise current working tree diff;
-   - otherwise current branch compared to the merge base with the default upstream/base branch.
-2. If there is no discoverable review target, ask one concise question for the target.
-3. Read project instructions, relevant docs/ADRs, tests, and nearby code needed to understand the shape of the change.
-4. Inspect the diff first, then read surrounding files and callers for changed behavior.
-5. Measure file-size pressure when the diff adds substantial code. Treat a source file crossing from below 1000 lines to above 1000 lines as a presumptive decomposition issue.
-6. Search for existing canonical helpers, modules, ownership layers, state models, and type contracts before accepting new bespoke logic.
-7. Look for simplification moves that preserve behavior while deleting concepts, branches, modes, wrappers, or orchestration steps.
-8. Produce findings first, ordered by severity and maintainability impact. Prefer a few high-conviction findings over a long list of cosmetic notes.
+- Read the project instructions, relevant docs/ADRs, tests, and nearby code needed to understand the shape of the change.
+- Inspect the diff and surrounding callers for structural consequences. Measure file-size pressure when the driver is reviewing substantial additions; a source file crossing from below 1000 lines to above 1000 lines is a presumptive decomposition issue.
+- Search for existing canonical helpers, modules, ownership layers, state models, and type contracts before accepting new bespoke logic.
+- Look for simplification moves that preserve behavior while deleting concepts, branches, modes, wrappers, or orchestration steps.
+- Feed a few high-conviction structural findings and concrete remedies back through the driver's output contract.
 
 ## Review Standards
 
@@ -64,25 +58,4 @@ When a finding is valid, suggest the cleaner shape:
 - make type boundaries explicit so fallback and casting paths can be removed;
 - parallelize independent work or group related updates when that makes the orchestration easier to reason about.
 
-## Output
-
-Lead with findings:
-
-```markdown
-Findings:
-- [P1] Title
-  File: path/to/file.ext:123
-  Problem: What structural issue the change introduces or preserves.
-  Impact: Why this makes the codebase harder to change, test, or reason about.
-  Cleaner shape: Concrete restructuring direction.
-  Verification: Focused checks that should prove behavior is preserved.
-
-Open questions:
-- ...
-
-Verification:
-- Ran: ...
-- Not run: ... because ...
-```
-
-If there are no blocking structural issues, say that clearly and note any residual review or verification gaps. Do not approve merely because behavior appears correct if there is an obvious simpler structure, unjustified file-size explosion, spaghetti branching, leaky boundary, or hacky abstraction.
+When active, report structural findings through the driver's output contract. Do not issue a second full-review verdict; if no blocking structural issue is found, say so within the driver's review result and preserve its verification gaps.

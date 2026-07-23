@@ -38,7 +38,7 @@ If there is no discoverable diff, PR, branch comparison, or path scope, ask one 
 
 ## Optional Deep Review
 
-Inline review by this agent is the right default. Use independent reviewer passes only when the user explicitly asks for multi-agent, deep, parallel, or adversarial review and the runtime supports it — do not fan them out on your own just because a change looks substantial. When asked, run them with a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or via cross-model review. A project-mandated review gate still applies where a project defines one: in a Harness repo, satisfy the review-independence ladder the project requires (`/Users/example/dev/os/repos/harness/docs/harness-runs-operator-guide.md` → *Review Independence*), and note residual risk if a required pass is unavailable.
+Inline review by this agent is the right default. Use independent reviewer passes only when the user explicitly asks for multi-agent, deep, parallel, or adversarial review, or when active project instructions require them — do not fan them out on your own just because a change looks substantial. When a pass is required, use a fresh `code-reviewer` subagent that is not given the implementer's plan/reasoning, or another project-approved review surface, and note residual risk if it is unavailable.
 
 Recommended independent lenses:
 

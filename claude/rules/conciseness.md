@@ -2,6 +2,10 @@
 
 Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler unless the user explicitly asks for detail.
 
+Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Apply this to responses, documentation, commit messages, and pull-request descriptions. Prefer precision over blanket style bans: state claims directly; do not manufacture a “not X but Y” contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are acceptable when they are the clearest form.
+
+Keep delegated or subagent prompts focused: include only the task and context the worker needs; omit builder reasoning, implementation narrative, and logs of failed attempts.
+
 ## Bans
 
 - **No step-narration banners** in user-facing output: "Step 1: Plan", "---", "Now implementing", "Moving on to X". Structure your own reasoning internally; don't announce it.
@@ -9,12 +13,6 @@ Lead with the conclusion. Preserve necessary evidence, material caveats, decisio
 - **No restating** the user's request back at them before answering.
 - **No closing recap** when a concrete summary already exists (verifier table, diff list, commit message). Don't paraphrase what the user just saw.
 - **No apology fillers**: "You're right, I should have...". Acknowledge briefly if correction is warranted, then move on.
-
-## Caps
-
-- `harness-task-checkpoint` / `harness-task-done` draft: ≤ 200 words.
-- `/execute` final confirm: ≤ 1 AC table + 3 lines of prose.
-- Subagent prompts: include only what the subagent needs (task file, diff, conventions, plan / AC-mapping table if the subagent expects it) — no builder reasoning, no implementation narrative, no log of what was tried.
 
 ## Exceptions
 

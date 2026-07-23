@@ -349,6 +349,21 @@
       "counterpart": "twin (differs)"
     },
     {
+      "id": "systemic-diagnosis",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/systemic-diagnosis/SKILL.md",
+        "claude": "claude/skills/systemic-diagnosis/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/systemic-diagnosis",
+        "claude": "~/.claude/skills/systemic-diagnosis"
+      },
+      "counterpart": "identical"
+    },
+    {
       "id": "thermo-nuclear-code-quality-review",
       "kind": "skill",
       "platforms": ["codex", "claude"],

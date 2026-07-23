@@ -65,7 +65,7 @@ is_repo_managed_skill() {
     local skill_name="$1"
 
     case "$skill_name" in
-        architecture-review|archify|ask-chatgpt-pro|ask-oracle|babysit-pr|codex-project-init|design-experiment|diagnose|distill-source|doc-audit|docker-optimize|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|prepare-dynamic-workflow|prototype|research-prompt|review-change|review-experiment|session-handoff|skill-lifecycle|thermo-nuclear-code-quality-review|tdd|zoom-out) return 0 ;;
+        architecture-review|archify|ask-chatgpt-pro|ask-oracle|babysit-pr|codex-project-init|design-experiment|diagnose|distill-source|doc-audit|docker-optimize|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|prepare-dynamic-workflow|prototype|research-prompt|review-change|review-experiment|session-handoff|skill-lifecycle|systemic-diagnosis|thermo-nuclear-code-quality-review|tdd|zoom-out) return 0 ;;
         *) return 1 ;;
     esac
 }
