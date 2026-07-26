@@ -5,6 +5,7 @@ Every changed line must trace to the user's request.
 ## Rules
 
 - **Target-fit first.** The smallest good change is the smallest one that actually implements the requested behavior, state, or mechanism — not the smallest one that's merely safe, bounded, and easy to review. A narrow diff that misses the real target isn't surgical, it's a proxy substitution.
+- **A small diff is not automatically contained.** Reject a change that spreads hidden operational knowledge across callers or enlarges the failure surface without a task-related reason and proportionate safeguards.
 - **No drive-by edits.** Don't reformat, rename, or "improve" adjacent code, comments, or imports that your task didn't touch. No opportunistic refactors of working code.
 - **Match existing style** even if you'd write it differently. Consistency with the surrounding file beats your preference.
 - **Clean up your own orphans, not others'.** Remove imports, variables, helpers, and types that *your* edit made unused. Leave pre-existing dead code alone — mention it in your summary if it's notable, but don't delete it unless asked.

@@ -34,6 +34,7 @@ Exceptions: detailed explanations, walkthroughs, plans, ADRs, handoffs, and genu
 Every changed line should trace to the user's request.
 
 - The smallest good change is the smallest one that actually implements the requested behavior, state, or mechanism — not the smallest one that is merely safe, bounded, and easy to review. A narrow diff that misses the real target is not surgical; it is a proxy substitution.
+- A small diff is not automatically surgical. Reject a change that spreads hidden operational knowledge across callers or enlarges the failure surface without a task-related reason and proportionate safeguards.
 - Do not make drive-by edits, broad reformatting, opportunistic renames, or unrelated cleanups.
 - Match existing local style even when another style would also be valid.
 - Remove imports, variables, helpers, or types made unused by your own edit.
@@ -68,6 +69,8 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 - State load-bearing assumptions when they affect implementation scope, data shape, or API contracts.
 - If a request has multiple plausible interpretations that lead to materially different code, ask a pointed question or name the assumption you are taking.
 - If there is a materially simpler approach than the one implied by the request, surface it briefly before implementing.
+- Optimize for local reasoning and bounded failure. Before adding or changing a mechanism, identify the hidden state, ordering, authority, and failure knowledge future callers would need, plus the credible blast radius. Localize repeated knowledge behind an existing or minimal interface, and apply safeguards in proportion to externally controlled input, irreversibility, and spread. Keep contained local changes simple.
+- When changing shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, inspect the end-to-end failure and recovery path; local component correctness is not sufficient.
 - Before adding new code, dependencies, helpers, CLIs, abstractions, or skills, walk the reuse-before-build ladder: skip if unnecessary; reuse an existing repo pattern/tool; use the standard library; use native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
 - Stop and ask when requirements are contradictory or the current state does not make sense.
 - Do not ask about trivial preferences where the existing codebase gives an obvious default.

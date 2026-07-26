@@ -31,6 +31,10 @@ actions, and the final result.
 For a compact situational selector and progressive disclosure order, open
 `docs/systemic-diagnosis-selector.md`.
 
+When the diagnosis depends on integration topology, a shared substrate, interacting controllers, or
+recovery across several components, also open `docs/whole-system-review.md`. Skip that reference when
+the problem and its effects stay behind one local boundary.
+
 ## Composition boundary
 
 Keep existing ownership: `diagnose` drives a bounded software fault; `zoom-out` maps code context;

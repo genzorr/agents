@@ -32,7 +32,8 @@ Use these terms consistently in findings.
 1. Read the user's concern and identify the target area. If this is a harness task, read `harness snapshot`, the active task, and the parent slice.
 2. Read relevant docs, findings, ADRs, glossary/context docs, and tests. Respect existing decisions unless there is concrete friction.
 3. Trace callers, data flow, configuration, side effects, and verification seams. Use Grep/Glob first; avoid broad rewrites.
-4. Look for signals:
+4. When the target area changes integration topology, a shared substrate, cross-component coordination, or failure containment, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local refactors.
+5. Look for signals:
    - callers must understand too much implementation detail;
    - one behavior is scattered across many files;
    - tests need private helpers, mocks of internals, or duplicated setup;
@@ -40,12 +41,12 @@ Use these terms consistently in findings.
    - a wrapper adds vocabulary but no leverage;
    - a seam has only one real adapter;
    - adding the next feature would require editing many callers.
-5. Classify dependency shape for each candidate:
+6. Classify dependency shape for each candidate:
    - **In-process**: pure computation or in-memory state. Deepen and test through the new interface.
    - **Local-substitutable**: local test stand-ins exist, such as temp files or in-memory stores. Keep the seam internal and test with the stand-in.
    - **Remote but owned**: define a port at the seam, with production and in-memory adapters.
    - **True external**: inject a port for the third-party dependency and use a mock/test adapter.
-6. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
+7. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
 
 ## Output
 

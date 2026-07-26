@@ -47,8 +47,9 @@ Ask the operator before:
 
 ```bash
 python3 scripts/validate_catalog.py            # catalog <-> source + allowlist parity
-python3 scripts/validate_skills.py             # SKILL.md frontmatter identity
+python3 scripts/validate_skills.py             # SKILL.md frontmatter + traveling doc references
 python3 scripts/check_cross_repo_consistency.py # cross-repo ownership split
+python3 -m unittest discover -s tests          # instruction behavior contracts
 bash scripts/test-prune-safety.sh              # scratch prune/uninstall ownership guard
 harness check                                  # Harness state consistency
 CLAUDE_HOME=... bash scripts/install-claude.sh --dry-run --diff   # scratch-home dry run

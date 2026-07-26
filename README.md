@@ -45,7 +45,7 @@ scripts/
   test-codex-permissions.sh    # scratch-home profile/config parser check
   check_cross_repo_consistency.py # verifies Agents/Harness/session-harvester ownership split
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
-  validate_skills.py  # SKILL.md frontmatter identity check (dir id == name, description present)
+  validate_skills.py  # SKILL.md frontmatter identity + traveling-doc references
 docs/
   destructive-command-guard.md # external cross-agent command guard decision and setup
   skill-authoring-principles.md   # craft rubric for writing/reviewing skills
@@ -63,6 +63,7 @@ per-platform variants are preserved, never flattened.
 python3 scripts/validate_catalog.py
 python3 scripts/validate_skills.py
 python3 scripts/check_cross_repo_consistency.py
+python3 -m unittest discover -s tests
 bash scripts/test-prune-safety.sh
 
 # Consistency check of this repo's Harness state:

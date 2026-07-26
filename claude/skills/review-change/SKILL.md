@@ -33,8 +33,9 @@ If there is no discoverable diff, PR, branch comparison, or path scope, ask one 
 3. Inspect the diff first, then read full surrounding files for changed behavior.
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
 5. Run cheap, relevant read-only checks when practical, such as existing tests/lint for touched areas. Do not run destructive, slow, or environment-mutating commands unless the user asked.
-6. Review for the checklist below.
-7. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
+6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local changes.
+7. Review for the checklist below.
+8. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
 
 ## Optional Deep Review
 
