@@ -66,6 +66,7 @@ Read each file and check for:
 - **Gaps** — Topic is mentioned but not explained; a section header exists but content is missing or shallow; a component is referenced but never documented.
 - **Stale references** — Points to a file/section that was renamed, moved, or deleted; references a decision as "open" when it was resolved; cites outdated terminology.
 - **Unresolved question mismatches** — Marked as open in open-questions but actually resolved elsewhere (or vice versa); resolved/ directory has an answer but the main doc still says "TBD".
+- **Context-file drift** — When the topic touches `CLAUDE.md`, `AGENTS.md`, or `.claude/rules/`, check these against `docs/context-file-authoring.md`: hand-maintained `CLAUDE.md`/`AGENTS.md` copies that have diverged, and context files describing an architecture the code has moved past. Both are high severity — a context file outranks the code in an agent's attention, so a stale one produces confidently wrong work.
 
 For each finding, note:
 - File path and approximate line number

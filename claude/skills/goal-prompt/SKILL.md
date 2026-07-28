@@ -82,13 +82,9 @@ Before writing the prompt, inspect enough local context to make it project-speci
    - final accounting: require a P0/P1 board with done/blocked/deferred status, commits, measurements, verification, benchmark paths, and remaining unsafe claims.
 11. For timeboxed autonomous research, include a `Primary Work / Fallback Policy` section in the GOAL file. It must set a concrete minimum effort bar before any fallback work, and hygiene fallback is disabled unless the user explicitly allowed it.
 12. Add model/effort recommendations to the goal spec when the target run is long, expensive,
-    quality-sensitive, or likely to spawn Claude workers. Keep them recommendations, not hard requirements,
-    unless the user explicitly named settings:
-   - model = capability: recommend stronger models for ambiguity, unfamiliar domains, subtle bugs,
-     architecture, security-sensitive reasoning, and final review; cheaper models for precise mechanical work;
-   - effort = thoroughness: recommend higher effort when success depends on reading broadly, trying multiple
-     steps, running tests, or double-checking; use default effort when unsure;
-   - do not confuse Claude effort with Codex reasoning effort or the Research Goal Mode "minimum effort bar".
+    quality-sensitive, or likely to spawn Claude workers, following `docs/model-and-effort.md`. Keep them
+    recommendations, not hard requirements, unless the user explicitly named settings. Note that the Research
+    Goal Mode "minimum effort bar" is a different concept from Claude effort.
 13. Keep gathering proportional. Do not re-audit the whole project when the user already supplied enough context. The goal is a strong handoff prompt, not full implementation.
 
 ## Frozen Protocol composition

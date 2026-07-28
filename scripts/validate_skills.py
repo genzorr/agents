@@ -16,8 +16,9 @@ Hard failures (exit 1):
 Warnings (do not fail):
     - cross-tree presence parity — a skill present in one tree but not the
       other. Informational because some skills legitimately live in one tree
-      only (e.g. the `codex-project-init` / `custom-init` project-init twins
-      are a deliberate cross-name counterpart gap, not a parity bug).
+      only (e.g. `codex-project-init` is Codex-only; the Claude `custom-init`
+      twin was removed, and Claude project init is handled inline against
+      `docs/context-file-authoring.md`).
     - explicitly known example-only doc placeholders that are not meant to
       resolve or travel.
 

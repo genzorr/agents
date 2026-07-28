@@ -88,7 +88,7 @@
       "install_target": {
         "codex": "~/.codex/skills/codex-project-init"
       },
-      "counterpart": "cross-name twin: claude custom-init (same role: project init; no same-name match)"
+      "counterpart": "codex-only: the Claude custom-init twin was removed; Claude project init is handled inline using docs/context-file-authoring.md"
     },
     {
       "id": "design-experiment",
@@ -423,19 +423,6 @@
         "claude": "~/.claude/skills/zoom-out"
       },
       "counterpart": "twin (differs)"
-    },
-    {
-      "id": "custom-init",
-      "kind": "skill",
-      "platforms": ["claude"],
-      "owner": "agents",
-      "source": {
-        "claude": "claude/skills/custom-init/SKILL.md"
-      },
-      "install_target": {
-        "claude": "~/.claude/skills/custom-init"
-      },
-      "counterpart": "cross-name twin: codex codex-project-init (same role: project init; no same-name match)"
     }
   ],
   "commands": [

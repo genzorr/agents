@@ -14,6 +14,14 @@ These instructions apply across Codex sessions unless a project-level `AGENTS.md
 
 Exceptions: detailed explanations, walkthroughs, plans, ADRs, handoffs, and genuine ambiguities where structure is the content.
 
+## Line Breaks In Files
+
+Never hard-wrap prose to a column width. One paragraph, bullet, or table row is one line, however long. This applies to Markdown, comments, docstrings, and commit message bodies.
+
+No formatter in these repos wraps Markdown, so every wrapped line is an authoring choice, and wrapping actively breaks things: a phrase split across a newline plus indentation no longer matches `grep`, `sed`, a patch context line, or a substring assertion. Instruction files in these repos have tests that pin exact phrases, and re-wrapping has broken them. Reflowing also inflates diffs, hiding the real change.
+
+Do not re-wrap or unwrap prose your task did not otherwise change — that is a drive-by edit.
+
 ## Action Authorization
 
 - For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
@@ -77,28 +85,16 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 
 ## Model And Effort
 
-Any script or workflow that invokes the upstream `claude` executable directly (including
-`claude -p` or `claude --print`) must pass an explicit `--model <model>` in argv for every
-invocation. Never rely on Claude settings, environment variables, or an inherited configured model
-for scripted execution. `claude-headless run --spec` requires a non-empty `model` in the
-JobRequest and passes it through; callers that bypass that interface remain outside its request
-validation.
+Any script or workflow that invokes the upstream `claude` executable directly (including `claude -p` or `claude --print`) must pass an explicit `--model <model>` in argv for every invocation. Never rely on Claude settings, environment variables, or an inherited configured model for scripted execution. `claude-headless run --spec` requires a non-empty `model` in the JobRequest and passes it through; callers that bypass that interface remain outside its request validation.
 
-- Prefer improving the prompt, scope, context, tools, and workflow before considering a more expensive
-  model or higher reasoning effort.
+- Prefer improving the prompt, scope, context, tools, and workflow before considering a more expensive model or higher reasoning effort.
 
 ### Preserve Thread Model
 
-- Never change an existing thread's model. The model for the current chat is fixed; the user will change
-  it manually if needed.
-- Do not change an existing thread's reasoning effort silently. If a different effort level would help,
-  stop and explicitly tell the user before changing it, and wait for the user's approval.
-- Entering goal mode, resuming work, finalizing a branch, reviewing a run, or encountering difficult work
-  does not authorize a model or effort change.
-- When sending a message to an existing thread, omit model and effort overrides so its current settings are
-  preserved.
-- When creating a thread, use the model and effort explicitly requested by the user. If none were
-  requested, preserve the configured default rather than selecting a stronger model.
-- Never upgrade Luna or Terra work to Sol automatically. If the current model appears insufficient, explain
-  why and ask the user to change it manually.
+- Never change an existing thread's model. The model for the current chat is fixed; the user will change it manually if needed.
+- Do not change an existing thread's reasoning effort silently. If a different effort level would help, stop and explicitly tell the user before changing it, and wait for the user's approval.
+- Entering goal mode, resuming work, finalizing a branch, reviewing a run, or encountering difficult work does not authorize a model or effort change.
+- When sending a message to an existing thread, omit model and effort overrides so its current settings are preserved.
+- When creating a thread, use the model and effort explicitly requested by the user. If none were requested, preserve the configured default rather than selecting a stronger model.
+- Never upgrade Luna or Terra work to Sol automatically. If the current model appears insufficient, explain why and ask the user to change it manually.
 - State any intentional model or effort override before launching a new thread.

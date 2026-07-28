@@ -47,7 +47,9 @@ scripts/
   validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
   validate_skills.py  # SKILL.md frontmatter identity + traveling-doc references
 docs/
+  context-file-authoring.md       # craft rubric for CLAUDE.md / AGENTS.md / rules (always-on layer)
   destructive-command-guard.md # external cross-agent command guard decision and setup
+  model-and-effort.md             # choosing model/effort for subagents, workflows, delegated jobs
   skill-authoring-principles.md   # craft rubric for writing/reviewing skills
   skill-installer-contract.md     # reusable per-repo installer contract (shared by all repos)
 docs/harness/          # this repo's own Harness task/slice/decision tracking state (not narrative docs)

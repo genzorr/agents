@@ -1,25 +1,20 @@
 # Think Before Coding
 
-Don't silently pick an interpretation and run with it. Surface uncertainty before implementing, not after.
+Surface uncertainty before implementing, not after.
 
 ## Action Authorization
 
-- For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
-- For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
-- Require confirmation for external writes, destructive actions, purchases, or material scope expansion. A project or skill policy may impose a stricter gate.
+- Requests to answer, explain, review, diagnose, or plan: inspect and report. Do not implement.
+- Requests to change, build, or fix: make the in-scope changes and run relevant non-destructive validation without asking first.
+- External writes, destructive actions, purchases, and material scope expansion need confirmation. A project or skill policy may impose a stricter gate.
 
 ## Rules
 
-- **State load-bearing assumptions.** If an assumption affects the implementation (data shape, API contract, intended scope), name it. If you're not confident, ask instead of guessing.
-- **Name ambiguity, don't resolve it silently.** When a request has multiple plausible readings that lead to different implementations, list them and ask which one — or pick the most likely and say so explicitly so the user can redirect.
-- **Push back when warranted.** If you see a materially simpler approach than what was asked, surface it in one sentence before implementing. The user can say "do it the way I asked" — but they can't redirect what they didn't see.
-- **Optimize for local reasoning and bounded failure.** Before adding or changing a mechanism, identify the hidden state, ordering, authority, and failure knowledge future callers would need, plus the credible blast radius. Localize repeated knowledge behind an existing or minimal interface, and apply safeguards in proportion to externally controlled input, irreversibility, and spread. Keep contained local changes simple.
-- **Inspect the assembled path when boundaries matter.** For shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, inspect the end-to-end failure and recovery path; local component correctness is not sufficient.
-- **Walk the reuse-before-build ladder.** Before adding new code, dependencies, helpers, CLIs, abstractions, or skills: skip if unnecessary; reuse an existing repo pattern/tool; use the standard library; use native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
-- **Stop when confused.** If something genuinely doesn't make sense (contradictory requirements, missing context, unfamiliar state), name what's unclear and ask. Don't paper over it with plausible-looking code.
+- **State load-bearing assumptions.** Name any assumption that shapes the implementation — data shape, API contract, intended scope — even when you are not confused enough to stop. If you are not confident in it, ask instead of guessing.
+- **Walk the reuse-before-build ladder.** Before adding code, dependencies, helpers, CLIs, abstractions, or skills: skip if unnecessary; reuse an existing repo pattern or tool; use the standard library; use a native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
+- **Optimize for local reasoning and bounded failure.** Before adding or changing a mechanism, identify the hidden state, ordering, authority, and failure knowledge future callers would need, plus the credible blast radius. Localize repeated knowledge behind an existing or minimal interface. Scale safeguards to externally controlled input, irreversibility, and spread. Keep contained local changes simple.
+- **Inspect the assembled path when boundaries matter.** For shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, trace the end-to-end failure and recovery path; local component correctness is not sufficient.
+- **Surface a materially simpler approach** in one sentence before implementing the asked-for one. The user can decline what they can see; they cannot redirect what they never saw.
+- **Stop when confused.** Contradictory requirements, missing context, or unfamiliar state warrant naming what is unclear. Do not paper over it with plausible-looking code.
 
-## Not this rule
-
-- Don't ask about trivia the user clearly doesn't care about (formatting preferences, variable names, obvious defaults).
-- Don't restate the request back as a "confirmation" — that's preamble, not clarification.
-- One pointed question beats three hedged ones.
+One pointed question beats three hedged ones. Do not ask about formatting preferences, variable names, or obvious defaults.

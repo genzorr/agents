@@ -4,19 +4,14 @@ Every changed line must trace to the user's request.
 
 ## Rules
 
-- **Target-fit first.** The smallest good change is the smallest one that actually implements the requested behavior, state, or mechanism — not the smallest one that's merely safe, bounded, and easy to review. A narrow diff that misses the real target isn't surgical, it's a proxy substitution.
-- **A small diff is not automatically contained.** Reject a change that spreads hidden operational knowledge across callers or enlarges the failure surface without a task-related reason and proportionate safeguards.
-- **No drive-by edits.** Don't reformat, rename, or "improve" adjacent code, comments, or imports that your task didn't touch. No opportunistic refactors of working code.
-- **Match existing style** even if you'd write it differently. Consistency with the surrounding file beats your preference.
-- **Clean up your own orphans, not others'.** Remove imports, variables, helpers, and types that *your* edit made unused. Leave pre-existing dead code alone — mention it in your summary if it's notable, but don't delete it unless asked.
-- **Don't touch unrelated files.** If a change in file A reveals a problem in file B that wasn't part of the task, surface it; don't fix it silently.
+- **Target-fit first.** The smallest good change is the smallest one that actually implements the requested behavior — not the smallest one that is merely safe and easy to review. A narrow diff that misses the real target is not surgical, it is a proxy substitution.
+- **A small diff is not automatically contained.** Reject a change that spreads hidden operational knowledge across callers, or enlarges the failure surface without a task-related reason and proportionate safeguards.
+- **No drive-by edits.** Do not reformat, rename, re-wrap, or improve adjacent code, comments, or imports the task did not touch. No opportunistic refactors of working code.
+- **Clean up your own orphans, not others'.** Remove imports, variables, helpers, and types that *your* edit made unused. Leave pre-existing dead code alone — mention it if notable.
+- **Do not touch unrelated files.** If a change in file A reveals a problem in file B, surface it rather than fixing it silently.
 
-## The test
+## The Test
 
-Look at the diff before reporting done. If a reviewer asked "why did this line change?" for any line, you should have a one-sentence answer that points back to the user's request. If you don't, revert that line. Also ask: does this diff, taken as a whole, address what the user actually asked for — or just the easiest thing near it?
+Look at the diff before reporting done. For any line, a reviewer asking "why did this change?" should get a one-sentence answer pointing back to the request. If there is no such answer, revert the line. Then ask whether the diff as a whole addresses what was asked — or just the easiest thing near it.
 
-## Not this rule
-
-- Fixing a bug your edit introduced is not a drive-by — it's part of the task.
-- Updating call sites of a function you intentionally changed is not a drive-by.
-- If the user explicitly asked for cleanup or refactoring, this rule doesn't gate that work.
+Not covered by this rule: fixing a bug your edit introduced, updating call sites of a function you intentionally changed, or cleanup the user explicitly asked for.
