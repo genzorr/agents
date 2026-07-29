@@ -1,0 +1,4 @@
+interface:
+  display_name: "Explain"
+  short_description: "Build and verify technical mental models."
+  default_prompt: "Use $explain to teach me this change, codebase, architecture, or concept and check my understanding."

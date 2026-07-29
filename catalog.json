@@ -167,6 +167,22 @@
       "counterpart": "identical"
     },
     {
+      "id": "explain",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/explain/SKILL.md",
+        "claude": "claude/skills/explain/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/explain",
+        "claude": "~/.claude/skills/explain"
+      },
+      "counterpart": "identical",
+      "tags": ["domain:technical-learning", "role:driver"]
+    },
+    {
       "id": "fix-build",
       "kind": "skill",
       "platforms": ["codex", "claude"],
