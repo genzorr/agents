@@ -103,6 +103,16 @@ Avoid:
 Weak criteria invite premature completion: the agent moves to the next visible step before the
 current one is actually finished. Sharpen the criterion before splitting the skill.
 
+## Proportional Behavior Proof
+
+Match proof to the changed behavior and the claim it must support; do not make every skill edit pay for an evaluation suite.
+
+- **Static contract proof** — use existing deterministic validators for packaging, references, metadata, syntax, exact structural invariants, and other mechanically decidable changes. This supports only those properties.
+- **Behavioral conformance proof** — when a change alters invocation, routing, authority, stop conditions, completion behavior, or another semantic contract, exercise the smallest representative cases through the same skill interface callers use. Prefer an observed material failure as a regression case; create a persistent fixture without one only when repeated demonstrated need justifies its upkeep.
+- **Outcome proof** — a curated conformance pass does not establish general task improvement, stable triggering, lower rework, or safe additional autonomy. A claim that would change a default or authority boundary belongs in the existing [`design-experiment` → `review-experiment` Protocol/Readout workflow](experiment-protocol-readout-contract.md), with a baseline and decision-relevant evidence.
+
+Do not add a runner, judge, schema, repeated-trial ritual, or standing case corpus until concrete repeated work shows that a shared mechanism would remove more complexity than it adds.
+
 ## Leading Terms
 
 Use compact, established terms when they carry real behavior. A good leading term compresses a
