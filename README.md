@@ -53,6 +53,7 @@ docs/
   skill-authoring-principles.md   # craft rubric for writing/reviewing skills
   skill-installer-contract.md     # reusable per-repo installer contract (shared by all repos)
 docs/harness/          # this repo's own Harness task/slice/decision tracking state (not narrative docs)
+research/findings/     # source-bounded research reviews and project-specific implications
 ```
 
 Codex/Claude same-name skills are deliberate **platform twins**, not automatically identical — the

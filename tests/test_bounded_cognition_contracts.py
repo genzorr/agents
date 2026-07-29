@@ -69,6 +69,48 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 self.assertEqual(len(reference_paragraphs), 1)
                 self.assertIn("skip", reference_paragraphs[0].lower())
 
+    def test_surface_unknowns_twins_define_mode_roles_and_bounded_routing(self) -> None:
+        codex = self.read("codex/skills/surface-unknowns/SKILL.md")
+        claude = self.read("claude/skills/surface-unknowns/SKILL.md")
+        self.assertEqual(codex, claude)
+
+        for text in (codex, claude):
+            self.assertIn("**Explicit discovery pass:** Driver", text)
+            self.assertIn("**Autonomous checkpoint:** Helper", text)
+            self.assertIn("Become a **router** only when explicitly transferring control", text)
+            self.assertIn("Keep exactly one driver active", text)
+            self.assertIn("same observed evidence and decision branch", text)
+            self.assertIn("highest expected decision value net of inspection, delay, and interruption cost", text)
+            self.assertIn("not empirically validated, exhaustive categories or mandatory stages", text)
+            self.assertIn("teach enough structure before asking them to choose", text)
+            self.assertIn("why its plausible alternatives differ", text)
+            self.assertIn("Never claim exhaustive discovery of unknown unknowns", text)
+            self.assertIn("Do not turn ordinary reversible implementation discretion into a user approval gate", text)
+            self.assertIn("Tests and review establish implementation evidence", text)
+            self.assertIn("explanation and transfer questions probe understanding", text)
+
+    def test_global_surfaces_preserve_selective_uncertainty_behavior_without_named_invocation(self) -> None:
+        codex = self.read("codex/AGENTS.md")
+        think = self.read("claude/rules/think-before-coding.md")
+
+        for text in (codex, think):
+            self.assertNotIn("surface-unknowns", text)
+            self.assertIn("multiple plausible", text)
+            self.assertIn("materially different actions", text)
+            self.assertIn("one interpretation dominates", text)
+            self.assertIn("resolution costs more than it can change", text)
+            self.assertIn("observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns", text)
+            self.assertIn("remaining verification gaps in the final handoff", text)
+
+    def test_surface_unknowns_codex_metadata_allows_implicit_invocation(self) -> None:
+        metadata = self.read("codex/skills/surface-unknowns/agents/openai.yaml")
+        self.assertIn('default_prompt: "Use $surface-unknowns', metadata)
+        self.assertIn("allow_implicit_invocation: true", metadata)
+
+        catalog = self.read("catalog.json")
+        surface_entry = catalog.split('"id": "surface-unknowns"', 1)[1].split('"id": "thermo-nuclear-code-quality-review"', 1)[0]
+        self.assertNotIn('"role:router"', surface_entry)
+
     def test_no_source_branded_umbrella_skill_was_added(self) -> None:
         for platform in ("codex", "claude"):
             self.assertFalse((REPO_ROOT / platform / "skills" / "shape-of-the-system").exists())

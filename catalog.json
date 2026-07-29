@@ -395,6 +395,22 @@
       "counterpart": "identical"
     },
     {
+      "id": "surface-unknowns",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/surface-unknowns/SKILL.md",
+        "claude": "claude/skills/surface-unknowns/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/surface-unknowns",
+        "claude": "~/.claude/skills/surface-unknowns"
+      },
+      "counterpart": "identical",
+      "tags": ["domain:uncertainty-management"]
+    },
+    {
       "id": "thermo-nuclear-code-quality-review",
       "kind": "skill",
       "platforms": ["codex", "claude"],

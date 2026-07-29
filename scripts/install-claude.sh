@@ -51,7 +51,7 @@ removed=0
 # harness-* prefix branch (that stays Harness's own allowlist).
 is_repo_managed_skill() {
     case "$1" in
-        architecture-review|archify|ask-chatgpt-pro|ask-oracle|babysit-pr|design-experiment|diagnose|distill-source|doc-audit|docker-optimize|explain|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|logging-optimize|prepare-dynamic-workflow|prototype|research-prompt|review-change|review-experiment|session-handoff|skill-lifecycle|systemic-diagnosis|thermo-nuclear-code-quality-review|tdd|zoom-out) return 0 ;;
+        architecture-review|archify|ask-chatgpt-pro|ask-oracle|babysit-pr|design-experiment|diagnose|distill-source|doc-audit|docker-optimize|explain|fix-build|goal-prompt|grill-with-docs|gtsam-doc|integrate-research|logging-optimize|prepare-dynamic-workflow|prototype|research-prompt|review-change|review-experiment|session-handoff|skill-lifecycle|surface-unknowns|systemic-diagnosis|thermo-nuclear-code-quality-review|tdd|zoom-out) return 0 ;;
         *) return 1 ;;
     esac
 }

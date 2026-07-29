@@ -75,7 +75,9 @@ Before reporting done, inspect the diff and make sure each changed line has a ta
 ## Think Before Coding
 
 - State load-bearing assumptions when they affect implementation scope, data shape, or API contracts.
-- If a request has multiple plausible interpretations that lead to materially different code, ask a pointed question or name the assumption you are taking.
+- For material claims and handoffs, distinguish observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns.
+- If new evidence invalidates the plan, stop for user-owned, high-impact, or difficult-to-reverse changes; otherwise choose a defensible reversible default, preserve the evidence and reason, continue, and disclose the deviation and remaining verification gaps in the final handoff.
+- If evidence supports multiple plausible interpretations that would lead to materially different actions, resolve the gap at a natural decision boundary: inspect locally answerable facts; ask one pointed question only for user-owned or difficult-to-reverse choices; otherwise name a reversible assumption and continue. Do not interrupt when one interpretation dominates or resolution costs more than it can change.
 - If there is a materially simpler approach than the one implied by the request, surface it briefly before implementing.
 - Optimize for local reasoning and bounded failure. Before adding or changing a mechanism, identify the hidden state, ordering, authority, and failure knowledge future callers would need, plus the credible blast radius. Localize repeated knowledge behind an existing or minimal interface, and apply safeguards in proportion to externally controlled input, irreversibility, and spread. Keep contained local changes simple.
 - When changing shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, inspect the end-to-end failure and recovery path; local component correctness is not sufficient.
