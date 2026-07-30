@@ -9,7 +9,7 @@ This packet checks whether the proposed contract distinguishes explicit discover
 - Cases: `tests/fixtures/surface_unknowns_cases.json` at SHA-256 `c33b61b3e43fc174171caefea243778301008c631e54bf71c55a0d4554255706`.
 - Base condition: `genzorr/agents` at `fa9d7e94cb5d7d6812c52e56239d51757c1ce44b`, using its `codex/AGENTS.md` and no `surface-unknowns` skill.
 - Original condition: PR head `3c69f82ef7f3888679e814b1df802bde7a23eee2`, using its `codex/AGENTS.md` and `codex/skills/surface-unknowns/SKILL.md`.
-- Revised condition: working-tree `codex/AGENTS.md` at SHA-256 `2e4710e8771b02ba4a1d6f0b379ae44eee1fbfc5412002e0759fd50ddcc6a744` and `codex/skills/surface-unknowns/SKILL.md` at SHA-256 `c68ec80dfa81a1a33ae102f5106ab13487145062e378e7fae7157a82760ad011` after integrating the independent review.
+- Revised condition: `genzorr/agents@65d49e7e143f2cf9157990fe014b8d97b562c0f0`, using `codex/AGENTS.md` at SHA-256 `2e4710e8771b02ba4a1d6f0b379ae44eee1fbfc5412002e0759fd50ddcc6a744` and `codex/skills/surface-unknowns/SKILL.md` at SHA-256 `c68ec80dfa81a1a33ae102f5106ab13487145062e378e7fae7157a82760ad011` after integrating the independent review.
 - Execution: fresh read-only subagents with inherited model and effort, no overrides, no source browsing, no file mutation, and a response cap of 160–180 words per case.
 - Cross-condition sentinel set: `explicit-novice-offline-conflicts`, `implicit-public-api-retry`, `noop-local-style`, `overlap-system-map`, `plan-user-owned-email-change`, `plan-reversible-helper-location`, and `plan-same-evidence-reentry`.
 - Full revised set: all 16 checked-in cases, split across two fresh subagents.

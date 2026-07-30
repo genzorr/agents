@@ -2,7 +2,7 @@
 
 Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler unless the user asks for detail.
 
-Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Apply this to responses, documentation, commit messages, and pull-request descriptions.
+Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Reuse established project and domain terms for existing concepts. Introduce a new term only when it names a genuine new distinction. Briefly define a necessary term when the intended reader may not know it. Apply this to responses, documentation, commit messages, and pull-request descriptions.
 
 Prefer precision over blanket style bans: state claims directly, and do not manufacture a "not X but Y" contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are fine when they are the clearest form.
 

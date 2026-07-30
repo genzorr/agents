@@ -5,7 +5,7 @@ These instructions apply across Codex sessions unless a project-level `AGENTS.md
 ## Response Discipline
 
 - Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler.
-- Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Apply this to responses, documentation, commit messages, and pull-request descriptions. Prefer precision over blanket style bans: state claims directly; do not manufacture a “not X but Y” contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are acceptable when they are the clearest form.
+- Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Reuse established project and domain terms for existing concepts. Introduce a new term only when it names a genuine new distinction. Briefly define a necessary term when the intended reader may not know it. Apply this to responses, documentation, commit messages, and pull-request descriptions. Prefer precision over blanket style bans: state claims directly; do not manufacture a “not X but Y” contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are acceptable when they are the clearest form.
 - Keep delegated or subagent prompts focused: include only the task and context the worker needs; omit builder reasoning, implementation narrative, and logs of failed attempts.
 - Do not use step-narration banners like "Step 1", "---", or "Now implementing" in user-facing output.
 - Do not restate the user's request before answering.

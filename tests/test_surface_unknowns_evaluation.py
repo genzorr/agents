@@ -61,10 +61,15 @@ class SurfaceUnknownsEvaluationPacketTest(unittest.TestCase):
         self.assertIn("not empirical validation", results)
         self.assertIn("not whether the Codex host independently selects it", results)
         self.assertIn("does not establish a general performance gain over the base rules", results)
+        self.assertIn("genzorr/agents@65d49e7e143f2cf9157990fe014b8d97b562c0f0", results)
+        self.assertIn(
+            "codex/AGENTS.md` at SHA-256 "
+            "`2e4710e8771b02ba4a1d6f0b379ae44eee1fbfc5412002e0759fd50ddcc6a744`",
+            results,
+        )
 
         evaluated_files = {
             "codex/skills/surface-unknowns/SKILL.md": "c68ec80dfa81a1a33ae102f5106ab13487145062e378e7fae7157a82760ad011",
-            "codex/AGENTS.md": "2e4710e8771b02ba4a1d6f0b379ae44eee1fbfc5412002e0759fd50ddcc6a744",
             "tests/fixtures/surface_unknowns_cases.json": "c33b61b3e43fc174171caefea243778301008c631e54bf71c55a0d4554255706",
         }
         for path, expected_sha256 in evaluated_files.items():
