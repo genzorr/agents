@@ -141,7 +141,7 @@ class SkillValidatorContractsTest(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("agents and claude-headless", errors[0])
 
-    def test_session_harvester_transition_layouts_are_exclusive_and_owned(self) -> None:
+    def test_session_harvester_requires_canonical_owned_layout(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             harvester = Path(tmp)
             script = harvester / "scripts" / "install-claude-skill.sh"
@@ -150,32 +150,33 @@ class SkillValidatorContractsTest(unittest.TestCase):
 
             legacy = harvester / "harvest-sessions-skill.md"
             legacy.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
-            self.assertEqual(CROSS_REPO.check_session_harvester(harvester), [])
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("legacy harvest-sessions-skill.md is no longer supported" in error for error in errors))
+            self.assertTrue(any("canonical skills/harvest-sessions must contain SKILL.md" in error for error in errors))
 
-            legacy.unlink()
             canonical = harvester / "skills" / "harvest-sessions" / "SKILL.md"
             canonical.parent.mkdir(parents=True)
             canonical.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
-            self.assertEqual(CROSS_REPO.check_session_harvester(harvester), [])
-
-            legacy.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
             errors = CROSS_REPO.check_session_harvester(harvester)
-            self.assertTrue(any("exactly one legacy or canonical" in error for error in errors))
+            self.assertTrue(any("legacy harvest-sessions-skill.md is no longer supported" in error for error in errors))
 
             legacy.unlink()
+            self.assertEqual(CROSS_REPO.check_session_harvester(harvester), [])
+
             canonical.unlink()
             errors = CROSS_REPO.check_session_harvester(harvester)
-            self.assertTrue(any("missing exactly one legacy" in error for error in errors))
             self.assertTrue(any("must contain SKILL.md" in error for error in errors))
 
             canonical.write_text("---\nname: wrong-name\n---\n", encoding="utf-8")
             foreign = harvester / "skills" / "foreign-skill"
             foreign.mkdir()
+            write_skill(harvester, "codex", "unexpected-skill")
             errors = CROSS_REPO.check_session_harvester(harvester)
             self.assertTrue(any("frontmatter name" in error for error in errors))
             self.assertTrue(any("foreign skill directories" in error for error in errors))
+            self.assertTrue(any("unexpected codex/ or claude/ skill tree" in error for error in errors))
 
-    def test_session_harvester_transition_layout_rejects_symlinked_sources(self) -> None:
+    def test_session_harvester_canonical_layout_rejects_symlinked_sources(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             harvester = Path(tmp) / "session-harvester"
             script = harvester / "scripts" / "install-claude-skill.sh"
@@ -187,7 +188,7 @@ class SkillValidatorContractsTest(unittest.TestCase):
             legacy = harvester / "harvest-sessions-skill.md"
             legacy.symlink_to(unreadable_as_utf8)
             errors = CROSS_REPO.check_session_harvester(harvester)
-            self.assertTrue(any("legacy harvest-sessions-skill.md must not be a symlink" in error for error in errors))
+            self.assertTrue(any("legacy harvest-sessions-skill.md is no longer supported" in error for error in errors))
 
             legacy.unlink()
             external_skill = Path(tmp) / "external-skill.md"

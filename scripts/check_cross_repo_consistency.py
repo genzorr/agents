@@ -154,46 +154,27 @@ def check_harness(harness: Path) -> list[str]:
 
 def check_session_harvester(harvester: Path) -> list[str]:
     errors: list[str] = []
-    # Temporary compatibility for the single canonical-layout migration; remove the legacy branch after the canonical source is established everywhere.
     legacy_skill = harvester / "harvest-sessions-skill.md"
     canonical_dir = harvester / "skills" / SESSION_SKILL
     canonical_skill = canonical_dir / "SKILL.md"
-    legacy_is_symlink = legacy_skill.is_symlink()
     canonical_dir_is_symlink = canonical_dir.is_symlink()
     canonical_skill_is_symlink = canonical_skill.is_symlink()
-    has_legacy = legacy_skill.is_file() and not legacy_is_symlink
     has_canonical = (
         canonical_skill.is_file()
         and not canonical_dir_is_symlink
         and not canonical_skill_is_symlink
     )
-    if legacy_is_symlink:
-        errors.append("session-harvester: legacy harvest-sessions-skill.md must not be a symlink")
-    elif legacy_skill.exists() and not has_legacy:
-        errors.append("session-harvester: legacy harvest-sessions-skill.md must be a regular file")
+    if legacy_skill.exists() or legacy_skill.is_symlink():
+        errors.append("session-harvester: legacy harvest-sessions-skill.md is no longer supported")
     if canonical_dir_is_symlink:
         errors.append("session-harvester: canonical skills/harvest-sessions directory must not be a symlink")
     elif canonical_skill_is_symlink:
         errors.append("session-harvester: canonical skills/harvest-sessions/SKILL.md must not be a symlink")
-    elif canonical_dir.exists() and not has_canonical:
+    elif not has_canonical:
         errors.append("session-harvester: canonical skills/harvest-sessions must contain SKILL.md")
-    if has_legacy == has_canonical:
-        if has_legacy:
-            errors.append(
-                "session-harvester: must contain exactly one legacy or canonical harvest-sessions source, not both"
-            )
-        else:
-            errors.append(
-                "session-harvester: missing exactly one legacy harvest-sessions-skill.md or canonical skills/harvest-sessions/SKILL.md"
-            )
-    skill_file = None
-    if has_canonical and not has_legacy:
-        skill_file = canonical_skill
-    elif has_legacy and not has_canonical:
-        skill_file = legacy_skill
-    fields = parse_frontmatter(skill_file.read_text(encoding="utf-8")) if skill_file else {}
-    if skill_file and fields.get("name") != SESSION_SKILL:
-        errors.append("session-harvester: selected skill frontmatter name must be harvest-sessions")
+    fields = parse_frontmatter(canonical_skill.read_text(encoding="utf-8")) if has_canonical else {}
+    if has_canonical and fields.get("name") != SESSION_SKILL:
+        errors.append("session-harvester: canonical skill frontmatter name must be harvest-sessions")
     if skill_dirs(harvester, "codex") or skill_dirs(harvester, "claude"):
         errors.append("session-harvester: unexpected codex/ or claude/ skill tree present")
 
