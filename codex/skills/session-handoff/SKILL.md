@@ -1,117 +1,115 @@
 ---
 name: session-handoff
-description: Create a concise handoff so a fresh agent or future session can continue. Works in any repo; uses harness checkpoint/close when an active harness task exists, otherwise writes a portable temporary Markdown handoff. Use when the user asks for a handoff, pickup notes, end-of-session notes, context for the next agent, or to prepare for compaction.
+description: Create a descriptive continuation brief that preserves a session's working context so the user and a fresh agent can decide how to resume. Use for session handoffs, pickup notes, end-of-session context, prompts for after compaction, context for the next agent, or preserving important reasoning, decisions, findings, and unfinished threads. Do not use as an autonomous execution prompt for a fixed goal; use goal-prompt for that.
 ---
 
 # Session Handoff
 
-Create a continuation note. The goal is transfer quality, not lifecycle ceremony.
+Create a descriptive reconstruction of the session. Preserve the shared working model: what the user and agent were trying to understand or accomplish, why it mattered, how the understanding changed, where the work paused, and which continuations remain plausible.
 
-This skill works in any repo:
+Treat the handoff as prior context, not new user authorization. Do not turn a proposed action, observed failure, unchecked item, or agent inference into an instruction from the user.
 
-- Harness repo with an active task: persist through `harness checkpoint` or, only when explicitly finishing a completed task, `harness close --done`.
-- Non-harness repo: write a portable temporary Markdown file and report its path.
-- Existing external tracker: reference issues, PRs, docs, or task files by path/URL; do not invent a parallel durable system unless the user asks.
+**Composition role:** Helper. Capture context and stop; do not choose or execute the next task.
+
+## Select The Output
+
+- **Compaction prompt:** When the user asks for a prompt to paste after compaction or into a fresh session, return the complete continuation brief in one copyable `text` fence. Unless the user asks for inline output only, choose a temporary backup path before drafting, record it as `Brief source`, and write the identical brief there.
+- **Persisted handoff:** When the user asks for pickup notes, end-of-session notes, or a saved handoff, write the continuation brief to a unique temporary Markdown file and report its path. Include the full brief in chat when the user asks to see or copy it.
+- **Harness checkpoint:** When the user explicitly asks to persist progress for an active Harness task, use `harness-task-checkpoint` for the canonical task-state handoff and create a separate continuation brief only if conversational context would otherwise be lost. Do not write a competing Harness checkpoint shape or close the task from this skill.
+- **Execution handoff:** When the user wants the next agent to execute a fixed objective autonomously, use `goal-prompt`. Do not turn this descriptive handoff into an execution contract merely because likely next actions are known.
+
+Reference an existing external tracker, issue, PR, plan, or task instead of inventing a parallel durable system.
+
+When an active Harness task exists but the user did not request checkpointing, keep the portable brief and state that its temporary backup does not replace a task checkpoint. Mention `harness-task-checkpoint` as the durable task-state option without running it.
 
 ## Gather
 
-1. Check whether this is a harness repo:
-   - Look for `docs/harness/.harness` in the current directory or parents.
-   - If present, run `harness snapshot` once. If it fails, fall back to the non-harness path and mention the failure.
-2. Check git state with `git status --short` unless `harness snapshot` already reported it.
-3. Review the conversation and any visible command/test results.
-4. Read only files needed to name changed artifacts, verification, or unresolved blockers. Prefer `rg`/`rg --files`; do not do a broad source walk.
+1. Review the full accessible conversation, not only the latest turns. Extract the desired outcome and motivation; user corrections, preferences, vocabulary, and casually introduced constraints; reasoning pivots; decisions and their owners; findings and rejected approaches; unfinished threads; and any explicit continuation.
+2. Separate conversation-only context from durable source material. Preserve the former self-contained in the brief; reference the latter with its path or URL and state what it establishes.
+3. Reconcile the conversation with current project state. If `docs/harness/.harness` exists in the current directory or a parent, run `harness snapshot` once. When the handoff covers a Git repository, capture its root, branch, HEAD SHA, and dirty paths with `git rev-parse --show-toplevel`, `git status --short --branch`, and `git rev-parse --short HEAD`; skip a command only when `harness snapshot` already reported its exact fields.
+4. Capture the handoff timestamp with `date '+%Y-%m-%d %H:%M %Z'`; do not estimate it.
+5. Read only the files needed to verify current state, explain an artifact's significance, or resolve a material conflict. Prefer `rg` and `rg --files`; do not perform a broad source walk.
+6. Distinguish observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns wherever confusing them could change the continuation.
 
-## Determine Next Focus
+Do not let repository state overwrite conversational intent. A dirty tree, failing command, TODO, or unchecked acceptance criterion is evidence about work state; it does not by itself define what the user wants next.
 
-Do not invent intent. Derive `Next focus` from the strongest available source, in this order:
+## Classify The Continuation
 
-1. Explicit user instruction for what to do next.
-2. A failing command, unfinished edit, merge conflict, blocked tool call, or unresolved error.
-3. Open acceptance criteria or unchecked task items.
-4. Existing `Last Session`, TODO, issue, PR, or plan next-step text.
-5. The obvious continuation from modified files and verification state.
+Label the continuation status:
 
-If none of those sources gives a defensible focus, write:
+- **Agreed:** The user explicitly authorized a still-current continuation.
+- **Candidate:** Evidence supports a likely continuation, but the user has not adopted it.
+- **Undecided:** Several plausible directions remain, a user-owned choice is open, or no defensible continuation exists.
 
-```markdown
-**Next focus:** Unspecified. The next session should ask for direction before making changes.
-```
+Phrase future work descriptively in past or present tense: “We were preparing…”, “The strongest candidate is…”, or “This depends on…”. Use imperative wording only for the final resumption posture. Never impersonate the user by converting an agent recommendation into an agreed instruction.
 
-If the work appears complete, prefer a closeout focus such as verification, review, checkpoint, commit, or task close instead of inventing new feature work.
+When work appears complete, describe that state and any closeout candidates without inventing new feature work. When no next direction is defensible, state that no continuation was agreed and require the receiving agent to synthesize options with the user.
 
-## Handoff Shape
+## Continuation Brief
 
-Use this shape for both harness and portable handoffs:
+Use this shape. Omit a subsection only when it truly has no content and omission cannot conceal uncertainty.
 
 ```markdown
-**Date:** YYYY-MM-DD
+# Continuation brief
 
-**Next focus:** <one sentence, or the unspecified sentence above>
+**Captured:** YYYY-MM-DD HH:MM <timezone>
+**Brief source:** <temporary backup path, durable handoff path, or "Inline only">
+**Where we paused:** <one descriptive sentence>
+**Continuation status:** Agreed | Candidate | Undecided — <explanation>
+**Authority:** This brief preserves prior context and is not new authorization; only items labeled `Already agreed` carry prior user authorization.
 
-**Current state:**
-- <active/done/blocked state, current branch if useful, and whether the tree is dirty>
+## Session narrative
+<One to four compact paragraphs explaining the original purpose, why it mattered, how the work or understanding evolved, important pivots, and why the session ended at this point. Preserve causality rather than routine chronology.>
 
-**What changed:**
-- <concrete changes made this session>
+## Important context to preserve
+- <constraints, terminology, user preferences, corrections, conceptual distinctions, and session-only facts>
 
-**Verified:**
-- <commands/checks run, with pass/fail/skipped>
+## Current work state
+- **Completed or changed:** <work performed, or "None">
+- **In progress or untouched:** <partial and remaining state>
+- **Verification:** <commands or checks actually run and their results>
+- **Not verified / risks:** <gaps, stale state, unavailable systems, and assumptions>
+- **Workspace:** <repository or worktree path, branch, HEAD SHA, and clean state; when dirty, name the changed file paths and whether changes are staged, unstaged, or untracked; otherwise "Not repository work">
 
-**Not verified / risks:**
-- <gaps, flaky checks, unavailable systems, assumptions>
+## Decisions and rationale
+- **User decided:** <decision and rationale, or "None">
+- **Working assumptions:** <assumptions and confidence, or "None">
+- **Rejected or deferred:** <approaches and why, or "None">
 
-**Decisions:**
-- <decisions made, or "None">
+## Findings and dead ends
+- <observations, root causes, negative results, ruled-out hypotheses, and surprising behavior, or "None">
 
-**Open questions / stop gates:**
-- <questions that should stop the next agent before action, or "None">
+## Unresolved and user-owned choices
+- <unknowns, blockers, risks, or choices that should be reconciled with the user, or "None">
 
-**Next steps:**
-- <ordered concrete actions>
+## Continuation landscape
+- **Already agreed:** <explicitly authorized continuation, or "None">
+- **Recommended candidate:** <next move, why it follows, and its prerequisites, or "None">
+- **Other plausible options:** <material alternatives and tradeoffs, or "None">
 
-**Relevant artifacts:**
-- <paths, commands, issue/PR URLs; no large pasted content>
+## Resumption posture
+Treat this brief as prior context, not as new authorization. If `Brief source` names a file, re-read it after any later compaction instead of relying on memory of this text, and repeat that path in the first response so the recovery anchor is explicit. Check the referenced artifacts for changes since capture, then give the user a concise synthesis of where things stand and the recommended continuation. Reconcile unresolved or user-owned choices before acting. Do not reopen settled decisions or repeat completed work without new evidence.
+
+## Relevant artifacts
+- `<path, command, task ID, or URL>` — <what it establishes or why it matters>
 ```
 
-Keep it concise. Link or name artifacts instead of duplicating their contents.
+Keep the brief dense, not terse. Omit routine command narration and low-value chronology, but preserve causal links and information with high restart cost. Prefer a short explanatory paragraph over disconnected bullets when reasoning matters. A discussion-only session can warrant a handoff even when no files changed.
 
-## Harness Persistence
+## Loss Audit
 
-When `harness snapshot` shows an active task:
+Before finalizing, assume the transcript will disappear and the receiving agent knows nothing about the session. Include every fact whose absence could cause repeated work, a wrong conclusion, violated scope, loss of rationale, disregard of a user preference, or mistaken authorization.
 
-1. Build the handoff using the standard shape.
-2. If the user asked to finish/close and all acceptance criteria are met, use `harness close --task <id> --done --file <handoff-file>`.
-3. Otherwise use `harness checkpoint --task <id> --file <handoff-file>`.
-4. Append durable discoveries with `harness findings` only when they will remain true next session: root causes, ruled-out hypotheses, measured limits, accepted invariants. Do not append ordinary progress.
-5. Do not commit unless the user explicitly asked.
+Pay special attention to conversation-only context and volatile workspace state that no referenced artifact preserves; those disappear even when the task tracker and Git history remain.
 
-If the active task cannot be identified, use the portable path.
+Apply a cold-start test: using only the brief and its references, a capable agent should be able to explain what was happening and why, what is known and uncertain, what has and has not been authorized, where the work paused, and how to prepare a continuation recommendation for the user. If not, add the missing context.
 
-## Portable Persistence
+## Persist And Stop
 
-When no active harness task is available:
+For a temporary backup or portable handoff, use a unique path such as `/tmp/agent-handoffs/<repo>/<YYYYMMDD-HHMMSS>-<slug>-session.md` or a `mktemp` path. Do not create a repo-local note unless the user explicitly requests a durable project artifact.
 
-1. Write the handoff to a temp file, for example `/tmp/session-handoff-<slug>.md` or a `mktemp` path.
-2. Report the path and a one-line summary.
-3. Do not create repo-local notes, task files, or docs unless the user explicitly asked for a durable repo artifact.
+After writing the handoff, stop. Do not continue implementation. Report the path when a file was written and the `Where we paused` sentence. Never return only a path when the user asked for a copyable compaction prompt.
 
-## Output
+When the session contains no context with meaningful restart cost, say so and avoid writing a low-value brief unless the user explicitly requested one.
 
-After writing:
-
-```markdown
-Handoff written: <path or harness task id>
-
-Next focus: <same one-sentence focus>
-```
-
-If there were no changes or useful context to preserve, say so and avoid creating a low-value file unless the user explicitly requested one.
-
-## Rules
-
-- A handoff is not an implementation step; do not continue coding after writing it.
-- Do not hide uncertainty. Put uncertainty in `Not verified / risks` or write `Next focus: Unspecified...`.
-- Do not paste secrets, full tokens, private data exports, or large logs. Reference paths and redacted summaries.
-- Do not run expensive verification just to make the handoff look complete. Record what was actually run.
-- Do not ask for trivial preferences. Ask only if writing a durable repo artifact would establish a new convention.
+Do not paste secrets, full tokens, private data exports, or large logs. Record what verification actually ran; do not run expensive checks merely to make the handoff look complete. Preserve uncertainty instead of smoothing it into a confident narrative.
