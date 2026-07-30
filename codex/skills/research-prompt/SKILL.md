@@ -32,6 +32,10 @@ Use when the user wants a structured prompt for external deep research.
 
 <core challenge>
 
+## Decision To Inform
+
+<decision, action, or downstream use this research will inform>
+
 ## What We Already Know
 
 <prior findings, decisions, relevant local docs>
@@ -68,4 +72,8 @@ Questions:
 - Target 250-400 lines; stop and propose splits before exceeding 500 lines.
 - Make the prompt specific enough for another model to run without this conversation.
 - Separate known project facts from questions to research.
+- State the concrete decision, action, or downstream use the research will inform.
+- Require a source hierarchy that prefers primary evidence such as official documentation, source code, papers, standards, filings, and changelogs; treat secondary commentary as supporting context rather than equivalent proof.
+- Require the result to separate verified facts, supported inferences, contradictions, and unresolved uncertainty.
+- Require one final gap review after the draft identifies unanswered questions, contradictions, and consequential single-source claims; use an additional search where it could materially close a gap, otherwise leave the gap explicitly unresolved.
 - Do not perform the deep research yourself unless the user asks.

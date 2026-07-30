@@ -39,6 +39,7 @@ Before writing the prompt, inspect enough local context to make it project-speci
    - Only write the goal spec inside the project (for example a committed `docs/.../<topic>-goal.md`) when the user explicitly wants a durable in-repo copy; keep it out of the default handoff path.
 4. Before drafting the GOAL file, define a concise `Completion Contract` for every goal, regardless of mode. It must state:
    - **Success exit:** the exact observable conditions that allow the agent to claim the goal is complete, including required verification evidence.
+   - **Evaluator integrity:** when tests or metrics determine success, preserve the evaluator; changing, disabling, narrowing, or relabeling it is allowed only when evaluator work is explicitly in scope, independently justified, and paired with replacement proof.
    - **Continue conditions:** signals that mean the agent must keep working instead of stopping after a partial win.
    - **Stop/ask gates:** conditions that require user input before proceeding, such as ambiguous scope, missing credentials/infrastructure, contract-breaking changes, or unsafe broad rewrites.
    - **Blocked exit:** what evidence must be recorded if the agent cannot proceed.

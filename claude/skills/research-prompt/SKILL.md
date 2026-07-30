@@ -127,7 +127,7 @@ README.md          # Project overview
 ### Writing the Prompt
 
 When you reach step 8, open `reference.md` (skill-local) and follow it. It
-holds the full output template (Context, Problem Statement, What
+holds the full output template (Context, Problem Statement, Decision To Inform, What
 We Already Know, What Needs Research, Research Questions Summary, Key Papers/
 Resources, Expected Output, Implementation Priorities, Desired Research Format,
 References, Relevant Project Files), the per-section authoring guidelines,

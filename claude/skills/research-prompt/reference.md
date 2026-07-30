@@ -32,6 +32,12 @@ Generate prompts with these sections (adapt as needed):
 
 ---
 
+## Decision To Inform
+
+[Concrete decision, action, or downstream use this research will inform.]
+
+---
+
 ## What We Already Know
 
 ### From Prior Research/Experience
@@ -173,6 +179,10 @@ The following project files provide additional context for this research. Pass t
 - 3-5 sub-challenges maximum
 - Avoid vague statements
 
+**Decision To Inform:**
+- Name the concrete decision, action, or downstream use
+- Explain which findings would change that decision
+
 **What We Already Know:**
 - Include sources/references
 - Distinguish facts from assumptions
@@ -197,6 +207,9 @@ The following project files provide additional context for this research. Pass t
 - Be specific about deliverables
 - Include format preferences (tables, lists, etc.)
 - Define what "done" looks like
+- Prefer primary evidence such as official documentation, source code, papers, standards, filings, and changelogs; use secondary commentary only as supporting context
+- Separate verified facts, supported inferences, contradictions, and unresolved uncertainty
+- End with one gap review for unanswered questions, contradictions, and consequential single-source claims; use an additional search where it could materially close a gap, otherwise leave it explicitly unresolved
 
 **Implementation Priorities:**
 - Three tiers: Immediate, Research, Future
