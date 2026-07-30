@@ -13,7 +13,8 @@ summarize or default to adoption.
 ```
 /distill-source <url-or-path>
 /distill-source https://arxiv.org/abs/xxxx.xxxxx
-/distill-source ~/Downloads/some-skill/SKILL.md "focus on retry logic"
+Example-only: ~/Downloads/some-skill/SKILL.md
+/distill-source <path> "focus on retry logic"
 ```
 
 Open `docs/distill-source-contract.md` before reading. It owns the source-coverage ledger, critical

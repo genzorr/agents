@@ -61,14 +61,14 @@ After confirming the task is workflow-shaped, decide what to produce. Modes comp
 find+run, author+prompt-only):
 
 1. **Find / reuse** — check for an existing fit **first**, before authoring anything: the bundled
-   `/deep-research`; project `.claude/workflows/*.js`; personal `~/.claude/workflows/*.js`. If one fits,
+   `/deep-research`; project `.claude/workflows/*.js`; personal `~/.claude/workflows/*.js` (runtime-home). If one fits,
    parameterize it with `args` instead of writing a new script.
 2. **Author** — write a script for this task, composing the patterns below. Discover the work-list inline
    first (list the files, find the channels, scope the diff), then encode the orchestration over it.
 3. **Run** — execute it this session via the `Workflow` tool (inline `script`, or `scriptPath` / `name`).
    The run is backgrounded; watch it with `/workflows`; it is resumable in-session.
 4. **Save** — persist a script that earned its keep: `.claude/workflows/<name>.js` (shared via the repo)
-   or `~/.claude/workflows/<name>.js` (personal). It becomes `/<name>`. Or ship it inside a skill — put the
+   or `~/.claude/workflows/<name>.js` (runtime-home) (personal). It becomes `/<name>`. Or ship it inside a skill — put the
    `.js` in the skill folder and reference it from SKILL.md as a **template** (adaptable), not a script to
    run verbatim.
 5. **Prompt-only** — produce a copyable handoff prompt + durable `WORKFLOW.md` for a *different* session to

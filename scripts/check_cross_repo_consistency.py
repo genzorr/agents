@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check asset ownership consistency across agents, harness, and session-harvester.
+"""Check asset ownership consistency across agents, Harness, Claude Headless, and session-harvester.
 
 This is a read-only S-17 guard. It verifies the repo split at the level that
 matters for install safety: physical skill/command/subagent source ownership and
@@ -154,14 +154,61 @@ def check_harness(harness: Path) -> list[str]:
 
 def check_session_harvester(harvester: Path) -> list[str]:
     errors: list[str] = []
-    skill_file = harvester / "harvest-sessions-skill.md"
-    if not skill_file.is_file():
-        return ["session-harvester: missing harvest-sessions-skill.md"]
-    fields = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
-    if fields.get("name") != SESSION_SKILL:
-        errors.append("session-harvester: skill frontmatter name must be harvest-sessions")
+    # Temporary compatibility for the single canonical-layout migration; remove the legacy branch after the canonical source is established everywhere.
+    legacy_skill = harvester / "harvest-sessions-skill.md"
+    canonical_dir = harvester / "skills" / SESSION_SKILL
+    canonical_skill = canonical_dir / "SKILL.md"
+    legacy_is_symlink = legacy_skill.is_symlink()
+    canonical_dir_is_symlink = canonical_dir.is_symlink()
+    canonical_skill_is_symlink = canonical_skill.is_symlink()
+    has_legacy = legacy_skill.is_file() and not legacy_is_symlink
+    has_canonical = (
+        canonical_skill.is_file()
+        and not canonical_dir_is_symlink
+        and not canonical_skill_is_symlink
+    )
+    if legacy_is_symlink:
+        errors.append("session-harvester: legacy harvest-sessions-skill.md must not be a symlink")
+    elif legacy_skill.exists() and not has_legacy:
+        errors.append("session-harvester: legacy harvest-sessions-skill.md must be a regular file")
+    if canonical_dir_is_symlink:
+        errors.append("session-harvester: canonical skills/harvest-sessions directory must not be a symlink")
+    elif canonical_skill_is_symlink:
+        errors.append("session-harvester: canonical skills/harvest-sessions/SKILL.md must not be a symlink")
+    elif canonical_dir.exists() and not has_canonical:
+        errors.append("session-harvester: canonical skills/harvest-sessions must contain SKILL.md")
+    if has_legacy == has_canonical:
+        if has_legacy:
+            errors.append(
+                "session-harvester: must contain exactly one legacy or canonical harvest-sessions source, not both"
+            )
+        else:
+            errors.append(
+                "session-harvester: missing exactly one legacy harvest-sessions-skill.md or canonical skills/harvest-sessions/SKILL.md"
+            )
+    skill_file = None
+    if has_canonical and not has_legacy:
+        skill_file = canonical_skill
+    elif has_legacy and not has_canonical:
+        skill_file = legacy_skill
+    fields = parse_frontmatter(skill_file.read_text(encoding="utf-8")) if skill_file else {}
+    if skill_file and fields.get("name") != SESSION_SKILL:
+        errors.append("session-harvester: selected skill frontmatter name must be harvest-sessions")
     if skill_dirs(harvester, "codex") or skill_dirs(harvester, "claude"):
         errors.append("session-harvester: unexpected codex/ or claude/ skill tree present")
+
+    skill_root = harvester / "skills"
+    if skill_root.is_dir():
+        foreign_dirs = {
+            path.name for path in skill_root.iterdir() if path.is_dir() and path.name != SESSION_SKILL
+        }
+        if foreign_dirs:
+            errors.append(f"session-harvester: foreign skill directories present: {sorted(foreign_dirs)}")
+        unexpected_entries = {
+            path.name for path in skill_root.iterdir() if not path.is_dir() and path.name != ".gitkeep"
+        }
+        if unexpected_entries:
+            errors.append(f"session-harvester: unexpected files in skills root: {sorted(unexpected_entries)}")
 
     script = harvester / "scripts" / "install-claude-skill.sh"
     if not script.is_file():
@@ -175,11 +222,13 @@ def check_session_harvester(harvester: Path) -> list[str]:
     return errors
 
 
-def check_disjoint_ownership(agents: Path, harness: Path) -> list[str]:
+def check_disjoint_ownership(agents: Path, harness: Path, claude_headless: Path) -> list[str]:
+    """Reject duplicate physical ownership without prescribing sibling asset sets."""
     errors: list[str] = []
     skill_owned = {
         "agents": skill_dirs(agents, "codex") | skill_dirs(agents, "claude"),
         "harness": skill_dirs(harness, "codex") | skill_dirs(harness, "claude"),
+        "claude-headless": skill_dirs(claude_headless, "codex") | skill_dirs(claude_headless, "claude"),
         "session-harvester": {SESSION_SKILL},
     }
     labels = sorted(skill_owned)
@@ -216,6 +265,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--agents", type=Path, default=default_agents)
     parser.add_argument("--harness", type=Path, default=default_repos / "harness")
+    parser.add_argument("--claude-headless", type=Path, default=default_repos / "claude-headless")
     parser.add_argument("--session-harvester", type=Path, default=default_repos / "session-harvester")
     args = parser.parse_args()
 
@@ -223,6 +273,7 @@ def main() -> int:
     for label, repo in (
         ("agents", args.agents),
         ("harness", args.harness),
+        ("claude-headless", args.claude_headless),
         ("session-harvester", args.session_harvester),
     ):
         if not repo.is_dir():
@@ -232,7 +283,7 @@ def main() -> int:
         errors.extend(check_agents(args.agents))
         errors.extend(check_harness(args.harness))
         errors.extend(check_session_harvester(args.session_harvester))
-        errors.extend(check_disjoint_ownership(args.agents, args.harness))
+        errors.extend(check_disjoint_ownership(args.agents, args.harness, args.claude_headless))
 
     for error in errors:
         print(f"FAIL  {error}", file=sys.stderr)

@@ -1,0 +1,212 @@
+"""Focused behavior contracts for skill portability and ownership guards."""
+
+import importlib.util
+import tempfile
+import unittest
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_script(name: str):
+    path = REPO_ROOT / "scripts" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+VALIDATE_SKILLS = load_script("validate_skills")
+CROSS_REPO = load_script("check_cross_repo_consistency")
+
+
+def write_skill(repo: Path, platform: str, name: str, body: str = "") -> None:
+    path = repo / platform / "skills" / name / "SKILL.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"---\nname: {name}\ndescription: Test skill.\n---\n\n{body}", encoding="utf-8")
+
+
+class SkillValidatorContractsTest(unittest.TestCase):
+    def test_user_home_dependency_requires_path_local_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            skill_dir = repo / "codex" / "skills" / "portable"
+            write_skill(repo, "codex", "portable", "Open /Users/alice/private-policy.md before continuing.")
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(warnings, [])
+            self.assertEqual(len(errors), 1)
+            self.assertIn("operative user-home dependency", errors[0])
+
+            write_skill(repo, "codex", "portable", "Example-only: /Users/alice/private-policy.md is illustrative.")
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(errors, [])
+            self.assertEqual(len(warnings), 1)
+            self.assertIn("classified example-only", warnings[0])
+
+            write_skill(
+                repo,
+                "codex",
+                "portable",
+                "Read /Users/alice/private-policy.md; example-only: /Users/alice/illustration.md.",
+            )
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("/Users/alice/private-policy.md", errors[0])
+            self.assertEqual(len(warnings), 1)
+            self.assertIn("/Users/alice/illustration.md", warnings[0])
+
+    def test_hard_coded_posix_and_windows_homes_need_example_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            skill_dir = repo / "codex" / "skills" / "portable"
+            write_skill(
+                repo,
+                "codex",
+                "portable",
+                'Read "/home/alice/private.md", C:\\Users\\Alice\\private.md, and /Users/alice/private.md.',
+            )
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(warnings, [])
+            self.assertEqual(len(errors), 3)
+            self.assertTrue(all("operative user-home dependency" in error for error in errors))
+
+            write_skill(
+                repo,
+                "codex",
+                "portable",
+                "example-only: /home/alice/private.md; example-only: C:\\Users\\Alice\\private.md; example-only: /Users/alice/private.md.",
+            )
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(errors, [])
+            self.assertEqual(len(warnings), 3)
+            self.assertTrue(all("classified example-only" in warning for warning in warnings))
+            self.assertTrue(all(not warning.endswith(".") for warning in warnings))
+
+            write_skill(repo, "codex", "portable", "runtime-home: /Users/alice/private.md")
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(warnings, [])
+            self.assertEqual(len(errors), 1)
+            self.assertIn("/Users/alice/private.md", errors[0])
+
+    def test_home_relative_paths_need_example_or_runtime_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            skill_dir = repo / "codex" / "skills" / "portable"
+            write_skill(repo, "codex", "portable", 'Read "~", "~/.cache/a.md", $HOME/.cache/b.md, and ${HOME}/.cache/c.md.')
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(warnings, [])
+            self.assertEqual(len(errors), 4)
+
+            write_skill(
+                repo,
+                "codex",
+                "portable",
+                "runtime-home: ~; runtime-home: ~/.cache/a.md; $HOME/.cache/b.md (runtime-home); example-only: ${HOME}/.cache/c.md.",
+            )
+            dependencies, examples, runtime_homes = VALIDATE_SKILLS.user_home_references(
+                VALIDATE_SKILLS.skill_directory_text(skill_dir)
+            )
+            self.assertEqual(dependencies, [])
+            self.assertEqual(examples, ["${HOME}/.cache/c.md"])
+            self.assertEqual(runtime_homes, ["$HOME/.cache/b.md", "~", "~/.cache/a.md"])
+            errors, warnings = VALIDATE_SKILLS.check_doc_references(skill_dir, repo)
+            self.assertEqual(errors, [])
+            self.assertEqual(len(warnings), 1)
+            self.assertIn("example-only", warnings[0])
+
+    def test_skill_lifecycle_twins_use_the_traveling_agents_policy(self) -> None:
+        policy = (REPO_ROOT / "docs/skill-lifecycle-policy.md").read_text(encoding="utf-8")
+        self.assertIn("Generic Skill Lifecycle Policy and Audit Method", policy)
+        self.assertIn("Harness's lifecycle policy is the stricter project-specific overlay", policy)
+        self.assertIn("hard-coded user-home dependency", policy)
+        for platform in ("codex", "claude"):
+            text = (REPO_ROOT / platform / "skills" / "skill-lifecycle" / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("docs/skill-lifecycle-policy.md", text)
+            self.assertIn("Harness lifecycle policy as the project-specific overlay", text)
+            self.assertNotIn("/Users/", text)
+
+    def test_claude_headless_physical_ownership_is_checked_for_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            claude_headless = root / "claude-headless"
+            write_skill(claude_headless, "codex", "claude-headless")
+            write_skill(claude_headless, "codex", "delegate-to-claude")
+            write_skill(claude_headless, "claude", "claude-headless")
+
+            agents = root / "agents"
+            harness = root / "harness"
+            write_skill(agents, "codex", "claude-headless")
+            errors = CROSS_REPO.check_disjoint_ownership(agents, harness, claude_headless)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("agents and claude-headless", errors[0])
+
+    def test_session_harvester_transition_layouts_are_exclusive_and_owned(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            harvester = Path(tmp)
+            script = harvester / "scripts" / "install-claude-skill.sh"
+            script.parent.mkdir(parents=True)
+            script.write_text("SRC=skills/harvest-sessions\n", encoding="utf-8")
+
+            legacy = harvester / "harvest-sessions-skill.md"
+            legacy.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
+            self.assertEqual(CROSS_REPO.check_session_harvester(harvester), [])
+
+            legacy.unlink()
+            canonical = harvester / "skills" / "harvest-sessions" / "SKILL.md"
+            canonical.parent.mkdir(parents=True)
+            canonical.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
+            self.assertEqual(CROSS_REPO.check_session_harvester(harvester), [])
+
+            legacy.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("exactly one legacy or canonical" in error for error in errors))
+
+            legacy.unlink()
+            canonical.unlink()
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("missing exactly one legacy" in error for error in errors))
+            self.assertTrue(any("must contain SKILL.md" in error for error in errors))
+
+            canonical.write_text("---\nname: wrong-name\n---\n", encoding="utf-8")
+            foreign = harvester / "skills" / "foreign-skill"
+            foreign.mkdir()
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("frontmatter name" in error for error in errors))
+            self.assertTrue(any("foreign skill directories" in error for error in errors))
+
+    def test_session_harvester_transition_layout_rejects_symlinked_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            harvester = Path(tmp) / "session-harvester"
+            script = harvester / "scripts" / "install-claude-skill.sh"
+            script.parent.mkdir(parents=True)
+            script.write_text("SRC=skills/harvest-sessions\n", encoding="utf-8")
+            unreadable_as_utf8 = Path(tmp) / "invalid-skill.md"
+            unreadable_as_utf8.write_bytes(b"\xff")
+
+            legacy = harvester / "harvest-sessions-skill.md"
+            legacy.symlink_to(unreadable_as_utf8)
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("legacy harvest-sessions-skill.md must not be a symlink" in error for error in errors))
+
+            legacy.unlink()
+            external_skill = Path(tmp) / "external-skill.md"
+            external_skill.write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
+            external_dir = Path(tmp) / "external-skill"
+            external_dir.mkdir()
+            (external_dir / "SKILL.md").write_text("---\nname: harvest-sessions\n---\n", encoding="utf-8")
+            canonical_dir = harvester / "skills" / "harvest-sessions"
+            canonical_dir.parent.mkdir()
+            canonical_dir.symlink_to(external_dir, target_is_directory=True)
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("canonical skills/harvest-sessions directory must not be a symlink" in error for error in errors))
+
+            canonical_dir.unlink()
+            canonical_dir.mkdir()
+            (canonical_dir / "SKILL.md").symlink_to(external_skill)
+            errors = CROSS_REPO.check_session_harvester(harvester)
+            self.assertTrue(any("canonical skills/harvest-sessions/SKILL.md must not be a symlink" in error for error in errors))
+
+
+if __name__ == "__main__":
+    unittest.main()

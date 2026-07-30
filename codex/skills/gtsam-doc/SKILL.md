@@ -11,10 +11,10 @@ Use when the user asks about GTSAM APIs or concepts.
 
 Check in this order:
 
-1. Cache: `~/.codex/skills/gtsam-doc/cache/<topic>.md`
+1. Cache: `~/.codex/skills/gtsam-doc/cache/<topic>.md` (runtime-home)
 2. Local source, if available (prefer `$GTSAM_SOURCE_DIR`):
    - `$GTSAM_SOURCE_DIR`
-   - `~/bin/gtsam`
+   - `~/bin/gtsam` (runtime-home)
 3. Official API docs: `https://gtsam.org/doxygen/`
 4. Official tutorials: `https://borglab.github.io/gtsam/`
 

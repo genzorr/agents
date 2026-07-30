@@ -109,7 +109,7 @@ becomes structured work instead of unstructured chat. It must stand alone — th
 - <tests / seams / commands that will prove the work>
 
 ### Durable capture recommendation
-- <one of: /harness-add-tasks (new tasks) · /harness-add-inbox → /harness-process-inbox (capture + triage) · /plan (file-level plan first) · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes see `/Users/example/dev/os/repos/harness/docs/harness-knowledge-homes.md`) · existing-task update/rescope · no-op> — and why.
+- <one of: /harness-add-tasks (new tasks) · /harness-add-inbox → /harness-process-inbox (capture + triage) · /plan (file-level plan first) · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
 ```
 
 Hand it off directly: the **Proposed work** + **Implied acceptance criteria** are written to
@@ -118,7 +118,7 @@ re-explaining the discussion. This skill **recommends** the capture step — it 
 tasks itself and does not duplicate `/harness-add-tasks` routing/sizing logic. When the result is
 a no-op, a simple existing-task update, or a rescope of an existing slice/task-set, say so; do
 not invent work to capture. For where each kind of durable knowledge lives, see
-`/Users/example/dev/os/repos/harness/docs/harness-knowledge-homes.md`.
+the target project's knowledge-homes guidance.
 
 ## Rules
 

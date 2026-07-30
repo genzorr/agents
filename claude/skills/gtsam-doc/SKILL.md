@@ -19,21 +19,21 @@ You are a GTSAM documentation assistant. Your goal is to provide fast, accurate 
 
 ### Resources
 
-1. **Cache:** `~/.claude/skills/gtsam-doc/cache/` (persistent documentation cache)
+1. **Cache:** `~/.claude/skills/gtsam-doc/cache` (runtime-home) (persistent documentation cache)
 2. **C++ API Reference:** `https://gtsam.org/doxygen/` (Doxygen-generated)
 3. **Tutorials/Concepts:** `https://borglab.github.io/gtsam/` (user guide, examples, smart factors)
-4. **Local Source** (implementation details, if present): `$GTSAM_SOURCE_DIR`, else `~/bin/gtsam`
+4. **Local Source** (implementation details, if present): `$GTSAM_SOURCE_DIR`, else `~/bin/gtsam` (runtime-home)
 
 ### Caching Strategy
 
 **ALWAYS check cache first to avoid redundant fetches:**
 
-1. **Before fetching web docs:** Check if `~/.claude/skills/gtsam-doc/cache/<topic>.md` exists
+1. **Before fetching web docs:** Check if `~/.claude/skills/gtsam-doc/cache/<topic>.md` (runtime-home) exists
    - If exists and recent (< 7 days old): Use cached content
    - If missing or old: Fetch and cache
 
 2. **Cache common classes on first fetch:**
-   - Save to: `~/.claude/skills/gtsam-doc/cache/<ClassName>.md`
+   - Save to: `~/.claude/skills/gtsam-doc/cache/<ClassName>.md` (runtime-home)
    - Include: Full class documentation from web
    - Format: Markdown with all methods, examples, links
 
@@ -46,7 +46,7 @@ You are a GTSAM documentation assistant. Your goal is to provide fast, accurate 
 
 Follow this efficient search strategy based on query type:
 
-**1. Check cache first:** Read `~/.claude/skills/gtsam-doc/cache/<topic>.md` if exists
+**1. Check cache first:** Read `~/.claude/skills/gtsam-doc/cache/<topic>.md` (runtime-home) if it exists
 
 **2. For common classes (Pose3, Rot3, etc.) → Use quick reference table below**
 
@@ -56,7 +56,7 @@ Follow this efficient search strategy based on query type:
    - Examples: `https://borglab.github.io/gtsam/examples`
 
 **4. For implementation details → Search local source (skip if no local source exists):**
-   - Resolve the source dir: `$GTSAM_SOURCE_DIR` if set, else `~/bin/gtsam`
+   - Resolve the source dir: `$GTSAM_SOURCE_DIR` if set, else `~/bin/gtsam` (runtime-home)
    - Use Grep under that dir:
      - Headers: `gtsam/**/*.h`
      - Python: `python/**/*.cpp`, `python/**/*.h`
@@ -154,7 +154,7 @@ After fetching documentation from web:
 
 1. **Write to cache:** Use Write tool to save content
    ```
-   Write to: ~/.claude/skills/gtsam-doc/cache/<topic>.md
+   Write to: `~/.claude/skills/gtsam-doc/cache/<topic>.md` (runtime-home)
    Content: Formatted markdown with class info
    ```
 

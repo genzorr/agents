@@ -20,7 +20,7 @@ cross-repo installer. Each repo:
 
 - installs, uninstalls, updates, and prunes **only the assets physically present in
   that repo's own source tree** (`agents/{codex,claude}/...`,
-  `harness/{codex,claude}/...`, `session-harvester/...`);
+  `harness/{codex,claude}/...`, `session-harvester/skills/harvest-sessions/...`);
 - never manages, prunes, or removes another repo's assets, even if that repo's
   install target lives in the same global `~/.codex` or `~/.claude` directory;
 - never manages, prunes, or removes a foreign/unknown installed asset (e.g.
@@ -36,8 +36,8 @@ tree, never hand-maintained as a separate claim.
 The target shape below is what future implementations may converge on. **Current
 repo support is intentionally uneven and documented in §10**: Agents implements
 install/prune/uninstall flags, Harness has single-mode scripts with
-`--dry-run`/`--diff`/`--prune`, and session-harvester has a single-skill
-install/uninstall script. This contract describes semantics and ownership
+`--dry-run`/`--diff`/`--prune`, and session-harvester has a complete-directory
+single-skill installer with `--dry-run`/`--diff`/`--prune`/`--uninstall`. This contract describes semantics and ownership
 invariants first; it does not claim every repo already exposes every verb.
 
 | Command | Mutates? | Idempotent? | What it does |
@@ -50,10 +50,7 @@ invariants first; it does not claim every repo already exposes every verb.
 | `prune` | yes | yes | Removes install targets that are (a) in this repo's managed set and (b) absent from this repo's current source tree. See the prune invariant in §3. Never removes an unmanaged or foreign target. |
 
 A repo may mark any command **non-applicable** if its owned asset set doesn't need
-it — e.g. session-harvester manages exactly one Claude skill file, so it may
-implement only `install`/`uninstall`/`validate` and document `status`, `update`, and
-`prune` as "not applicable: single-asset repo, re-run install to update, delete
-manually to uninstall" rather than building unused machinery. Non-applicability must
+it. Non-applicability must
 be **stated in that repo's install docs**, not silently omitted — a missing command
 with no note is a gap; a missing command with a one-line "not applicable because…"
 is a conforming implementation of this contract.
@@ -248,13 +245,9 @@ them. This mechanism is repo-neutral:
 |---|---|---|---|---|---|---|---|
 | **agents** | everything in `catalog.json` (generic personal/global skills, commands, subagents, rules, Codex `AGENTS.md`, Claude notification hook) | yes | yes | yes | yes | yes | yes |
 | **harness** | `harness-*` skills (both platforms), Claude `execute` command, Claude `harness-task-bootstrap`/`task-verifier` subagents, the Codex Stop-gate hook (`hooks.json` + `hooks/stop.sh` + `hooks/notifications.sh`, kept together because `stop.sh` sources `notifications.sh` as a sibling) | yes (`uv run python scripts/validate_skills.py`) | partial: `--dry-run --diff` reports source-vs-installed drift | yes | unsupported/deferred; not exposed by current scripts | re-run install | yes (`--prune`) |
-| **session-harvester** | `harvest-sessions` (Claude skill) only | yes | not applicable — single asset, `status` adds no value over checking one path | yes | yes | not applicable — re-run `install` | not applicable — single asset, delete manually or via `uninstall` |
+| **session-harvester** | `skills/harvest-sessions/` (one Claude skill directory, including traveling references) | yes | yes (`--dry-run --diff`) | yes | yes (`--uninstall`) | re-run install | yes (`--prune`, limited to stale files inside the owned skill directory) |
 
-session-harvester satisfies this contract with a minimal `install`/`uninstall` for
-its one skill (plus any doc it statically references) and documents the three
-non-applicable commands with the one-line reasons above, per the non-applicability
-rule in §2 — it does not need to build `status`/`update`/`prune` machinery for a
-single-asset managed set.
+session-harvester copies its complete `skills/harvest-sessions/` source directory, including traveling references, into its one owned Claude target. Its `--diff` is the read-only status surface, a normal install is the update surface, `--prune` removes only stale files inside that owned directory, and `--uninstall` removes that directory. It never manages another skill or any Codex asset.
 
 ## References
 

@@ -57,7 +57,7 @@ meaningfully more tokens — match the structure to the task.
 After confirming the task is workflow-shaped, decide what artifact to produce. Modes compose:
 
 1. **Find / reuse** — check for an existing fit first: the repo's `.claude/workflows/*.js` (project), personal
-   `~/.claude/workflows/*.js`, or the bundled `/deep-research`. If one fits, the handoff names it
+   `~/.claude/workflows/*.js` (runtime-home), or the bundled `/deep-research`. If one fits, the handoff names it
    (`Run /<name>`) and the input it takes via `args`, instead of authoring a new script.
 2. **Author** — write a script for this task, composing the patterns below, as a durable artifact the Claude
    session will run. Discover the work-list inline first, then encode the orchestration over it.

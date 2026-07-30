@@ -12,6 +12,8 @@ Hard failures (exit 1):
     - static doc references (`docs/*.md` strings under a skill directory) that
       do not resolve to a repo file, unless explicitly marked as known example
       placeholders.
+    - operative user-home path dependencies under a skill directory;
+      installed skills cannot rely on a developer's home directory.
 
 Warnings (do not fail):
     - cross-tree presence parity — a skill present in one tree but not the
@@ -50,6 +52,24 @@ CLAUDE_RUNTIME_FIELDS = ("model", "effort", "allowed-tools", "argument-hint")
 # cross-repo references such as `/Users/.../docs/name.md` are intentionally not
 # travel candidates for this repo.
 DOC_REF_RE = re.compile(r"docs/[A-Za-z0-9/_.-]+\.md")
+
+# Hard-coded user homes are never available after installation. Home-relative
+# paths can be portable runtime locations, but only when the author explicitly
+# classifies them on the same line. The match deliberately excludes Markdown and
+# sentence punctuation so quoted examples report the path, not its wrapper.
+USER_HOME_REF_RE = re.compile(
+    r"(?<![A-Za-z0-9_])(?P<path>(?:"
+    r"/(?:Users|home)/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.@%+=~*<>-]+)*"
+    r"|[A-Za-z]:[\\/]+Users[\\/]+[A-Za-z0-9_.-]+(?:[\\/]+[A-Za-z0-9_.@%+=~*<>-]+)*"
+    r"|~(?:(?:[\\/]+[A-Za-z0-9_.@%+=~*<>-]+)+|(?=$|[\s`'\".,;:!?()\[\]{}]))"
+    r"|(?:\$HOME(?![A-Za-z0-9_])|\$\{HOME\})(?:[\\/]+[A-Za-z0-9_.@%+=~*<>-]+)*"
+    r"))",
+    re.IGNORECASE,
+)
+EXAMPLE_ONLY_PREFIX_RE = re.compile(r"example-only:\s*$", re.IGNORECASE)
+EXAMPLE_ONLY_SUFFIX_RE = re.compile(r"\s*[`'\"]?\s*\(example-only\)", re.IGNORECASE)
+RUNTIME_HOME_PREFIX_RE = re.compile(r"runtime-home:\s*$", re.IGNORECASE)
+RUNTIME_HOME_SUFFIX_RE = re.compile(r"\s*[`'\"]?\s*\(runtime-home\)", re.IGNORECASE)
 
 # Run-local templated / generated doc paths (e.g. `docs/harness/ops/RUN_ID/*`,
 # `docs/audits/YYYYMMDD-*`). These are produced inside a run directory at runtime
@@ -138,19 +158,51 @@ def skill_directory_text(skill_dir: Path) -> str:
     return "\n".join(chunks)
 
 
+def user_home_references(text: str) -> tuple[list[str], list[str], list[str]]:
+    """Return (operative dependencies, example-only paths, runtime-home paths).
+
+    A hard-coded POSIX or Windows user home may only be an `example-only` path.
+    A portable `~`, `$HOME`, or `${HOME}` path may instead be a declared
+    `runtime-home` location. Both classifications are deliberately path-local.
+    """
+    dependencies: set[str] = set()
+    examples: set[str] = set()
+    runtime_homes: set[str] = set()
+    for match in USER_HOME_REF_RE.finditer(text):
+        line_start = text.rfind("\n", 0, match.start()) + 1
+        line_end = text.find("\n", match.end())
+        line = text[line_start : None if line_end == -1 else line_end]
+        relative_start = match.start() - line_start
+        path = match.group("path").rstrip(".,;:!?")
+        relative_end = relative_start + len(path)
+        if EXAMPLE_ONLY_PREFIX_RE.search(line[:relative_start]) or EXAMPLE_ONLY_SUFFIX_RE.match(
+            line[relative_end:]
+        ):
+            examples.add(path)
+        elif path.startswith(("~", "$HOME", "${HOME}")) and (
+            RUNTIME_HOME_PREFIX_RE.search(line[:relative_start])
+            or RUNTIME_HOME_SUFFIX_RE.match(line[relative_end:])
+        ):
+            runtime_homes.add(path)
+        else:
+            dependencies.add(path)
+    return sorted(dependencies), sorted(examples), sorted(runtime_homes)
+
+
 def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], list[str]]:
     """Return (hard errors, warnings) for static doc refs.
 
-    Missing refs are packaging failures because they would not travel into the
-    install tree. A tiny explicit allowlist covers example-only placeholders in
-    reference material.
+    Missing refs and operative user-home dependencies are packaging failures
+    because they would not travel into the install tree. A tiny explicit allowlist
+    covers example-only placeholders in reference material.
     """
     skill_file = skill_dir / "SKILL.md"
     if not skill_file.is_file():
         return [], []
     errors: list[str] = []
     warnings: list[str] = []
-    for ref in doc_references(skill_directory_text(skill_dir)):
+    text = skill_directory_text(skill_dir)
+    for ref in doc_references(text):
         if (repo_root / ref).is_file():
             continue
         message = f"{skill_dir.name}: doc reference not found: {ref}"
@@ -158,6 +210,18 @@ def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], l
             warnings.append(f"{message} (example-only)")
         else:
             errors.append(message)
+    dependencies, examples, _runtime_homes = user_home_references(text)
+    errors.extend(
+        f"{skill_dir.name}: operative user-home dependency: {path} "
+        "(use a traveling repo-relative reference; classify a non-operative illustration "
+        "as `example-only: <path>` or `<path> (example-only)`, or a portable `~`/`$HOME` "
+        "runtime location as `runtime-home: <path>` or `<path> (runtime-home)`)"
+        for path in dependencies
+    )
+    warnings.extend(
+        f"{skill_dir.name}: user-home path classified example-only: {path}"
+        for path in examples
+    )
     return errors, warnings
 
 

@@ -1,127 +1,15 @@
 ---
 name: skill-lifecycle
-description: Audit the repo-managed skill catalog and process docs against an overlap/staleness/sediment rubric and propose consolidate/slim/merge/deprecate/remove actions, plus the small/self-contained/composable authoring norm new skills must follow. Use when asked to prune skills, check for skill overlap or bloat, find stale process docs, or decide whether a new skill should exist. Propose-only — it never edits, merges, or deletes a skill.
+description: Audit repo-managed skills and instruction assets for overlap, staleness, portability, or bloat and propose lifecycle decisions. Use when asked to prune skills, check for skill overlap, review process sediment, or decide whether a new skill should exist. Proposal-only: it never edits, merges, deprecates, or removes an asset.
 ---
 
 # Skill Lifecycle
 
-The invocable front door to the skill lifecycle policy. It **audits and proposes** — it
-never edits, merges, deprecates, or deletes a skill or doc. Whole-skill merge/delete is a
-reviewed action gated on operator approval; the bounded execution of accepted proposals is a
-separate implementation task.
+This is the driver for a bounded lifecycle audit. It produces evidence-backed proposals; it never mutates assets, creates tasks, installs skills, or treats a worker's audit as an implementation verdict.
 
-`/Users/example/dev/os/repos/harness/docs/harness-skill-lifecycle-policy.md` is the decision policy (defer-to-native ladder; add /
-change / merge / deprecate / remove gates; Codex/Claude ownership rules) and
-`/Users/example/dev/os/repos/harness/docs/harness-skill-audit.md` is its audit method (signals, categories, thresholds). This skill
-runs that policy on demand and emits proposals — it does not restate the gates; read those docs
-for the exact thresholds.
+1. Identify the repository that physically owns each asset before assessing it. Apply the generic policy and audit method in `docs/skill-lifecycle-policy.md`; open `docs/skill-authoring-principles.md` when judging authoring shape or composition roles. Done when every finding has the correct ownership and authority.
+2. For Harness-owned `harness-*` assets, treat the Harness lifecycle policy as the project-specific overlay. Do not extend that overlay to generic assets or move physical ownership across repositories.
+3. Compare responsibilities by description and body, collect cited signals, and choose exactly one lifecycle category per finding. Default thin evidence to `keep + watch`; require operator approval for merge, deprecate, or remove proposals.
+4. Return the proposal format from `docs/skill-lifecycle-policy.md`. Done when each proposed change names its evidence, bounded action, content owner where relevant, and any required approval.
 
-## Authoring norm (small / self-contained / composable / progressively disclosed)
-
-Every new or edited skill must follow this norm; proposals to slim are measured against it.
-Use `docs/skill-authoring-principles.md` as the compact craft rubric for invocation cost,
-information hierarchy, completion criteria, leading terms, no-ops, duplication, sediment, and
-sprawl. `skill-creator` owns mechanics; this skill owns lifecycle policy and audit decisions.
-
-- **Small — as small as correct.** One responsibility, one clear invocation boundary. Not
-  uniformly tiny: keep the guardrails, the verification steps, and anything a fresh agent could
-  not infer. Cut filler, restated policy, and duplicated context.
-- **Self-contained.** Co-locate what the skill needs, or reference a doc that **travels on
-  install** (the installers copy `docs/<name>.md` paths a skill references into the install
-  tree). A reference that only resolves from a dev checkout is a packaging bug.
-- **Progressively disclosed.** The `description` is always loaded; the `SKILL.md` body loads when
-  the skill runs; a referenced file loads only when the model opens it. So when a skill has a short
-  always-needed core plus a heavy block needed only sometimes (a large output template, long
-  examples), keep the core in `SKILL.md` and move the heavy block to a file the body points to —
-  alongside the skill for 1:1 content, a shared `docs/` file only when several skills repeat the
-  same material. Keep twins semantically aligned, not file-shape identical: never pad an
-  already-lean twin for symmetry. The same shape applies to commands and agent definitions. Full
-  convention: `/Users/example/dev/os/repos/harness/docs/harness-skill-lifecycle-policy.md` §8.
-- **Composable.** Reference or hand off to other skills instead of duplicating their logic
-  (e.g. delegate diff critique to `/review-change`, task creation to `/harness-add-tasks`). Name
-  the skill; do not inline its body. Know each skill's **composition role** — driver, router,
-  lens, helper, or protocol — and the precedence `protocol > driver > router > helper > lens`
-  (`docs/skill-authoring-principles.md` §Composition Roles / §Orchestration Discipline). A
-  lens-shaped skill must not relax a protocol or seize the driver seat.
-
-## What to audit
-
-Scope is the repo-managed instruction surface, not project code:
-
-- `codex/skills/` and `claude/skills/` skill bodies + frontmatter (both trees).
-- `claude/commands/`, `claude/agents/`, `claude/rules/`.
-- Installed/project instruction docs: `AGENTS.md`, tracked `.claude/CLAUDE.md`, READMEs, and the
-  referenced `docs/` guides.
-
-## Overlap / staleness rubric (skills, commands, rules)
-
-Compare by description **and** body, never by name alone. Propose one category per finding:
-
-- **Slim** — body far longer than correct, restates policy that lives in a traveling doc, or
-  duplicates a sibling tree's content verbatim → propose extraction + thin reference. (This is
-  the common case and the bounded slimming pass executes accepted slim proposals.)
-- **Merge** — two surfaces share responsibility and one can absorb the other without losing a
-  platform-specific need → name the survivor and the content owner (one owns the concept, the
-  other cross-references). Do not merge across trees when the platform framing legitimately
-  differs.
-- **Change** — a concrete cited defect fixable without redefining the skill: stale repo path,
-  hardcoded machine-specific path, mis-firing description, twin-frontmatter drift.
-- **Deprecate → remove** — disuse, duplication, or replacement by a model-native mechanism.
-  Harness has no per-skill invocation telemetry, so disuse-based deprecate/remove needs operator
-  confirmation; never infer it. Removal is never automatic.
-- **Keep + watch** — thin or contested evidence. The default when a finding is not strong.
-
-Also flag **composition-role hazards** as `change`: a skill that behaves like a driver but is
-framed as a lens (or vice versa), a lens that relaxes a protocol, or two skills claiming the
-driver seat for one lifecycle. Check every new or edited skill for role clarity and protocol
-safety, not only duplication.
-
-## Process-sediment rubric (docs)
-
-Old process artifacts should not masquerade as current truth (destination over journey): the
-durable record — an ADR, Evidence (`E-N`), a task `# Outcome`, or the canonical board (see
-`/Users/example/dev/os/repos/harness/docs/harness-knowledge-homes.md` for where each lives) — is the truth; the artifact that
-produced it is provenance. **Flag, do not delete.** Candidates:
-
-- A PRD/design doc whose decisions have shipped and are now captured in a durable record, with no
-  skill/doc referencing it as live guidance → propose archive/trim, citing the superseding record.
-- Scratch left in the tree: `GOAL.md`, `WORKFLOW.md`, prompts, logs, generated output.
-- Superseded run docs under `docs/harness/ops/<run>/` that no live guidance references.
-
-A flag must cite both the artifact and the durable record that now supersedes it. If no durable
-record exists, the artifact is not sediment — it is the only copy; propose capture, not removal.
-
-## Should this skill exist at all?
-
-Before proposing a *new* skill, walk the defer-to-native ladder in the policy doc: standing
-guidance → AGENTS.md/CLAUDE.md; a doc-shaped one-off → a `GOAL.md`/`WORKFLOW.md`; a discrete
-on-demand capability → a skill; explicit invocation / fresh context / fan-out → command /
-subagent / workflow. Add a skill only when no lower tier suffices and its responsibility is
-distinct from every existing surface in both trees.
-
-## Output: proposals
-
-Audit-only. Emit a ranked proposal list; do not touch any file.
-
-```markdown
-## Skill lifecycle proposals
-
-1. <skill/doc> — <slim | merge | change | deprecate | remove | keep+watch | new-skill>
-   Evidence: <description+body overlap, line count, stale path, superseding record — be concrete>
-   Proposed action: <what to do; for merge name survivor + content owner; for remove name the soak>
-   Approval: <"operator approval required" for any merge/remove/deprecate>
-
-Authoring-norm violations:
-- <skill> — <restates traveling-doc policy / not self-contained / duplicates sibling tree>
-```
-
-Lead with the highest-confidence, highest-payoff findings. State install verification belongs to
-whoever executes an accepted proposal (`install-claude.sh`/`install-codex.sh --dry-run --diff` +
-`--prune` review), not to this audit.
-
-## Guardrails
-
-- Propose only. Never edit, merge, deprecate, or delete a skill or doc here.
-- Any merge/remove/deprecate is gated on operator approval and a reviewed proposal.
-- Keep `claude/` and `codex/` parity in view: dual skills must stay name-aligned; flag drift.
-- No daemons, schedulers, MCP, UI, telemetry subsystem, or `harness-core`/CLI/Python changes.
+Do not add telemetry, daemons, schedulers, MCP/UI systems, or Harness CLI/core changes through this audit. Installation verification belongs to the accepted implementation and uses scratch homes only.
