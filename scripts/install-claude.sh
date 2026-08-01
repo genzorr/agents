@@ -72,7 +72,7 @@ is_repo_managed_command() {
 
 is_repo_managed_rule() {
     case "$1" in
-        conciseness.md|reading-discipline.md|surgical-changes.md|think-before-coding.md) return 0 ;;
+        code-comments.md|conciseness.md|reading-discipline.md|surgical-changes.md|think-before-coding.md) return 0 ;;
         *) return 1 ;;
     esac
 }

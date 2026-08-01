@@ -515,6 +515,19 @@
   ],
   "rules": [
     {
+      "id": "code-comments",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/code-comments.md"
+      },
+      "install_target": {
+        "claude": "~/.claude/rules/code-comments.md"
+      },
+      "counterpart": "codex/AGENTS.md section"
+    },
+    {
       "id": "conciseness",
       "kind": "rule",
       "platforms": ["claude"],

@@ -51,6 +51,14 @@ Every changed line should trace to the user's request.
 
 Before reporting done, inspect the diff and make sure each changed line has a task-related reason, and that the change set as a whole addresses the actual request rather than a convenient proxy for it.
 
+## Code Comments
+
+Comments earn their place by explaining why, not what. Delete anything that restates the code, narrates how the change came about, or records investigation history — that belongs in the commit message or project tracking, not the source.
+
+Docstrings: a one-line summary plus Args/Returns/Raises. Design rationale, alternatives considered, and measurement history do not belong in a docstring.
+
+Applies to code you write. Do not restyle comments in code your task did not otherwise change.
+
 ## Sandbox Escalation
 
 - When an in-scope command fails with a likely sandbox denial (`EPERM`, `EACCES`, `Operation not permitted`, `Permission denied`, or `Read-only file system`), distinguish it from an application failure. If the action is non-destructive and still required, request one narrowly scoped escalation for the exact command. Do not broaden the command, invent a workaround, or retry a command that may have partially mutated state. If Auto-review denies the escalation, follow the denial or ask the user.
