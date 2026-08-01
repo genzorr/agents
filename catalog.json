@@ -210,7 +210,7 @@
         "codex": "~/.codex/skills/goal-prompt",
         "claude": "~/.claude/skills/goal-prompt"
       },
-      "counterpart": "twin (199 vs 181 ln)"
+      "counterpart": "twin (204 vs 181 ln)"
     },
     {
       "id": "grill-with-docs",
