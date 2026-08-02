@@ -15,7 +15,7 @@ The user-facing output is only the bundle location. Do not print the generated p
 
 ## Workflow
 
-1. Identify the target task type: coding, research, debugging, architecture/review, document analysis, log analysis, or mixed.
+1. Identify the target task type: coding, research, debugging, architecture/review, document analysis, log analysis, or mixed. Read the user's task for requested deliverable formats; invoking this skill does not request a PDF, while an explicit instruction such as "do provide PDF along with other output" does.
 2. Gather only relevant context for Oracle:
    - Prefer a curated context pack over a raw full-repo dump.
    - Include current git diff, relevant source files, tests, logs, configs, docs, papers, metrics, and prior research notes when they materially affect the answer.
@@ -23,7 +23,7 @@ The user-facing output is only the bundle location. Do not print the generated p
 3. Write a concise, information-dense prompt for the bundle that names the task, context, success criteria, constraints, evidence rules, output mode, and artifact format.
 4. Preserve exact names of files, functions, parameters, datasets, papers, metrics, configs, commands, and error strings.
 5. Separate known facts from assumptions and open questions.
-6. Choose the output artifact format using the artifact policy below.
+6. Choose the output artifact format using the artifact policy below, preserving any explicit PDF request from the user's task or prompt.
 7. Render the bundle to a file. A `/tmp/...` path is fine unless the user requested a specific location.
 8. Return only the bundle path unless the user explicitly asks for explanation, file selection rationale, the generated prompt, the command, or the rendered context pack.
 
@@ -91,12 +91,12 @@ oracle --render --render-plain \
 Choose the requested output format based on the task:
 
 - Markdown file: default for research notes, implementation plans, reviews, specs, hypotheses, and summaries.
-- PDF: use when the result should be shared, submitted, archived, or read as a polished report.
-- Both Markdown and PDF: use for important research/project outputs where Markdown is editable and PDF is shareable.
+- PDF: include only when the user's task explicitly asks for a PDF; do not infer it from the task type, importance, or file-generation availability.
+- Both Markdown and PDF: include only when the user's task explicitly asks for both or asks for a PDF along with the other output.
 - Diagrams/images: request them when architecture, pipelines, algorithms, experiment flow, causal mechanisms, or tradeoffs are central.
 - Tables: request them for comparisons, experiment matrices, literature evidence, decisions, risks, and ablations.
 
-If file generation is available, instruct GPT Pro to create downloadable `.md` and/or `.pdf` files. If file generation is not available, instruct it to output the complete Markdown content directly.
+Always instruct GPT Pro to create a downloadable `.md` file. Instruct GPT Pro to create a PDF only if the user explicitly asks for it in the prompt, and if so, create it from the finalized Markdown in one export, keep the layout simple, skip page-by-page visual/CV verification and iterative layout polishing, and perform only a lightweight sanity check that the file exists and is readable. If the user does not explicitly request a PDF, instruct GPT Pro not to create one. If requested file generation is unavailable, instruct it to output the complete Markdown content directly. Do not spend tokens describing PDF preparation.
 
 ## Context Rules
 
@@ -195,10 +195,7 @@ For decision-support tasks where the user explicitly asked for recommendations, 
 
 # Artifact Output
 
-Create a downloadable Markdown file.
-Also create a PDF if file generation is available.
-Include diagrams where they clarify architecture, workflow, causal mechanism, or experiment design.
-If downloadable files are not available, output the complete Markdown document directly.
+Create a downloadable Markdown file. Create a PDF only if the user explicitly requests it in the prompt; when requested, create it from the finalized Markdown in one export, keep the layout simple, skip page-by-page visual/CV verification and iterative layout polishing, and perform only a lightweight sanity check that the file exists and is readable. If PDF generation is unavailable, provide the Markdown file. If the user does not explicitly request a PDF, do not create one. Include diagrams where they clarify architecture, workflow, causal mechanism, or experiment design. If downloadable files are not available, output the complete Markdown document directly.
 ```
 
 ## Specialization

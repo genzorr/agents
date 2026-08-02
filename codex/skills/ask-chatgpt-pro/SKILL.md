@@ -25,14 +25,15 @@ Use `ask-oracle` instead when:
 
 ## Workflow
 
-1. State a neutral task, desired output, scope, non-goals, and success criteria. Do not include a suspected cause, preferred solution, reviewer conclusion, or implementation plan unless the user explicitly asks Pro to evaluate it.
-2. Identify each GitHub repo and its stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, target paths, symbols, and search strings. For a change review, record both the base and head commits.
-3. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then run `git status --short` and inspect the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
-4. Select only the sources needed to answer the task. Include a minimal source manifest and omit generated files, dependency directories, unrelated modules, PR descriptions, review threads, issue commentary, and prior AI reports unless the user explicitly asks for comparison. Retain a durable experiment/result record only when its directly recorded measurements, commands, or artifacts are needed and available at the pinned ref.
-5. Verify every named manifest path at its pinned commit before writing the document. Use `git cat-file -e <sha>:<path>` when the commit is available locally, or an equivalent GitHub API/connector lookup. Remove an unresolved path, or state its access limitation and use a search string instead.
-6. Include validation only when it materially changes the review. Record concise command results as secondary framing, not proof that overrides GitHub source.
-7. Write `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact. Use the template below.
-8. Return the document path, refs to inspect, and any commit/push status affecting Pro's visibility. Do not paste the document unless asked.
+1. Read the user's task for requested deliverable formats. Invoking this skill does not request a PDF; preserve an explicit request such as "do provide PDF along with other output" in the consult's Artifact Output instructions.
+2. State a neutral task, desired output, scope, non-goals, and success criteria. Do not include a suspected cause, preferred solution, reviewer conclusion, or implementation plan unless the user explicitly asks Pro to evaluate it.
+3. Identify each GitHub repo and its stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, target paths, symbols, and search strings. For a change review, record both the base and head commits.
+4. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then run `git status --short` and inspect the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
+5. Select only the sources needed to answer the task. Include a minimal source manifest and omit generated files, dependency directories, unrelated modules, PR descriptions, review threads, issue commentary, and prior AI reports unless the user explicitly asks for comparison. Retain a durable experiment/result record only when its directly recorded measurements, commands, or artifacts are needed and available at the pinned ref.
+6. Verify every named manifest path at its pinned commit before writing the document. Use `git cat-file -e <sha>:<path>` when the commit is available locally, or an equivalent GitHub API/connector lookup. Remove an unresolved path, or state its access limitation and use a search string instead.
+7. Include validation only when it materially changes the review. Record concise command results as secondary framing, not proof that overrides GitHub source.
+8. Write `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact. Use the template below.
+9. Return the document path, refs to inspect, and any commit/push status affecting Pro's visibility. Do not paste the document unless asked.
 
 ## Neutrality And Evidence Rules
 
@@ -49,7 +50,9 @@ Use `ask-oracle` instead when:
 
 ## Artifact Policy
 
-Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words excluding citations. Use a Markdown file by default and also request a PDF when file generation is available. If files cannot be generated, require the complete Markdown report in the response.
+Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words excluding citations. Always request a downloadable Markdown report. Instruct Pro to create a PDF only if the user explicitly asks for it in the prompt, such as "do provide PDF along with other output"; otherwise, do not create one. Do not infer a PDF request from invoking this skill, the report's importance, or file-generation availability. If a requested PDF cannot be generated, require the complete Markdown report in the response.
+
+When a PDF is explicitly requested, tell Pro to create it from the finalized Markdown in one export, keep the layout simple, skip page-by-page visual/CV verification and iterative layout polishing, and perform only a lightweight sanity check that the file exists and is readable. Do not spend tokens describing PDF preparation.
 
 Use short sections and citations instead of long excerpts, appendices, or a duplicated source manifest. Request a table or diagram only when it materially clarifies comparisons, architecture, workflow, causal mechanism, or tradeoffs.
 
@@ -129,7 +132,7 @@ For decision support or execution planning explicitly requested in the task, ret
 
 # Artifact Output
 
-Create one downloadable Markdown report of 800–1,200 words, excluding citations. Also create a PDF if file generation is available. If downloadable files are unavailable, output the complete Markdown report directly. Use a table or diagram only when it materially clarifies the result.
+Create one downloadable Markdown report of 800–1,200 words, excluding citations. Create a PDF only if the user explicitly requests it in the prompt; when requested, create it from the finalized Markdown in one export, keep the layout simple, skip page-by-page visual/CV verification and iterative layout polishing, and perform only a lightweight sanity check that the file exists and is readable. If PDF generation is unavailable, provide the Markdown report. If the user does not explicitly request a PDF, do not create one. Use a table or diagram only when it materially clarifies the result.
 ```
 
 For coding tasks, name target files, interfaces, current and desired behavior, tests, acceptance criteria, and do-not-change constraints. For debugging tasks, name the exact error, reproduction steps, environment, recent changes, implicated files, prior attempts, and expected versus actual behavior.
