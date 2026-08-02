@@ -26,6 +26,19 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             self.assertIn("hidden operational knowledge", text)
             self.assertIn("proportionate safeguards", text)
 
+    def test_global_surfaces_require_consequence_level_test_design(self) -> None:
+        for path in ("codex/AGENTS.md", "claude/rules/think-before-coding.md"):
+            text = self.read(path)
+            for phrase in (
+                "Test consequences, not decisions.",
+                "production defect it would catch",
+                "synthetic valid and invalid inputs",
+                "test that enforcement through observable behavior",
+                "artifact or contract under test",
+                "what the remaining production code still guarantees",
+            ):
+                self.assertIn(phrase, text, path)
+
     def test_distill_source_twins_open_complete_contract_and_keep_promotion_separate(self) -> None:
         for path in (
             "codex/skills/distill-source/SKILL.md",
