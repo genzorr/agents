@@ -21,3 +21,7 @@ Reach for the cheapest tool that can answer the question:
 Going straight to a content search across a directory is the expensive mistake. Read a file whole when the task genuinely requires reasoning across all of it — config, schemas, ADRs, threat models.
 
 When a task hands you a list of large source files, read the acceptance criteria first and let it tell you which regions matter.
+
+## Searchable Interfaces
+
+Treat filenames, symbols, type names, headings, and test names as search handles. For new code and durable docs, prefer stable, domain-specific names and one canonical spelling per concept; put non-obvious invariants and provenance at the definition or canonical document. Do not rename working APIs or restructure files solely for agent discoverability; make that tradeoff explicit when the task or measured navigation friction justifies it.

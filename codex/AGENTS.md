@@ -37,6 +37,10 @@ Do not re-wrap or unwrap prose your task did not otherwise change — that is a 
 - Read full config files, schemas, ADRs, and threat models when the task requires reasoning across the whole artifact.
 - Do not repeatedly reread content already available in the current session unless something changed.
 
+### Searchable Interfaces
+
+Treat filenames, symbols, type names, headings, and test names as search handles. For new code and durable docs, prefer stable, domain-specific names and one canonical spelling per concept; put non-obvious invariants and provenance at the definition or canonical document. Do not rename working APIs or restructure files solely for agent discoverability; make that tradeoff explicit when the task or measured navigation friction justifies it.
+
 ## Surgical Changes
 
 Every changed line should trace to the user's request.
