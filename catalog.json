@@ -78,6 +78,21 @@
       "counterpart": "identical"
     },
     {
+      "id": "bro",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/bro/SKILL.md",
+        "claude": "claude/skills/bro/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/bro",
+        "claude": "~/.claude/skills/bro"
+      },
+      "counterpart": "twin (Claude disables model invocation)"
+    },
+    {
       "id": "codex-project-init",
       "kind": "skill",
       "platforms": ["codex"],
