@@ -395,6 +395,22 @@
       "counterpart": "twin (differs)"
     },
     {
+      "id": "storage-cleanup",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/storage-cleanup/SKILL.md",
+        "claude": "claude/skills/storage-cleanup/SKILL.md"
+      },
+      "install_target": {
+        "codex": "~/.codex/skills/storage-cleanup",
+        "claude": "~/.claude/skills/storage-cleanup"
+      },
+      "counterpart": "twin (Claude disables model invocation; Codex disables implicit invocation via metadata)",
+      "tags": ["domain:system-maintenance", "role:driver"]
+    },
+    {
       "id": "systemic-diagnosis",
       "kind": "skill",
       "platforms": ["codex", "claude"],

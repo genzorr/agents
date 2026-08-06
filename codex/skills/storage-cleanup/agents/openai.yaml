@@ -1,0 +1,7 @@
+interface:
+  display_name: "Storage Cleanup"
+  short_description: "Inspect disk usage and safely reclaim approved space."
+  default_prompt: "Use $storage-cleanup to inspect disk usage, classify reclaimable storage, and prepare a safe cleanup plan before deleting anything."
+
+policy:
+  allow_implicit_invocation: false
