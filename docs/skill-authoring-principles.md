@@ -84,6 +84,10 @@ Keep the body focused on what the agent must do now.
 
 Use a reference pointer that says when to open the file, not just what the file is called.
 
+## Claim breadth
+
+When finite observations are being turned into reusable skill behavior, conditionally open the Agents-owned `docs/claim-discipline.md` reference. First choose the least restrictive behavior that remains correct for the supported cases and required safety/authority boundaries. Then express that behavior as compactly as possible. Textual brevity is an encoding objective, not a generalization objective. Keep the resulting instruction non-vacuous: it needs a real trigger, required behavior, observable output or stop condition, and applicable boundaries.
+
 ## Completion Criteria
 
 Every ordered step should end with a clear completion criterion. Good criteria are observable and

@@ -28,6 +28,8 @@ actions, and the final result.
    claim labels, confidence, and next test incrementally when new evidence arrives; do not rewrite
    earlier uncertainty into certainty.
 
+When a diagnosis may support reusable guidance or a default, open `docs/claim-discipline.md` after labeling the claims. Use it to bound supported conditions, alternatives, counterevidence, explicit non-claims, and the separate downstream decision; this reference does not replace systemic causal mapping or the active driver's authority.
+
 For a compact situational selector and progressive disclosure order, open
 `docs/systemic-diagnosis-selector.md`.
 

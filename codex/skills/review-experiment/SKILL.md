@@ -9,6 +9,8 @@ Review a completed run of a frozen Protocol and record the result as a Readout. 
 
 This skill implements the portable Protocol/Readout contract. The full versioned contract (identity/hash rules, direct-write versus one-way import/freeze, current-leaf resolution, exact-repeat no-op, mismatch rejection, successor-only corrections) lives at `docs/experiment-protocol-readout-contract.md` in the `agents` source repo; the rules that govern *this* skill are restated below so the installed skill is self-contained. This skill does not redefine that contract — see `design-experiment`'s twin `SKILL.md` for the Protocol side of the same contract, which this skill reuses rather than re-derives.
 
+When a Readout may inform reusable guidance, open `docs/claim-discipline.md` before interpreting results. Preserve observations first, compare alternatives and counterevidence, choose the weakest non-vacuous conclusion supported by the complete relevant evidentiary record and tested conditions, state explicit non-claims, and determine the downstream decision separately in its existing disposition and adoption fields.
+
 ## Contract this skill reviews against
 
 A Readout is the one place execution validity, observations, interpretation, scope/caveats, reuse notes, and two independent dispositions are recorded — never conflated with each other or with the Protocol they review:
@@ -30,8 +32,8 @@ A Readout is the one place execution validity, observations, interpretation, sco
 4. **Gather each Readout field from the user, one at a time**, with the same discipline `design-experiment` uses for Protocol fields: do not accept a field as complete until it is concrete enough that a different reader could reach the same conclusion without asking a follow-up question. Never fill in `observations` or `interpretation` yourself from inference — elicit the actual measured facts and the actual conclusion from the user; this skill structures the review, it does not perform it:
    - `execution` — `valid` | `invalid` | `partial`.
    - `observations` — measured facts against the Protocol's `metrics`, with artifact references (paths the Protocol's `commands` already produced).
-   - `interpretation` — what the observations mean against the Protocol's `gates` and the baseline.
-   - `scope_and_caveats` — what this result does and does not generalize to.
+   - `interpretation` — what the observations mean against the Protocol's `gates` and the baseline; select the weakest non-vacuous conclusion supported by the observations and counterevidence, rather than broadening to a family or provider set or selecting a claim because it would support a desired decision.
+   - `scope_and_caveats` — what this result does and does not generalize to, including supported versus incidental conditions, alternatives, and explicit non-claims.
    - `reuse_do_not_repeat` — what future work should reuse, and what it must not repeat.
    - `area_brief_disposition` — `no-change` | `update-area-brief` | `retract-area-brief`.
    - `adoption_disposition` — `no-adoption` | `consider-adr` | `update-adr`, with the ADR-naming pairing rule above.

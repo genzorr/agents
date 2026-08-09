@@ -13,8 +13,7 @@
 
 ## question
 
-<!-- Decision, bounded question/claim, expected mechanism, credible competing explanations,
-     and observations that would falsify the explanation. -->
+<!-- Decision, bounded question/claim, expected mechanism, credible competing explanations, observations that would falsify the explanation, the weakest non-vacuous positive claim a valid result could support, and the stronger claim this Protocol cannot establish. The later decision remains separate from claim selection. -->
 
 ## baseline_ref
 
@@ -35,8 +34,7 @@
 
 ## gates
 
-<!-- Practical thresholds and guardrails, permitted claim boundary, and next-stage rule,
-     all decided before any run. -->
+<!-- Practical thresholds and guardrails, permitted claim boundary, exact rejection scope of a negative result, inconclusive/invalid outcome, and next discriminator, all decided before any run. -->
 
 -
 

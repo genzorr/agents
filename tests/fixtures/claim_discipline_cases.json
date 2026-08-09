@@ -1,0 +1,75 @@
+{
+  "contract": "Each case checks that evidence scope, conclusion scope, and downstream decision remain separate.",
+  "cases": [
+    {
+      "id": "provider-specific-overgeneralization",
+      "failure_mode": "A provider-specific observation is promoted to a provider-independent rule.",
+      "observation": "Three reviewed runs used Provider-A and showed the same failure under the recorded workload.",
+      "weakest_supported_conclusion": "The tested workflow failed under Provider-A and the recorded workload.",
+      "explicit_non_claim": "The result does not establish the same behavior for other providers or workloads.",
+      "decision_boundary": "Keep the next change Provider-A-scoped until independent provider evidence exists.",
+      "must_preserve": ["provider scope", "recorded workload", "independent evidence"],
+      "must_avoid": ["provider-independent rule", "all providers"]
+    },
+    {
+      "id": "several-sessions-one-project",
+      "failure_mode": "Several sessions from one project are treated as cross-project evidence.",
+      "observation": "The pattern recurred across six sessions, all in one project and one workflow.",
+      "weakest_supported_conclusion": "The project-local workflow exhibits the observed pattern under its current conditions.",
+      "explicit_non_claim": "Session count does not establish a cross-project or generic agent rule.",
+      "decision_boundary": "Use independent project lineages or a broader test before promotion.",
+      "must_preserve": ["project scope", "workflow scope", "independent project lineages"],
+      "must_avoid": ["cross-project rule", "generic agent rule"]
+    },
+    {
+      "id": "one-failed-implementation",
+      "failure_mode": "One failed implementation is generalized into a family-wide impossibility claim.",
+      "observation": "One implementation of a mechanism missed the frozen acceptance gate under the tested setup.",
+      "weakest_supported_conclusion": "That implementation did not meet the gate under the recorded conditions.",
+      "explicit_non_claim": "The failure does not establish that the whole mechanism family cannot work.",
+      "decision_boundary": "Reject or revise the tested implementation and design a family-discriminating follow-up.",
+      "must_preserve": ["tested implementation", "recorded conditions", "family-discriminating follow-up"],
+      "must_avoid": ["family-wide rejection", "mechanism family cannot work"]
+    },
+    {
+      "id": "absolute-versus-scoped",
+      "failure_mode": "A short absolute rule is preferred over a longer conditional rule that preserves the same decision.",
+      "observation": "Fresh-context review helped on substantial decision-bearing changes, while trivial mechanical changes did not need it.",
+      "weakest_supported_conclusion": "For substantial or decision-bearing work, isolate reviewer context; choose cross-model review when risk and capability justify it.",
+      "explicit_non_claim": "The evidence does not require fresh or cross-model review for every task.",
+      "decision_boundary": "Adopt the conditional rule only at the existing review authority and scope.",
+      "must_preserve": ["substantial work trigger", "decision-bearing scope", "risk and capability judgment"],
+      "must_avoid": ["always delegate", "every task"]
+    },
+    {
+      "id": "vacuous-weakening",
+      "failure_mode": "Removing conditions leaves advice that no longer changes behavior.",
+      "observation": "A proposed rewrite removes the trigger, required action, and proof condition and leaves only 'be careful'.",
+      "weakest_supported_conclusion": "The rewrite is vacuous and does not preserve the behavior contract.",
+      "explicit_non_claim": "Shorter wording is not evidence of a weaker or more general usable rule.",
+      "decision_boundary": "Retain a real trigger, action, observable output or stop condition, and boundary.",
+      "must_preserve": ["real trigger", "observable output or stop condition", "applicable boundary"],
+      "must_avoid": ["be careful", "use judgment only"]
+    },
+    {
+      "id": "inadequate-discriminator",
+      "failure_mode": "An intervention and measurement cannot distinguish credible alternatives, but the result is treated as causal evidence.",
+      "observation": "Two plausible mechanisms predict the same measured result under the chosen proxy intervention.",
+      "weakest_supported_conclusion": "The run is unresolved for the causal question and cannot select between the mechanisms.",
+      "explicit_non_claim": "The result does not support a causal, family-wide, or adoption conclusion.",
+      "decision_boundary": "Design the next intervention and measurement to separate the alternatives.",
+      "must_preserve": ["credible alternatives", "distinguishing measurement", "unresolved status"],
+      "must_avoid": ["causal conclusion", "adoption conclusion"]
+    },
+    {
+      "id": "safety-and-authorization-boundary",
+      "failure_mode": "Claim weakening is used to remove a hard safety, authorization, privacy, or acceptance boundary.",
+      "observation": "A proposed generalized rule would bypass user confirmation for an irreversible external action.",
+      "weakest_supported_conclusion": "The generalization is unacceptable because the authorization boundary is a required guardrail, not an incidental condition.",
+      "explicit_non_claim": "Epistemic scope reduction does not authorize bypassing safety, privacy, authorization, or acceptance proof.",
+      "decision_boundary": "Preserve the hard boundary and route any change through its existing authority.",
+      "must_preserve": ["user confirmation", "irreversible action gate", "existing authority"],
+      "must_avoid": ["bypass authorization", "weaken guardrail"]
+    }
+  ]
+}

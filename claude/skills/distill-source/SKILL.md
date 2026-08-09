@@ -21,6 +21,8 @@ Open `docs/distill-source-contract.md` before reading. It owns the source-covera
 extraction fields, fit matrix, keep/reject/defer outcomes, output contract, and maintainer behavior
 fixtures.
 
+When the source may influence reusable agent behavior, also open `docs/claim-discipline.md` before synthesis or fit decisions. Keep source observations, target-supported conditions, incidental details, alternatives, counterevidence, explicit non-claims, and the downstream decision separate; a source recommendation is not evidence that a broader target rule is justified.
+
 ## Composition role
 
 - **Driver** for source scoping, reading, target-context inspection, and the adaptation brief.
@@ -58,6 +60,7 @@ scraper, crawler, monitor, or raw-source store.
 6. **Extract critically.** For each material mechanism preserve objective, assumptions, invariants,
    tensions and conflict rules, misuse risks, evidence/lineage quality, and non-transferable
    boundaries. A slogan without its exception is not a complete extraction.
+   Use the claim-discipline reference to remove unsupported scope clauses without making the proposed behavior vacuous, and to reject provider-independent, cross-project, or mechanism-family conclusions when the source or target evidence does not cover those dimensions.
 7. **Map before proposing.** Fill the mechanism-to-owner matrix. Name existing coverage and choose
    `keep`, `reject`, `defer`, or the smallest concrete delta. Every proposal names one owner, the
    lowest reliable enforcement layer, a failure risk, observable validation, and route.

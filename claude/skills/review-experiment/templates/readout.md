@@ -41,12 +41,11 @@
 
 ## interpretation
 
-<!-- What the observations mean against the Protocol's `gates` and `baseline_ref`. -->
+<!-- The weakest non-vacuous conclusion supported by all relevant observations and counterevidence against the Protocol's `gates` and `baseline_ref`; do not choose it for the decision it might enable. -->
 
 ## scope_and_caveats
 
-<!-- Limits of what this Readout's result generalizes to: sample size, environment, confounds,
-     anything a later reader must not over-extend. -->
+<!-- Limits of what this Readout's result generalizes to: supported versus incidental conditions, alternatives, explicit non-claims, sample size, environment, confounds, and anything a later reader must not over-extend. -->
 
 ## reuse_do_not_repeat
 

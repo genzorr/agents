@@ -9,6 +9,8 @@ Freeze the scientific contract for one experiment before anything runs. This ski
 
 This skill implements the portable Protocol contract. The full versioned contract (including the traveling Readout, review-experiment, and Harness handoff) lives at `docs/experiment-protocol-readout-contract.md` in the `agents` source repo; the rules that govern *this* skill are restated below so the installed skill is self-contained.
 
+When the Protocol is decision-bearing or may later support reusable guidance, open `docs/claim-discipline.md` before the Research design gate. Use its evidence-first claim ladder to name the weakest non-vacuous positive claim that a valid result could support, stronger non-claim, negative-result scope, inconclusive/invalid outcome, and next discriminator; keep the downstream decision separate, keep this method conditional to experiment design, and do not weaken safety, authorization, guardrail, or acceptance boundaries.
+
 ## Contract this skill freezes
 
 A Protocol is created once and then frozen — never mutated in place:
@@ -35,6 +37,7 @@ Before freezing, make the design decision-bearing and interpretable. Resolve the
 
 - **Decision and claim boundary:** state what decision the result can inform, the present stage (sanity, research, representative, or scale), and what it cannot establish. Put this in `question` and the promotion/next-stage rule in `gates`.
 - **Mechanism and falsifiers:** state the expected mechanism, credible competing explanations, and observations that would count against it in `question`.
+- **Claim ladder and discrimination:** state the weakest non-vacuous claim a valid positive result could support, the stronger claim this Protocol cannot establish, the exact rejection scope of a negative result, and the next discriminator needed for a stronger claim. Choose an intervention, comparator, and measurements that distinguish the relevant alternatives rather than a proxy that leaves them observationally equivalent; determine the downstream decision separately.
 - **Design structure:** identify the experimental unit, factors and levels, control/comparator, and material sources of variation in `units`.
 - **Metric roles:** prefix every metric with `primary:`, `guardrail:`, `diagnostic:`, or `resource:`. Put practical decision thresholds—not merely statistical detectability—in `gates`.
 - **Baseline and variation:** use `baseline_ref` for an immutable, reproducible baseline manifest that names its stage/tier. Put the planned seeds, trials, tasks, datasets, environments, and their coverage/count rationale in `units`; `run_set` holds the corresponding closed run/commit references once assigned.

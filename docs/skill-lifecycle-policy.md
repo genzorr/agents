@@ -47,6 +47,10 @@ Check twin behavior semantically: same-name Codex and Claude skills are counterp
 
 Treat composition-role hazards as `Change`: a driver framed as a lens, a lens taking lifecycle ownership, or two surfaces claiming one driver role. Apply the role precedence in `docs/skill-authoring-principles.md`: `protocol > driver > router > helper > lens`; a lens may add checks but never relax a protocol.
 
+## Claim breadth audit
+
+When a lifecycle finding would turn finite observations into reusable behavior, open `docs/claim-discipline.md` before choosing its scope. Check evidence lineages, tested and incidental conditions, alternatives, counterevidence, target cases, guardrail cases, and explicit non-claims. Thin evidence should produce a narrow rule or `keep + watch`, not a provider-independent, cross-project, family-wide, or global claim; this method never weakens safety, authorization, or acceptance boundaries.
+
 Treat process sediment as a proposal to capture or trim, never an automatic deletion. A candidate needs both the obsolete artifact and a cited durable replacement such as an ADR, Evidence, task outcome, or canonical board. If no durable record exists, propose capture instead of removal.
 
 ## Authoring norm

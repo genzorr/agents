@@ -20,16 +20,17 @@ Accept:
 1. Parse paths, prompt path, and user guidance.
 2. Read the research outputs and original prompt if provided.
 3. Read project context likely to receive the findings: `AGENTS.md`, `README.md`, `docs/`, `research/`, `drafts/`, ADRs, and relevant specs.
-4. Ask only what is needed:
+4. When findings could become reusable guidance, a default, or a project-level recommendation, open `docs/claim-discipline.md` before synthesis. Keep source observations, target-project evidence, alternatives, counterevidence, supported conditions, and explicit non-claims visible; select the weakest non-vacuous conclusion supported by that complete record, then determine any recommendation or documentation decision separately.
+5. Ask only what is needed:
    - focus areas if the research covers multiple topics
    - summary-only versus updating docs
    - target files if documentation updates are requested
-5. Write a findings summary to `research/findings/YYYYMMDD-topic-findings.md`.
-6. If the user approved doc updates:
+6. Write a findings summary to `research/findings/YYYYMMDD-topic-findings.md`.
+7. If the user approved doc updates:
    - list target files and proposed changes
    - apply only approved documentation edits
    - keep source research files unchanged
-7. Report the findings file and any updated docs.
+8. Report the findings file and any updated docs.
 
 ## Findings Format
 

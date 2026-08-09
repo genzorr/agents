@@ -97,6 +97,8 @@ Parse the invocation to extract:
 - Check `.claude/specs/`, `docs/`, `drafts/` for relevant docs
 - Understand what documentation exists that might need updating
 
+When findings could become reusable guidance, a default, or a project-level recommendation, open `docs/claim-discipline.md` before synthesis. Keep source observations, target-project evidence, alternatives, counterevidence, supported conditions, and explicit non-claims visible; select the weakest non-vacuous conclusion supported by that complete record, then determine any recommendation or documentation decision separately.
+
 ### Step 3: Ask Clarifying Questions
 
 Use AskUserQuestion to gather user input. Ask 1-3 questions based on what's unclear:

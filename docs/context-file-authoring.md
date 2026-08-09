@@ -104,6 +104,10 @@ Three mechanisms, in order of preference:
 
 Do not externalize material needed on every run just to shorten a file. That trades one always-on cost for an always-on cost plus a round-trip.
 
+## Claim breadth
+
+When a context-file proposal generalizes from observed behavior, conditionally open the Agents-owned `docs/claim-discipline.md` reference before choosing its loading layer. The broader the loading surface, the more evidence is required that the rule applies across that surface. Keep behavior project-, path-, task-, or skill-specific until independent evidence justifies broader placement.
+
 ## Environment Activation
 
 Not a context file, but the piece of project setup that is easiest to get wrong and least visible when it is missing. A project with a virtual environment needs its activation appended to `$CLAUDE_ENV_FILE` at session start, or every Bash call silently runs against the wrong interpreter:
