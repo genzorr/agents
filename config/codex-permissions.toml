@@ -19,9 +19,8 @@ extends = ":workspace"
 ":slash_tmp" = "write"
 
 [permissions.agentic-local.filesystem.":workspace_roots"]
+# The workspace grant already covers repository metadata. Child selectors are fed back as new workspace roots by the desktop app and expand recursively across turns.
 "." = "write"
-".git" = "write"
-".codex" = "write"
 
 [permissions.agentic-local.filesystem."~/.local/state/claude-headless/jobs"]
 "." = "write"
@@ -48,6 +47,9 @@ extends = ":workspace"
 "." = "write"
 
 [permissions.agentic-local.filesystem."~/.claude/cache"]
+"." = "write"
+
+[permissions.agentic-local.filesystem."~/.cache/uv"]
 "." = "write"
 
 [permissions.agentic-local.network]
