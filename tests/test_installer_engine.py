@@ -512,6 +512,34 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertNotIn(str(script), settings.read_text())
             self.assertFalse((home / ".agents-install-state.json").exists())
 
+    def test_no_history_hook_adoption_canonicalizes_before_recording_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            script = home / "hooks/notifications.sh"
+            script.parent.mkdir(parents=True)
+            script.write_bytes((repo / "claude/hooks/notifications.sh").read_bytes())
+            script.chmod(0o755)
+            settings = home / "settings.json"
+            unrelated = {"PreToolUse": [{"hooks": [{"type": "command", "command": "/usr/local/bin/other"}]}]}
+            settings.write_text(json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": f"{home}/hooks/notifications.sh"}]}], **unrelated}}), encoding="utf-8")
+
+            first = self.run_installer(repo, "claude", home)
+
+            self.assertEqual(first.returncode, 0, first.stderr)
+            after_first = settings.read_bytes()
+            self.assertEqual(list(json.loads(after_first)["hooks"]), ["PreToolUse", "Notification"])
+            dry_run = self.run_installer(repo, "claude", home, "--dry-run")
+            self.assertEqual(dry_run.returncode, 0, dry_run.stderr)
+            self.assertIn("0 adapter action(s)", dry_run.stdout)
+            second = self.run_installer(repo, "claude", home)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            self.assertEqual(settings.read_bytes(), after_first)
+
+            removed = self.run_installer(repo, "claude", home, "--uninstall")
+            self.assertEqual(removed.returncode, 0, removed.stderr)
+            self.assertEqual(json.loads(settings.read_text())["hooks"], unrelated)
+
     def test_no_history_install_rejects_ambiguous_preexisting_hook_leaf(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home"

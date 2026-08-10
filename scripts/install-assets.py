@@ -467,6 +467,8 @@ def plan_claude_hooks(
             adopted_leaves, adoption_error = adoptable_desired_leaves(cleaned_hooks, desired_hooks)
             if adoption_error:
                 return None, adoption_error, {}
+            if adopted_leaves:
+                cleaned_hooks, _matched = remove_managed_leaves(cleaned_hooks, adopted_leaves)
         updated_hooks = merge_hook_values(cleaned_hooks or {}, desired_hooks)
         updated = dict(settings)
         updated["hooks"] = updated_hooks
@@ -479,7 +481,7 @@ def plan_claude_hooks(
             "platform": "claude",
             "target": "settings.json",
             "script_target": script_target,
-            "managed_leaves": adopted_leaves + newly_managed_leaves(cleaned_hooks, updated_hooks),
+            "managed_leaves": newly_managed_leaves(cleaned_hooks, updated_hooks),
         }
     after = pretty_json(updated)
     if before == after:
