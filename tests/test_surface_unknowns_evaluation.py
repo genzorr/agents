@@ -69,7 +69,7 @@ class SurfaceUnknownsEvaluationPacketTest(unittest.TestCase):
         )
 
         evaluated_files = {
-            "codex/skills/surface-unknowns/SKILL.md": "c68ec80dfa81a1a33ae102f5106ab13487145062e378e7fae7157a82760ad011",
+            "shared/skills/surface-unknowns/SKILL.md": "c68ec80dfa81a1a33ae102f5106ab13487145062e378e7fae7157a82760ad011",
             "tests/fixtures/surface_unknowns_cases.json": "c33b61b3e43fc174171caefea243778301008c631e54bf71c55a0d4554255706",
         }
         for path, expected_sha256 in evaluated_files.items():

@@ -9,7 +9,7 @@ CONFORMANCE = REPO_ROOT / "tests" / "ask_chatgpt_pro_conformance.md"
 
 class AskChatGPTProConsultationContractsTest(unittest.TestCase):
     def read(self, platform: str) -> str:
-        return (REPO_ROOT / platform / "skills" / "ask-chatgpt-pro" / "SKILL.md").read_text(encoding="utf-8")
+        return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "SKILL.md").read_text(encoding="utf-8")
 
     def test_platform_twins_are_identical_and_general_purpose(self) -> None:
         codex = self.read("codex")

@@ -10,6 +10,10 @@ class BoundedCognitionContractsTest(unittest.TestCase):
     def read(self, path: str) -> str:
         return (REPO_ROOT / path).read_text(encoding="utf-8")
 
+    def read_skill(self, platform: str, skill: str) -> str:
+        source = "shared" if skill in {"surface-unknowns", "systemic-diagnosis"} else platform
+        return self.read(f"{source}/skills/{skill}/SKILL.md")
+
     def test_global_surfaces_encode_local_reasoning_and_bounded_failure(self) -> None:
         codex = self.read("codex/AGENTS.md")
         think = self.read("claude/rules/think-before-coding.md")
@@ -73,7 +77,7 @@ class BoundedCognitionContractsTest(unittest.TestCase):
 
         for platform in ("codex", "claude"):
             for skill in ("architecture-review", "systemic-diagnosis", "review-change"):
-                text = self.read(f"{platform}/skills/{skill}/SKILL.md")
+                text = self.read_skill(platform, skill)
                 reference_paragraphs = [
                     paragraph
                     for paragraph in text.split("\n\n")
@@ -83,8 +87,8 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 self.assertIn("skip", reference_paragraphs[0].lower())
 
     def test_surface_unknowns_twins_define_mode_roles_and_bounded_routing(self) -> None:
-        codex = self.read("codex/skills/surface-unknowns/SKILL.md")
-        claude = self.read("claude/skills/surface-unknowns/SKILL.md")
+        codex = self.read_skill("codex", "surface-unknowns")
+        claude = self.read_skill("claude", "surface-unknowns")
         self.assertEqual(codex, claude)
 
         for text in (codex, claude):

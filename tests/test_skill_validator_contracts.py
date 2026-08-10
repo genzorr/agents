@@ -1,9 +1,12 @@
 """Focused behavior contracts for skill portability and ownership guards."""
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
+
+from scripts.agent_catalog import desired_files, load_catalog, validate_catalog
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,6 +31,65 @@ def write_skill(repo: Path, platform: str, name: str, body: str = "") -> None:
 
 
 class SkillValidatorContractsTest(unittest.TestCase):
+    def test_file_valued_skill_source_user_home_dependency_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            source = repo / "shared" / "portable.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("Read /Users/alice/private-policy.md.\n", encoding="utf-8")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "shared/portable.md", "claude": "shared/portable.md"}, "install_target": {"codex": "skills/portable/SKILL.md", "claude": "skills/portable/SKILL.md"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, _warnings = VALIDATE_SKILLS.validate_catalog_skill_sources(repo)
+
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("operative user-home dependency" in error for error in errors))
+
+    def test_shared_skill_source_user_home_dependency_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            skill = repo / "shared" / "skills" / "portable" / "SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("---\nname: portable\ndescription: Fixture skill.\n---\n\nRead /Users/alice/private-policy.md.\n", encoding="utf-8")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "shared/skills/portable", "claude": "shared/skills/portable"}, "install_target": {"codex": "skills/portable", "claude": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, _warnings = VALIDATE_SKILLS.validate_catalog_skill_sources(repo)
+
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("operative user-home dependency" in error for error in errors))
+
+    def test_platform_extra_file_requires_catalog_source_layer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            skill = repo / "shared" / "skills" / "portable" / "SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("---\nname: portable\ndescription: Fixture skill.\n---\n", encoding="utf-8")
+            extra = repo / "codex" / "skills" / "portable" / "agents" / "openai.yaml"
+            extra.parent.mkdir(parents=True)
+            extra.write_text("interface:\n  display_name: Portable\n", encoding="utf-8")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "shared/skills/portable", "claude": "shared/skills/portable"}, "install_target": {"codex": "skills/portable", "claude": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, _warnings = validate_catalog(repo)
+
+        self.assertEqual(errors, ["disk: codex/skills/portable/agents/openai.yaml has no catalog entry"])
+
+    def test_shared_skill_sources_expand_identically_for_both_platforms(self) -> None:
+        assets = load_catalog(REPO_ROOT)
+        codex_files = desired_files(REPO_ROOT, assets, "codex")
+        claude_files = desired_files(REPO_ROOT, assets, "claude")
+        shared_root = REPO_ROOT / "shared" / "skills"
+        shared_targets = {
+            target: desired
+            for target, desired in codex_files.items()
+            if desired.asset.kind == "skill" and desired.source.is_relative_to(shared_root)
+        }
+        self.assertTrue(shared_targets)
+        for target, codex_desired in shared_targets.items():
+            self.assertIn(target, claude_files)
+            self.assertEqual(codex_desired.source, claude_files[target].source)
+
     def test_user_home_dependency_requires_path_local_classification(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
@@ -121,7 +183,7 @@ class SkillValidatorContractsTest(unittest.TestCase):
         self.assertIn("Harness's lifecycle policy is the stricter project-specific overlay", policy)
         self.assertIn("hard-coded user-home dependency", policy)
         for platform in ("codex", "claude"):
-            text = (REPO_ROOT / platform / "skills" / "skill-lifecycle" / "SKILL.md").read_text(encoding="utf-8")
+            text = (REPO_ROOT / "shared" / "skills" / "skill-lifecycle" / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("docs/skill-lifecycle-policy.md", text)
             self.assertIn("Harness lifecycle policy as the project-specific overlay", text)
             self.assertNotIn("/Users/", text)

@@ -36,8 +36,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/ask-oracle",
-        "claude": "claude/skills/ask-oracle"
+        "codex": [{"path": "shared/skills/ask-oracle", "target": "skills/ask-oracle"}, {"path": "codex/skills/ask-oracle/agents", "target": "skills/ask-oracle/agents"}],
+        "claude": "shared/skills/ask-oracle"
       },
       "install_target": {
         "codex": "skills/ask-oracle",
@@ -50,8 +50,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/ask-chatgpt-pro",
-        "claude": "claude/skills/ask-chatgpt-pro"
+        "codex": [{"path": "shared/skills/ask-chatgpt-pro", "target": "skills/ask-chatgpt-pro"}, {"path": "codex/skills/ask-chatgpt-pro/agents", "target": "skills/ask-chatgpt-pro/agents"}],
+        "claude": "shared/skills/ask-chatgpt-pro"
       },
       "install_target": {
         "codex": "skills/ask-chatgpt-pro",
@@ -64,8 +64,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/babysit-pr",
-        "claude": "claude/skills/babysit-pr"
+        "codex": "shared/skills/babysit-pr",
+        "claude": "shared/skills/babysit-pr"
       },
       "install_target": {
         "codex": "skills/babysit-pr",
@@ -104,8 +104,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/design-experiment",
-        "claude": "claude/skills/design-experiment"
+        "codex": "shared/skills/design-experiment",
+        "claude": "shared/skills/design-experiment"
       },
       "install_target": {
         "codex": "skills/design-experiment",
@@ -161,8 +161,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/docker-optimize",
-        "claude": "claude/skills/docker-optimize"
+        "codex": "shared/skills/docker-optimize",
+        "claude": "shared/skills/docker-optimize"
       },
       "install_target": {
         "codex": "skills/docker-optimize",
@@ -175,8 +175,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/explain",
-        "claude": "claude/skills/explain"
+        "codex": [{"path": "shared/skills/explain", "target": "skills/explain"}, {"path": "codex/skills/explain/agents", "target": "skills/explain/agents"}],
+        "claude": "shared/skills/explain"
       },
       "install_target": {
         "codex": "skills/explain",
@@ -261,8 +261,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/logging-optimize",
-        "claude": "claude/skills/logging-optimize"
+        "codex": "shared/skills/logging-optimize",
+        "claude": "shared/skills/logging-optimize"
       },
       "install_target": {
         "codex": "skills/logging-optimize",
@@ -331,8 +331,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/review-experiment",
-        "claude": "claude/skills/review-experiment"
+        "codex": "shared/skills/review-experiment",
+        "claude": "shared/skills/review-experiment"
       },
       "install_target": {
         "codex": "skills/review-experiment",
@@ -360,8 +360,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/skill-lifecycle",
-        "claude": "claude/skills/skill-lifecycle"
+        "codex": "shared/skills/skill-lifecycle",
+        "claude": "shared/skills/skill-lifecycle"
       },
       "install_target": {
         "codex": "skills/skill-lifecycle",
@@ -389,8 +389,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/systemic-diagnosis",
-        "claude": "claude/skills/systemic-diagnosis"
+        "codex": "shared/skills/systemic-diagnosis",
+        "claude": "shared/skills/systemic-diagnosis"
       },
       "install_target": {
         "codex": "skills/systemic-diagnosis",
@@ -403,8 +403,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/surface-unknowns",
-        "claude": "claude/skills/surface-unknowns"
+        "codex": [{"path": "shared/skills/surface-unknowns", "target": "skills/surface-unknowns"}, {"path": "codex/skills/surface-unknowns/agents", "target": "skills/surface-unknowns/agents"}],
+        "claude": "shared/skills/surface-unknowns"
       },
       "install_target": {
         "codex": "skills/surface-unknowns",
@@ -418,8 +418,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/thermo-nuclear-code-quality-review",
-        "claude": "claude/skills/thermo-nuclear-code-quality-review"
+        "codex": "shared/skills/thermo-nuclear-code-quality-review",
+        "claude": "shared/skills/thermo-nuclear-code-quality-review"
       },
       "install_target": {
         "codex": "skills/thermo-nuclear-code-quality-review",

@@ -44,9 +44,9 @@ import sys
 from pathlib import Path
 
 try:
-    from agent_catalog import validate_catalog
+    from agent_catalog import CatalogError, load_catalog, validate_catalog
 except ModuleNotFoundError:  # Imported as a module from repository tests.
-    from scripts.agent_catalog import validate_catalog
+    from scripts.agent_catalog import CatalogError, load_catalog, validate_catalog
 
 # Claude-runtime frontmatter fields that Codex skills omit by convention.
 # Listed here only to document the deliberate cross-tree parity deferral.
@@ -156,9 +156,10 @@ def doc_references(text: str) -> list[str]:
 
 
 def skill_directory_text(skill_dir: Path) -> str:
-    """Return UTF-8-ish text from every file in a skill directory."""
+    """Return UTF-8-ish text from a skill source file or directory."""
     chunks: list[str] = []
-    for path in sorted(p for p in skill_dir.rglob("*") if p.is_file()):
+    paths = (skill_dir,) if skill_dir.is_file() else sorted(p for p in skill_dir.rglob("*") if p.is_file())
+    for path in paths:
         chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
     return "\n".join(chunks)
 
@@ -201,9 +202,6 @@ def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], l
     because they would not travel into the install tree. A tiny explicit allowlist
     covers example-only placeholders in reference material.
     """
-    skill_file = skill_dir / "SKILL.md"
-    if not skill_file.is_file():
-        return [], []
     errors: list[str] = []
     warnings: list[str] = []
     text = skill_directory_text(skill_dir)
@@ -233,7 +231,7 @@ def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], l
 def _skill_names(tree_dir: Path) -> list[str]:
     if not tree_dir.is_dir():
         return []
-    return sorted(d.name for d in tree_dir.iterdir() if d.is_dir())
+    return sorted(d.name for d in tree_dir.iterdir() if d.is_dir() and (d / "SKILL.md").is_file())
 
 
 def cross_tree_parity(codex_names: list[str], claude_names: list[str]) -> list[str]:
@@ -255,10 +253,28 @@ def validate_trees(codex_dir: Path, claude_dir: Path) -> tuple[list[str], list[s
         repo_root = tree.parent.parent
         for name in _skill_names(tree):
             errors.extend(f"{label}/{msg}" for msg in check_skill(tree / name))
-            doc_errors, doc_warnings = check_doc_references(tree / name, repo_root)
-            errors.extend(f"{label}/{msg}" for msg in doc_errors)
-            warnings.extend(f"{label}/{msg}" for msg in doc_warnings)
     warnings.extend(cross_tree_parity(_skill_names(codex_dir), _skill_names(claude_dir)))
+    return errors, warnings
+
+
+def validate_catalog_skill_sources(repo: Path) -> tuple[list[str], list[str]]:
+    """Return doc and user-home validation results for every catalog skill source layer."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    try:
+        assets = load_catalog(repo)
+    except CatalogError as exc:
+        return [str(exc)], []
+    for asset in assets:
+        if asset.kind != "skill":
+            continue
+        for platform in asset.platforms:
+            for index, layer in enumerate(asset.sources[platform]):
+                source = repo / layer.path
+                doc_errors, doc_warnings = check_doc_references(source, repo)
+                label = f"{platform}/{asset.id} layer {index}"
+                errors.extend(f"{label}: {error}" for error in doc_errors)
+                warnings.extend(f"{label}: {warning}" for warning in doc_warnings)
     return errors, warnings
 
 
@@ -280,6 +296,10 @@ def main() -> int:
         return 2
 
     errors, warnings = validate_trees(codex_dir, claude_dir)
+
+    source_errors, source_warnings = validate_catalog_skill_sources(args.repo)
+    errors.extend(source_errors)
+    warnings.extend(source_warnings)
 
     catalog_errors, catalog_warnings = validate_catalog(args.repo)
     errors.extend(catalog_errors)

@@ -15,6 +15,10 @@ class ClaimDisciplineContractsTest(unittest.TestCase):
         self.reference = REFERENCE.read_text(encoding="utf-8")
         self.packet = json.loads(CASES.read_text(encoding="utf-8"))
 
+    def read_skill(self, platform: str, skill: str) -> str:
+        source = "shared" if skill in {"design-experiment", "review-experiment", "skill-lifecycle", "systemic-diagnosis"} else platform
+        return (REPO_ROOT / source / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+
     def test_reference_defines_evidence_first_claim_selection(self) -> None:
         for phrase in (
             "Evidence-first claim selection",
@@ -74,7 +78,7 @@ class ClaimDisciplineContractsTest(unittest.TestCase):
     def test_existing_claim_bearing_surfaces_load_one_conditional_reference(self) -> None:
         for platform in ("codex", "claude"):
             for skill in ("design-experiment", "review-experiment", "distill-source", "integrate-research", "skill-lifecycle", "systemic-diagnosis"):
-                text = (REPO_ROOT / platform / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+                text = self.read_skill(platform, skill)
                 self.assertEqual(text.count("docs/claim-discipline.md"), 1, (platform, skill))
 
         for path in (
@@ -86,15 +90,13 @@ class ClaimDisciplineContractsTest(unittest.TestCase):
 
     def test_templates_keep_claim_ladder_and_readout_separation_in_existing_fields(self) -> None:
         for path in (
-            "codex/skills/design-experiment/templates/protocol.md",
-            "claude/skills/design-experiment/templates/protocol.md",
+            "shared/skills/design-experiment/templates/protocol.md",
         ):
             text = (REPO_ROOT / path).read_text(encoding="utf-8")
             for phrase in ("weakest non-vacuous positive claim", "exact rejection scope", "next discriminator"):
                 self.assertIn(phrase, text, path)
         for path in (
-            "codex/skills/review-experiment/templates/readout.md",
-            "claude/skills/review-experiment/templates/readout.md",
+            "shared/skills/review-experiment/templates/readout.md",
         ):
             text = (REPO_ROOT / path).read_text(encoding="utf-8")
             for phrase in ("weakest non-vacuous conclusion", "counterevidence", "explicit non-claims"):
@@ -122,7 +124,7 @@ class ClaimDisciplineContractsTest(unittest.TestCase):
     def test_existing_authority_and_adoption_boundaries_remain_strong(self) -> None:
         for platform in ("codex", "claude"):
             for skill in ("design-experiment", "review-experiment"):
-                text = (REPO_ROOT / platform / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+                text = self.read_skill(platform, skill)
                 self.assertTrue(
                     "Never authorize adoption or a default change" in text
                     or "never authorizes adoption or a default change" in text,

@@ -10,8 +10,7 @@ from typing import Any, Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CODEX_SKILL = ROOT / "codex" / "skills" / "explain"
-CLAUDE_SKILL = ROOT / "claude" / "skills" / "explain"
+SHARED_SKILL = ROOT / "shared" / "skills" / "explain"
 EXPECTED_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; font-src 'none'; script-src 'none'; connect-src 'none'; media-src 'none'; frame-src 'none'; object-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'"
 
 
@@ -36,7 +35,7 @@ def run_renderer(spec_path: Path, output_path: Path, *, cwd: Optional[Path] = No
     return subprocess.run(
         [
             sys.executable,
-            str(CODEX_SKILL / "scripts" / "render_static.py"),
+            str(SHARED_SKILL / "scripts" / "render_static.py"),
             str(spec_path),
             str(output_path),
         ],
@@ -48,7 +47,7 @@ def run_renderer(spec_path: Path, output_path: Path, *, cwd: Optional[Path] = No
 
 
 class ExplainRendererTest(unittest.TestCase):
-    def test_platform_twins_are_identical_except_codex_metadata(self) -> None:
+    def test_shared_source_contains_runtime_files(self) -> None:
         for relative in (
             Path("SKILL.md"),
             Path("references/modes.md"),
@@ -56,15 +55,11 @@ class ExplainRendererTest(unittest.TestCase):
             Path("references/html-safety.md"),
             Path("scripts/render_static.py"),
         ):
-            self.assertEqual(
-                (CODEX_SKILL / relative).read_text(encoding="utf-8"),
-                (CLAUDE_SKILL / relative).read_text(encoding="utf-8"),
-                relative,
-            )
+            self.assertTrue((SHARED_SKILL / relative).is_file(), relative)
 
     def test_skill_defaults_nontrivial_explanations_to_inert_temporary_html(self) -> None:
-        skill = (CODEX_SKILL / "SKILL.md").read_text(encoding="utf-8")
-        safety = (CODEX_SKILL / "references" / "html-safety.md").read_text(encoding="utf-8")
+        skill = (SHARED_SKILL / "SKILL.md").read_text(encoding="utf-8")
+        safety = (SHARED_SKILL / "references" / "html-safety.md").read_text(encoding="utf-8")
 
         self.assertIn("Default to static HTML for a nontrivial explanation", skill)
         self.assertIn("Save the new artifact under `/tmp`", skill)

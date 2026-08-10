@@ -40,10 +40,14 @@ def parse_frontmatter(text: str) -> dict[str, str]:
 
 
 def skill_dirs(repo: Path, platform: str) -> set[str]:
-    root = repo / platform / "skills"
-    if not root.is_dir():
-        return set()
-    return {path.name for path in root.iterdir() if path.is_dir() and (path / "SKILL.md").is_file()}
+    roots = (repo / platform / "skills", repo / "shared" / "skills")
+    return {
+        path.name
+        for root in roots
+        if root.is_dir()
+        for path in root.iterdir()
+        if path.is_dir() and (path / "SKILL.md").is_file()
+    }
 
 
 def md_names(root: Path) -> set[str]:

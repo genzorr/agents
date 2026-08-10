@@ -38,6 +38,8 @@ claude/
   rules/*.md          # generic global rules
   hooks/              # generic Claude notification hook
   hooks.json          # Claude hook config (merged into settings.json on install)
+shared/
+  skills/<id>/...     # mechanically byte-identical Codex/Claude source content
 scripts/
   install-assets.py    # shared stdlib catalog/installer engine
   install-claude.sh   # compatibility wrapper for the Claude engine
@@ -59,8 +61,8 @@ research/findings/     # source-bounded research reviews and project-specific im
 ```
 
 Codex/Claude same-name skills are deliberate **platform twins**, not automatically identical — the
-per-platform variants are preserved, never flattened. PR B may place only mechanically byte-identical
-source files under a shared tree while keeping platform-only files as explicit catalog source layers.
+per-platform variants are preserved, never flattened. PR B places only mechanically byte-identical
+source files under `shared/skills` while keeping platform-only files as explicit catalog source layers.
 
 ## Desired state and historical state
 
