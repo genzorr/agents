@@ -31,6 +31,7 @@ cross-tree presence gaps but does not force content/frontmatter parity.
 All install/uninstall/validate behavior follows the reusable per-repo skill installer contract in
 [`docs/skill-installer-contract.md`](docs/skill-installer-contract.md). `repos/harness` and
 `repos/session-harvester` follow the same contract for their own physically-present assets.
+For Agents, `catalog.json` is the sole desired-state authority and each selected home records historical materialized files plus adapter reconciliation history in `.agents-install-state.json`; the shell scripts are compatibility wrappers around the shared stdlib engine.
 
 ## Stop / Ask gates
 
@@ -46,8 +47,8 @@ Ask the operator before:
 ## Commands
 
 ```bash
-python3 scripts/validate_catalog.py            # catalog <-> source + allowlist parity
-python3 scripts/validate_skills.py             # SKILL.md frontmatter + traveling doc references
+python3 scripts/validate_catalog.py            # catalog schema, source/target coverage, and travel references
+python3 scripts/validate_skills.py             # frontmatter, portability, and catalog-backed text checks
 python3 scripts/check_cross_repo_consistency.py # cross-repo ownership split
 python3 -m unittest discover -s tests          # instruction behavior contracts
 bash scripts/test-prune-safety.sh              # scratch prune/uninstall ownership guard

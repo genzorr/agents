@@ -47,12 +47,13 @@ class StorageCleanupContractsTest(unittest.TestCase):
         catalog = json.loads((REPO_ROOT / "catalog.json").read_text(encoding="utf-8"))
         entry = next(item for item in catalog["skills"] if item["id"] == "storage-cleanup")
         self.assertEqual(set(entry["platforms"]), {"codex", "claude"})
-        self.assertEqual(entry["source"]["codex"], "codex/skills/storage-cleanup/SKILL.md")
-        self.assertEqual(entry["source"]["claude"], "claude/skills/storage-cleanup/SKILL.md")
+        self.assertEqual(entry["source"]["codex"], "codex/skills/storage-cleanup")
+        self.assertEqual(entry["source"]["claude"], "claude/skills/storage-cleanup")
 
         for installer in ("scripts/install-codex.sh", "scripts/install-claude.sh"):
             text = (REPO_ROOT / installer).read_text(encoding="utf-8")
-            self.assertIn("|storage-cleanup|", text, installer)
+            self.assertIn("install-assets.py", text, installer)
+            self.assertNotIn("storage-cleanup", text, installer)
 
 
 if __name__ == "__main__":

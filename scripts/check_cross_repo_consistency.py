@@ -9,15 +9,17 @@ installer scope. It does not inspect installed global homes.
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
+try:
+    from agent_catalog import CatalogError, catalog_named_ids, catalog_skill_ids, load_catalog
+except ModuleNotFoundError:  # Imported as a module from repository tests.
+    from scripts.agent_catalog import CatalogError, catalog_named_ids, catalog_skill_ids, load_catalog
+
 HARNESS_COMMANDS = {"execute.md"}
 HARNESS_AGENTS = {"harness-task-bootstrap.md", "task-verifier.md"}
-AGENTS_COMMANDS = {"dual-review.md", "plan.md"}
-AGENTS_AGENTS = {"code-reviewer.md", "planner.md"}
 SESSION_SKILL = "harvest-sessions"
 FOREIGN_SKILLS = {"codex-primary-runtime"}
 
@@ -50,22 +52,6 @@ def md_names(root: Path) -> set[str]:
     return {path.name for path in root.iterdir() if path.is_file() and path.suffix == ".md"}
 
 
-def load_json(path: Path, label: str) -> tuple[dict, list[str]]:
-    if not path.is_file():
-        return {}, [f"{label}: missing required file: {path}"]
-    try:
-        return json.loads(path.read_text(encoding="utf-8")), []
-    except json.JSONDecodeError as exc:
-        return {}, [f"{label}: invalid JSON in {path}: {exc}"]
-
-
-def catalog_skill_ids(agents: Path) -> tuple[set[str], list[str]]:
-    catalog, errors = load_json(agents / "catalog.json", "agents")
-    if errors:
-        return set(), errors
-    return {entry["id"] for entry in catalog.get("skills", [])}, []
-
-
 def bash_return_zero_patterns(script: Path, function_name: str) -> tuple[set[str], list[str]]:
     if not script.is_file():
         return set(), [f"missing required installer script: {script}"]
@@ -87,34 +73,35 @@ def bash_return_zero_patterns(script: Path, function_name: str) -> tuple[set[str
 
 def check_agents(agents: Path) -> list[str]:
     errors: list[str] = []
-    physical = skill_dirs(agents, "codex") | skill_dirs(agents, "claude")
-    catalog, catalog_errors = catalog_skill_ids(agents)
-    errors.extend(catalog_errors)
+    try:
+        assets = load_catalog(agents)
+    except CatalogError as exc:
+        return [f"agents: invalid catalog: {exc}"]
+    physical_by_platform = {platform: skill_dirs(agents, platform) for platform in ("codex", "claude")}
+    catalog_by_platform = {platform: catalog_skill_ids(assets, platform) for platform in ("codex", "claude")}
+    physical = physical_by_platform["codex"] | physical_by_platform["claude"]
+    catalog = catalog_by_platform["codex"] | catalog_by_platform["claude"]
     boundary = {name for name in physical | catalog if name.startswith("harness-")}
     boundary |= (physical | catalog) & ({SESSION_SKILL} | FOREIGN_SKILLS)
     for name in sorted(boundary):
         errors.append(f"agents: boundary/foreign skill must not be owned here: {name}")
-    if physical != catalog:
-        errors.append(
-            "agents: physical skill dirs and catalog skill ids differ "
-            f"(physical-only={sorted(physical - catalog)}, catalog-only={sorted(catalog - physical)})"
-        )
+    for platform in ("codex", "claude"):
+        if physical_by_platform[platform] != catalog_by_platform[platform]:
+            errors.append(
+                f"agents: {platform} physical skill dirs and catalog ids differ "
+                f"(physical-only={sorted(physical_by_platform[platform] - catalog_by_platform[platform])}, "
+                f"catalog-only={sorted(catalog_by_platform[platform] - physical_by_platform[platform])})"
+            )
 
     commands = md_names(agents / "claude" / "commands")
-    harness_commands = commands & HARNESS_COMMANDS
-    unexpected_commands = commands - AGENTS_COMMANDS - HARNESS_COMMANDS
-    if unexpected_commands:
-        errors.append(f"agents: unexpected Claude commands present: {sorted(unexpected_commands)}")
-    if harness_commands:
-        errors.append(f"agents: Harness-owned Claude commands present: {sorted(harness_commands)}")
+    expected_commands = {f"{name}.md" for name in catalog_named_ids(assets, "command", "claude")}
+    if commands != expected_commands:
+        errors.append(f"agents: physical Claude commands and catalog ids differ (physical={sorted(commands)}, catalog={sorted(expected_commands)})")
 
     agents_files = md_names(agents / "claude" / "agents")
-    harness_agents = agents_files & HARNESS_AGENTS
-    unexpected_agents = agents_files - AGENTS_AGENTS - HARNESS_AGENTS
-    if unexpected_agents:
-        errors.append(f"agents: unexpected Claude agents present: {sorted(unexpected_agents)}")
-    if harness_agents:
-        errors.append(f"agents: Harness-owned Claude agents present: {sorted(harness_agents)}")
+    expected_agents = {f"{name}.md" for name in catalog_named_ids(assets, "subagent", "claude")}
+    if agents_files != expected_agents:
+        errors.append(f"agents: physical Claude subagents and catalog ids differ (physical={sorted(agents_files)}, catalog={sorted(expected_agents)})")
     return errors
 
 

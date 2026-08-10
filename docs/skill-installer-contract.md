@@ -1,258 +1,89 @@
 # Skill Installer Contract
 
-A durable, repo-neutral contract for how `repos/agents`, `repos/harness`, and
-`repos/session-harvester` each install, uninstall, update, and prune the Codex/Claude
-assets they own. It defines the shared shape; it does not implement it. Later
-implementation tasks (Agents installer, Harness installer reconciliation,
-session-harvester install/uninstall) build against this contract instead of
-inventing per-repo behavior.
+A durable, repo-neutral contract for how `repos/agents`, `repos/harness`, and `repos/session-harvester` install, update, prune, and uninstall the Codex/Claude assets they own. It defines the shared safety shape; each repository remains the source of truth for the assets physically present in that repository.
 
-This contract was written against the existing Harness installers
-(`repos/harness/scripts/install-claude.sh`, `install-codex.sh`) as the load-bearing
-precedent for hook/config safety and doc-manifest behavior. Where those scripts'
-actual behavior differs from an idealized command shape, this doc says so explicitly
-(see §2 and §9) rather than silently describing something that doesn't exist yet.
+## 1. Purpose and ownership
 
-## 1. Purpose & scope
+Each repository manages only assets physically present in its own source tree. It never manages, prunes, or removes another repository's assets or a foreign/unknown installed asset such as `codex-primary-runtime`. Agents owns generic personal/global skills, commands, subagents, rules, Codex global instructions, Claude notification files, and explicitly cataloged traveling documents. Harness owns its `harness-*` assets and coupled Codex stop-gate files. session-harvester owns `skills/harvest-sessions/`.
 
-One installer *surface shape* is shared across three repos; there is no global,
-cross-repo installer. Each repo:
-
-- installs, uninstalls, updates, and prunes **only the assets physically present in
-  that repo's own source tree** (`agents/{codex,claude}/...`,
-  `harness/{codex,claude}/...`, `session-harvester/skills/harvest-sessions/...`);
-- never manages, prunes, or removes another repo's assets, even if that repo's
-  install target lives in the same global `~/.codex` or `~/.claude` directory;
-- never manages, prunes, or removes a foreign/unknown installed asset (e.g.
-  `codex-primary-runtime`) that isn't sourced from any of these three repos.
-
-Ownership is determined by **physical presence in the repo's own source tree**, not
-by naming convention. A repo's catalog/allowlist (§7) is the authoritative
-enumeration of that presence — it is generated from or checked against the source
-tree, never hand-maintained as a separate claim.
+Agents uses `catalog.json` as the sole desired-state authority. The catalog loader, installer engine, and validators derive identity, platform, sources, source layers, targets, adapters, and traveling documents from that file; the compatibility shell wrappers contain no asset allowlists or copy/prune logic.
 
 ## 2. Command surface
 
-The target shape below is what future implementations may converge on. **Current
-repo support is intentionally uneven and documented in §10**: Agents implements
-install/prune/uninstall flags, Harness has single-mode scripts with
-`--dry-run`/`--diff`/`--prune`, and session-harvester has a complete-directory
-single-skill installer with `--dry-run`/`--diff`/`--prune`/`--uninstall`. This contract describes semantics and ownership
-invariants first; it does not claim every repo already exposes every verb.
+| Command | Mutates? | Meaning |
+|---|---|---|
+| `validate` | no | Validate catalog schema, source/target coverage, frontmatter, portability, traveling references, boundaries, and compatible state shape. |
+| `--dry-run` | no | Report planned install, update, prune, uninstall, or adapter actions without creating directories, writing files, changing modes, merging settings, migrating state, or removing files. |
+| `--diff` | no | Observational diff surface; implies `--dry-run`. |
+| install/update | yes | Materialize current catalog desired state, adopt exact unrecorded outputs, update unchanged recorded outputs, and preserve/report conflicts. |
+| `--prune` | yes | Remove only unchanged files recorded as Agents-owned that are absent from current desired state. |
+| `--uninstall` | yes | Reconcile every recorded Agents-owned file, including assets removed from the current catalog, then remove state after successful reconciliation. |
 
-| Command | Mutates? | Idempotent? | What it does |
-|---|---|---|---|
-| `validate` | no | yes | Checks source-tree identity/coverage (see §8). Never touches install targets. |
-| `status` / `diff` | no | yes | Reports source-vs-installed drift: new (in source, not installed), changed (differs), removed (installed, not in source), unmanaged (installed, not owned by this repo). Read-only equivalent of what `install --dry-run --diff` would do. |
-| `install` | yes | yes | Copies source → install target for this repo's owned assets. Creates missing dirs/files, updates changed ones, never touches assets it doesn't own. Re-running with no source changes is a no-op. |
-| `uninstall` | yes | yes | Removes install targets for **all** of this repo's owned assets, regardless of current source-tree state (a stronger, explicit "take my stuff out" — distinct from `prune`, which only removes what source no longer has). |
-| `update` | yes | yes | Alias/shorthand for re-running `install` after a source change; same semantics, framed for the "I changed source, now sync it" workflow. |
-| `prune` | yes | yes | Removes install targets that are (a) in this repo's managed set and (b) absent from this repo's current source tree. See the prune invariant in §3. Never removes an unmanaged or foreign target. |
+Agents exposes the commands through `scripts/install-codex.sh` and `scripts/install-claude.sh`, which resolve the repository and `exec` `scripts/install-assets.py <platform>`. The engine is stdlib-only and uses `CODEX_HOME` or `CLAUDE_HOME`, defaulting to the real home only when an operator explicitly approves a live mutation.
 
-A repo may mark any command **non-applicable** if its owned asset set doesn't need
-it. Non-applicability must
-be **stated in that repo's install docs**, not silently omitted — a missing command
-with no note is a gap; a missing command with a one-line "not applicable because…"
-is a conforming implementation of this contract.
+## 3. Ownership and prune invariant
 
-## 3. Ownership rule (the prune invariant)
+`prune` removes a target only when all three conditions hold: the target is recorded in `.agents-install-state.json` as Agents-owned, the target is absent from current catalog desired state, and its current SHA-256 digest and mode equal the last-installed record. A modified recorded target is reported and preserved. An unrecorded exact source match may be adopted during install; uninstall never adopts unrecorded files and removes a recorded file only when its current SHA-256 digest and mode equal the recorded signature. An unrecorded differing destination is an unmanaged conflict and is never overwritten.
 
-Each repo installs, uninstalls, and prunes only assets physically present in its own
-source tree. The catalog/allowlist (§7) is the authoritative managed-set for that
-repo — nothing is managed by convention or naming pattern alone.
+The state requirement prevents current desired state from becoming historical ownership authority. State entries remain after normal installs when an asset leaves the catalog, so an explicit prune or uninstall can reconcile the historical output. Foreign, Harness-owned, session-harvester-owned, unrecorded, and legacy names remain untouched.
 
-**Prune invariant, stated precisely:** `prune` removes an install target **if and
-only if** both hold:
+## 4. Scratch-home testing and live gate
 
-1. the target's name is in this repo's managed set (catalog/allowlist), **and**
-2. the corresponding source no longer exists in this repo's source tree.
-
-`prune` never removes a target for any other reason. In particular:
-
-- an installed asset owned by a *different* repo (even one following this same
-  contract) is never in this repo's managed set, so it is never touched;
-- a foreign/unknown installed asset (`codex-primary-runtime`) is never in any
-  repo's managed set, so it is never touched — Harness's Codex installer belt-and-
-  suspenders skips it by exact name in addition to it already failing the
-  allowlist check;
-- an asset that IS in the managed set but whose source still exists is never
-  removed by `prune` — only `uninstall` removes those.
-
-This is the invariant that prevents the cross-repo violation named in the S-17
-board: after the generic personal/global assets move from Harness to Agents, the
-Harness allowlist **must** drop those names, or Harness's own `--prune` would
-delete Agents-installed assets it no longer sources.
-
-Legacy cleanup is outside the normal managed set. If an operator wants to remove
-pre-extraction names such as `dynamic-workflow-prompt`,
-`gpt-pro-context-prompt`, `add-tasks`, `investigate`, `session-start`,
-`task-checkpoint`, `task-done`, `task-start`, `branching-and-prs.md`, or
-`adversarial-review.md`, do it through a separate explicit migration run after a
-dry-run review and operator approval. Do not place those names in ordinary
-install/prune/uninstall allowlists unless their source exists in the owning repo.
-
-## 4. Scratch-home testing
-
-`CODEX_HOME` and `CLAUDE_HOME` environment variables redirect all install targets
-(read and write) away from the real `~/.codex` / `~/.claude`. Every mutation-capable
-command (`install`, `uninstall`, `update`, `prune`) **must** be exercised against a
-scratch home before any live run, using this invocation pattern:
+Every mutation-capable command must be exercised against isolated scratch homes before a live run. Fresh-home tests must prove that `--dry-run` and `--diff` leave the home path absent, then prove install, second-install idempotence, update, prune, and uninstall behavior.
 
 ```bash
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --dry-run --diff
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --prune --dry-run
-
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --dry-run --diff
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --prune --dry-run
 ```
 
-`--dry-run` reports what would change without writing; `--diff` shows the actual
-content diff for changed files. A scratch-home run against a *fresh* directory
-proves an install/prune from empty; a scratch-home run seeded with a prior install
-(or a copy of the real home) proves idempotency and correct drift/prune detection
-without any risk to the live environment.
+Running install, update, prune, or uninstall against the real `~/.codex` or `~/.claude` requires an explicit operator approval every time. Repository validation and all prescribed verification use scratch homes and must not mutate live global state.
 
-## 5. Live-mutation approval gate
+## 5. Platform adapter safety
 
-Running `install`, `uninstall`, `update`, or `prune` against the **real** `~/.codex`
-or `~/.claude` (i.e. without `CODEX_HOME`/`CLAUDE_HOME` redirected to a scratch
-path) is an explicit operator-approval gate. No repo's installer may perform a live
-global mutation autonomously — an agent must stop and ask before running any
-mutating command against the real home, every time, regardless of how many times
-approval was granted for scratch-home or prior live runs in the same session.
-`validate`, `status`, and `diff` are read-only and do not require this gate even
-against the real home.
+Codex writes global `AGENTS.md` only when the destination is absent, empty, or has the exact first-line header `# Global Codex Instructions`; other global instructions are preserved and reported. Codex permission-profile merging remains in `scripts/install-codex-permissions.py` and is not part of the generic engine.
 
-## 6. Hook/config safety
+Claude never overwrites `settings.json` wholesale. It merges the catalog hook fragment while preserving unrelated hook commands, and records the exact Agents commands and script target needed for later reconciliation. Invalid JSON, malformed adapter data, missing prerequisites, and modified historical Agents commands produce an unresolved conflict with non-success status; they do not authorize destructive cleanup. Uninstall removes only exact recorded or safely inferred Agents commands and preserves unrelated settings and hooks. Existing settings mode is preserved, new settings use normal file-creation mode, and the hook source's `__CLAUDE_HOME__` placeholder is rendered to the selected home.
 
-These are the **existing** guards implemented in the Harness scripts today. Any
-repo's installer implementation must preserve this behavior exactly — it is what
-makes install idempotent and non-destructive to a user's own configuration.
+## 6. Desired catalog and source layers
 
-**Claude (`hooks.json` → `~/.claude/settings.json`):**
+Each catalog entry declares `id`, `kind`, `platforms`, `owner`, `source`, `install_target`, and optional `handling` and `tags`. A source may be a file or complete directory; directory sources include every nested file, support asset, template, script, metadata file, and source mode. Ordered source-layer objects may give each layer an explicit non-colliding target or an adapter-only role such as Claude settings hooks.
 
-- Claude Code reads hooks from `settings.json`; the installer never overwrites that
-  file wholesale — it only sets/replaces the `hooks` key via `jq`.
-- The merge is skipped (with a "skipped… unmanaged hook entries present" message)
-  unless the existing `hooks` block in `settings.json` is **empty** or **every leaf
-  hook command already points at the managed `notifications.sh`** (matched by
-  `*/hooks/notifications.sh*` substring, so both literal and `$HOME`-relative
-  forms count as managed). Any other unmanaged hook command present blocks the
-  merge entirely — the installer does not selectively merge around it.
-  If `jq` is not on `PATH`, the merge is skipped outright.
-- The hook source's `__CLAUDE_HOME__` placeholder is rendered to the real
-  `$CLAUDE_HOME` value (`sed` substitution) before merging, so the resulting
-  hook commands are absolute paths into the install target.
+Install targets are relative to the selected platform home and never repeat `~/.codex` or `~/.claude`. The loader rejects path traversal, absolute paths, missing or escaping sources, symlinked source trees, duplicate ids, duplicate targets, source-layer collisions, invalid platform declarations, incomplete physical coverage, and reserved cross-repository ids.
 
-**Codex (`AGENTS.md` and `hooks.json`):**
+Traveling documents use `kind: traveling_document` and explicit source and platform target entries. Runtime text scanning never decides what is installed. The transition reader accepts the old `.agents-doc-manifest` once, records its paths in historical state with a trusted-baseline marker, and removes the legacy file only after successful migration; an untrusted legacy baseline cannot authorize destructive removal.
 
-- `AGENTS.md` is written only if the destination is **empty** or its **first
-  line** is exactly the managed header `# Global Codex Instructions`. Any other
-  first line means the destination is unmanaged and is skipped (with a "skipped
-  unmanaged global file" message) — the file is never appended to or partially
-  merged.
-- Harness-owned `hooks.json` updates only the Harness Stop-gate entry. The
-  installer merges the rendered Stop hook into an existing JSON object, removes
-  prior Harness Stop hook spellings, and preserves other unmanaged hook entries.
-  If the existing file is not valid/mergeable JSON, the merge is skipped instead
-  of overwriting it.
-- The `__CODEX_HOME__` placeholder in the source `hooks.json` is rendered to the
-  real `$CODEX_HOME` value before comparison/write/merge.
+## 7. Historical install state
 
-**Both platforms:** install targets (`~/.codex`, `~/.claude`) are **outputs only,
-never hand-edited**. Any user who wants to change installed behavior edits the
-owning repo's source and re-runs install; a direct edit under the install target
-will be silently overwritten (for files inside a repo's owned set) or left alone
-but inconsistent with source (for anything outside it) on the next install.
+Each selected home may contain `.agents-install-state.json` with `schema_version`, `owner`, `platform`, a path-keyed `files` object, and historical `adapters`. Each file record contains catalog asset id and kind, last-installed SHA-256, mode, explicit owner, and whether its baseline is trusted; adapter records contain exact structural hook-leaf identities and targets needed for safe retry and uninstall. State is historical ownership evidence, not a second desired-state catalog, and malformed or foreign records are rejected before mutation.
 
-## 7. Manifest/catalog + doc-manifest
-
-**Catalog** — each repo's catalog (in Agents, `catalog.json`; Harness and
-session-harvester may use an equivalent structure) is the ownership source of
-truth: it enumerates every asset that repo's installer is allowed to install,
-update, or prune, with per-platform source path and install target. An installer's
-managed-set check (the `is_repo_managed_skill`-style allowlist) must be derivable
-from, or checked against, this catalog — not maintained as an independent list that
-can drift from it. `scripts/validate_catalog.py` in Agents is the reference
-implementation of "does the allowlist match the catalog," including tolerance for
-an installer script that doesn't exist yet.
-
-**Doc-manifest** (`.harness-doc-manifest`-style file dropped in the install home,
-named per-repo, e.g. `.agents-doc-manifest`) — records which static repo docs
-(`docs/*.md` files a skill's body statically references, e.g. `docs/glossary.md`)
-were copied into the install tree because a currently-installed skill references
-them. This mechanism is repo-neutral:
-
-- on every install run, the current skill source is scanned for `docs/*.md`
-  references (excluding run-local templated paths like `RUN_ID`/`YYYYMMDD`
-  segments, and excluding references that don't resolve to a real repo file —
-  those are illustrative examples, not travel candidates);
-- every resolved reference is copied alongside the skill install, so a skill that
-  points at a doc still finds it after install;
-- on a normal (non-prune) run the manifest **accumulates** (union of past + current
-  doc set) so a later prune has the full history to reconcile;
-- on a `--prune` run, any manifest-recorded doc no longer in the current reference
-  set is removed from the install tree, and the manifest is rewritten to exactly
-  the current set;
-- a doc the user placed under the install tree themselves is **never** recorded in
-  the manifest (it was never copied by the installer), so it is never touched by
-  prune — the manifest only ever tracks installer-copied docs.
+Normal install creates missing desired targets, adopts exact existing targets, updates destinations that still match the recorded digest and mode, and preserves/report modified or unmanaged conflicts. State is written atomically only after a mutating reconciliation; unresolved conflicts retain the state needed for retry. Prune removes unchanged stale entries and empty directories only after owned files are removed. Uninstall removes unchanged recorded outputs and adapter fragments, preserves modified outputs, and deletes state only when reconciliation has no unresolved conflict.
 
 ## 8. Validation behavior
 
-- **`SKILL.md` identity**: every skill directory's `name:` frontmatter field must
-  equal its directory name (which must also equal its catalog id). Missing or
-  empty `description:` is a hard failure. This is enforced by a stdlib-only,
-  string-based frontmatter parser — no YAML dependency, matching the durable-
-  frontmatter convention.
-- **Catalog coverage**: every physically-present asset in a repo's owned locations
-  (skills, commands, subagents, rules, hooks, global instructions) must have a
-  catalog entry, and every catalog entry's source path must exist on disk — both
-  directions are checked, so an asset can't be silently un-cataloged nor a catalog
-  entry silently orphaned.
-- **Cross-tree presence**: a same-id skill present on one platform (Codex) but not
-  the other (Claude), or vice versa, is a **warning**, not a failure — twins are
-  deliberately not forced to be identical or even mutually present. Content and
-  frontmatter parity across platform twins (`model`/`effort`/`allowed-tools`/
-  `argument-hint`) is deferred by design and never checked.
-- **Boundary check**: a boundary/foreign id (any `harness-*` name,
-  `harvest-sessions`, `codex-primary-runtime`, or another repo's owned id) must
-  never appear as an installable entry in a repo's own catalog.
+`scripts/validate_catalog.py` and the installer load the same stdlib catalog module. Validation covers catalog schema and identity, bidirectional source coverage, complete directory expansion, frontmatter name/description identity, safe relative targets, source-layer collisions, explicit traveling references across skills/commands/subagents/rules/global instructions, boundary ownership, and install-state schema compatibility. `scripts/validate_skills.py` retains skill portability checks and invokes the catalog-backed text/reference validation. Cross-tree presence asymmetry is explicit and allowed; exact sharedness is established mechanically by PR B rather than free-text counterpart metadata.
 
-## 9. Idempotency & rollback
+## 9. Idempotency, conflict handling, and rollback
 
-- Install is **copy-based and idempotent**: re-running `install`/`update` with an
-  unchanged source is a no-op (reported as "unchanged"); with a changed source it
-  updates only the changed files.
-- Install **never deletes user data** it doesn't own — it only ever writes files
-  under its own managed paths, and the hook/config guards in §6 mean it refuses to
-  touch a destination it can't prove is already managed.
-- `prune`/`uninstall` remove **only** targets in the repo's own managed set (§3);
-  they never delete anything outside it, including another repo's assets or a
-  foreign asset.
-- **Rollback** is: re-run `install` from the current (or a prior, checked-out)
-  source commit to restore a known-good install state, or restore the install
-  target itself from VCS/backup if the target directory is independently tracked.
-  There is no separate rollback mechanism beyond "source is the truth, re-sync
-  from it" — this is why install must stay copy-based and idempotent rather than
-  stateful.
+Install is copy-based and idempotent: unchanged source and mode produce no file action; source or mode changes update only unchanged recorded outputs. Conflicts produce a non-success disposition and fail-closed install behavior. Safe prune/uninstall actions may complete while modified stale paths remain recorded and reported for retry.
 
-## 10. Per-repo applicability
+Rollback is to check out a known-good source commit and re-run the installer against the selected scratch or approved live home. A prior home backup may restore install outputs independently. There is no broad force flag: explicit operator action outside the installer is required for a destination that cannot be proven Agents-owned.
 
-| Repo | Managed set | `validate` | `status`/`diff` | `install` | `uninstall` | `update` | `prune` |
-|---|---|---|---|---|---|---|---|
-| **agents** | everything in `catalog.json` (generic personal/global skills, commands, subagents, rules, Codex `AGENTS.md`, Claude notification hook) | yes | yes | yes | yes | yes | yes |
-| **harness** | `harness-*` skills (both platforms), Claude `execute` command, Claude `harness-task-bootstrap`/`task-verifier` subagents, the Codex Stop-gate hook (`hooks.json` + `hooks/stop.sh` + `hooks/notifications.sh`, kept together because `stop.sh` sources `notifications.sh` as a sibling) | yes (`uv run python scripts/validate_skills.py`) | partial: `--dry-run --diff` reports source-vs-installed drift | yes | unsupported/deferred; not exposed by current scripts | re-run install | yes (`--prune`) |
-| **session-harvester** | `skills/harvest-sessions/` (one Claude skill directory, including traveling references) | yes | yes (`--dry-run --diff`) | yes | yes (`--uninstall`) | re-run install | yes (`--prune`, limited to stale files inside the owned skill directory) |
+## 10. Per-repository applicability
 
-session-harvester copies its complete `skills/harvest-sessions/` source directory, including traveling references, into its one owned Claude target. Its `--diff` is the read-only status surface, a normal install is the update surface, `--prune` removes only stale files inside that owned directory, and `--uninstall` removes that directory. It never manages another skill or any Codex asset.
+| Repository | Managed set | Validate | Install | Update | Prune | Uninstall |
+|---|---|---|---|---|---|---|
+| agents | `catalog.json` assets, explicit traveling documents, and historical state | yes | yes via shared engine | re-run install | yes | yes |
+| harness | physically present `harness-*` assets and coupled files | repository-native | yes | re-run install | yes | deferred unless its contract changes |
+| session-harvester | `skills/harvest-sessions/` complete directory | repository-native | yes | re-run install | yes within owned directory | yes |
 
 ## References
 
-- `catalog.json` (this repo) — the Agents catalog this contract's §7 refers to.
-- `scripts/validate_catalog.py`, `scripts/validate_skills.py` (this repo) — the
-  validation behavior in §8.
-- `repos/harness/scripts/install-claude.sh`, `repos/harness/scripts/install-codex.sh`
-  — the existing implementation this contract's §6/§7 behavior is captured from.
+- `catalog.json` — Agents desired-state catalog.
+- `scripts/agent_catalog.py` — shared catalog model, validation, and expansion.
+- `scripts/install-assets.py` — shared stdlib installer engine.
+- `scripts/validate_catalog.py` and `scripts/validate_skills.py` — repository validation surfaces.
+- `repos/harness/scripts/install-claude.sh` and `install-codex.sh` — historical source of the platform safety guards preserved here.

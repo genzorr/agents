@@ -7,14 +7,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/architecture-review/SKILL.md",
-        "claude": "claude/skills/architecture-review/SKILL.md"
+        "codex": "codex/skills/architecture-review",
+        "claude": "claude/skills/architecture-review"
       },
       "install_target": {
-        "codex": "~/.codex/skills/architecture-review",
-        "claude": "~/.claude/skills/architecture-review"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/architecture-review",
+        "claude": "skills/architecture-review"
+      }
     },
     {
       "id": "archify",
@@ -22,14 +21,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/archify/SKILL.md",
-        "claude": "claude/skills/archify/SKILL.md"
+        "codex": "codex/skills/archify",
+        "claude": "claude/skills/archify"
       },
       "install_target": {
-        "codex": "~/.codex/skills/archify",
-        "claude": "~/.claude/skills/archify"
+        "codex": "skills/archify",
+        "claude": "skills/archify"
       },
-      "counterpart": "twin (Codex/Claude invocation wording differs)",
       "tags": ["domain:diagrams", "origin:tt-a1i/archify"]
     },
     {
@@ -38,14 +36,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/ask-oracle/SKILL.md",
-        "claude": "claude/skills/ask-oracle/SKILL.md"
+        "codex": "codex/skills/ask-oracle",
+        "claude": "claude/skills/ask-oracle"
       },
       "install_target": {
-        "codex": "~/.codex/skills/ask-oracle",
-        "claude": "~/.claude/skills/ask-oracle"
-      },
-      "counterpart": "identical"
+        "codex": "skills/ask-oracle",
+        "claude": "skills/ask-oracle"
+      }
     },
     {
       "id": "ask-chatgpt-pro",
@@ -53,14 +50,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/ask-chatgpt-pro/SKILL.md",
-        "claude": "claude/skills/ask-chatgpt-pro/SKILL.md"
+        "codex": "codex/skills/ask-chatgpt-pro",
+        "claude": "claude/skills/ask-chatgpt-pro"
       },
       "install_target": {
-        "codex": "~/.codex/skills/ask-chatgpt-pro",
-        "claude": "~/.claude/skills/ask-chatgpt-pro"
-      },
-      "counterpart": "identical"
+        "codex": "skills/ask-chatgpt-pro",
+        "claude": "skills/ask-chatgpt-pro"
+      }
     },
     {
       "id": "babysit-pr",
@@ -68,14 +64,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/babysit-pr/SKILL.md",
-        "claude": "claude/skills/babysit-pr/SKILL.md"
+        "codex": "codex/skills/babysit-pr",
+        "claude": "claude/skills/babysit-pr"
       },
       "install_target": {
-        "codex": "~/.codex/skills/babysit-pr",
-        "claude": "~/.claude/skills/babysit-pr"
-      },
-      "counterpart": "identical"
+        "codex": "skills/babysit-pr",
+        "claude": "skills/babysit-pr"
+      }
     },
     {
       "id": "bro",
@@ -83,14 +78,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/bro/SKILL.md",
-        "claude": "claude/skills/bro/SKILL.md"
+        "codex": "codex/skills/bro",
+        "claude": "claude/skills/bro"
       },
       "install_target": {
-        "codex": "~/.codex/skills/bro",
-        "claude": "~/.claude/skills/bro"
-      },
-      "counterpart": "twin (Claude disables model invocation)"
+        "codex": "skills/bro",
+        "claude": "skills/bro"
+      }
     },
     {
       "id": "codex-project-init",
@@ -98,12 +92,11 @@
       "platforms": ["codex"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/codex-project-init/SKILL.md"
+        "codex": "codex/skills/codex-project-init"
       },
       "install_target": {
-        "codex": "~/.codex/skills/codex-project-init"
-      },
-      "counterpart": "codex-only: the Claude custom-init twin was removed; Claude project init is handled inline using docs/context-file-authoring.md"
+        "codex": "skills/codex-project-init"
+      }
     },
     {
       "id": "design-experiment",
@@ -111,14 +104,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/design-experiment/SKILL.md",
-        "claude": "claude/skills/design-experiment/SKILL.md"
+        "codex": "codex/skills/design-experiment",
+        "claude": "claude/skills/design-experiment"
       },
       "install_target": {
-        "codex": "~/.codex/skills/design-experiment",
-        "claude": "~/.claude/skills/design-experiment"
+        "codex": "skills/design-experiment",
+        "claude": "skills/design-experiment"
       },
-      "counterpart": "identical",
       "tags": ["domain:experiment-workflow"]
     },
     {
@@ -127,14 +119,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/diagnose/SKILL.md",
-        "claude": "claude/skills/diagnose/SKILL.md"
+        "codex": "codex/skills/diagnose",
+        "claude": "claude/skills/diagnose"
       },
       "install_target": {
-        "codex": "~/.codex/skills/diagnose",
-        "claude": "~/.claude/skills/diagnose"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/diagnose",
+        "claude": "skills/diagnose"
+      }
     },
     {
       "id": "distill-source",
@@ -142,14 +133,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/distill-source/SKILL.md",
-        "claude": "claude/skills/distill-source/SKILL.md"
+        "codex": "codex/skills/distill-source",
+        "claude": "claude/skills/distill-source"
       },
       "install_target": {
-        "codex": "~/.codex/skills/distill-source",
-        "claude": "~/.claude/skills/distill-source"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/distill-source",
+        "claude": "skills/distill-source"
+      }
     },
     {
       "id": "doc-audit",
@@ -157,14 +147,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/doc-audit/SKILL.md",
-        "claude": "claude/skills/doc-audit/SKILL.md"
+        "codex": "codex/skills/doc-audit",
+        "claude": "claude/skills/doc-audit"
       },
       "install_target": {
-        "codex": "~/.codex/skills/doc-audit",
-        "claude": "~/.claude/skills/doc-audit"
-      },
-      "counterpart": "twin (70 vs 167 ln)"
+        "codex": "skills/doc-audit",
+        "claude": "skills/doc-audit"
+      }
     },
     {
       "id": "docker-optimize",
@@ -172,14 +161,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/docker-optimize/SKILL.md",
-        "claude": "claude/skills/docker-optimize/SKILL.md"
+        "codex": "codex/skills/docker-optimize",
+        "claude": "claude/skills/docker-optimize"
       },
       "install_target": {
-        "codex": "~/.codex/skills/docker-optimize",
-        "claude": "~/.claude/skills/docker-optimize"
-      },
-      "counterpart": "identical"
+        "codex": "skills/docker-optimize",
+        "claude": "skills/docker-optimize"
+      }
     },
     {
       "id": "explain",
@@ -187,14 +175,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/explain/SKILL.md",
-        "claude": "claude/skills/explain/SKILL.md"
+        "codex": "codex/skills/explain",
+        "claude": "claude/skills/explain"
       },
       "install_target": {
-        "codex": "~/.codex/skills/explain",
-        "claude": "~/.claude/skills/explain"
+        "codex": "skills/explain",
+        "claude": "skills/explain"
       },
-      "counterpart": "identical",
       "tags": ["domain:technical-learning", "role:driver"]
     },
     {
@@ -203,14 +190,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/fix-build/SKILL.md",
-        "claude": "claude/skills/fix-build/SKILL.md"
+        "codex": "codex/skills/fix-build",
+        "claude": "claude/skills/fix-build"
       },
       "install_target": {
-        "codex": "~/.codex/skills/fix-build",
-        "claude": "~/.claude/skills/fix-build"
-      },
-      "counterpart": "twin (34 vs 72 ln)"
+        "codex": "skills/fix-build",
+        "claude": "skills/fix-build"
+      }
     },
     {
       "id": "goal-prompt",
@@ -218,14 +204,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/goal-prompt/SKILL.md",
-        "claude": "claude/skills/goal-prompt/SKILL.md"
+        "codex": "codex/skills/goal-prompt",
+        "claude": "claude/skills/goal-prompt"
       },
       "install_target": {
-        "codex": "~/.codex/skills/goal-prompt",
-        "claude": "~/.claude/skills/goal-prompt"
-      },
-      "counterpart": "twin (204 vs 181 ln)"
+        "codex": "skills/goal-prompt",
+        "claude": "skills/goal-prompt"
+      }
     },
     {
       "id": "grill-with-docs",
@@ -233,14 +218,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/grill-with-docs/SKILL.md",
-        "claude": "claude/skills/grill-with-docs/SKILL.md"
+        "codex": "codex/skills/grill-with-docs",
+        "claude": "claude/skills/grill-with-docs"
       },
       "install_target": {
-        "codex": "~/.codex/skills/grill-with-docs",
-        "claude": "~/.claude/skills/grill-with-docs"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/grill-with-docs",
+        "claude": "skills/grill-with-docs"
+      }
     },
     {
       "id": "gtsam-doc",
@@ -248,14 +232,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/gtsam-doc/SKILL.md",
-        "claude": "claude/skills/gtsam-doc/SKILL.md"
+        "codex": "codex/skills/gtsam-doc",
+        "claude": "claude/skills/gtsam-doc"
       },
       "install_target": {
-        "codex": "~/.codex/skills/gtsam-doc",
-        "claude": "~/.claude/skills/gtsam-doc"
+        "codex": "skills/gtsam-doc",
+        "claude": "skills/gtsam-doc"
       },
-      "counterpart": "twin (59 vs 192 ln)",
       "tags": ["domain:robotics"]
     },
     {
@@ -264,14 +247,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/integrate-research/SKILL.md",
-        "claude": "claude/skills/integrate-research/SKILL.md"
+        "codex": "codex/skills/integrate-research",
+        "claude": "claude/skills/integrate-research"
       },
       "install_target": {
-        "codex": "~/.codex/skills/integrate-research",
-        "claude": "~/.claude/skills/integrate-research"
-      },
-      "counterpart": "twin (79 vs 175 ln)"
+        "codex": "skills/integrate-research",
+        "claude": "skills/integrate-research"
+      }
     },
     {
       "id": "logging-optimize",
@@ -279,14 +261,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/logging-optimize/SKILL.md",
-        "claude": "claude/skills/logging-optimize/SKILL.md"
+        "codex": "codex/skills/logging-optimize",
+        "claude": "claude/skills/logging-optimize"
       },
       "install_target": {
-        "codex": "~/.codex/skills/logging-optimize",
-        "claude": "~/.claude/skills/logging-optimize"
-      },
-      "counterpart": "identical"
+        "codex": "skills/logging-optimize",
+        "claude": "skills/logging-optimize"
+      }
     },
     {
       "id": "prepare-dynamic-workflow",
@@ -294,14 +275,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/prepare-dynamic-workflow/SKILL.md",
-        "claude": "claude/skills/prepare-dynamic-workflow/SKILL.md"
+        "codex": "codex/skills/prepare-dynamic-workflow",
+        "claude": "claude/skills/prepare-dynamic-workflow"
       },
       "install_target": {
-        "codex": "~/.codex/skills/prepare-dynamic-workflow",
-        "claude": "~/.claude/skills/prepare-dynamic-workflow"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/prepare-dynamic-workflow",
+        "claude": "skills/prepare-dynamic-workflow"
+      }
     },
     {
       "id": "prototype",
@@ -309,14 +289,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/prototype/SKILL.md",
-        "claude": "claude/skills/prototype/SKILL.md"
+        "codex": "codex/skills/prototype",
+        "claude": "claude/skills/prototype"
       },
       "install_target": {
-        "codex": "~/.codex/skills/prototype",
-        "claude": "~/.claude/skills/prototype"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/prototype",
+        "claude": "skills/prototype"
+      }
     },
     {
       "id": "research-prompt",
@@ -324,14 +303,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/research-prompt/SKILL.md",
-        "claude": "claude/skills/research-prompt/SKILL.md"
+        "codex": "codex/skills/research-prompt",
+        "claude": "claude/skills/research-prompt"
       },
       "install_target": {
-        "codex": "~/.codex/skills/research-prompt",
-        "claude": "~/.claude/skills/research-prompt"
-      },
-      "counterpart": "twin (71 vs 165 ln)"
+        "codex": "skills/research-prompt",
+        "claude": "skills/research-prompt"
+      }
     },
     {
       "id": "review-change",
@@ -339,14 +317,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/review-change/SKILL.md",
-        "claude": "claude/skills/review-change/SKILL.md"
+        "codex": "codex/skills/review-change",
+        "claude": "claude/skills/review-change"
       },
       "install_target": {
-        "codex": "~/.codex/skills/review-change",
-        "claude": "~/.claude/skills/review-change"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/review-change",
+        "claude": "skills/review-change"
+      }
     },
     {
       "id": "review-experiment",
@@ -354,14 +331,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/review-experiment/SKILL.md",
-        "claude": "claude/skills/review-experiment/SKILL.md"
+        "codex": "codex/skills/review-experiment",
+        "claude": "claude/skills/review-experiment"
       },
       "install_target": {
-        "codex": "~/.codex/skills/review-experiment",
-        "claude": "~/.claude/skills/review-experiment"
+        "codex": "skills/review-experiment",
+        "claude": "skills/review-experiment"
       },
-      "counterpart": "identical",
       "tags": ["domain:experiment-workflow"]
     },
     {
@@ -370,14 +346,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/session-handoff/SKILL.md",
-        "claude": "claude/skills/session-handoff/SKILL.md"
+        "codex": "codex/skills/session-handoff",
+        "claude": "claude/skills/session-handoff"
       },
       "install_target": {
-        "codex": "~/.codex/skills/session-handoff",
-        "claude": "~/.claude/skills/session-handoff"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/session-handoff",
+        "claude": "skills/session-handoff"
+      }
     },
     {
       "id": "skill-lifecycle",
@@ -385,14 +360,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/skill-lifecycle/SKILL.md",
-        "claude": "claude/skills/skill-lifecycle/SKILL.md"
+        "codex": "codex/skills/skill-lifecycle",
+        "claude": "claude/skills/skill-lifecycle"
       },
       "install_target": {
-        "codex": "~/.codex/skills/skill-lifecycle",
-        "claude": "~/.claude/skills/skill-lifecycle"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/skill-lifecycle",
+        "claude": "skills/skill-lifecycle"
+      }
     },
     {
       "id": "storage-cleanup",
@@ -400,14 +374,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/storage-cleanup/SKILL.md",
-        "claude": "claude/skills/storage-cleanup/SKILL.md"
+        "codex": "codex/skills/storage-cleanup",
+        "claude": "claude/skills/storage-cleanup"
       },
       "install_target": {
-        "codex": "~/.codex/skills/storage-cleanup",
-        "claude": "~/.claude/skills/storage-cleanup"
+        "codex": "skills/storage-cleanup",
+        "claude": "skills/storage-cleanup"
       },
-      "counterpart": "twin (Claude disables model invocation; Codex disables implicit invocation via metadata)",
       "tags": ["domain:system-maintenance", "role:driver"]
     },
     {
@@ -416,14 +389,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/systemic-diagnosis/SKILL.md",
-        "claude": "claude/skills/systemic-diagnosis/SKILL.md"
+        "codex": "codex/skills/systemic-diagnosis",
+        "claude": "claude/skills/systemic-diagnosis"
       },
       "install_target": {
-        "codex": "~/.codex/skills/systemic-diagnosis",
-        "claude": "~/.claude/skills/systemic-diagnosis"
-      },
-      "counterpart": "identical"
+        "codex": "skills/systemic-diagnosis",
+        "claude": "skills/systemic-diagnosis"
+      }
     },
     {
       "id": "surface-unknowns",
@@ -431,14 +403,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/surface-unknowns/SKILL.md",
-        "claude": "claude/skills/surface-unknowns/SKILL.md"
+        "codex": "codex/skills/surface-unknowns",
+        "claude": "claude/skills/surface-unknowns"
       },
       "install_target": {
-        "codex": "~/.codex/skills/surface-unknowns",
-        "claude": "~/.claude/skills/surface-unknowns"
+        "codex": "skills/surface-unknowns",
+        "claude": "skills/surface-unknowns"
       },
-      "counterpart": "identical",
       "tags": ["domain:uncertainty-management"]
     },
     {
@@ -447,14 +418,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/thermo-nuclear-code-quality-review/SKILL.md",
-        "claude": "claude/skills/thermo-nuclear-code-quality-review/SKILL.md"
+        "codex": "codex/skills/thermo-nuclear-code-quality-review",
+        "claude": "claude/skills/thermo-nuclear-code-quality-review"
       },
       "install_target": {
-        "codex": "~/.codex/skills/thermo-nuclear-code-quality-review",
-        "claude": "~/.claude/skills/thermo-nuclear-code-quality-review"
+        "codex": "skills/thermo-nuclear-code-quality-review",
+        "claude": "skills/thermo-nuclear-code-quality-review"
       },
-      "counterpart": "identical",
       "tags": ["origin:cursor/plugins/cursor-team-kit"]
     },
     {
@@ -463,14 +433,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/tdd/SKILL.md",
-        "claude": "claude/skills/tdd/SKILL.md"
+        "codex": "codex/skills/tdd",
+        "claude": "claude/skills/tdd"
       },
       "install_target": {
-        "codex": "~/.codex/skills/tdd",
-        "claude": "~/.claude/skills/tdd"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/tdd",
+        "claude": "skills/tdd"
+      }
     },
     {
       "id": "zoom-out",
@@ -478,14 +447,13 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/zoom-out/SKILL.md",
-        "claude": "claude/skills/zoom-out/SKILL.md"
+        "codex": "codex/skills/zoom-out",
+        "claude": "claude/skills/zoom-out"
       },
       "install_target": {
-        "codex": "~/.codex/skills/zoom-out",
-        "claude": "~/.claude/skills/zoom-out"
-      },
-      "counterpart": "twin (differs)"
+        "codex": "skills/zoom-out",
+        "claude": "skills/zoom-out"
+      }
     }
   ],
   "commands": [
@@ -498,9 +466,8 @@
         "claude": "claude/commands/dual-review.md"
       },
       "install_target": {
-        "claude": "~/.claude/commands/dual-review.md"
-      },
-      "counterpart": "none (Codex has no dual-review)"
+        "claude": "commands/dual-review.md"
+      }
     },
     {
       "id": "plan",
@@ -511,9 +478,8 @@
         "claude": "claude/commands/plan.md"
       },
       "install_target": {
-        "claude": "~/.claude/commands/plan.md"
-      },
-      "counterpart": "asymmetric: codex harness-plan skill is harness-framed and stays Harness-owned; this generic command has no same-name Codex counterpart"
+        "claude": "commands/plan.md"
+      }
     }
   ],
   "subagents": [
@@ -526,9 +492,8 @@
         "claude": "claude/agents/code-reviewer.md"
       },
       "install_target": {
-        "claude": "~/.claude/agents/code-reviewer.md"
-      },
-      "counterpart": "none (Codex has no agents/ subagent surface)"
+        "claude": "agents/code-reviewer.md"
+      }
     },
     {
       "id": "planner",
@@ -539,9 +504,8 @@
         "claude": "claude/agents/planner.md"
       },
       "install_target": {
-        "claude": "~/.claude/agents/planner.md"
-      },
-      "counterpart": "none"
+        "claude": "agents/planner.md"
+      }
     }
   ],
   "rules": [
@@ -554,9 +518,8 @@
         "claude": "claude/rules/code-comments.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/code-comments.md"
-      },
-      "counterpart": "codex/AGENTS.md section"
+        "claude": "rules/code-comments.md"
+      }
     },
     {
       "id": "conciseness",
@@ -567,9 +530,8 @@
         "claude": "claude/rules/conciseness.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/conciseness.md"
-      },
-      "counterpart": "codex/AGENTS.md section (Codex packages rules inline, not as discrete files)"
+        "claude": "rules/conciseness.md"
+      }
     },
     {
       "id": "model-and-effort",
@@ -580,9 +542,8 @@
         "claude": "claude/rules/model-and-effort.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/model-and-effort.md"
-      },
-      "counterpart": "codex/AGENTS.md section"
+        "claude": "rules/model-and-effort.md"
+      }
     },
     {
       "id": "reading-discipline",
@@ -593,9 +554,8 @@
         "claude": "claude/rules/reading-discipline.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/reading-discipline.md"
-      },
-      "counterpart": "codex/AGENTS.md section"
+        "claude": "rules/reading-discipline.md"
+      }
     },
     {
       "id": "surgical-changes",
@@ -606,9 +566,8 @@
         "claude": "claude/rules/surgical-changes.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/surgical-changes.md"
-      },
-      "counterpart": "codex/AGENTS.md section"
+        "claude": "rules/surgical-changes.md"
+      }
     },
     {
       "id": "think-before-coding",
@@ -619,9 +578,8 @@
         "claude": "claude/rules/think-before-coding.md"
       },
       "install_target": {
-        "claude": "~/.claude/rules/think-before-coding.md"
-      },
-      "counterpart": "codex/AGENTS.md section"
+        "claude": "rules/think-before-coding.md"
+      }
     }
   ],
   "hooks": [
@@ -631,12 +589,17 @@
       "platforms": ["claude"],
       "owner": "agents",
       "source": {
-        "claude": ["claude/hooks/notifications.sh", "claude/hooks.json"]
+        "claude": [
+          {"path": "claude/hooks/notifications.sh", "target": "hooks/notifications.sh"},
+          {"path": "claude/hooks.json", "target": null, "role": "settings-hooks"}
+        ]
       },
       "install_target": {
-        "claude": "~/.claude/hooks/notifications.sh (merged into ~/.claude/settings.json via hooks.json)"
+        "claude": "hooks/notifications.sh"
       },
-      "counterpart": "codex/hooks/notifications.sh stays Harness-owned: it is sourced as a sibling by the Codex Stop-gate hooks/stop.sh, which is Harness-coupled. Only the Claude notification hook moved to agents."
+      "handling": {
+        "claude": "claude_settings_hooks"
+      }
     }
   ],
   "global_instructions": [
@@ -649,10 +612,20 @@
         "codex": "codex/AGENTS.md"
       },
       "install_target": {
-        "codex": "~/.codex/AGENTS.md"
-      },
-      "counterpart": "claude/rules/*.md (Claude packages the same rule content as discrete files; Codex folds it inline into AGENTS.md — container difference, not a content twin)"
+        "codex": "AGENTS.md"
+      }
     }
+  ],
+  "traveling_documents": [
+    {"id": "claim-discipline-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md"}, "install_target": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md"}},
+    {"id": "context-file-authoring-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/context-file-authoring.md"}, "install_target": {"claude": "docs/context-file-authoring.md"}},
+    {"id": "distill-source-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/distill-source-contract.md", "claude": "docs/distill-source-contract.md"}, "install_target": {"codex": "docs/distill-source-contract.md", "claude": "docs/distill-source-contract.md"}},
+    {"id": "experiment-protocol-readout-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md"}, "install_target": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md"}},
+    {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}},
+    {"id": "skill-authoring-principles-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md"}, "install_target": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md"}},
+    {"id": "skill-lifecycle-policy-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/skill-lifecycle-policy.md", "claude": "docs/skill-lifecycle-policy.md"}, "install_target": {"codex": "docs/skill-lifecycle-policy.md", "claude": "docs/skill-lifecycle-policy.md"}},
+    {"id": "systemic-diagnosis-selector-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/systemic-diagnosis-selector.md", "claude": "docs/systemic-diagnosis-selector.md"}, "install_target": {"codex": "docs/systemic-diagnosis-selector.md", "claude": "docs/systemic-diagnosis-selector.md"}},
+    {"id": "whole-system-review-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/whole-system-review.md", "claude": "docs/whole-system-review.md"}, "install_target": {"codex": "docs/whole-system-review.md", "claude": "docs/whole-system-review.md"}}
   ],
   "boundary_notes": {
     "$comment": "Documentation only. These owners are NOT installable/prunable through this catalog — this repo never manages, prunes, or removes them. See AGENTS.md Boundary section and docs/skill-installer-contract.md.",

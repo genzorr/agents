@@ -25,7 +25,7 @@ per-repo installer contract all three repos follow.
 ## Layout
 
 ```
-catalog.json          # authoritative catalog of agents-owned assets (identity + install targets)
+catalog.json          # sole desired-state catalog (assets, source layers, targets, adapters, travel docs)
 codex/
   AGENTS.md           # global Codex instructions (generic agent behavior)
   skills/<id>/SKILL.md
@@ -39,13 +39,14 @@ claude/
   hooks/              # generic Claude notification hook
   hooks.json          # Claude hook config (merged into settings.json on install)
 scripts/
-  install-claude.sh   # install/uninstall/prune claude/ -> $CLAUDE_HOME (default ~/.claude)
-  install-codex.sh    # install/uninstall/prune codex/ -> $CODEX_HOME (default ~/.codex)
+  install-assets.py    # shared stdlib catalog/installer engine
+  install-claude.sh   # compatibility wrapper for the Claude engine
+  install-codex.sh    # compatibility wrapper for the Codex engine
   install-codex-permissions.py # backup-preserving named Custom profile installer/rollback
   test-codex-permissions.sh    # scratch-home profile/config parser check
   check_cross_repo_consistency.py # verifies Agents/Harness/session-harvester ownership split
-  validate_catalog.py # catalog <-> source consistency + installer-allowlist parity
-  validate_skills.py  # SKILL.md frontmatter identity + traveling-doc references
+  validate_catalog.py # catalog/source/target/travel/state-contract validation
+  validate_skills.py  # frontmatter, portability, and catalog-backed text validation
 docs/
   context-file-authoring.md       # craft rubric for CLAUDE.md / AGENTS.md / rules (always-on layer)
   destructive-command-guard.md # external cross-agent command guard decision and setup
@@ -58,7 +59,16 @@ research/findings/     # source-bounded research reviews and project-specific im
 ```
 
 Codex/Claude same-name skills are deliberate **platform twins**, not automatically identical — the
-per-platform variants are preserved, never flattened.
+per-platform variants are preserved, never flattened. PR B may place only mechanically byte-identical
+source files under a shared tree while keeping platform-only files as explicit catalog source layers.
+
+## Desired state and historical state
+
+`catalog.json` declares the desired asset identity, platform, source file or complete directory, relative install target, adapter exception, and explicit traveling document. `scripts/install-assets.py` expands that catalog for one platform; the shell wrappers do not contain asset inventories. `.agents-install-state.json` in a selected home records files Agents materialized or safely adopted plus Claude adapter history, with explicit ownership, source digest, mode, and exact managed structural hook leaves. It is historical ownership evidence, not a desired-state catalog.
+
+Normal install adopts exact existing outputs, updates unchanged recorded outputs, and preserves modified or unmanaged conflicts. `--dry-run` and `--diff` do not create directories, write files, change modes, merge settings, or migrate state. `--prune` removes only unchanged files recorded in historical state that are absent from the current catalog; `--uninstall` reconciles every recorded Agents file, including assets removed from the catalog. Modified destinations are reported and preserved.
+
+Traveling documents are catalog assets. Validation scans managed skills, commands, subagents, rules, and global instructions and requires each real `docs/*.md` reference to be declared for that platform; examples and run-generated paths remain explicit exceptions. Add or remove an asset by editing its authored source and catalog entry, then validate and exercise an isolated scratch home; installer code should not change.
 
 ## Validation & install (local, safe)
 
@@ -90,6 +100,8 @@ bash scripts/test-codex-permissions.sh
 - Mutating commands run against scratch homes by default in verification. **Live global
   install/update/prune requires explicit operator approval.**
 - Install is copy-based and idempotent; `--prune`/`--uninstall` only remove assets this repo owns.
+- `.agents-install-state.json` is written atomically only after a mutating reconciliation succeeds; keep it with the home when diagnosing or retrying conflicts.
+- Roll back by checking out a known-good source commit and re-running the installer against the selected scratch or approved live home; no live home is touched during repository verification.
 
 ## Tooling
 

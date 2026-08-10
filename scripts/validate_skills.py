@@ -43,6 +43,11 @@ import re
 import sys
 from pathlib import Path
 
+try:
+    from agent_catalog import validate_catalog
+except ModuleNotFoundError:  # Imported as a module from repository tests.
+    from scripts.agent_catalog import validate_catalog
+
 # Claude-runtime frontmatter fields that Codex skills omit by convention.
 # Listed here only to document the deliberate cross-tree parity deferral.
 CLAUDE_RUNTIME_FIELDS = ("model", "effort", "allowed-tools", "argument-hint")
@@ -275,6 +280,10 @@ def main() -> int:
         return 2
 
     errors, warnings = validate_trees(codex_dir, claude_dir)
+
+    catalog_errors, catalog_warnings = validate_catalog(args.repo)
+    errors.extend(catalog_errors)
+    warnings.extend(catalog_warnings)
 
     for warning in warnings:
         print(f"WARN  {warning}")
