@@ -61,7 +61,8 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 - **Interfaces**: breaking API changes, migration gaps, inconsistent names/types, confusing return values, missing compatibility handling.
 - **Maintainability**: over-engineering, duplicated logic, unnecessary abstractions, hidden coupling, complex code where a simpler local pattern exists.
 - **Reuse-before-build**: new code, helpers, CLIs, abstractions, dependencies, or skills that skipped an obvious lower rung — existing repo pattern/tool, standard library, native platform/framework capability, existing dependency, or config/flag/rule change.
-- **Verification**: missing or weak tests for risky behavior, tests that do not exercise the changed contract, CI gaps.
+- **Verification**: missing or weak tests for risky behavior, tests that do not exercise the changed contract, CI gaps, and decision-locking assertions that pin a legitimately changeable value, relationship, text, or source shape without naming a production defect and observable consequence. Exact assertions remain valid when the exact value, text, or shape is itself a documented public, safety, compatibility, or shipped-artifact contract.
+- **Reviewed behavior spines**: when the change claims a reviewed executable behavior authority, verify that implementation did not weaken it; its supported public seam, controlled boundaries, independent oracle, prohibited shortcuts, and claim ceiling are explicit; one legitimate implementation change remains green; one plausible production defect turns it red; and a detector ledger accounts for every deleted or weakened test.
 
 ## What Not To Flag
 

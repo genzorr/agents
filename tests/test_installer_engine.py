@@ -350,7 +350,8 @@ class InstallerEngineTest(unittest.TestCase):
                 pruned = self.run_installer(repo, "codex", home, "--prune")
                 if modified:
                     self.assertEqual(pruned.returncode, 2, pruned.stderr)
-                    self.assertIn("modified stale destination", pruned.stderr)
+                    self.assertIn("CONFLICT", pruned.stderr)
+                    self.assertIn("skills/sample/tool.sh", pruned.stderr)
                     self.assertEqual(retired.read_text(), "operator edit\n")
                 else:
                     self.assertEqual(pruned.returncode, 0, pruned.stderr)
@@ -369,7 +370,8 @@ class InstallerEngineTest(unittest.TestCase):
             (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
             result = self.run_installer(repo, "codex", home, "--prune")
             self.assertEqual(result.returncode, 2)
-            self.assertIn("modified stale destination", result.stderr)
+            self.assertIn("CONFLICT", result.stderr)
+            self.assertIn("skills/sample/SKILL.md", result.stderr)
             self.assertEqual(destination.read_text(), "operator edit\n")
 
     def test_stale_foreign_record_cannot_authorize_reserved_target_deletion(self) -> None:

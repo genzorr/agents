@@ -17,9 +17,20 @@ Use one vertical slice at a time: one failing behavior test, the smallest implem
 6. Refactor only with passing tests, keeping behavior unchanged.
 7. Repeat for the next behavior.
 
+## Reviewed Behavior Spines
+
+For a stable, meaningful behavior that spans states or artifacts, depends on a required non-event, or is likely to receive a substantial agent implementation, propose one small behavior spine before implementation. Skip this ceremony for a small local change or unstable interface where ordinary focused TDD gives sufficient evidence.
+
+- Keep behavior authority separate from implementation: a human or independent specification owner approves the claim before the implementer treats it as fixed. The implementer may read production code but must not silently weaken the approved claim, oracle, or baseline tests.
+- Name the stimulus, supported public seam, observable consequences and non-events, cross-state or cross-artifact integrity relationships, controlled external boundaries, prohibited shortcuts, independent oracle, and claim ceiling.
+- Establish red-before-green evidence when changing behavior or fixing a defect. When adding a spine for behavior that already exists, record the pristine green baseline and challenge the oracle with a plausible semantic bypass.
+- During review, demonstrate one legitimate implementation change that remains green and one plausible production defect that turns the spine red.
+
 ## Test Quality
 
 - Good tests describe behavior, not implementation shape.
+- Before proposing an assertion, name the production defect it would catch and the observable consequence it protects.
+- Do not pin an exact value, relationship, text, or source shape when it could change legitimately without a production defect. Exact assertions remain appropriate when the value, text, or shape is itself a documented public, safety, compatibility, or shipped-artifact contract.
 - Tests should survive internal refactors.
 - Avoid mocking internal collaborators just because they are convenient.
 - Mock true external systems, time, randomness, and slow/unavailable services when needed.

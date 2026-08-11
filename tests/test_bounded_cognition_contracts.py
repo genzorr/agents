@@ -43,6 +43,39 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             ):
                 self.assertIn(phrase, text, path)
 
+    def test_tdd_and_review_twins_require_reviewed_behavior_spine_semantics(self) -> None:
+        for platform in ("codex", "claude"):
+            tdd = self.read_skill(platform, "tdd")
+            for phrase in (
+                "Keep behavior authority separate from implementation",
+                "supported public seam",
+                "controlled external boundaries",
+                "independent oracle",
+                "claim ceiling",
+                "red-before-green evidence",
+                "legitimate implementation change that remains green",
+                "plausible production defect that turns the spine red",
+                "production defect it would catch",
+                "observable consequence it protects",
+                "documented public, safety, compatibility, or shipped-artifact contract",
+            ):
+                self.assertIn(phrase, tdd, f"{platform} tdd: {phrase}")
+
+            review = self.read_skill(platform, "review-change")
+            for phrase in (
+                "decision-locking assertions",
+                "production defect and observable consequence",
+                "supported public seam",
+                "controlled boundaries",
+                "independent oracle",
+                "claim ceiling",
+                "legitimate implementation change remains green",
+                "plausible production defect turns it red",
+                "detector ledger",
+                "documented public, safety, compatibility, or shipped-artifact contract",
+            ):
+                self.assertIn(phrase, review, f"{platform} review-change: {phrase}")
+
     def test_distill_source_twins_open_complete_contract_and_keep_promotion_separate(self) -> None:
         for path in (
             "codex/skills/distill-source/SKILL.md",
