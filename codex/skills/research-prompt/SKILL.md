@@ -1,23 +1,39 @@
 ---
 name: research-prompt
-description: Generate a comprehensive prompt for deep research tools, with project context and expected deliverables.
+description: Generate a project-grounded prompt for an external deep research tool, with a clear decision, evidence standard, scope, sufficiency bar, and expected deliverables.
 ---
 
 # Research Prompt
 
-Use when the user wants a structured prompt for external deep research.
+Create a structured prompt for external deep research. Do not perform the research unless the user asks.
+
+## Input
+
+- Extract the research topic, target tool or audience, user constraints, prior knowledge, and desired output.
+- Use current conversation context when it already resolves the task.
+- Ask at most three questions, only when the answer materially changes the decision, scope, evidence standard, or sufficiency bar.
+- Suggest focused sub-prompts when the request spans independent domains, mixes deep theory with detailed implementation, or compares too many unrelated alternatives for one coherent answer.
+
+## Research Quality Contract
+
+Before drafting, define this compact contract inside the prompt:
+
+- **Decision or downstream action:** what the research must enable, change, reject, or leave undecided.
+- **Evidence standard:** which sources count as primary evidence and what corroboration, recency, provenance, or direct inspection the important claims require.
+- **Scope boundaries:** systems, alternatives, timeframes, jurisdictions, repositories, interfaces, constraints, and explicit non-goals.
+- **Sufficiency bar:** the coverage needed to answer responsibly, such as required alternative families, representative cases, contradiction checks, implementation implications, or decision-relevant comparison dimensions.
+- **Unresolved/stop condition:** uncertainty that must remain explicit, trigger another targeted search, or prevent a recommendation instead of being guessed away.
+
+Do not score research numerically. Keep the contract proportional; it replaces vague requests for “comprehensive” coverage rather than adding ceremony.
 
 ## Workflow
 
-1. Extract the topic, target audience/tool if specified, and any constraints.
-2. Ask at most three clarifying questions when the scope, project context, or desired output is unclear.
-3. Suggest splitting the topic if it spans several independent domains, compares more than five methods, or mixes deep theory with implementation detail.
-4. Gather project context when working inside a repo:
-   - `AGENTS.md`, `README.md`
-   - `docs/`, `research/`, `drafts/`
-   - relevant architecture notes, ADRs, specs, config schemas, or key source files
-5. Identify 5-15 relevant local files to pass alongside the prompt.
-6. Save the generated prompt to `research/prompts/YYYYMMDD-topic-slug.md` when inside a project. Create the directory if needed. If outside a project, output the prompt directly.
+1. Gather only the project context needed to make the research decision-specific: applicable `AGENTS.md`, README, architecture notes, ADRs, specs, prior research, configuration schemas, and key source entry points.
+2. Separate project facts, user decisions, assumptions, hypotheses, and open research questions.
+3. Identify 5–15 relevant local files when working inside a repository. Include only files that exist and explain their relevance briefly.
+4. Draft the prompt using the structure below, omitting empty or inapplicable sections.
+5. Save it to `research/prompts/YYYYMMDD-topic-slug.md` inside a project. Outside a project, return it directly.
+6. Report the saved path and the matching local-context file list.
 
 ## Prompt Structure
 
@@ -25,55 +41,42 @@ Use when the user wants a structured prompt for external deep research.
 # Research Prompt: <topic>
 
 ## Context
-
-<project background, current state, goals, constraints>
+<project background, current state, selected decisions, and constraints>
 
 ## Problem Statement
+<decision-relevant problem>
 
-<core challenge>
-
-## Decision To Inform
-
-<decision, action, or downstream use this research will inform>
+## Research Quality Contract
+- Decision or downstream action: ...
+- Evidence standard: ...
+- Scope boundaries: ...
+- Sufficiency bar: ...
+- Unresolved/stop condition: ...
 
 ## What We Already Know
+<verified facts, prior findings, assumptions, and unresolved contradictions kept distinct>
 
-<prior findings, decisions, relevant local docs>
-
-## What Needs Research
-
-### 1. <research area>
-
-Questions:
-- ...
-
-## Research Questions Summary
-
+## Research Questions
 1. ...
 
-## Key Papers, Docs, and Resources to Review
-
+## Sources And Resources To Inspect
 - ...
 
-## Expected Research Output
+## Required Analysis And Deliverables
+- comparisons and tradeoffs
+- recommendation or explicit no-decision result
+- implementation or validation implications where relevant
+- contradictions, uncertainty, and evidence gaps
 
-- comparison tables
-- recommendations with tradeoffs
-- implementation guidance
-- risks and validation steps
-
-## Local Context Files To Include
-
-- `path`
+## Relevant Project Files
+- `path` — relevance
 ```
 
 ## Rules
 
-- Target 250-400 lines; stop and propose splits before exceeding 500 lines.
-- Make the prompt specific enough for another model to run without this conversation.
-- Separate known project facts from questions to research.
-- State the concrete decision, action, or downstream use the research will inform.
-- Require a source hierarchy that prefers primary evidence such as official documentation, source code, papers, standards, filings, and changelogs; treat secondary commentary as supporting context rather than equivalent proof.
-- Require the result to separate verified facts, supported inferences, contradictions, and unresolved uncertainty.
-- Require one final gap review after the draft identifies unanswered questions, contradictions, and consequential single-source claims; use an additional search where it could materially close a gap, otherwise leave the gap explicitly unresolved.
-- Do not perform the deep research yourself unless the user asks.
+- Make the prompt executable without this conversation, but do not paste material already available in referenced files.
+- Prefer official documentation, source code, papers, standards, filings, datasets, benchmarks, and changelogs as primary evidence. Use secondary commentary as context, not equivalent proof.
+- Require the result to distinguish verified facts, supported inferences, contradictions, assumptions, and unresolved uncertainty.
+- Require a final gap review. Run another targeted search only when it could materially close a decision-relevant gap; otherwise preserve the gap explicitly.
+- Keep requested tables, recommendations, implementation guidance, risks, and validation steps tied to the stated downstream decision.
+- Target roughly 250–400 lines only when the subject genuinely needs that depth. Split before exceeding 500 lines; do not pad a bounded question to meet a quota.

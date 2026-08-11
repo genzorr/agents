@@ -1,204 +1,100 @@
 ---
 name: goal-prompt
-description: Create a short copyable prompt for a Codex /goal handoff by default, or a direct Claude Code handoff when explicitly requested, that points to a durable goal spec. Use when the user invokes goal-prompt, /goal-prompt, asks for a prompt that an agent session should use to read a durable goal spec, asks for a long-running autonomous goal, or needs PRD-backed goal setup.
+description: Create a compact durable goal handoff for a Codex /goal session by default, or a direct Claude Code handoff when explicitly requested. Use when the user invokes goal-prompt or asks for a resumable, autonomous, research, or PRD-backed agent handoff.
 ---
 
 # Goal Prompt
 
-Create a short prompt for a target agent session. Default to a Codex session that will run under `/goal`.
+Create one short handoff prompt backed by one durable goal spec. Default to Codex `/goal`; target Claude Code only when the user explicitly asks for Claude.
 
-> **Cross-tree twin.** `claude/skills/goal-prompt/SKILL.md` is the Claude Code counterpart. The two
-> bodies are intentional tree-framed twins (Codex `/goal` set-goal bootstrap vs Claude direct
-> prompt), not duplication to extract — keep their section structure in sync when editing either.
-
-For Codex targets, the output is not a normal task prompt like "`/goal do this`". It is a bootstrap prompt that points the target agent to a durable goal spec file, tells it to formulate a compact file-referenced goal, set that goal with the goal tooling, and execute.
-
-For Claude Code targets, the output is a direct task prompt that points the target agent to a durable goal spec file, then tells it to follow that file and execute. Claude Code does not have Codex-style set-goal functionality, so do not instruct the target agent to set a goal or create a meta-prompt for a goal mechanism.
-
-By default the goal spec is a unique per-handoff file at `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md` (see Gather step 3). Optimize for compaction resistance by putting the actual instructions in that durable goal spec, not in the generated prompt.
+The durable goal spec carries the real instructions and survives compaction. The generated prompt only points the target session to that spec and tells it how to start.
 
 ## Input
 
-- Treat all text after `goal-prompt` or `/goal-prompt` as the seed context. The user may provide a rough idea, constraints, copied notes, paths, task IDs, or partial decisions.
-- If no seed context is provided, use the current conversation when it clearly contains one.
-- If neither the invocation nor the conversation contains enough intent to define a direction, ask one concise question for the missing topic or outcome and stop.
-- Ask follow-up questions only when the answer would materially change the project, scope, or success criteria. Ask at most three.
-- If the user says the target agent needs a time limit, deadline, timebox, "work until", "do not stop until", or similar persistence constraint, preserve it as a first-class requirement. If the exact duration or wall-clock deadline is missing, ask one concise question for it before writing the prompt.
+- Treat text after `goal-prompt` or `/goal-prompt` as seed context. Use the current conversation when it already contains a clear task.
+- Ask at most three follow-up questions, and only when an answer would materially change the outcome, scope, success evidence, deadline, or stop gates.
+- If the intent is too vague to define a verifiable outcome, ask one concise question and stop.
+- Preserve explicit deadlines, timeboxes, persistence requirements, selected decisions, permissions, and non-goals.
 
-## Target Agent
+## Target
 
-- Default target is **Codex `/goal`**.
-- If the user explicitly says `for Claude`, `Claude Code`, or otherwise names Claude as the target agent, target **Claude Code** instead.
-- For a Claude Code target, produce a direct task prompt. Do not tell Claude to set a goal, use `/goal`, create a meta-prompt, or call goal tooling. Claude should read the goal spec and execute it directly.
-- For a Codex target, keep the existing `/goal` bootstrap behavior: tell the target Codex session to set a compact file-referenced goal and execute it.
+- Default: Codex `/goal` bootstrap.
+- Explicit Claude request: direct Claude Code prompt.
+- Do not set a goal in the current session. This skill prepares another session's handoff.
+- Do not change either session's model or effort. Recommendations may be recorded in the goal spec when justified, but the operator owns actual settings.
 
-## Gather
+## Goal Quality And Completion Contract
 
-Before writing the prompt, inspect enough local context to make it project-specific. Use already-provided seed context and current conversation details first; gather only what is missing or needs validation.
+Every durable goal spec must contain one integrated `Completion Contract`. Define it before authoring the other sections, and do not create a second goal-quality section that repeats it.
 
-1. Read applicable `AGENTS.md`, README, and command docs only when they are not already known in the active session or likely to affect the handoff.
-2. Find relevant docs, harness tasks, ADRs, plans, or source entry points named by the seed context.
-3. Create or update one durable goal spec file before writing the prompt. Default to a unique per-handoff path so concurrent handoffs never collide and no earlier spec is overwritten:
-   - **Default:** `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md`, where `<repo>` is the target repo/worktree name and `<task-slug>` is a short kebab-case summary of the goal. Create the directory if needed.
-   - Only write the goal spec inside the project (for example a committed `docs/.../<topic>-goal.md`) when the user explicitly wants a durable in-repo copy; keep it out of the default handoff path.
-   - For any handoff intended to resume after the current session or from another session, machine, worktree, or queued/overnight run, add an `Expected Starting Ref` section to the GOAL file with the target repository/worktree, branch, and exact starting commit SHA (or another stable revision when Git is not authoritative). Capture Git refs from the target worktree with `git rev-parse --show-toplevel`, `git branch --show-current`, and `git rev-parse HEAD`; do not infer them from memory. Add a `Material Drift Check` section that compares the current worktree/branch and governing task/spec/policy artifacts with that expected state before implementation and after every resume. Material drift includes a branch or worktree switch, a current head that is not the expected ref or a descendant of it, a changed governing artifact, changed ownership or constraints, or source/config changes that invalidate the goal's stated assumptions or acceptance criteria; commits produced by this goal after the expected ref are allowed progress and must be recorded in the durable handoff. On material drift, stop, record the current ref and difference in the established durable checkpoint or handoff, and ask the operator; update the expected ref only after an explicit operator decision and record that decision. For non-Git targets, record a stable tag, version, or content digest; if no stable ref can be captured at handoff-authoring time, stop/ask before issuing the handoff rather than creating a permanent target-run gate. Never silently refresh the expected ref or proceed from a stale handoff.
-4. Before drafting the GOAL file, define a concise `Completion Contract` for every goal, regardless of mode. It must state:
-   - **Success exit:** the exact observable conditions that allow the agent to claim the goal is complete, including required verification evidence.
-   - **Evaluator integrity:** when tests or metrics determine success, preserve the evaluator; changing, disabling, narrowing, or relabeling it is allowed only when evaluator work is explicitly in scope, independently justified, and paired with replacement proof.
-   - **Continue conditions:** signals that mean the agent must keep working instead of stopping after a partial win.
-   - **Stop/ask gates:** conditions that require user input before proceeding, such as ambiguous scope, missing credentials/infrastructure, contract-breaking changes, or unsafe broad rewrites.
-   - **Blocked exit:** what evidence must be recorded if the agent cannot proceed.
-   - **Non-goals/deferred work:** related work that must not be silently folded into success.
-5. Select the applicable goal mode or compatible mode combination before drafting the GOAL file. Standard Mode usually stands alone; Research, Timeboxed, and Long-Run modes may be combined when the work needs all of their sections.
-   - **Standard Goal Mode**: implement, verify, or continue a known task with a known task order. Keep the GOAL file short and task-directed.
-   - **Research Goal Mode**: investigate an uncertain mechanism, compare candidates, diagnose a metric/regression, run benchmarks, decide whether a hypothesis works, or let the agent choose the next attempt after seeing evidence. Add the research-loop sections described below.
-   - **Timeboxed Goal Mode**: preserve the deadline/timebox and add primary-work/fallback rules. If the timeboxed work is uncertain or benchmark-driven, combine this with Research Goal Mode.
-   - **Long-Run Goal Mode**: run a broad autonomous task for many hours or avoid premature closure. Strong signals include "overnight", "6-8 hours", "xhigh/max", "do not stop early", "hard exit conditions", "improve speed by X", "broad audit", "rewrite/refactor", or "large autonomous run". Combine this mode with Research or Timeboxed Mode when evidence or elapsed time controls success.
-6. Decide whether the goal needs a PRD or PRD-like durable spec. Create or update one when the work is product-shaped, architecture-shaped, benchmark-policy-shaped, multi-hour, spans several modules, has ambiguous success criteria, or should survive multiple goal runs.
-   - The PRD is the durable **what/why/success contract**: problem, users, goals/non-goals, definitions, constraints, acceptance model, risks, and round-specific completion contract.
-   - The goal spec is the **execution routing contract**: branch, task order, references, mode, verification, stop gates, and final handoff requirements.
-   - Harness tasks are the **tracked units of work**.
-   - Put the PRD under an existing project docs area when obvious, such as `docs/.../<topic>-prd.md`; otherwise use `/tmp/<topic>-prd.md`, label it temporary in the goal spec, and require final accounting to say whether it should be promoted into the repo.
-   - Do not create a PRD for tiny fixes, mechanical edits, exact one-off commands, or ordinary task continuations where the harness task already contains enough durable context.
-7. If the current project uses harness, check `harness status` or `harness snapshot` when useful. Make the GOAL file a concise routing index that points to concrete harness references supplied by the user or already active:
-   - active or named slice file
-   - active or named task file(s)
-   - any named spec/result docs
-   - task order, deadline, verification, stop gates, and transition instructions
-   Do not invent harness tasks or slices. If a harness handoff does not have enough durable context, warn the current user that the target agent needs a harness task/spec first, or ask whether to create one.
-8. If the current project does not use harness, make the GOAL file the durable working spec: objective, context, constraints, success criteria, verification, durable references, stop gates, and any deadline.
-9. For Research Goal Mode, include a `Hypothesis Loop And Exit Conditions` section in the GOAL file. It must define:
-   - the real problem being solved, not only the first suspected mechanism;
-   - prior evidence and required references the agent must read before choosing candidates;
-   - the loop: hypothesis -> smallest implementation or diagnostic -> benchmark/measurement -> accept/reject/inconclusive -> next hypothesis;
-   - a concrete minimum effort bar, usually at least 3 serious hypotheses or implementation attempts unless the user gives a different number, a candidate passes promotion gates earlier, or a stop gate blocks work;
-   - candidate gates with exact metric thresholds, required artifacts, and any replication rule such as N=1 before N=3;
-   - the continuation rule: after every negative, partial, or promising result, formulate the next evidence-derived hypothesis and continue until a listed exit condition is met;
-   - the rejection rule: reject a family only after the minimum effort bar is met and the attempted candidates fail gates;
-   - stop/ask gates for missing benchmark evidence, unavailable infrastructure, contract-breaking changes, broad rewrites, exhausted nontrivial hypotheses, or user-judgment decisions;
-   - the defaults policy: do not change defaults unless replicated evidence passes gates and the task explicitly recommends promotion.
-10. For Long-Run Goal Mode, include a `Hard Exit Conditions` section in the GOAL file. It must define:
-   - a P0/P1/P2 board requirement before implementation starts;
-   - closure rule: all P0/P1 items are done, explicitly blocked, or the elapsed-time gate is reached with a handoff-quality checkpoint;
-   - anti-early-exit rule: one useful fix, one passing smoke test, or one good commit is not enough when P0/P1 items remain actionable;
-   - continuation rule: if the run finishes far earlier than the timebox and no stop gate is hit, continue through P1 and then P2/stretch work;
-   - measurement rule: speed/performance claims require a microbenchmark, local before/after timing, or benchmark evidence for the affected path;
-   - benchmark timing rule: remote benchmark timing claims require replication such as `n>=3`; otherwise label timing inconclusive and separate it from behavior parity;
-   - commit cadence: commit coherent chunks after relevant verification, unless the user explicitly says not to commit;
-   - final accounting: require a P0/P1 board with done/blocked/deferred status, commits, measurements, verification, benchmark paths, and remaining unsafe claims.
-11. For Research or Long-Run Goal Mode, include a task-specific `Does Not Count` section in the GOAL file. List plausible near-misses that must not satisfy success, such as a summary without the required artifact or evidence, a partial or inconclusive result reported as complete, or a passing proxy while the actual acceptance criteria remain unmet; replace these examples with exclusions drawn from the task. When the task has credible proxy-substitution, premature-closure, fabrication/status-theater, evaluator-gaming, or stale-state risks, include an `Adversarial Failure Modes` section naming each selected failure mode, its observable detection signal, and the response (continue, record the failure as not counting, or stop/ask; candidate rejection still follows the existing research-rejection rule). Keep this conditional; do not add generic boilerplate to Standard goals.
-12. For timeboxed autonomous research, include a `Primary Work / Fallback Policy` section in the GOAL file. It must set a concrete minimum effort bar before any fallback work, and hygiene fallback is disabled unless the user explicitly allowed it.
-13. Add model/effort recommendations to the goal spec when the target run is delegated, long, expensive,
-    quality-sensitive, or likely to spawn Claude workers. Keep them recommendations, not hard requirements,
-    unless the user explicitly named settings:
-   - model = capability: recommend stronger models for ambiguity, unfamiliar domains, subtle bugs,
-     architecture, security-sensitive reasoning, and final review; cheaper models for precise mechanical work;
-   - effort = thoroughness: recommend higher effort when success depends on reading broadly, trying multiple
-     steps, running tests, or double-checking; use default effort when unsure;
-   - do not confuse Claude effort with Codex reasoning effort or the Research Goal Mode "minimum effort bar".
-14. Keep gathering proportional. Do not re-audit the whole project when the user already supplied enough context. The goal is a strong handoff prompt, not full implementation.
+The contract must state:
 
-## Frozen Protocol composition
+- **Outcome:** the concrete state, behavior, decision, or artifact that must exist.
+- **Evidence:** the observable proof that the outcome is real, including required commands, measurements, artifacts, or reviewed behavior.
+- **Success threshold:** a meaningful quantitative threshold when the domain supports one; otherwise a clear binary or reviewed acceptance condition.
+- **Boundaries:** the relevant scope, ownership, constraints, and non-goals.
+- **Stop/ask gates:** user-owned decisions, missing authority, unsafe expansion, contradictory requirements, unavailable infrastructure, or material ambiguity the target agent must not silently resolve.
+- **Continue conditions:** partial wins, inconclusive evidence, or remaining close-blocking work that require continued work.
+- **Blocked exit:** the evidence and current state that must be recorded when progress cannot continue.
+- **Evaluator integrity:** tests, metrics, and acceptance checks may be changed only when evaluator work is explicitly in scope, independently justified, and paired with replacement proof.
 
-When the seed describes a decision-bearing experiment, the handoff must carry the
-frozen Protocol reference (`protocol`, `protocol_sha256`, and its path) plus
-routing and stop gates. It must not copy or regenerate the Protocol's question,
-baseline, metrics, commands, artifacts, gates, abort conditions, or deviation
-policy. Those remain owned by `design-experiment` and the frozen Protocol.
+Repair activity-only goals such as “make progress,” “keep investigating,” or “improve X” into verifiable outcomes. If the missing outcome or validator is user-owned, ask instead of inventing it. Do not score goals numerically.
 
-Label an exploratory handoff as exploratory and state that it makes no
-confirmatory claim and grants no Area Brief or adoption authority. A handoff
-cannot silently promote exploratory work to confirmatory/regression work; route
-that transition through a new frozen Protocol from `design-experiment`.
+## Author The Durable Goal Spec
 
-`goal-prompt` only carries identity and routing. It never writes a Readout,
-mutates an Area Brief, creates an ADR, or authorizes a default. Completed runs
-route to `review-experiment`, which writes or validates the one canonical
-Readout when Harness is present.
+1. Read only the applicable project instructions, named tasks, docs, plans, ADRs, and source entry points needed to make the handoff project-specific.
+2. Write the spec to a collision-resistant unique path, normally `/tmp/agent-handoffs/<repo>/<YYYYMMDD-HHMMSS>-<task-slug>-<short-id>-goal.md`. Use a new random or UUID-derived short ID for every handoff; never overwrite or reuse an earlier goal spec. For a cross-machine target, use a user-approved shared or in-repo path the target can read; never issue a handoff that points to the authoring machine's inaccessible `/tmp`. Create an in-repo spec only when the user explicitly requests or approves a durable repository artifact.
+3. Add the Completion Contract to every spec. Keep a standard small task short and task-directed: objective, durable references, Completion Contract, permissions, the smallest trustworthy validation loop, and final handoff. Add recorded manual QA only when behavior cannot be proven automatically.
+4. For Harness projects, use the spec as a routing index to existing task/slice/spec files. Name the task or slice the target must activate and read plus the lifecycle transitions it is authorized to perform; do not invent Harness items. For non-Harness projects, include enough context to resume after compaction.
+5. Add `Expected Starting Ref` and `Material Drift Check` when the target may start or resume after the authoring worktree can change: delayed, queued, cross-machine, cross-worktree, or resumable handoffs. Omit them only for an immediate handoff to a target already anchored to the verified same checkout. Capture the exact target with `git rev-parse --show-toplevel`, `git branch --show-current`, and `git rev-parse HEAD`; do not infer it from memory. Treat a current Git `HEAD` that is neither the expected ref nor its descendant as material drift. For non-Git targets, capture a stable version or digest; stop if none can be established. Reference the drift gate from the Completion Contract, permit commits produced by the goal, and stop when a branch/worktree switch, governing-artifact change, or source/config change invalidates the stated assumptions or acceptance criteria. Record the difference and ask the operator; update the expected ref only after an explicit operator decision.
+6. Add a PRD only when the work is product-shaped, architecture-shaped, benchmark-policy-shaped, cross-module, or otherwise needs a durable what/why/success contract. Duration alone does not require a PRD. The PRD states the problem, goals, non-goals, and acceptance model; keep it beside the goal spec under the same `<YYYYMMDD-HHMMSS>-<task-slug>-<short-id>` stem with a `-prd.md` suffix unless the user approves an in-repo path, then reference it from the goal spec. Tiny fixes and ordinary continuations do not need one.
+7. Add a concise `Recommended Runtime` only when delegation cost, ambiguity, risk, or required thoroughness makes the recommendation useful. Keep it advisory unless the user explicitly requires a setting.
+8. Add a `Final Handoff` section and require it to be durable. For Harness work, follow the existing checkpoint/review/finalize ownership and `# Last Session` / `# Outcome` shape. For non-Harness work, require objective status, changed files or commits, verification, not-landed work, blockers, and material uncertainty.
+
+## Task-Triggered Clauses
+
+Do not classify the task into a mode. Start with the core goal spec above and add only clauses required by explicit task facts:
+
+- **Deadline or timebox:** record the exact deadline or duration, what must continue until then, and any permitted fallback. Do not invent fallback work or treat an attempt count as permission to stop early.
+- **Evidence-directed exploration:** when the target agent must choose the next attempt from evidence, add the real problem, prior evidence, hypothesis-to-measurement loop, acceptance and rejection rules, required artifacts, and stop gates. Set a calibrated evidence bar before rejecting an approach family and require measurement for performance claims. When the task carries timing or benchmark claims, state a replication requirement, default to repeated runs for remote or noisy benchmarks, and label timing evidence inconclusive until that requirement is met. Add task-specific `Does Not Count` or `Adversarial Failure Modes` only when a credible proxy, premature-closure, evaluator-gaming, fabricated-status, or stale-state risk exists. Do not change project or benchmark defaults or promote a candidate unless the Completion Contract permits promotion and the required evidence passes its threshold.
+- **Multiple checkpoints:** name only the dependency, ownership, or verification checkpoints needed to execute safely. Do not add a P0/P1/P2 board or other long-run ceremony merely because the task may take hours.
+
+## Frozen Experiment Protocol
+
+When the task is governed by a frozen experiment Protocol, carry its path, `protocol`, and `protocol_sha256` plus routing and stop gates. Do not copy, regenerate, or mutate its question, baseline, commands, metrics, artifacts, gates, abort conditions, or deviation policy. Exploratory work remains exploratory until a new Protocol authorizes confirmatory work. Route completed runs through `review-experiment`; this skill does not create a Readout, ADR, or default-promotion authority.
 
 ## Output
 
-Return exactly one fenced Markdown block, plus a one-line lead-in if useful. Use `text` as the fence language so the app renders a copy button. Keep the generated prompt brief; do not copy the full contents of the goal spec into it. Substitute the actual goal-spec path into the prompt.
+Return exactly one `text` fenced block, plus a one-line lead-in when useful. Do not paste the goal spec into the prompt.
 
-For a Codex `/goal` target, use this bootstrap prompt:
-
-```text
-You are in <project/repo>.
-
-Read <goal-spec path, e.g. /tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md> before setting a goal. That file, plus the files it references, is the durable source of truth; do not rely on this prompt after compaction.
-
-Set a compact Codex goal for yourself that references that goal spec, includes any deadline or stop gates from that file, and then execute it. Inspect only the project context needed to follow the goal spec. Before each harness task/slice transition, activate and read the relevant harness item named in the goal spec.
-
-If the goal spec is under-specified in a way that would change the work, ask before setting the goal. Otherwise proceed autonomously, keep work scoped to the goal spec, verify as instructed there, and do not claim success when required evidence is missing. If the goal spec defines a research loop or hard exit conditions, do not stop after one useful fix or one failed candidate; continue until success, research rejection, elapsed-time exit, or a listed stop/ask gate.
-```
-
-For a Claude Code target, use this direct prompt:
+For Codex `/goal`:
 
 ```text
 You are in <project/repo>.
 
-Read <goal-spec path, e.g. /tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md> first. That file, plus the files it references, is the durable source of truth; do not rely on this prompt after compaction.
+Read <goal-spec path> before setting a goal. The goal spec and the files it references are the durable source of truth; do not rely on memory of this prompt after compaction.
 
-Follow the goal spec directly, including any deadline or stop gates from that file, and execute it. Inspect only the project context needed to follow the goal spec. Before each harness task/slice transition, activate and read the relevant harness item named in the goal spec.
+Set a compact Codex goal that references the goal spec, preserves any deadline and stop gates from it, and then execute it. Read only the project context needed to follow the spec. Do not claim completion without the required evidence, and continue while its continue conditions remain true.
 
-If the goal spec is under-specified in a way that would change the work, ask before proceeding. Otherwise proceed autonomously, keep work scoped to the goal spec, verify as instructed there, and do not claim success when required evidence is missing. If the goal spec defines a research loop or hard exit conditions, do not stop after one useful fix or one failed candidate; continue until success, research rejection, elapsed-time exit, or a listed stop/ask gate.
+If the goal spec is materially under-specified, stop and ask before setting the goal. Otherwise work autonomously within its scope and leave the required durable final handoff.
 ```
 
-## Prompt Requirements
+For Claude Code:
 
-- Keep the generated prompt short. For Codex targets it should be a bootstrap pointer to the goal spec; for Claude Code targets it should be a direct task prompt pointing to that file. Neither form should duplicate the goal spec.
-- Do not include large pasted seed context, conversation summaries, or project excerpts in the generated prompt. Put necessary details in the GOAL file instead.
-- Include concrete local paths, task IDs, docs, commands, or known constraints in the GOAL file, then reference that file from the generated prompt.
-- Prefer durable-reference-first prompts. For Codex targets, the compact stored goal should reference the goal spec. For Claude Code targets, the direct prompt should reference the goal spec. In both cases, the goal spec should reference any other durable files the target agent must re-read after compaction.
-- Preserve uncertainty explicitly instead of hiding it. Put unresolved questions in the generated prompt as stop gates.
-- Prefer autonomous exploration wording over implementation certainty when the seed is exploratory.
-- Always write or update a durable goal spec before producing the prompt. Default to the unique `/tmp/agent-handoffs/<repo>/<YYYYMMDD>-<task-slug>-goal.md` path; write an in-repo copy only when the user explicitly asks. Reference that file from the generated prompt and, for Codex targets, from the compact goal. Do not use the long chat prompt as the only durable source for important requirements.
-- For PRD-backed goals, write or update the PRD before finalizing the goal spec, and make the goal spec reference it. The generated prompt should still point primarily to the goal spec; do not paste the PRD into the prompt.
-- For harness projects, make the GOAL file small: a routing index with user-provided or already active slice/task files, named spec/result docs, task order, deadline, verification, stop gates, and instructions to respect active task state and lifecycle rules.
-- For non-harness projects, make the GOAL file complete enough to continue after compaction: context, constraints, success criteria, verification, durable references, stop gates, and deadline.
-- **Completion Contract (required in every GOAL file).** Include a concise section that defines success exit, continue conditions, stop/ask gates, blocked exit evidence, and non-goals/deferred work. Do not let "tests pass" alone define success unless the task is purely mechanical and the acceptance criteria are fully covered by those tests.
-- **Delayed/cross-session starting-ref guard.** For a handoff intended to resume later or in another session, require `Expected Starting Ref` and `Material Drift Check` sections in the GOAL file, reference the drift gate from the Completion Contract's stop/ask and blocked-exit clauses, and stop on material drift instead of silently refreshing the handoff.
-- **Research/Long-Run near-miss guard.** For Research or Long-Run goals, require a task-specific `Does Not Count` section and include an `Adversarial Failure Modes` section when proxy substitution, premature closure, evaluator gaming, fabrication/status theater, or stale state is a credible risk; candidate rejection still follows the existing research-rejection rule.
-- **Validation loop (required in the verification section).** Name the *smallest trustworthy validation loop* for the change: the deterministic tests/checks the agent runs, plus an explicit manual-QA step with recorded evidence (steps + observed result) where behavior cannot be proven automatically (UI, interactive, external state). Do not add an independent-review pass as a default global tax. Require a separate fresh-context review only when the user explicitly asks for it or the target project's task/finalization policy mandates it; in Harness repos, follow that project's *Review Independence* policy for this project-specific gate.
-- **Final Handoff (required in every GOAL file).** Include a `Final Handoff` section requiring the implementation agent to leave a **standard review handoff before exiting**, persisted durably (not only in chat) so the generic lifecycle review/finalize skills (`harness-review-work`, `harness-finalize-work`) can consume it. For harness work, the normal implementer handoff is the task's outcome-shaped `# Last Session` block via `harness-task-checkpoint`, even when the implementer believes the acceptance criteria are met. Match that skill's committed contract: use the `# Outcome` sections as labels (What Landed / Verification / Not Landed / Follow-ups / Evidence) plus a Status line and branch/commits, and keep "tests passed" separate from "browser/external state verified". Reserve `harness-task-done` and the terminal `# Outcome` record for `harness-finalize-work` — closure and terminal Outcome stay finalizer-owned unless the operator explicitly tells the implementation agent to close the task. For non-harness work, require an equivalent durable handoff file (objective status, changed files, verification, not-landed, follow-ups). Anchor to the existing `# Outcome` / `# Last Session` shape; do not invent a competing schema.
-- **Model/effort recommendations.** When relevant, include a concise `Recommended Runtime` or equivalent
-  line in the goal spec. For Codex targets, recommend reasoning effort only when task risk justifies it. For
-  Claude targets or Claude workers, recommend model for capability and effort for thoroughness. Avoid hard
-  settings unless the user requested them or the delegation mechanism requires them.
-- Use **Research Goal Mode** only when success requires experimental evidence and the target agent may need to choose the next attempt after seeing results. Strong signals include words like "hypothesis", "research", "try approaches", "benchmark candidates", "investigate", "diagnose", "accept/reject", "promote defaults", "find what works", or "continue after failures". Do not use Research Goal Mode for fixed implementation tasks, exact benchmark runs, simple bug fixes, or ordinary handoffs.
-- In Research Goal Mode, the GOAL file must include `Hypothesis Loop And Exit Conditions` even when no timebox was requested:
-  - State the real problem and distinguish it from the first suspected mechanism.
-  - Name prior evidence/references to read before implementation.
-  - Require a vertical hypothesis cycle: hypothesis -> implementation/diagnostic -> benchmark/measurement -> accept/reject/inconclusive -> next hypothesis.
-  - Set a minimum effort bar. Default to at least 3 serious hypotheses or implementation attempts unless the user gives a different number, a candidate passes promotion gates earlier, or a stop gate blocks progress.
-  - Treat "3" as a default calibration, not a law: it is enough breadth to avoid over-rejecting a broad idea after one proxy failure, while still bounded enough for one autonomous run. Use 2 for expensive or risky attempts, 4-5 for cheap diagnostics, or 1 only when the user explicitly wants one candidate.
-  - Define a serious hypothesis as evidence-derived, mechanistically distinct from prior attempts, implemented or diagnostically tested, benchmarked/measured against gates, and closed with accept/reject/inconclusive evidence. Nearby threshold or weight sweeps do not count unless prior evidence specifically justifies that sweep.
-  - Define candidate gates, required artifacts, and replication rules.
-  - Require continuation after negative, partial, or promising results until success, research rejection, or a stop/ask gate.
-  - Define research rejection narrowly: only after the minimum effort bar is met and attempted candidates fail gates.
-  - Preserve stop/ask gates for missing evidence, unavailable infrastructure, contract-breaking changes, broad rewrites, exhausted nontrivial hypotheses, or decisions that need user judgment.
-  - State that defaults stay unchanged unless replicated evidence passes gates and the task explicitly recommends promotion.
-- For timeboxed autonomous research, the GOAL file must include a `Primary Work / Fallback Policy` section with these defaults unless the user gave different explicit rules:
-  - Hygiene or fallback work is disabled unless the user explicitly allowed it for this run.
-  - Do not switch away from the primary task/slice until the minimum effort bar is met: at least 3 serious hypotheses or implementation attempts, and at least 75% of the timebox spent on primary work. The attempt count is not permission to switch early.
-  - After each partial, negative, or promising result, formulate the next follow-up hypothesis or implementation attempt and run it unless blocked by a listed stop gate.
-  - Do not create many microtasks as a substitute for progress; task creation is not progress by itself.
-  - For harness work, one task can contain multiple findings, failed attempts, follow-up attempts, and commits. Harness task explosion is not success.
-  - If hygiene fallback is explicitly enabled, cap it to the final 25% of the run after the minimum effort bar is met, or require user approval before switching.
-- Use **Long-Run Goal Mode** when the target run should last for hours, consume a large model budget, perform broad architecture or benchmark hardening, or avoid the early-exit failure mode. In this mode, the GOAL file must include `Hard Exit Conditions` even when no exact timebox was requested:
-  - Require a P0/P1/P2 board before implementation. P0/P1 define close-blocking work; P2/stretch is optional after P0/P1.
-  - Define close as all P0/P1 done, explicitly blocked, or elapsed-time gate reached with a handoff-quality checkpoint.
-  - State that one useful fix, one passing smoke, or one benchmark is not enough while P0/P1 remains actionable.
-  - Preserve autonomy inside the board: the target agent may choose ordering, add measurements, and do architectural work that supports the objective.
-  - Require speed/performance claims to be measured. "Should be faster" is not evidence.
-  - Require benchmark timing claims to be replicated (`n>=3` by default) or labelled inconclusive.
-  - Require coherent commits after verified chunks unless the user says not to commit.
-  - Require final accounting: P0/P1 statuses, measurements, commits, verification, benchmark paths, and unsafe/unproven claims.
-- Include concise compaction-resistance wording in the generated prompt:
-  - "Do not rely on memory of this prompt after compaction."
-  - "The goal spec and the files it references are the durable source of truth."
-- When the user requested a time limit or persistence-until-deadline behavior, include explicit instructions in the generated prompt:
-  - In the generated prompt, say to follow the deadline and stop gates in the GOAL file.
-  - Put detailed persistence, continuation, and final-accounting rules in the GOAL file, not the generated prompt.
-- Do not write the generated prompt to a file unless the user asks. The durable GOAL file is separate from the generated prompt and should still be written.
-- Do not set a goal in the current session; this skill produces the prompt for another target session. Do not mention setting a goal when the target is Claude Code.
+```text
+You are in <project/repo>.
+
+Read <goal-spec path> first. The goal spec and the files it references are the durable source of truth; do not rely on memory of this prompt after compaction.
+
+Follow the goal spec directly, including any deadline and stop gates it defines, and execute it. Read only the project context needed to follow the spec. Do not claim completion without the required evidence, and continue while its continue conditions remain true.
+
+If the goal spec is materially under-specified, stop and ask before proceeding. Otherwise work autonomously within its scope and leave the required durable final handoff.
+```
+
+## Output Rules
+
+- Always write the durable goal spec for this handoff before returning the prompt. Update only the spec already created for this same handoff.
+- Keep the prompt short and put concrete paths, task IDs, constraints, verification, and task-triggered clauses in the spec.
+- Do not duplicate large conversation excerpts or source files in either artifact; point to durable references.
+- Preserve unresolved material questions as stop gates rather than hiding them behind assumptions.
+- Do not write the generated prompt to a file unless the user asks.

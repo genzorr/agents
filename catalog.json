@@ -369,6 +369,19 @@
       }
     },
     {
+      "id": "sol-luna-orchestration",
+      "kind": "skill",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/sol-luna-orchestration"
+      },
+      "install_target": {
+        "codex": "skills/sol-luna-orchestration"
+      },
+      "tags": ["role:lens", "domain:orchestration"]
+    },
+    {
       "id": "storage-cleanup",
       "kind": "skill",
       "platforms": ["codex", "claude"],

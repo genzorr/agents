@@ -1,0 +1,87 @@
+---
+name: sol-luna-orchestration
+description: Configure Sol-led planning and review with bounded Luna implementation in ordinary Codex threads. Use only when the operator explicitly invokes sol-luna-orchestration or explicitly asks for Sol–Luna orchestration; invocation configures the current task driver and does not itself launch work.
+---
+
+# Sol–Luna Orchestration
+
+**Composition role: lens.** The current task skill or workflow remains the driver. The active protocol or driver decides whether an implementation step may be delegated, and this lens never grants Luna authority the driver lacks. This lens changes how implementation is delegated; it does not own task lifecycle, redefine success, or launch Luna merely because it was invoked.
+
+## Configure Only
+
+If invoked without a resolved task and coherent implementation chunk, confirm that the lens is provisionally configured, name the planning and decomposition Sol must finish before delegation, and return without launching Luna. Activation is scoped to the task being configured and does not carry to a later task; a later task requires a fresh explicit invocation, and a provisional configuration requires a fresh invocation after the task is resolved.
+
+## Preconditions
+
+- The originating thread must already be running Sol. Do not change the current thread's model. If the current thread is not Sol, say so and do not silently switch it.
+- Preserve the current permissions, approval policy, authorization boundaries, task scope, and no-worktree-without-operator-approval rule.
+- Use ordinary Codex threads, not subagents.
+- Use stable native thread behavior exposed by the running Codex product. Do not encode experimental RPC names or fabricate unsupported syntax.
+
+## Operating Model
+
+- Sol remains planner, decision-maker, orchestrator, reviewer, and acceptance authority.
+- Luna is the implementation worker for one coherent bounded task.
+- Luna's report is evidence, not acceptance. Sol accepts work only after inspecting the actual repository state, diff, and proportionate verification evidence.
+- Saving Sol tokens must not weaken task definition, verification, authority boundaries, or review quality.
+
+## Delegation Sequence
+
+1. Sol resolves architecture, decomposition, scope, ownership, risks, stop gates, and the completion contract before delegation.
+2. Do not delegate every tiny operation. Select a coherent implementation chunk Luna can investigate, implement, validate, and report without taking user-owned decisions.
+3. Obtain the originating Sol thread ID from the native current-thread identity or status surface. Do not invent an ID or create a side-channel file, registry, or ledger for it. If the current driver already requires a durable checkpoint, that checkpoint may record the delegated objective and native Luna thread ID; do not create a checkpoint solely for this lens.
+4. Before launch, state that the operator's explicit lens invocation requests a Luna worker and name the Luna model choice plus any intentional effort override.
+5. Create a new ordinary Codex thread using Luna and send the compact worker contract below. Do not use a subagent and do not change the originating thread's model.
+6. After the Luna thread is successfully started, satisfy any existing driver checkpoint requirement and immediately return a concise normal response that identifies the Luna thread and delegated objective. Do not wait, poll, repeatedly check status, or emit no-op progress messages.
+7. Luna performs the local investigation required by its bounded task, implements, runs proportionate validation, and reports the result to the originating Sol thread ID through the native existing-thread continuation mechanism.
+8. Sol reviews the actual changed state and evidence. Review the targeted diff and material risks without repeating Luna's full investigation or routine test execution.
+9. Send follow-up fixes for the same task to the same Luna thread so it retains context. Start a new Luna thread only for a genuinely separate task.
+
+If the running Codex surface cannot create an ordinary Luna thread, expose the new thread ID, or send a message to the originating Sol thread ID, report the exact missing capability. Do not substitute a subagent, controller, daemon, queue, workflow script, side-channel file, or invented command.
+
+Dispatch is not completion. The driver's task remains open and unaccepted until Sol reviews the returned work. Do not poll, but if the operator asks for status or resumes after an expected report did not arrive, perform one native status or thread-read check on the same Luna thread. Re-send the worker contract to that thread only when the check shows the thread idle or ended with no report delivered. If the check shows work in progress, report that status and do not re-send; otherwise report the stall; never launch a replacement thread silently.
+
+## Compact Luna Worker Contract
+
+Send only the minimum sufficient contract:
+
+- **Objective:** the concrete bounded implementation outcome.
+- **Durable references:** relevant task, spec, source, and instruction paths; point to files instead of pasting their contents.
+- **Scope and ownership:** files or components Luna owns plus explicit non-goals and overlap boundaries.
+- **Authority:** local write, validation, commit, push, and external-write permissions exactly as granted by the user and governing project rules.
+- **Success criteria:** observable completion conditions and required artifacts.
+- **Verification:** exact or proportional checks Luna must run and evidence it must preserve.
+- **Stop/ask gates:** architecture decisions, user-owned choices, unsafe scope expansion, missing authority, unavailable infrastructure, or material ambiguity Luna must escalate instead of guessing.
+- **Return route:** the originating Sol thread ID and instruction to report there.
+- **Return format:** outcome; changed files or commit; verification; blockers; material uncertainty.
+
+Do not include builder reasoning, long conversation history, failed-attempt narration, or a request for hidden chain-of-thought.
+
+## Luna Worker Rules
+
+- Investigate enough local context to implement the bounded task correctly; do not blindly follow an under-specified patch recipe.
+- Keep changes within the delegated scope and preserve unrelated user work.
+- Escalate architecture changes, contract changes, unsafe broad rewrites, missing authority, or materially different interpretations to Sol.
+- Never upgrade Luna work to Sol automatically.
+- Do not claim success when required evidence is missing or when the acceptance condition is only partially met.
+- Report concisely: outcome, changed files or commit, verification, blockers, and material uncertainty. Omit step-by-step narration and hidden reasoning.
+
+## Sol Token-Efficiency Rules
+
+- Spend Sol tokens on planning, decomposition, architecture and risk decisions, worker contract quality, targeted review, and acceptance.
+- Let Luna own broad routine scans, line-by-line implementation, local diagnostics, and test execution needed for its bounded task.
+- Prefer durable paths and exact symbols over pasted source and long summaries.
+- Review the material diff, affected contracts, and verification evidence; do not redo Luna's entire investigation by default.
+- Do not poll or repeat “still working” messages. Luna reports back when it has a result or blocker.
+
+## Parallel Work
+
+Multiple Luna threads are allowed only for genuinely independent tasks with non-overlapping ownership or an explicit coordination boundary. Parallelism does not authorize Git worktrees. If safe isolation requires a worktree, stop and ask the operator.
+
+## Normal Launch Response
+
+After dispatch, return one concise response in this shape:
+
+```text
+Launched Luna thread <thread-id> for <bounded objective>. It will implement, validate, and report back to this Sol thread for review.
+```

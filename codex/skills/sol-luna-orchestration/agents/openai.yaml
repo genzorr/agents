@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sol-Luna Orchestration"
+  short_description: "Configure Sol-led delegation to Luna."
+  default_prompt: "Use $sol-luna-orchestration to configure Sol-led planning and review with bounded Luna implementation."
+policy:
+  allow_implicit_invocation: false
