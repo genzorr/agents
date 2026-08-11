@@ -1,0 +1,7 @@
+# POSIX-first repo: keep line endings LF in the working tree too.
+#
+# Without this, a Windows checkout under core.autocrlf=true rewrites text files as
+# CRLF, which changes their bytes: content digests pinned in tests stop matching and
+# assertions that quote a multi-line fragment stop finding it. On POSIX nothing
+# changes -- the files are already LF.
+* text=auto eol=lf

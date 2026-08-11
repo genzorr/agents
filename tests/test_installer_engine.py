@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import contextlib
 import copy
+import hashlib
+import io
 import json
 import importlib.util
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -17,6 +21,94 @@ from pathlib import Path
 from scripts.agent_catalog import CatalogError, validate_asset_target, validate_catalog
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+PRE_ADAPTER_MERGE_STATE = REPO_ROOT / "tests" / "fixtures" / "claude-hook-pre-adapter-merge-state.json"
+
+
+posix_host_only = unittest.skipIf(
+    os.name == "nt",
+    "asserts POSIX-host behavior: on Windows the engine wires the PowerShell notifier "
+    "instead of the shell one, and there are no POSIX mode bits to preserve",
+)
+
+
+def posix_bash() -> str:
+    """Return a bash able to run the shell wrappers on this host.
+
+    `bash` on a stock Windows PATH is the WSL launcher, whose Linux userland does not
+    share the Windows profile these tests install into. Git for Windows ships an MSYS
+    bash that does; identify it by userland rather than by name.
+    """
+    if os.name != "nt":
+        return "bash"
+    candidates = []
+    git = shutil.which("git")
+    if git:
+        candidates.append(Path(git).resolve().parents[1] / "bin" / "bash.exe")
+    for root in (os.environ.get("ProgramFiles"), os.environ.get("ProgramFiles(x86)")):
+        if root:
+            candidates.append(Path(root) / "Git" / "bin" / "bash.exe")
+    for candidate in candidates:
+        if not candidate.is_file():
+            continue
+        probe = subprocess.run(
+            [str(candidate), "-c", "uname -s"], capture_output=True, text=True, check=False
+        )
+        if probe.returncode == 0 and probe.stdout.startswith(("MINGW", "MSYS", "CYGWIN")):
+            return str(candidate)
+    raise unittest.SkipTest("no MSYS bash available to run the shell wrappers")
+
+
+def shell_path(path: Path) -> str:
+    """Render *path* for a bash argument: a backslash there is an escape, not a separator."""
+    return path.as_posix()
+
+
+def shell_search_path(*extra: Path) -> str:
+    """Build a PATH the resolved bash can use, with *extra* directories first.
+
+    On POSIX that is the usual colon-joined list. On Windows the value is consumed as
+    a native PATH, so it must be os.pathsep-joined and name real directories -- which
+    is why the MSYS `usr/bin` is appended rather than `/usr/bin:/bin`.
+    """
+    if os.name != "nt":
+        return os.pathsep.join([*(str(item) for item in extra), "/usr/bin", "/bin"])
+    msys_bin = Path(posix_bash()).resolve().parents[1] / "usr" / "bin"
+    return os.pathsep.join([*(str(item) for item in extra), str(msys_bin)])
+POWERSHELL_PREFIX = "powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File"
+
+
+def windows_hook_command(home: Path, script: str = "hooks/notifications.ps1") -> str:
+    """Build the expected native-Windows hook command without reusing engine code."""
+    rendered = f"{home}/{script}".replace("/", "\\")
+    return f'{POWERSHELL_PREFIX} "{rendered}"'
+
+
+@contextlib.contextmanager
+def installer_module(repo: Path, *, windows: bool = False):
+    """Import a fixture repo's engine so its host-OS branch can be selected."""
+    scripts_path = str(repo / "scripts")
+    name = f"install_assets_fixture_{'nt' if windows else 'posix'}"
+    sys.path.insert(0, scripts_path)
+    try:
+        spec = importlib.util.spec_from_file_location(name, repo / "scripts/install-assets.py")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        module.HOST_IS_WINDOWS = windows
+        yield module
+    finally:
+        sys.modules.pop(name, None)
+        sys.modules.pop("agent_catalog", None)
+        sys.path.remove(scripts_path)
+
+
+def run_module(module, platform: str, home: Path, *, prune: bool = False, uninstall: bool = False, dry_run: bool = False) -> tuple[int, str, str]:
+    args = type("Args", (), {"platform": platform, "dry_run": dry_run, "show_diff": False, "update": False, "prune": prune, "uninstall": uninstall})()
+    out, err = io.StringIO(), io.StringIO()
+    variable = "CODEX_HOME" if platform == "codex" else "CLAUDE_HOME"
+    with mock.patch.dict(os.environ, {variable: str(home)}), contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = module.run(args)
+    return code, out.getvalue(), err.getvalue()
 
 
 def write_fixture(repo: Path, platform: str = "codex", *, travel: bool = False, global_file: bool = False, hooks: bool = False) -> None:
@@ -24,6 +116,8 @@ def write_fixture(repo: Path, platform: str = "codex", *, travel: bool = False, 
     scripts.mkdir(parents=True)
     for name in ("agent_catalog.py", "install-assets.py"):
         shutil.copy2(REPO_ROOT / "scripts" / name, scripts / name)
+    (scripts / "lib").mkdir()
+    shutil.copy2(REPO_ROOT / "scripts/lib/python.sh", scripts / "lib/python.sh")
     wrapper = "install-codex.sh" if platform == "codex" else "install-claude.sh"
     shutil.copy2(REPO_ROOT / "scripts" / wrapper, scripts / wrapper)
     (scripts / wrapper).chmod(0o755)
@@ -57,28 +151,56 @@ def write_fixture(repo: Path, platform: str = "codex", *, travel: bool = False, 
         hook_root.mkdir(parents=True)
         (hook_root / "notifications.sh").write_text("#!/bin/sh\necho notify\n", encoding="utf-8")
         (hook_root / "notifications.sh").chmod(0o755)
-        (repo / "claude" / "hooks.json").write_text(json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": "__CLAUDE_HOME__/hooks/notifications.sh"}]}]}}), encoding="utf-8")
-        assets["hooks"].append({"id": "claude-notifications", "kind": "hook", "platforms": ["claude"], "owner": "agents", "source": {"claude": [{"path": "claude/hooks/notifications.sh", "target": "hooks/notifications.sh"}, {"path": "claude/hooks.json", "target": None, "role": "settings-hooks"}]}, "install_target": {"claude": "hooks/notifications.sh"}, "handling": {"claude": "claude_settings_hooks"}})
+        (hook_root / "notifications.ps1").write_text("exit 0\n", encoding="utf-8")
+        (repo / "claude" / "hooks.json").write_text(json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": "__CLAUDE_NOTIFY__"}]}]}}), encoding="utf-8")
+        assets["hooks"].append(
+            {
+                "id": "claude-notifications",
+                "kind": "hook",
+                "platforms": ["claude"],
+                "owner": "agents",
+                "source": {
+                    "claude": [
+                        {"path": "claude/hooks/notifications.sh", "target": "hooks/notifications.sh", "role": "posix-script"},
+                        {"path": "claude/hooks/notifications.ps1", "target": "hooks/notifications.ps1", "role": "windows-script"},
+                        {"path": "claude/hooks.json", "target": None, "role": "settings-hooks"},
+                    ]
+                },
+                "install_target": {"claude": "hooks/notifications.sh"},
+                "handling": {"claude": "claude_settings_hooks"},
+            }
+        )
 
     (repo / "catalog.json").write_text(json.dumps({"assets_comment": "fixture", **assets}, indent=2) + "\n", encoding="utf-8")
 
 
 def replace_fixture_hook_asset(repo: Path) -> None:
     """Replace the fixture hook with a new catalog identity and script target."""
-    old_script = repo / "claude/hooks/notifications.sh"
-    new_script = repo / "claude/hooks/replacement.sh"
-    old_script.rename(new_script)
-    fragment_path = repo / "claude/hooks.json"
-    fragment = json.loads(fragment_path.read_text())
-    fragment["hooks"]["Notification"][0]["hooks"][0]["command"] = "__CLAUDE_HOME__/hooks/replacement.sh"
-    fragment_path.write_text(json.dumps(fragment), encoding="utf-8")
+    (repo / "claude/hooks/notifications.sh").rename(repo / "claude/hooks/replacement.sh")
+    (repo / "claude/hooks/notifications.ps1").rename(repo / "claude/hooks/replacement.ps1")
     catalog_path = repo / "catalog.json"
     catalog = json.loads(catalog_path.read_text())
     hook = catalog["hooks"][0]
     hook["id"] = "claude-replacement"
-    hook["source"]["claude"][0] = {"path": "claude/hooks/replacement.sh", "target": "hooks/replacement.sh"}
+    hook["source"]["claude"][0] = {"path": "claude/hooks/replacement.sh", "target": "hooks/replacement.sh", "role": "posix-script"}
+    hook["source"]["claude"][1] = {"path": "claude/hooks/replacement.ps1", "target": "hooks/replacement.ps1", "role": "windows-script"}
     hook["install_target"]["claude"] = "hooks/replacement.sh"
     catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+
+
+def seed_pre_adapter_merge_home(repo: Path, home: Path) -> None:
+    """Materialize the historical hook state whose Windows notifier had a separate identity."""
+    hook_home = home / "hooks"
+    hook_home.mkdir(parents=True)
+    for name in ("notifications.sh", "notifications.ps1"):
+        shutil.copy2(repo / "claude" / "hooks" / name, hook_home / name)
+
+    state = json.loads(PRE_ADAPTER_MERGE_STATE.read_text(encoding="utf-8"))
+    command = f"{home}/hooks/notifications.sh"
+    state["adapters"]["claude-notifications"]["managed_leaves"][0]["leaf"]["command"] = command
+    (home / ".agents-install-state.json").write_text(json.dumps(state) + "\n", encoding="utf-8")
+    settings = {"hooks": {"Notification": [{"hooks": [{"type": "command", "command": command}]}]}}
+    (home / "settings.json").write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
 
 
 class InstallerEngineTest(unittest.TestCase):
@@ -87,7 +209,7 @@ class InstallerEngineTest(unittest.TestCase):
         env = os.environ.copy()
         env["CODEX_HOME" if platform == "codex" else "CLAUDE_HOME"] = str(home)
         env["PYTHONDONTWRITEBYTECODE"] = "1"
-        return subprocess.run(["bash", str(wrapper), *args], text=True, capture_output=True, env=env, check=False)
+        return subprocess.run([posix_bash(), shell_path(wrapper), *args], text=True, capture_output=True, env=env, check=False)
 
     def test_dry_run_and_diff_do_not_create_fresh_home(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -104,7 +226,8 @@ class InstallerEngineTest(unittest.TestCase):
             write_fixture(repo)
             first = self.run_installer(repo, "codex", home)
             self.assertEqual(first.returncode, 0, first.stderr)
-            self.assertEqual((home / "skills/sample/tool.sh").stat().st_mode & 0o777, 0o755)
+            if os.name != "nt":
+                self.assertEqual((home / "skills/sample/tool.sh").stat().st_mode & 0o777, 0o755)
             state = json.loads((home / ".agents-install-state.json").read_text())
             self.assertEqual(state["platform"], "codex")
             second = self.run_installer(repo, "codex", home, "--update")
@@ -512,6 +635,7 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertNotIn(str(script), settings.read_text())
             self.assertFalse((home / ".agents-install-state.json").exists())
 
+    @posix_host_only
     def test_no_history_hook_adoption_canonicalizes_before_recording_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home"
@@ -540,6 +664,7 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertEqual(removed.returncode, 0, removed.stderr)
             self.assertEqual(json.loads(settings.read_text())["hooks"], unrelated)
 
+    @posix_host_only
     def test_no_history_install_rejects_ambiguous_preexisting_hook_leaf(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home"
@@ -579,6 +704,7 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertEqual(settings.read_bytes(), before)
             self.assertTrue((home / "hooks/notifications.sh").exists())
 
+    @posix_host_only
     def test_hook_fragment_command_update_reconciles_from_history(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home"
@@ -589,7 +715,7 @@ class InstallerEngineTest(unittest.TestCase):
             fragment_path = repo / "claude/hooks.json"
             fragment = json.loads(fragment_path.read_text())
             new_command = f'{home}/hooks/notifications.sh "updated message"'
-            fragment["hooks"]["Notification"][0]["hooks"][0]["command"] = '__CLAUDE_HOME__/hooks/notifications.sh "updated message"'
+            fragment["hooks"]["Notification"][0]["hooks"][0]["command"] = '__CLAUDE_NOTIFY__ "updated message"'
             fragment_path.write_text(json.dumps(fragment), encoding="utf-8")
 
             result = self.run_installer(repo, "claude", home)
@@ -615,8 +741,10 @@ class InstallerEngineTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertNotIn(old_command, (home / "settings.json").read_text())
                 self.assertFalse((home / "hooks/notifications.sh").exists())
+                self.assertFalse((home / "hooks/notifications.ps1").exists())
                 if operation == "--prune":
                     self.assertTrue((home / "hooks/replacement.sh").exists())
+                    self.assertTrue((home / "hooks/replacement.ps1").exists())
                     state = json.loads((home / ".agents-install-state.json").read_text())
                     self.assertEqual(set(state["adapters"]), {"claude-replacement"})
                     self.assertEqual(self.run_installer(repo, "claude", home, "--prune").returncode, 0)
@@ -643,6 +771,8 @@ class InstallerEngineTest(unittest.TestCase):
             state = json.loads((home / ".agents-install-state.json").read_text())
             self.assertEqual(state["adapters"], {})
             self.assertNotIn("hooks/notifications.sh", state["files"])
+            self.assertNotIn("hooks/notifications.ps1", state["files"])
+            self.assertFalse((home / "hooks/notifications.ps1").exists())
             retried = self.run_installer(repo, "claude", home, "--prune")
             self.assertEqual(retried.returncode, 0, retried.stderr)
 
@@ -817,6 +947,7 @@ class InstallerEngineTest(unittest.TestCase):
                 self.assertIn("reserved or foreign target", result.stderr)
                 self.assertTrue(forged.exists())
 
+    @posix_host_only
     def test_claude_home_path_is_shell_quoted_in_hook_command(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home with space"
@@ -919,6 +1050,7 @@ class InstallerEngineTest(unittest.TestCase):
             errors, _warnings = validate_catalog(repo)
             self.assertTrue(any("claude/hooks/extra.sh" in error for error in errors))
 
+    @posix_host_only
     def test_settings_mode_is_preserved_and_new_settings_match_creation_mode(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo, home = Path(tmp) / "repo", Path(tmp) / "home"
@@ -1031,10 +1163,480 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertTrue(any("unsafe relative path" in error for error in errors))
 
             catalog["skills"][0]["install_target"]["claude"] = "skills/sample"
-            catalog["hooks"][0]["source"]["claude"][1]["target"] = "hooks/notifications.sh"
+            catalog["hooks"][0]["source"]["claude"][2]["target"] = "hooks/settings-fragment.sh"
             (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
             errors, _warnings = validate_catalog(repo)
             self.assertTrue(any("settings hook adapter needs exactly one script and one settings-hooks fragment" in error for error in errors))
+
+    def test_settings_adapter_requires_a_notifier_for_every_host(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            write_fixture(repo, "claude", hooks=True)
+            catalog = json.loads((repo / "catalog.json").read_text())
+            del catalog["hooks"][0]["source"]["claude"][1]
+            (repo / "claude/hooks/notifications.ps1").unlink()
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, _warnings = validate_catalog(repo)
+
+            self.assertTrue(any("settings hook adapter needs exactly one script and one settings-hooks fragment" in error for error in errors))
+
+    def test_catalog_rejects_unsupported_entry_metadata_but_accepts_a_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            write_fixture(repo, "claude", hooks=True)
+            catalog_path = repo / "catalog.json"
+            catalog = json.loads(catalog_path.read_text())
+            catalog["hooks"][0]["counterpart"] = "prose the loader never reads"
+            catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+            errors, _warnings = validate_catalog(repo)
+            self.assertTrue(any("unsupported key(s) counterpart" in error for error in errors))
+
+            del catalog["hooks"][0]["counterpart"]
+            catalog["hooks"][0]["$comment"] = "documented comment convention"
+            catalog["hooks"][0]["source"]["claude"][0]["counterpart"] = "layer prose"
+            catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+            errors, _warnings = validate_catalog(repo)
+            self.assertTrue(any("source layer 0: unsupported key(s) counterpart" in error for error in errors))
+
+            del catalog["hooks"][0]["source"]["claude"][0]["counterpart"]
+            catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
+            errors, _warnings = validate_catalog(repo)
+            self.assertEqual(errors, [])
+
+    @posix_host_only
+    def test_fragment_command_outside_the_managed_notifier_is_a_conflict(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            fragment_path = repo / "claude/hooks.json"
+            fragment = json.loads(fragment_path.read_text())
+            fragment["hooks"]["Notification"][0]["hooks"][0]["command"] = "/usr/local/bin/unmanaged"
+            fragment_path.write_text(json.dumps(fragment), encoding="utf-8")
+
+            result = self.run_installer(repo, "claude", home)
+
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn("does not invoke hooks/notifications.sh", result.stderr)
+            self.assertFalse((home / "settings.json").exists())
+            self.assertFalse((home / ".agents-install-state.json").exists())
+
+    @posix_host_only
+    def test_home_with_backslash_and_quote_renders_a_json_safe_hook_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            home = Path(tmp) / 'ho"me\\claude'
+            write_fixture(repo, "claude", hooks=True)
+
+            installed = self.run_installer(repo, "claude", home)
+
+            self.assertEqual(installed.returncode, 0, installed.stderr)
+            command = json.loads((home / "settings.json").read_text())["hooks"]["Notification"][0]["hooks"][0]["command"]
+            self.assertEqual(command, f"'{home}'/hooks/notifications.sh")
+            second = self.run_installer(repo, "claude", home)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            self.assertIn("0 adapter action(s)", second.stdout)
+            removed = self.run_installer(repo, "claude", home, "--uninstall")
+            self.assertEqual(removed.returncode, 0, removed.stderr)
+            self.assertEqual(json.loads((home / "settings.json").read_text()), {})
+
+    def test_forged_state_script_target_cannot_widen_adapter_deletion_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            self.assertEqual(self.run_installer(repo, "claude", home).returncode, 0)
+            forged = home / "hooks/forged.sh"
+            forged.write_text("operator script\n", encoding="utf-8")
+            forged.chmod(0o644)
+            state_path = home / ".agents-install-state.json"
+            state = json.loads(state_path.read_text())
+            state["files"]["hooks/forged.sh"] = {
+                "owner": "agents",
+                "asset_id": "claude-notifications",
+                "kind": "hook",
+                "sha256": hashlib.sha256(forged.read_bytes()).hexdigest(),
+                "mode": "0644",
+                "baseline_known": True,
+            }
+            state["adapters"]["claude-notifications"]["script_targets"] = ["hooks/notifications.sh", "hooks/notifications.ps1", "hooks/forged.sh"]
+            state_path.write_text(json.dumps(state), encoding="utf-8")
+
+            for operation in ((), ("--prune",), ("--uninstall",)):
+                with self.subTest(operation=operation or ("install",)):
+                    result = self.run_installer(repo, "claude", home, *operation)
+
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn("hook target is not bound to catalog or adapter history", result.stderr)
+                    self.assertTrue(forged.exists())
+                    self.assertEqual(forged.read_text(), "operator script\n")
+
+    @posix_host_only
+    def test_pre_adapter_merge_home_reconciles_the_moved_notifier_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            for operation in ((), ("--prune",), ("--uninstall",)):
+                with self.subTest(operation=operation or ("install",)):
+                    label = operation[0] if operation else "install"
+                    repo, home = Path(tmp) / f"repo-{label}", Path(tmp) / f"home-{label}"
+                    write_fixture(repo, "claude", hooks=True)
+                    seed_pre_adapter_merge_home(repo, home)
+                    installed_settings = (home / "settings.json").read_bytes()
+                    # The rework also changed the notifier source, so the recorded digest
+                    # is the historical fixture's content rather than the current source's.
+                    source = repo / "claude/hooks/notifications.ps1"
+                    source.write_text("exit 0\n# reworked\n", encoding="utf-8")
+                    notifier = home / "hooks/notifications.ps1"
+                    self.assertNotEqual(notifier.read_bytes(), source.read_bytes())
+
+                    result = self.run_installer(repo, "claude", home, *operation)
+
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    if operation == ("--uninstall",):
+                        self.assertFalse(notifier.exists())
+                        self.assertFalse((home / "hooks/notifications.sh").exists())
+                        self.assertEqual(json.loads((home / "settings.json").read_text()), {})
+                        self.assertFalse((home / ".agents-install-state.json").exists())
+                        continue
+                    self.assertEqual(notifier.read_bytes(), source.read_bytes())
+                    self.assertEqual((home / "settings.json").read_bytes(), installed_settings)
+                    state = json.loads((home / ".agents-install-state.json").read_text())
+                    self.assertEqual(state["files"]["hooks/notifications.ps1"]["asset_id"], "claude-notifications")
+                    self.assertEqual(state["adapters"]["claude-notifications"]["script_target"], "hooks/notifications.sh")
+                    self.assertEqual(self.run_installer(repo, "claude", home, *operation).returncode, 0)
+
+    @posix_host_only
+    def test_unprovable_notifier_identity_mismatch_still_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            for label, code, message, edit_destination, foreign in (
+                ("unprovable", 1, "asset identity does not match catalog", True, False),
+                ("foreign", 1, "invalid or foreign asset identity", False, True),
+                ("provable-but-modified", 2, "recorded destination was modified; preserved", True, False),
+            ):
+                with self.subTest(record=label):
+                    repo, home = Path(tmp) / f"repo-{label}", Path(tmp) / f"home-{label}"
+                    write_fixture(repo, "claude", hooks=True)
+                    seed_pre_adapter_merge_home(repo, home)
+                    notifier = home / "hooks/notifications.ps1"
+                    if label != "provable-but-modified":
+                        # Reworking the source leaves the recorded digest matching neither
+                        # the current source nor an edited destination.
+                        (repo / "claude/hooks/notifications.ps1").write_text("exit 0\n# reworked\n", encoding="utf-8")
+                    if edit_destination:
+                        notifier.write_text("operator edit\n", encoding="utf-8")
+                    if foreign:
+                        state_path = home / ".agents-install-state.json"
+                        state = json.loads(state_path.read_text())
+                        state["files"]["hooks/notifications.ps1"]["asset_id"] = "harness-forged"
+                        state_path.write_text(json.dumps(state), encoding="utf-8")
+                    before = notifier.read_bytes()
+
+                    result = self.run_installer(repo, "claude", home)
+
+                    self.assertEqual(result.returncode, code, result.stderr)
+                    self.assertIn(message, result.stderr)
+                    self.assertEqual(notifier.read_bytes(), before)
+
+    def test_uninstall_removes_hook_leaves_despite_an_unusable_fragment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            for label, text in (
+                ("unmanaged-command", json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": "/usr/local/bin/unmanaged"}]}]}})),
+                ("malformed-json", "{not json"),
+            ):
+                with self.subTest(fragment=label):
+                    repo, home = Path(tmp) / f"repo-{label}", Path(tmp) / f"home-{label}"
+                    write_fixture(repo, "claude", hooks=True)
+                    self.assertEqual(self.run_installer(repo, "claude", home).returncode, 0)
+                    (repo / "claude/hooks.json").write_text(text, encoding="utf-8")
+
+                    result = self.run_installer(repo, "claude", home, "--uninstall")
+
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(json.loads((home / "settings.json").read_text()), {})
+                    self.assertFalse((home / "hooks/notifications.sh").exists())
+                    self.assertFalse((home / "hooks/notifications.ps1").exists())
+                    self.assertFalse((home / ".agents-install-state.json").exists())
+
+    @posix_host_only
+    def test_prune_retires_stale_hook_history_despite_an_unusable_fragment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            self.assertEqual(self.run_installer(repo, "claude", home).returncode, 0)
+            stale_command = f"{home}/hooks/notifications.sh"
+            replace_fixture_hook_asset(repo)
+            fragment_path = repo / "claude/hooks.json"
+            usable = fragment_path.read_text()
+            fragment_path.write_text(json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": "/usr/local/bin/unmanaged"}]}]}}), encoding="utf-8")
+
+            pruned = self.run_installer(repo, "claude", home, "--prune")
+
+            self.assertEqual(pruned.returncode, 2, pruned.stderr)
+            self.assertIn("does not invoke hooks/replacement.sh", pruned.stderr)
+            self.assertNotIn(stale_command, (home / "settings.json").read_text())
+            state = json.loads((home / ".agents-install-state.json").read_text())
+            self.assertEqual(state["adapters"]["claude-notifications"]["managed_leaves"], [])
+
+            fragment_path.write_text(usable, encoding="utf-8")
+            retried = self.run_installer(repo, "claude", home, "--prune")
+            self.assertEqual(retried.returncode, 0, retried.stderr)
+            self.assertEqual(set(json.loads((home / ".agents-install-state.json").read_text())["adapters"]), {"claude-replacement"})
+            self.assertFalse((home / "hooks/notifications.sh").exists())
+            self.assertIn(f"{home}/hooks/replacement.sh", (home / "settings.json").read_text())
+
+    def test_catalog_requires_twin_notifier_target_names(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            write_fixture(repo, "claude", hooks=True)
+            (repo / "claude/hooks/notifications.ps1").rename(repo / "claude/hooks/notify.ps1")
+            catalog = json.loads((repo / "catalog.json").read_text())
+            catalog["hooks"][0]["source"]["claude"][1] = {"path": "claude/hooks/notify.ps1", "target": "hooks/notify.ps1", "role": "windows-script"}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, _warnings = validate_catalog(repo)
+
+            self.assertTrue(any("notifiers must be `<name>.sh` and `<name>.ps1` twins" in error for error in errors))
+
+    @posix_host_only
+    def test_posix_install_materializes_the_windows_notifier_without_wiring_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+
+            installed = self.run_installer(repo, "claude", home)
+
+            self.assertEqual(installed.returncode, 0, installed.stderr)
+            self.assertTrue((home / "hooks/notifications.ps1").exists())
+            self.assertNotIn("notifications.ps1", (home / "settings.json").read_text())
+            state = json.loads((home / ".agents-install-state.json").read_text())
+            self.assertEqual(state["adapters"]["claude-notifications"]["script_target"], "hooks/notifications.sh")
+            self.assertNotIn("script_targets", state["adapters"]["claude-notifications"])
+            self.assertIn("hooks/notifications.ps1", state["files"])
+
+    def test_windows_install_applies_catalog_files_and_wires_the_powershell_hook(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            with installer_module(repo, windows=True) as module:
+                code, _out, err = run_module(module, "claude", home)
+                self.assertEqual(code, 0, err)
+                self.assertTrue((home / "skills/sample/SKILL.md").exists())
+                self.assertTrue((home / "hooks/notifications.ps1").exists())
+                command = json.loads((home / "settings.json").read_text())["hooks"]["Notification"][0]["hooks"][0]["command"]
+                self.assertEqual(command, windows_hook_command(home))
+                state = json.loads((home / ".agents-install-state.json").read_text())
+                self.assertEqual(state["adapters"]["claude-notifications"]["script_target"], "hooks/notifications.ps1")
+
+                settings_before = (home / "settings.json").read_bytes()
+                code, out, err = run_module(module, "claude", home)
+                self.assertEqual(code, 0, err)
+                self.assertIn("0 file action(s), 0 adapter action(s)", out)
+                self.assertEqual((home / "settings.json").read_bytes(), settings_before)
+
+    def test_windows_prune_and_uninstall_reconcile_and_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            for operation in ("prune", "uninstall"):
+                repo, home = Path(tmp) / f"repo-{operation}", Path(tmp) / f"home-{operation}"
+                write_fixture(repo, "claude", hooks=True)
+                with installer_module(repo, windows=True) as module:
+                    self.assertEqual(run_module(module, "claude", home)[0], 0)
+                    catalog = json.loads((repo / "catalog.json").read_text())
+                    catalog["hooks"] = []
+                    shutil.rmtree(repo / "claude/hooks")
+                    (repo / "claude/hooks.json").unlink()
+                    (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+                    code, _out, err = run_module(module, "claude", home, **{operation: True})
+
+                    self.assertEqual(code, 0, err)
+                    self.assertFalse((home / "hooks/notifications.ps1").exists())
+                    self.assertFalse((home / "hooks/notifications.sh").exists())
+                    self.assertNotIn("notifications", (home / "settings.json").read_text())
+                    if operation == "prune":
+                        state = json.loads((home / ".agents-install-state.json").read_text())
+                        self.assertEqual(state["adapters"], {})
+                        self.assertEqual(run_module(module, "claude", home, prune=True)[0], 0)
+                    else:
+                        self.assertFalse((home / ".agents-install-state.json").exists())
+                        self.assertEqual(run_module(module, "claude", home, uninstall=True)[0], 0)
+
+    def test_windows_modified_hook_leaf_is_preserved_until_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", hooks=True)
+            with installer_module(repo, windows=True) as module:
+                self.assertEqual(run_module(module, "claude", home)[0], 0)
+                settings = home / "settings.json"
+                installed = settings.read_bytes()
+                modified = json.loads(installed)
+                modified["hooks"]["Notification"][0]["hooks"][0]["command"] += " --operator-edit"
+                settings.write_text(json.dumps(modified), encoding="utf-8")
+
+                code, _out, err = run_module(module, "claude", home, uninstall=True)
+
+                self.assertEqual(code, 2, err)
+                self.assertIn("recorded hook leaves were modified or moved", err)
+                self.assertEqual(json.loads(settings.read_text()), modified)
+                self.assertTrue((home / "hooks/notifications.ps1").exists())
+                state = json.loads((home / ".agents-install-state.json").read_text())
+                self.assertIn("claude-notifications", state["adapters"])
+
+                settings.write_bytes(installed)
+                code, _out, err = run_module(module, "claude", home, uninstall=True)
+                self.assertEqual(code, 0, err)
+                self.assertFalse((home / "hooks/notifications.ps1").exists())
+                self.assertFalse((home / ".agents-install-state.json").exists())
+
+    def test_windows_notifier_script_stays_fail_silent(self) -> None:
+        script = REPO_ROOT / "claude/hooks/notifications.ps1"
+        text = script.read_text(encoding="utf-8")
+        self.assertEqual(text.rstrip().splitlines()[-1], "exit 0")
+        for noisy in ("Write-Host", "Write-Error", "throw"):
+            self.assertNotIn(noisy, text)
+        guarded = text.split("\ntry {", 1)
+        self.assertEqual(len(guarded), 2)
+        self.assertIn("Show-Toast", guarded[1])
+        self.assertIn("Show-Balloon", guarded[1])
+
+        powershell = shutil.which("pwsh")
+        if powershell is None:
+            return
+        # A non-Windows pwsh has neither WinRT nor WinForms, so this exercises the
+        # path where every notifier attempt fails.
+        result = subprocess.run([powershell, "-NoProfile", "-File", str(script), "fixture"], text=True, capture_output=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "")
+        self.assertEqual(result.stderr.strip(), "")
+
+
+class InterpreterProbeTest(unittest.TestCase):
+    """`python3` on PATH may be a Store alias stub that exits without running."""
+
+    def write_stub(self, directory: Path, name: str, body: str) -> None:
+        stub = directory / name
+        stub.write_text(f"#!/bin/sh\n{body}\n", encoding="utf-8")
+        stub.chmod(0o755)
+
+    def resolve(self, path: Path) -> subprocess.CompletedProcess[str]:
+        env = {"PATH": shell_search_path(path), "HOME": str(path)}
+        return subprocess.run(
+            [posix_bash(), "-c", '. "$1"; resolve_python', "bash", shell_path(REPO_ROOT / "scripts/lib/python.sh")],
+            text=True,
+            capture_output=True,
+            env=env,
+            check=False,
+        )
+
+    def test_probe_skips_a_candidate_that_only_looks_installed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            stubs = Path(tmp)
+            self.write_stub(stubs, "python3", 'echo "Python was not found" >&2\nexit 49')
+            # POSIX separators inside the stub body: it is run by a shell, which reads
+            # a backslash as an escape rather than a path separator.
+            self.write_stub(stubs, "python", f'exec "{Path(sys.executable).as_posix()}" "$@"')
+
+            result = self.resolve(stubs)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), "python")
+
+    def test_probe_reports_failure_when_no_candidate_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            stubs = Path(tmp)
+            self.write_stub(stubs, "python3", "exit 49")
+            self.write_stub(stubs, "python", "exit 1")
+
+            result = self.resolve(stubs)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("no working Python 3.9+ on PATH", result.stderr)
+
+    def test_wrapper_fails_closed_without_a_working_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            stubs = Path(tmp) / "stubs"
+            stubs.mkdir()
+            self.write_stub(stubs, "python3", "exit 49")
+            self.write_stub(stubs, "python", "exit 1")
+            home = Path(tmp) / "home"
+            env = {"PATH": shell_search_path(stubs), "HOME": str(tmp), "CLAUDE_HOME": str(home)}
+
+            result = subprocess.run([posix_bash(), shell_path(REPO_ROOT / "scripts/install-claude.sh")], text=True, capture_output=True, env=env, check=False)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("no working Python 3.9+ on PATH", result.stderr)
+            self.assertFalse(home.exists())
+
+    def test_probe_leaves_no_variables_in_the_sourcing_shell(self) -> None:
+        result = subprocess.run(
+            [posix_bash(), "-c", '. "$1"; resolve_python >/dev/null; set | grep -c "^probe=" || true', "bash", shell_path(REPO_ROOT / "scripts/lib/python.sh")],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "0")
+
+
+class WindowsEntryPointTest(unittest.TestCase):
+    """A native-Windows host runs the PowerShell wrappers; WSL bash cannot reach its home."""
+
+    def wrapper(self, platform: str) -> str:
+        return (REPO_ROOT / f"scripts/install-{platform}.ps1").read_text(encoding="utf-8")
+
+    def test_wrappers_resolve_an_interpreter_and_invoke_the_engine_per_platform(self) -> None:
+        for platform in ("claude", "codex"):
+            with self.subTest(platform=platform):
+                text = self.wrapper(platform)
+                self.assertIn("lib/python.ps1", text)
+                self.assertIn("$python = Resolve-AgentsPython", text)
+                self.assertIn(f"'install-assets.py') {platform} @args", text)
+                self.assertIn("exit $LASTEXITCODE", text)
+                self.assertIn("$ErrorActionPreference = 'Stop'", text)
+
+    def test_powershell_and_posix_wrappers_target_the_same_engine_and_platform(self) -> None:
+        for platform in ("claude", "codex"):
+            with self.subTest(platform=platform):
+                posix = (REPO_ROOT / f"scripts/install-{platform}.sh").read_text(encoding="utf-8")
+                self.assertIn("install-assets.py", posix)
+                self.assertIn(f'install-assets.py" {platform} "$@"', posix)
+                self.assertIn(f"'install-assets.py') {platform} @args", self.wrapper(platform))
+
+    def test_both_probes_enforce_the_declared_requires_python_floor(self) -> None:
+        declared = re.search(r'requires-python\s*=\s*">=(\d+)\.(\d+)"', (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        self.assertIsNotNone(declared)
+        major, minor = declared.group(1), declared.group(2)
+        for name in ("scripts/lib/python.sh", "scripts/lib/python.ps1"):
+            with self.subTest(probe=name):
+                text = (REPO_ROOT / name).read_text(encoding="utf-8")
+                self.assertIn(f"sys.version_info[:2] >= ({major}, {minor})", text)
+                self.assertIn(f"no working Python {major}.{minor}+ on PATH", text)
+
+    def test_powershell_probe_tries_the_launcher_before_the_alias_stub(self) -> None:
+        text = (REPO_ROOT / "scripts/lib/python.ps1").read_text(encoding="utf-8")
+        order = [candidate for candidate in ("'py'", "'python3'", "'python'") if candidate in text]
+        self.assertEqual(order, ["'py'", "'python3'", "'python'"])
+        self.assertLess(text.index("Command = 'py'"), text.index("Command = 'python3'"))
+        self.assertIn("-c $probe", text)
+        self.assertIn("$LASTEXITCODE -eq 0", text)
+
+    def test_powershell_wrapper_dry_run_is_observational_where_pwsh_exists(self) -> None:
+        powershell = shutil.which("pwsh")
+        if powershell is None:
+            self.skipTest("pwsh is not installed on this host")
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "claude"
+            env = {**os.environ, "CLAUDE_HOME": str(home), "PYTHONDONTWRITEBYTECODE": "1"}
+
+            result = subprocess.run(
+                [powershell, "-NoProfile", "-File", str(REPO_ROOT / "scripts/install-claude.ps1"), "--dry-run"],
+                text=True,
+                capture_output=True,
+                env=env,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("Dry run (claude)", result.stdout)
+            self.assertFalse(home.exists())
 
 
 if __name__ == "__main__":

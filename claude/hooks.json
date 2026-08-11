@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "__CLAUDE_HOME__/hooks/notifications.sh \"Waiting for permission...\""
+            "command": "__CLAUDE_NOTIFY__ \"Waiting for permission...\""
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "__CLAUDE_HOME__/hooks/notifications.sh \"Claude needs your input\""
+            "command": "__CLAUDE_NOTIFY__ \"Claude needs your input\""
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "__CLAUDE_HOME__/hooks/notifications.sh \"Compacting session...\""
+            "command": "__CLAUDE_NOTIFY__ \"Compacting session...\""
           }
         ]
       }
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "__CLAUDE_HOME__/hooks/notifications.sh \"Response complete\""
+            "command": "__CLAUDE_NOTIFY__ \"Response complete\""
           }
         ]
       }

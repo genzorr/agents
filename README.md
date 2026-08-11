@@ -36,14 +36,18 @@ claude/
   commands/*.md       # generic slash commands (dual-review, plan)
   agents/*.md         # generic subagents (code-reviewer, planner)
   rules/*.md          # generic global rules
-  hooks/              # generic Claude notification hook
-  hooks.json          # Claude hook config (merged into settings.json on install)
+  hooks/              # generic Claude notifier: notifications.sh (POSIX) + notifications.ps1 (Windows)
+  hooks.json          # Claude hook config (merged into settings.json on install; wires the host's notifier)
 shared/
   skills/<id>/...     # mechanically byte-identical Codex/Claude source content
 scripts/
   install-assets.py    # shared stdlib catalog/installer engine
-  install-claude.sh   # compatibility wrapper for the Claude engine
-  install-codex.sh    # compatibility wrapper for the Codex engine
+  install-claude.sh   # compatibility wrapper for the Claude engine (POSIX)
+  install-codex.sh    # compatibility wrapper for the Codex engine (POSIX)
+  install-claude.ps1  # native-Windows entry point for the Claude engine
+  install-codex.ps1   # native-Windows entry point for the Codex engine
+  lib/python.sh       # interpreter resolution for the POSIX wrappers (probes by execution)
+  lib/python.ps1      # interpreter resolution for the PowerShell wrappers (probes by execution)
   install-codex-permissions.py # backup-preserving named Custom profile installer/rollback
   test-codex-permissions.sh    # scratch-home profile/config parser check
   check_cross_repo_consistency.py # verifies Agents/Harness/session-harvester ownership split
@@ -93,6 +97,18 @@ CODEX_HOME="$PWD/.scratch-home/codex"  bash scripts/install-codex.sh  --dry-run 
 python3 scripts/install-codex-permissions.py --dry-run
 python3 scripts/install-codex-permissions.py
 bash scripts/test-codex-permissions.sh
+```
+
+On a **native Windows** host use the PowerShell entry points instead — the `bash` on PATH is WSL and
+reaches neither the Windows home nor `powershell.exe`. Homes are selected with `$env:CLAUDE_HOME` /
+`$env:CODEX_HOME` and default to `%USERPROFILE%\.claude` / `%USERPROFILE%\.codex`:
+
+```powershell
+$env:CLAUDE_HOME = "$PWD\.scratch-home\claude"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-claude.ps1 --dry-run --diff
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-claude.ps1
+$env:CODEX_HOME = "$PWD\.scratch-home\codex"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1 --dry-run --diff
 ```
 
 ## Safety

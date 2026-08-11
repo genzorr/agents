@@ -7,8 +7,9 @@ S-17.
 ## Boundary
 
 - This repo is the **source of truth** for generic personal/global skills, commands, subagents,
-  rules, Codex global instructions, and the Claude notification hook. Edit those here; never edit
-  the installed copies under `~/.claude` or `~/.codex` directly.
+  rules, Codex global instructions, and the Claude notification hook (POSIX and Windows notifiers,
+  one settings adapter). Edit those here; never edit the installed copies under `~/.claude` or
+  `~/.codex` directly.
 - **Source ownership follows physical presence.** This repo installs, uninstalls, and prunes **only
   the assets physically present here**. It never manages, prunes, or removes assets owned by
   `repos/harness`, `repos/session-harvester`, or any foreign/unknown installed skill.

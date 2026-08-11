@@ -601,9 +601,11 @@
       "kind": "hook",
       "platforms": ["claude"],
       "owner": "agents",
+      "$comment": "The one Claude settings-hooks adapter. Both notifier scripts are materialized on every host; the installer wires exactly one of them into settings.json, chosen by the host OS (`posix-script` on POSIX, `windows-script` on native Windows), because a POSIX invocation cannot run on Windows and vice versa.",
       "source": {
         "claude": [
-          {"path": "claude/hooks/notifications.sh", "target": "hooks/notifications.sh"},
+          {"path": "claude/hooks/notifications.sh", "target": "hooks/notifications.sh", "role": "posix-script"},
+          {"path": "claude/hooks/notifications.ps1", "target": "hooks/notifications.ps1", "role": "windows-script"},
           {"path": "claude/hooks.json", "target": null, "role": "settings-hooks"}
         ]
       },

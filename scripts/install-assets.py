@@ -14,15 +14,39 @@ import shlex
 import stat
 import tempfile
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
-from agent_catalog import Asset, CatalogError, DesiredFile, SourceLayer, desired_files, load_catalog, validate_asset_target, validate_catalog
+from agent_catalog import (
+    ADAPTER_POSIX_SCRIPT_ROLE,
+    ADAPTER_WINDOWS_SCRIPT_ROLE,
+    NOTIFIER_SUFFIXES,
+    Asset,
+    CatalogError,
+    DesiredFile,
+    SourceLayer,
+    desired_files,
+    load_catalog,
+    notifier_twin,
+    settings_hook_layers,
+    validate_asset_identity,
+    validate_asset_target,
+    validate_catalog,
+)
 
 STATE_FILE = ".agents-install-state.json"
 LEGACY_DOC_MANIFEST = ".agents-doc-manifest"
 STATE_SCHEMA_VERSION = 2
 ADAPTER_KIND = "claude_settings_hooks"
+HOST_IS_WINDOWS = os.name == "nt"
+WINDOWS_SCRIPT_SUFFIX = NOTIFIER_SUFFIXES[ADAPTER_WINDOWS_SCRIPT_ROLE]
+# The one fragment token: hook commands need the host-selected notifier invocation,
+# and nothing in a fragment needs the bare home.
+NOTIFIER_TOKEN = "__CLAUDE_NOTIFY__"
+# Hook commands are executed by whatever shell Claude Code uses for the platform, so the
+# script path is double-quoted: cmd.exe and POSIX shells both pass a double-quoted Windows
+# path through unchanged, while a single-quoted or bare one survives only in one of them.
+POWERSHELL_PREFIX = "powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File"
 STATE_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 STATE_MODE_RE = re.compile(r"^[0-7]{4}$")
 SHELL_CONTROL_RE = re.compile(r"[;&|<>`$\\\\\r\n]")
@@ -114,20 +138,63 @@ def _validate_file_record(platform: str, target: str, record: object, desired: d
             raise CatalogError(f"invalid state record for {target}: asset identity does not match catalog")
 
 
-def is_supported_hook_command(command: str, script_path: str) -> bool:
+def migrate_notifier_record_identity(home: Path, target: str, record: dict[str, Any], desired: dict[str, DesiredFile]) -> None:
+    """Adopt the current catalog identity for a notifier recorded under an older asset id.
+
+    Moving a notifier script between catalog entries leaves an otherwise valid record
+    whose asset id no longer matches the entry that now owns the target, and the
+    identity check rejects it before install, prune, or uninstall can reconcile the
+    file. Only the settings-hooks adapter's own notifier targets migrate, and only
+    when ownership is provable: the recorded baseline must equal the installed file or
+    the current source byte for byte, so forged and unrelated records still fail closed.
+    """
+    item = desired.get(target)
+    if item is None or record.get("kind") != "hook" or item.asset.kind != "hook":
+        return
+    if item.asset.handling.get("claude") != ADAPTER_KIND or record.get("owner") != "agents":
+        return
+    recorded_id = record.get("asset_id")
+    if recorded_id == item.asset.id or record.get("baseline_known") is not True:
+        return
+    try:
+        validate_asset_identity(recorded_id, f"state record {target}")
+        scripts, _fragment = settings_hook_layers(item.asset)
+        recorded = state_signature(record)
+    except ValueError:
+        return
+    if target not in scripts.values():
+        return
+    destination = home / PurePosixPath(target)
+    installed_baseline = not destination.is_symlink() and destination.is_file() and file_signature(destination) == recorded
+    if not installed_baseline and file_signature(item.source) != recorded:
+        return
+    record["asset_id"] = item.asset.id
+
+
+def is_supported_hook_command(command: str, invocation: str) -> bool:
     """Accept only the documented direct hook invocation form."""
-    if command == script_path:
+    if command == invocation:
         return True
-    prefix = script_path + ' "'
+    prefix = invocation + ' "'
     if not command.startswith(prefix) or not command.endswith('"'):
         return False
     argument = command[len(prefix) : -1]
     return bool(argument) and '"' not in argument and SHELL_CONTROL_RE.search(argument) is None
 
 
-def rendered_hook_script_path(home: Path, script_target: str) -> str:
+def notifier_invocation(home: Path, script_target: str) -> str:
+    """Return the command prefix that runs one installed notifier script.
+
+    The form follows the recorded script target, not the current host, so a home
+    installed on one platform stays reconcilable from the other.
+    """
     validate_home_target(home, script_target, reject_leaf_symlink=True)
-    return f"{shlex.quote(str(home))}/{script_target}"
+    if not script_target.endswith(WINDOWS_SCRIPT_SUFFIX):
+        return f"{shlex.quote(str(home))}/{script_target}"
+    script = str(PureWindowsPath(home, *PurePosixPath(script_target).parts))
+    if '"' in script:
+        raise CatalogError(f"selected home cannot be quoted for a PowerShell hook: {home}")
+    return f'{POWERSHELL_PREFIX} "{script}"'
 
 
 def hook_leaves(value: Any, path: tuple[str | int, ...] = ()) -> list[dict[str, Any]]:
@@ -162,7 +229,7 @@ def leaf_at(value: Any, path: list[object]) -> Any:
     return current
 
 
-def validate_managed_leaves(asset_id: str, leaves: object, script_path: str) -> list[dict[str, Any]]:
+def validate_managed_leaves(asset_id: str, leaves: object, invocation: str) -> list[dict[str, Any]]:
     if not isinstance(leaves, list):
         raise CatalogError(f"invalid adapter state for {asset_id}: managed_leaves must be a list")
     normalized: list[dict[str, Any]] = []
@@ -175,7 +242,7 @@ def validate_managed_leaves(asset_id: str, leaves: object, script_path: str) -> 
             raise CatalogError(f"invalid adapter state for {asset_id}: managed_leaves path is invalid")
         leaf = identity["leaf"]
         command = leaf.get("command")
-        if not isinstance(command, str) or not is_supported_hook_command(command, script_path):
+        if not isinstance(command, str) or not is_supported_hook_command(command, invocation):
             raise CatalogError(f"invalid adapter state for {asset_id}: managed_leaves must contain supported hook invocations")
         key = leaf_identity(identity)
         if key in seen:
@@ -229,6 +296,19 @@ def adoptable_desired_leaves(current: Any, desired: Any) -> tuple[list[dict[str,
     return adopted, None
 
 
+def adapter_script_targets(record: dict[str, Any]) -> list[str]:
+    """Return the notifier scripts one adapter record may own, wired one first.
+
+    Authority is the recorded wired target plus the twin derived from its name, never
+    a list the state file supplies: installed state must not be able to nominate an
+    extra file for removal. Both notifiers stay reconcilable after the adapter is
+    replaced, and a home installed on one host stays reconcilable from the other.
+    """
+    wired = record["script_target"]
+    twin = notifier_twin(wired) if isinstance(wired, str) else None
+    return [wired] if twin is None else [wired, twin]
+
+
 def _validate_adapter_record(home: Path, asset_id: str, record: object) -> None:
     if not isinstance(record, dict):
         raise CatalogError(f"invalid adapter state for {asset_id}")
@@ -237,9 +317,9 @@ def _validate_adapter_record(home: Path, asset_id: str, record: object) -> None:
         raise CatalogError(f"invalid adapter state for {asset_id}: missing required field")
     if record["owner"] != "agents" or record["asset_id"] != asset_id or record["kind"] != ADAPTER_KIND or record["platform"] != "claude" or record["target"] != "settings.json":
         raise CatalogError(f"invalid adapter state for {asset_id}: foreign or inconsistent identity")
-    script_target = record["script_target"]
-    validate_asset_target("claude", asset_id, "hook", script_target, f"adapter state {asset_id}")
-    validate_managed_leaves(asset_id, record["managed_leaves"], rendered_hook_script_path(home, script_target))
+    for script_target in adapter_script_targets(record):
+        validate_asset_target("claude", asset_id, "hook", script_target, f"adapter state {asset_id}")
+    validate_managed_leaves(asset_id, record["managed_leaves"], notifier_invocation(home, record["script_target"]))
 
 
 def load_state(
@@ -272,6 +352,8 @@ def load_state(
         if not isinstance(target, str) or not target or "\\" in target or Path(target).is_absolute() or ".." in PurePosixPath(target).parts or not isinstance(record, dict):
             raise CatalogError(f"invalid state entry: {target!r}")
         validate_home_target(home, target)
+        if desired is not None:
+            migrate_notifier_record_identity(home, target, record, desired)
         try:
             _validate_file_record(platform, target, record, desired)
         except (TypeError, ValueError) as exc:
@@ -283,7 +365,7 @@ def load_state(
                 and target in expected_targets[record["asset_id"]]
             )
             adapter = data["adapters"].get(record["asset_id"])
-            history_match = isinstance(adapter, dict) and adapter.get("script_target") == target
+            history_match = isinstance(adapter, dict) and target in adapter_script_targets(adapter)
             if not catalog_match and not history_match:
                 raise CatalogError(f"invalid state record for {target}: hook target is not bound to catalog or adapter history")
     return data, True
@@ -338,17 +420,18 @@ def source_text(layer: SourceLayer, repo: Path) -> str:
     return (repo / layer.path).read_text(encoding="utf-8")
 
 
-def hook_asset(assets: tuple[Asset, ...], platform: str) -> tuple[Asset, SourceLayer, SourceLayer] | None:
+def hook_asset(assets: tuple[Asset, ...], platform: str) -> tuple[Asset, dict[str, str], SourceLayer] | None:
     for asset in assets:
-        if asset.handling.get(platform) != "claude_settings_hooks":
+        if asset.handling.get(platform) != ADAPTER_KIND:
             continue
-        layers = asset.sources[platform]
-        script = next((layer for layer in layers if layer.target is not None), None)
-        fragment = next((layer for layer in layers if layer.target is None and layer.role == "settings-hooks"), None)
-        if script is None or fragment is None:
-            raise CatalogError(f"{asset.id} ({platform}): settings hook adapter needs script and fragment layers")
-        return asset, script, fragment
+        scripts, fragment = settings_hook_layers(asset)
+        return asset, scripts, fragment
     return None
+
+
+def host_script_target(scripts: dict[str, str]) -> str:
+    """Return the notifier target this host can actually execute."""
+    return scripts[ADAPTER_WINDOWS_SCRIPT_ROLE if HOST_IS_WINDOWS else ADAPTER_POSIX_SCRIPT_ROLE]
 
 
 def merge_hook_values(existing: Any, desired: Any) -> Any:
@@ -373,12 +456,38 @@ def merge_hook_values(existing: Any, desired: Any) -> Any:
     raise CatalogError("unresolved settings.json hook adapter: incompatible nonempty hook types")
 
 
-def rendered_hook_fragment(repo: Path, layer: SourceLayer, home: Path) -> dict[str, Any]:
-    text = source_text(layer, repo).replace("__CLAUDE_HOME__", shlex.quote(str(home)))
+def json_string_body(value: str) -> str:
+    """Escape a rendered value for substitution inside a JSON string literal.
+
+    The token is substituted before parsing, so the value must survive as JSON text and
+    not merely as a shell word. A Windows path is backslash-separated and would
+    otherwise inject invalid \\escape sequences; the same hazard exists on POSIX for
+    any home containing a backslash or a double quote.
+    """
+    return json.dumps(value)[1:-1]
+
+
+def rendered_hook_fragment(repo: Path, layer: SourceLayer, home: Path, invocation: str) -> dict[str, Any]:
+    text = source_text(layer, repo).replace(NOTIFIER_TOKEN, json_string_body(invocation))
     value = json.loads(text)
     if not isinstance(value, dict) or not isinstance(value.get("hooks"), (dict, list)):
         raise CatalogError("Claude hook fragment must contain a hooks object or array")
     return value
+
+
+def supported_fragment_hooks(repo: Path, layer: SourceLayer, home: Path, invocation: str, script_target: str) -> Any:
+    """Return the fragment's desired hooks, refusing commands state cannot re-validate.
+
+    Every recorded leaf has to re-validate against the notifier invocation on the next
+    run, so a fragment whose commands the loader would later reject is refused before
+    it is merged rather than after it is written.
+    """
+    desired = rendered_hook_fragment(repo, layer, home, invocation)["hooks"]
+    for identity in hook_leaves(desired):
+        command = identity["leaf"]["command"]
+        if not is_supported_hook_command(command, invocation):
+            raise CatalogError(f"fragment command does not invoke {script_target}: {command}")
+    return desired
 
 
 def creation_mode() -> int:
@@ -407,30 +516,46 @@ def plan_claude_hooks(
         for asset_id, record in state.get("adapters", {}).items()
         if isinstance(record, dict) and record.get("kind") == ADAPTER_KIND and record.get("target") == "settings.json"
     }
-    if configured is not None:
-        asset, script, fragment = configured
-        asset_id = asset.id
-        script_target = script.target
-        if script_target is None:
-            raise CatalogError(f"{asset_id}: settings hook adapter has no script target")
-        desired_hooks = rendered_hook_fragment(repo, fragment, home)["hooks"]
-    else:
-        asset_id = None
-        script_target = None
-        desired_hooks = None
-
     if configured is None and not histories:
         return None, None, {}
     if uninstall and not histories:
         return None, None, {}
-    if not configured and not (prune or uninstall):
+    if configured is None and not (prune or uninstall):
         return None, None, {}
+
+    asset_id: str | None = None
+    script_target: str | None = None
+    desired_hooks: Any = None
+    fragment_error: str | None = None
+    if configured is not None:
+        asset, scripts, fragment = configured
+        asset_id = asset.id
+        if not uninstall:
+            # Only the host-executable notifier is wired into settings.json; the other
+            # script is still materialized, so switching platforms needs no reinstall.
+            # Uninstall needs neither: it reconciles from the recorded target.
+            script_target = host_script_target(scripts)
+            invocation = notifier_invocation(home, script_target)
+            try:
+                desired_hooks = supported_fragment_hooks(repo, fragment, home, invocation, script_target)
+            except (ValueError, OSError) as exc:
+                # The fragment gates only the merge. Uninstall never reads it, and prune
+                # still retires recorded history that no current fragment can claim.
+                fragment_error = f"unresolved settings.json hook adapter: {exc}"
+                if not prune:
+                    return None, fragment_error, {}
+
+    merge = configured is not None and not uninstall and fragment_error is None
     active_histories = histories if (prune or uninstall) else ({asset_id: histories[asset_id]} if asset_id in histories else {})
+    if fragment_error is not None:
+        active_histories = {history_id: record for history_id, record in active_histories.items() if history_id != asset_id}
+        if not active_histories:
+            return None, fragment_error, {}
 
     destination = validate_home_target(home, "settings.json", reject_leaf_symlink=True)
     if not destination.exists():
         if uninstall:
-            return None, None, {history_id: None for history_id in active_histories}
+            return None, fragment_error, {history_id: None for history_id in active_histories}
         settings: dict[str, Any] = {}
         before = ""
     else:
@@ -448,9 +573,9 @@ def plan_claude_hooks(
     cleaned_hooks, matched = remove_managed_leaves(current_hooks, historical_leaves)
     if not matched:
         return None, "unresolved settings.json hook adapter: recorded hook leaves were modified or moved; preserved", {}
-    if uninstall or (prune and configured is None):
+    if not merge:
         if "hooks" not in settings:
-            return None, None, {history_id: None for history_id in active_histories}
+            return None, fragment_error, {history_id: None for history_id in active_histories}
         updated_hooks = cleaned_hooks
         updated = dict(settings)
         if updated_hooks is None:
@@ -460,8 +585,7 @@ def plan_claude_hooks(
         description = "remove Agents hooks from settings.json"
         history_updates = {history_id: None for history_id in active_histories}
     else:
-        if configured is None or asset_id is None or script_target is None or desired_hooks is None:
-            return None, "unresolved Claude hook adapter: catalog history has no current fragment", {}
+        # merge implies a configured adapter: every other combination returned above.
         adopted_leaves: list[dict[str, Any]] = []
         if asset_id not in histories:
             adopted_leaves, adoption_error = adoptable_desired_leaves(cleaned_hooks, desired_hooks)
@@ -485,9 +609,9 @@ def plan_claude_hooks(
         }
     after = pretty_json(updated)
     if before == after:
-        return None, None, history_updates
+        return None, fragment_error, history_updates
     mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else creation_mode()
-    return AdapterAction(description, destination, "settings.json", before, after, mode), None, history_updates
+    return AdapterAction(description, destination, "settings.json", before, after, mode), fragment_error, history_updates
 
 
 def display_diff(target: str, before: str, after: str) -> None:
@@ -577,13 +701,11 @@ def retain_hook_files_on_adapter_error(
     targets: set[str] = set()
     configured = hook_asset(assets, "claude")
     if configured is not None:
-        _asset, script, _fragment = configured
-        targets.add(script.target)
-    targets.update(
-        record["script_target"]
-        for record in state.get("adapters", {}).values()
-        if isinstance(record, dict) and isinstance(record.get("script_target"), str)
-    )
+        _asset, scripts, _fragment = configured
+        targets.update(scripts.values())
+    for record in state.get("adapters", {}).values():
+        if isinstance(record, dict) and isinstance(record.get("script_target"), str):
+            targets.update(adapter_script_targets(record))
     for target in targets:
         if not any(action.target == target and action.kind == "remove" for action in actions):
             continue
@@ -601,7 +723,7 @@ def apply_adapter_updates(next_state: dict[str, Any], adapter_updates: dict[str,
             next_state["adapters"][asset_id] = record
             continue
         existing = next_state["adapters"].get(asset_id)
-        if isinstance(existing, dict) and existing.get("script_target") in next_state["files"]:
+        if isinstance(existing, dict) and any(target in next_state["files"] for target in adapter_script_targets(existing)):
             existing["managed_leaves"] = []
             continue
         next_state["adapters"].pop(asset_id, None)

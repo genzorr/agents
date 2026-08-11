@@ -34,6 +34,14 @@ PLATFORMS = ("codex", "claude")
 BOUNDARY_EXACT_IDS = {"harvest-sessions", "codex-primary-runtime"}
 BOUNDARY_PREFIX = "harness-"
 KNOWN_HANDLING = {"codex_global_instructions", "claude_settings_hooks"}
+ASSET_KEYS = {"$comment", "id", "kind", "platforms", "owner", "source", "install_target", "handling", "tags"}
+SOURCE_LAYER_KEYS = {"path", "target", "role"}
+ADAPTER_FRAGMENT_ROLE = "settings-hooks"
+ADAPTER_POSIX_SCRIPT_ROLE = "posix-script"
+ADAPTER_WINDOWS_SCRIPT_ROLE = "windows-script"
+ADAPTER_SCRIPT_ROLES = (ADAPTER_POSIX_SCRIPT_ROLE, ADAPTER_WINDOWS_SCRIPT_ROLE)
+ADAPTER_ROLES = (*ADAPTER_SCRIPT_ROLES, ADAPTER_FRAGMENT_ROLE)
+NOTIFIER_SUFFIXES = {ADAPTER_POSIX_SCRIPT_ROLE: ".sh", ADAPTER_WINDOWS_SCRIPT_ROLE: ".ps1"}
 VALID_KINDS = set(SECTION_KINDS.values())
 RESERVED_ASSET_IDS = {"harvest-sessions", "codex-primary-runtime"}
 RESERVED_TARGET_ROOTS = {"skills/codex-primary-runtime", "skills/harvest-sessions"}
@@ -159,9 +167,14 @@ def _source_layers(entry: dict, platform: str) -> tuple[SourceLayer, ...]:
             continue
         if not isinstance(layer, dict):
             raise CatalogError(f"{entry.get('id', '<unknown>')} ({platform}) source layer {index}: expected object")
+        unknown = sorted(set(layer) - SOURCE_LAYER_KEYS)
+        if unknown:
+            raise CatalogError(f"{entry.get('id', '<unknown>')} ({platform}) source layer {index}: unsupported key(s) {', '.join(unknown)}")
         path = layer.get("path")
         target = layer.get("target", entry["install_target"][platform])
         role = layer.get("role")
+        if role is not None and not isinstance(role, str):
+            raise CatalogError(f"{entry.get('id', '<unknown>')} ({platform}) source layer {index}: role must be a string")
         if target is not None and not isinstance(target, str):
             raise CatalogError(f"{entry.get('id', '<unknown>')} ({platform}) source layer {index}: target must be string or null")
         if target is None and not isinstance(role, str):
@@ -173,6 +186,11 @@ def _source_layers(entry: dict, platform: str) -> tuple[SourceLayer, ...]:
 def _parse_asset(section: str, entry: object) -> Asset:
     if not isinstance(entry, dict):
         raise CatalogError(f"{section}: every entry must be an object")
+    # Unsupported keys are rejected rather than ignored: silently tolerated metadata
+    # reads as a behavior contract the loader never honors. Prose belongs in `$comment`.
+    unknown = sorted(set(entry) - ASSET_KEYS)
+    if unknown:
+        raise CatalogError(f"{section}/{entry.get('id', '<unknown>')}: unsupported key(s) {', '.join(unknown)}")
     asset_id = entry.get("id")
     kind = entry.get("kind")
     if not isinstance(asset_id, str) or not asset_id:
@@ -212,7 +230,7 @@ def _parse_asset(section: str, entry: object) -> Asset:
         for index, layer in enumerate(sources[platform]):
             if layer.target is not None:
                 validate_asset_target(platform, asset_id, kind, layer.target, f"{section}/{asset_id} {platform} layer {index}")
-            elif not (kind == "hook" and platform == "claude" and handling.get(platform) == "claude_settings_hooks" and layer.role == "settings-hooks"):
+            elif not (kind == "hook" and platform == "claude" and handling.get(platform) == "claude_settings_hooks" and layer.role == ADAPTER_FRAGMENT_ROLE):
                 raise CatalogError(f"{section}/{asset_id} {platform} layer {index}: unconsumed target-null layer")
     return Asset(asset_id, kind, platforms, owner, sources, install_targets, handling, tuple(tags))
 
@@ -274,6 +292,45 @@ def _catalog_assets(raw: dict) -> list[Asset]:
     return assets
 
 
+def notifier_twin(script_target: str) -> str | None:
+    """Return the other host's notifier for one notifier target, or None.
+
+    The pair is derived from the target name rather than read from installed state,
+    so a home cannot nominate an extra file as adapter-owned. `settings_hook_layers`
+    enforces the naming this derivation relies on.
+    """
+    for suffix in NOTIFIER_SUFFIXES.values():
+        if script_target.endswith(suffix):
+            other = next(value for value in NOTIFIER_SUFFIXES.values() if value != suffix)
+            return script_target[: -len(suffix)] + other
+    return None
+
+
+def settings_hook_layers(asset: Asset) -> tuple[dict[str, str], SourceLayer]:
+    """Return the adapter's role-keyed notifier targets and its settings fragment."""
+    layers = asset.sources["claude"]
+    scripts = {
+        layer.role: layer.target
+        for layer in layers
+        if layer.role in ADAPTER_SCRIPT_ROLES and isinstance(layer.target, str)
+    }
+    fragments = [layer for layer in layers if layer.role == ADAPTER_FRAGMENT_ROLE and layer.target is None]
+    if len(layers) != len(ADAPTER_ROLES) or len(scripts) != len(ADAPTER_SCRIPT_ROLES) or len(fragments) != 1:
+        raise CatalogError(
+            f"{asset.id}: Claude settings hook adapter needs exactly one script and one settings-hooks fragment "
+            f"per host platform (roles: {', '.join(ADAPTER_ROLES)})"
+        )
+    posix_target = scripts[ADAPTER_POSIX_SCRIPT_ROLE]
+    if not posix_target.endswith(NOTIFIER_SUFFIXES[ADAPTER_POSIX_SCRIPT_ROLE]) or notifier_twin(posix_target) != scripts[ADAPTER_WINDOWS_SCRIPT_ROLE]:
+        # The installer derives a replaced adapter's historical ownership from this
+        # naming, so unpaired notifier targets would strand a home's hook files.
+        raise CatalogError(
+            f"{asset.id}: Claude settings hook adapter notifiers must be `<name>{NOTIFIER_SUFFIXES[ADAPTER_POSIX_SCRIPT_ROLE]}`"
+            f" and `<name>{NOTIFIER_SUFFIXES[ADAPTER_WINDOWS_SCRIPT_ROLE]}` twins"
+        )
+    return scripts, fragments[0]
+
+
 def _validate_adapter_cardinality(assets: list[Asset]) -> None:
     adapters = [asset for asset in assets if asset.handling.get("claude") == "claude_settings_hooks"]
     if len(adapters) > 1:
@@ -283,11 +340,7 @@ def _validate_adapter_cardinality(assets: list[Asset]) -> None:
     adapter = adapters[0]
     if adapter.kind != "hook" or adapter.platforms != ("claude",):
         raise CatalogError(f"{adapter.id}: Claude settings hook adapter must be a Claude hook")
-    layers = adapter.sources["claude"]
-    scripts = [layer for layer in layers if layer.target is not None]
-    fragments = [layer for layer in layers if layer.target is None and layer.role == "settings-hooks"]
-    if len(scripts) != 1 or len(fragments) != 1 or len(layers) != 2:
-        raise CatalogError(f"{adapter.id}: Claude settings hook adapter needs exactly one script and one settings-hooks fragment")
+    settings_hook_layers(adapter)
 
 
 def _validate_source_collisions(repo: Path, assets: list[Asset]) -> None:
@@ -312,21 +365,24 @@ def _covered_by_source(path: str, source_paths: set[str]) -> bool:
 
 
 def _physical_asset_paths(repo: Path) -> set[str]:
+    # as_posix(), not str(): these are compared against catalog source paths, which are
+    # always forward-slashed. A native separator would miss every entry on Windows and
+    # report the whole tree as uncatalogued.
     paths: set[str] = set()
     for platform in (*PLATFORMS, "shared"):
         skills = repo / platform / "skills"
         if skills.is_dir():
-            paths.update(str(path.relative_to(repo)) for path in skills.rglob("*") if path.is_file())
+            paths.update(path.relative_to(repo).as_posix() for path in skills.rglob("*") if path.is_file())
     for category in ("commands", "agents", "rules"):
         root = repo / "claude" / category
         if root.is_dir():
-            paths.update(str(path.relative_to(repo)) for path in root.iterdir() if path.is_file() and path.suffix == ".md")
+            paths.update(path.relative_to(repo).as_posix() for path in root.iterdir() if path.is_file() and path.suffix == ".md")
     for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "hooks.json"):
         if path.is_file():
-            paths.add(str(path.relative_to(repo)))
+            paths.add(path.relative_to(repo).as_posix())
     hook_root = repo / "claude" / "hooks"
     if hook_root.is_dir():
-        paths.update(str(path.relative_to(repo)) for path in sorted(hook_root.rglob("*")) if path.is_file())
+        paths.update(path.relative_to(repo).as_posix() for path in sorted(hook_root.rglob("*")) if path.is_file())
     return paths
 
 

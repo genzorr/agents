@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "owner": "agents",
+  "platform": "claude",
+  "files": {
+    "hooks/notifications.ps1": {
+      "owner": "agents",
+      "asset_id": "claude-notifications-windows",
+      "kind": "hook",
+      "sha256": "28d3b9e880a77975493dc7e359144c0295a4f694cfe0af4f928c22307bc5c320",
+      "mode": "0644",
+      "baseline_known": true
+    },
+    "hooks/notifications.sh": {
+      "owner": "agents",
+      "asset_id": "claude-notifications",
+      "kind": "hook",
+      "sha256": "88774f0462af55e5e164f81b385fb391dd7fa6e8ebd385429ac3adbb8b8efddc",
+      "mode": "0755",
+      "baseline_known": true
+    }
+  },
+  "adapters": {
+    "claude-notifications": {
+      "owner": "agents",
+      "asset_id": "claude-notifications",
+      "kind": "claude_settings_hooks",
+      "platform": "claude",
+      "target": "settings.json",
+      "script_target": "hooks/notifications.sh",
+      "managed_leaves": [
+        {
+          "path": [
+            "Notification",
+            0,
+            "hooks",
+            0
+          ],
+          "leaf": {
+            "type": "command",
+            "command": "__CLAUDE_HOME__/hooks/notifications.sh"
+          }
+        }
+      ]
+    }
+  }
+}
