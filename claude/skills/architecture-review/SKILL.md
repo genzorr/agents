@@ -33,7 +33,8 @@ Use these terms consistently in findings.
 2. Read relevant docs, findings, ADRs, glossary/context docs, and tests. Respect existing decisions unless there is concrete friction.
 3. Trace callers, data flow, configuration, side effects, and verification seams. Use Grep/Glob first; avoid broad rewrites.
 4. When the target area changes integration topology, a shared substrate, cross-component coordination, or failure containment, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local refactors.
-5. Look for signals:
+5. When the reviewed change adds an entrypoint or touches durable behavior reachable from two or more entrypoints, open `docs/multi-entrypoint-capability-review.md` and apply its ownership, bypass, effect, and proof checks. Skip it when work stays behind one existing interface, entrypoints share only a product-free primitive, or the project already has one proven behavior path and the new work does not change it.
+6. Look for signals:
    - callers must understand too much implementation detail;
    - one behavior is scattered across many files;
    - tests need private helpers, mocks of internals, or duplicated setup;
@@ -41,14 +42,14 @@ Use these terms consistently in findings.
    - a wrapper adds vocabulary but no leverage;
    - a seam has only one real adapter;
    - adding the next feature would require editing many callers.
-6. Classify dependency shape for each candidate:
+7. Classify dependency shape for each candidate:
    - **In-process**: pure computation or in-memory state. Deepen and test through the new interface.
    - **Local-substitutable**: local test stand-ins exist, such as temp files or in-memory stores. Keep the seam internal and test with the stand-in.
    - **Remote but owned**: define a port at the seam, with production and in-memory adapters.
    - **True external**: inject a port for the third-party dependency and use a mock/test adapter.
-7. Keep only candidates with concrete friction and a change that earns its abstraction under the principles above. It is valid to return no candidates; do not fill a quota.
-8. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
-9. Stop for selection. Route one user-selected candidate at a time to `/grill-with-docs` to resolve its seam and acceptance contract before implementation; do not develop implementation detail for or schedule unselected candidates.
+8. Keep only candidates with concrete friction and a change that earns its abstraction under the principles above. It is valid to return no candidates; do not fill a quota.
+9. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
+10. Stop for selection. Route one user-selected candidate at a time to `/grill-with-docs` to resolve its seam and acceptance contract before implementation; do not develop implementation detail for or schedule unselected candidates.
 
 ## Output
 

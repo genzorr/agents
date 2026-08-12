@@ -24,6 +24,8 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             self.assertIn("bounded failure", text)
             self.assertIn("blast radius", text)
             self.assertIn("local component correctness is not sufficient", text)
+            self.assertIn("first find and reuse the existing path for its durable behavior", text)
+            self.assertIn("do not implement a parallel copy in the nearest adapter", text)
 
         for text in (codex, surgical):
             self.assertIn("small diff", text.lower())
@@ -200,6 +202,36 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 "without elaborating or scheduling them",
             ):
                 self.assertIn(behavior, text, f"{platform}: {behavior}")
+
+    def test_architecture_review_conditionally_applies_multi_entrypoint_capability_lens(self) -> None:
+        reference = self.read("docs/multi-entrypoint-capability-review.md")
+        for behavior in (
+            "two or more entrypoints reach the same durable behavior",
+            "Skip it when the change stays behind one existing interface",
+            "Map responsibilities onto the project's current names",
+            "Map every entrypoint and bypass",
+            "transaction or commit boundary and its owner",
+            "duplicate intentionally when owners or reasons to change differ",
+            "capture it durably in project documentation or through `harness-record` before implementing",
+            "keep the seam internal rather than introducing a port for testing alone",
+            "no capability-boundary delta",
+            "Do not prescribe `app/`, `capabilities/`, `domain/`, `contracts/`, `platform/`, or `shared/` directories",
+            "Do not create a new architecture or capability-contract skill",
+        ):
+            self.assertIn(behavior, reference)
+
+        for platform in ("codex", "claude"):
+            text = self.read_skill(platform, "architecture-review")
+            reference_paragraphs = [
+                paragraph
+                for paragraph in text.split("\n\n")
+                if "docs/multi-entrypoint-capability-review.md" in paragraph
+            ]
+            self.assertEqual(len(reference_paragraphs), 1)
+            self.assertIn("When the reviewed change adds an entrypoint or touches durable behavior reachable from two or more entrypoints", reference_paragraphs[0])
+            self.assertIn("Skip it when work stays behind one existing interface, entrypoints share only a product-free primitive, or the project already has one proven behavior path and the new work does not change it.", reference_paragraphs[0])
+            self.assertFalse((REPO_ROOT / platform / "skills" / "capability-core-adapters").exists())
+            self.assertFalse((REPO_ROOT / platform / "skills" / "capability-contract").exists())
 
     def test_grill_with_docs_routes_unknowns_to_evidence_without_forcing_a_choice(self) -> None:
         for platform in ("codex", "claude"):
