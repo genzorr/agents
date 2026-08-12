@@ -32,13 +32,14 @@ horizontal, mis-ordered, or stale). When the target is an existing slice/task-se
      ownership, data contract, migration/rollback path, or verification strategy.
    - **Infer + verify** — a question whose likely answer follows from code, docs, project
      vocabulary, prior task notes, or a low-risk conservative default.
+   - **Needs evidence** — a sharp decision that conversation and repository evidence cannot settle, such as UI feel, interaction behavior, or uncertain runtime behavior. Identify the cheapest reliable discriminator instead of asking the user to speculate.
    - **Fog** — an area that is probably relevant later but cannot be phrased sharply until another
      decision lands. Do not pre-split fog into fake questions.
-5. Ask the single most important **Ask now** question. Include your recommended answer, why it
+5. If a material branch **Needs evidence**, name what is missing and route it to `prototype` for experiential feedback, `research-prompt` for external facts, or `design-experiment` for an empirical comparison. Record it as an open question or stop gate, stop pursuing that branch, and resume it only after the evidence exists.
+6. Ask the single most important **Ask now** question. Include your recommended answer, why it
    matters, and any immediately relevant inferred defaults the user can correct.
-6. After each answer, update and re-rank the pool. Promote fog only when it becomes a sharp
-   question; demote questions whose answers are now inferable.
-7. When no remaining **Ask now** question would materially change the work, stop grilling and emit
+7. After each answer, update and re-rank the pool. Treat "I don't know" as valid information: route an empirically answerable question through **Needs evidence**, or preserve a user-owned choice as an explicit stop gate instead of manufacturing certainty. Promote fog only when it becomes a sharp question; demote questions whose answers are now inferable.
+8. When no remaining **Ask now** question or unrouted **Needs evidence** item would materially change the work, stop grilling and emit
    the **Decision Summary** (see below),
    then recommend the durable capture path it identifies — a glossary/context update, an ADR
    for a durable tradeoff, an update to an existing harness task, or new task(s)/a slice for
@@ -67,7 +68,7 @@ Infer instead of asking when the evidence is strong enough for a future implemen
 
 Do not infer when the answer chooses product behavior, deletes or migrates user data, changes a
 public contract, creates irreversible work, or would invalidate a plausible alternate architecture.
-Those remain **Ask now** questions.
+Those remain **Ask now** questions unless they require missing empirical or experiential evidence; classify those as **Needs evidence**.
 
 ## Output While Grilling
 
@@ -109,7 +110,7 @@ becomes structured work instead of unstructured chat. It must stand alone — th
 - <tests / seams / commands that will prove the work>
 
 ### Durable capture recommendation
-- <one of: harness-add-tasks (new tasks) · harness-add-inbox → harness-process-inbox (capture + triage) · harness-plan (file-level plan first) · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
+- <one of: harness-add-tasks (new tasks) · harness-add-inbox → harness-process-inbox (capture + triage) · harness-plan (file-level plan first) · evidence route (prototype · research-prompt · design-experiment) before capture · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
 ```
 
 Hand it off directly: the **Proposed work** + **Implied acceptance criteria** are written to
@@ -128,5 +129,6 @@ the target project's knowledge-homes guidance.
   concise inferred defaults that need verification.
 - Do not ask just to confirm a low-risk inference. Put it in **Inferred decisions to verify** and
   let the user correct it before capture.
+- Do not keep rephrasing a question that requires missing evidence or a user-owned decision.
 - Do not edit docs until the user confirms the decision or asks for capture.
 - When the plan is ready, emit the Decision Summary and recommend its capture path (`harness-add-tasks`, `harness-add-inbox` → `harness-process-inbox`, `harness-plan`, `architecture-review`, ADR, glossary update, existing-task update/rescope, or no-op). Do not create tasks automatically.

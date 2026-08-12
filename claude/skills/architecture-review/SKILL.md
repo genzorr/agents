@@ -29,7 +29,7 @@ Use these terms consistently in findings.
 
 ## Workflow
 
-1. Read the user's concern and identify the target area. If this is a harness task, read `harness snapshot`, the active task, and the parent slice.
+1. Read the user's concern, planned change, or upcoming work. If this is a harness task, also read `harness snapshot`, the active task, and the parent slice. Use those sources to scope the review. When none supplies a scope, inspect recent Git history to prioritize repeatedly changed paths; treat churn as a priority signal, not evidence of an architecture defect.
 2. Read relevant docs, findings, ADRs, glossary/context docs, and tests. Respect existing decisions unless there is concrete friction.
 3. Trace callers, data flow, configuration, side effects, and verification seams. Use Grep/Glob first; avoid broad rewrites.
 4. When the target area changes integration topology, a shared substrate, cross-component coordination, or failure containment, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local refactors.
@@ -46,7 +46,9 @@ Use these terms consistently in findings.
    - **Local-substitutable**: local test stand-ins exist, such as temp files or in-memory stores. Keep the seam internal and test with the stand-in.
    - **Remote but owned**: define a port at the seam, with production and in-memory adapters.
    - **True external**: inject a port for the third-party dependency and use a mock/test adapter.
-7. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
+7. Keep only candidates with concrete friction and a change that earns its abstraction under the principles above. It is valid to return no candidates; do not fill a quota.
+8. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
+9. Stop for selection. Route one user-selected candidate at a time to `/grill-with-docs` to resolve its seam and acceptance contract before implementation; do not develop implementation detail for or schedule unselected candidates.
 
 ## Output
 
@@ -63,8 +65,10 @@ Candidates:
    Risk: <main risk or migration concern>
    Verification: <focused checks>
 
-Recommended next step: <one action>
+Recommended next step: <select one candidate for /grill-with-docs | No action>
 ```
+
+When no candidate clears the bar, keep the `Verdict:` line, replace the candidate list with `Candidates: None — <why no candidate cleared the bar>`, and set `Recommended next step: No action`; omit candidate subfields.
 
 For large architecture reviews, offer to turn the candidates into a temp-file report and use `/archify` for requested diagram artifacts. Do not create report files unless the user asks for that artifact.
 
@@ -73,4 +77,4 @@ For large architecture reviews, offer to turn the candidates into a temp-file re
 - Do not propose a new abstraction unless it hides real complexity or matches an existing pattern.
 - Do not suggest horizontal "split by layer" work when a vertical task would be safer.
 - Do not edit code unless the user explicitly asks for implementation.
-- If the review yields concrete work, suggest creating focused harness tasks with `/harness-add-tasks`.
+- If the selected candidate's grilling yields concrete work, let `/grill-with-docs` recommend its durable capture path; do not create tasks directly. If the user wants unselected candidates retained, use `/harness-record` to capture them as inbox items without elaborating or scheduling them.

@@ -165,6 +165,54 @@ class BoundedCognitionContractsTest(unittest.TestCase):
         for platform in ("codex", "claude"):
             self.assertFalse((REPO_ROOT / platform / "skills" / "shape-of-the-system").exists())
 
+    def test_architecture_review_scopes_candidates_and_stops_for_selection(self) -> None:
+        for platform in ("codex", "claude"):
+            text = self.read_skill(platform, "architecture-review")
+            for behavior in (
+                "upcoming work",
+                "none supplies a scope",
+                "history to prioritize repeatedly changed paths",
+                "churn as a priority signal",
+                "not evidence of an architecture defect",
+                "valid to return no candidates",
+                "do not fill a quota",
+                "Stop for selection",
+                "one user-selected candidate",
+                "grill-with-docs",
+                "do not develop implementation detail for or schedule unselected candidates",
+                "When no candidate clears the bar",
+                "Candidates: None",
+                "Recommended next step: No action",
+                "selected candidate's grilling yields concrete work",
+                "do not create tasks directly",
+                "harness-record",
+                "inbox items",
+                "without elaborating or scheduling them",
+            ):
+                self.assertIn(behavior, text, f"{platform}: {behavior}")
+
+    def test_grill_with_docs_routes_unknowns_to_evidence_without_forcing_a_choice(self) -> None:
+        for platform in ("codex", "claude"):
+            text = self.read_skill(platform, "grill-with-docs")
+            for behavior in (
+                "**Needs evidence**",
+                "If a material branch",
+                "cheapest reliable discriminator",
+                "Record it as an open question or stop gate",
+                "stop pursuing that branch",
+                "resume it only after the evidence exists",
+                "prototype",
+                "research-prompt",
+                "design-experiment",
+                'Treat "I don\'t know" as valid information',
+                "preserve a user-owned choice",
+                "Do not keep rephrasing a question",
+                "unless they require missing empirical or experiential evidence",
+                "unrouted **Needs evidence** item",
+                "evidence route",
+            ):
+                self.assertIn(behavior, text, f"{platform}: {behavior}")
+
 
 if __name__ == "__main__":
     unittest.main()
