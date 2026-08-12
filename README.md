@@ -31,6 +31,7 @@ codex/
   skills/<id>/SKILL.md
 config/
   codex-permissions.toml # source-managed named Custom permission profile
+  claude-auto-mode.json  # primary-macOS Claude auto-mode record (manual, not installed)
 claude/
   skills/<id>/SKILL.md
   commands/*.md       # generic slash commands (dual-review, plan)
@@ -54,6 +55,7 @@ scripts/
   validate_catalog.py # catalog/source/target/travel/state-contract validation
   validate_skills.py  # frontmatter, portability, and catalog-backed text validation
 docs/
+  claude-auto-mode.md          # recorded Claude auto-mode config: decision, manual apply contract, drift check
   context-file-authoring.md       # craft rubric for CLAUDE.md / AGENTS.md / rules (always-on layer)
   destructive-command-guard.md # external cross-agent command guard decision and setup
   model-and-effort.md             # choosing model/effort for subagents, workflows, delegated jobs
@@ -113,8 +115,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps
 
 ## Safety
 
-- **Install targets (`~/.codex`, `~/.claude`) are outputs, never hand-edited.** Edit source here,
-  then run the install script.
+- **Installer-owned targets under `~/.codex` and `~/.claude` are outputs, never hand-edited.** Edit their source here, then run the owning install script. The record-only Claude auto-mode config is an explicit operator-managed exception; follow `docs/claude-auto-mode.md` and preserve unrelated settings.
 - Mutating commands run against scratch homes by default in verification. **Live global
   install/update/prune requires explicit operator approval.**
 - Install is copy-based and idempotent; `--prune`/`--uninstall` only remove assets this repo owns.
