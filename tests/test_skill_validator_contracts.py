@@ -31,6 +31,10 @@ def write_skill(repo: Path, platform: str, name: str, body: str = "") -> None:
 
 
 class SkillValidatorContractsTest(unittest.TestCase):
+    def test_production_catalog_validates(self) -> None:
+        errors, _warnings = validate_catalog(REPO_ROOT)
+        self.assertEqual(errors, [])
+
     def test_file_valued_skill_source_user_home_dependency_fails_validation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
@@ -89,6 +93,102 @@ class SkillValidatorContractsTest(unittest.TestCase):
         for target, codex_desired in shared_targets.items():
             self.assertIn(target, claude_files)
             self.assertEqual(codex_desired.source, claude_files[target].source)
+
+    def test_all_managed_skills_materialize_their_runtime_doc_reference_closure(self) -> None:
+        assets = load_catalog(REPO_ROOT)
+        for platform in ("codex", "claude"):
+            installed = desired_files(REPO_ROOT, assets, platform)
+            for asset in assets:
+                if asset.kind != "skill" or platform not in asset.platforms:
+                    continue
+                skill = asset.id
+                skill_root = f"skills/{skill}"
+                owned = [item for item in installed.values() if item.asset.id == skill]
+                self.assertTrue(owned, f"{platform}/{skill}: no desired files")
+                for item in owned:
+                    text = item.source.read_text(encoding="utf-8", errors="ignore")
+                    for reference in VALIDATE_SKILLS.doc_references(text):
+                        target = f"{skill_root}/{reference}"
+                        self.assertIn(target, installed, f"{platform}/{skill}: installed reference does not resolve: {reference}")
+                        self.assertEqual(installed[target].asset.id, skill)
+                        self.assertEqual(installed[target].source.resolve(), (REPO_ROOT / reference).resolve())
+
+    def test_skill_local_doc_layer_satisfies_catalog_travel_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            write_skill(repo, "codex", "portable", "Open `docs/policy.md` before continuing.")
+            policy = repo / "docs" / "policy.md"
+            policy.parent.mkdir()
+            policy.write_text("Open `docs/nested.md` before continuing.\n", encoding="utf-8")
+            nested = repo / "docs" / "nested.md"
+            nested.write_text("Nested policy.\n", encoding="utf-8")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex"], "owner": "agents", "source": {"codex": [{"path": "codex/skills/portable", "target": "skills/portable"}, {"path": "docs/policy.md", "target": "skills/portable/docs/policy.md"}, {"path": "docs/nested.md", "target": "skills/portable/docs/nested.md"}]}, "install_target": {"codex": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, warnings = validate_catalog(repo)
+
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+
+    def test_home_root_travel_does_not_satisfy_a_skill_relative_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            write_skill(repo, "codex", "portable", "Open `docs/policy.md` before continuing.")
+            policy = repo / "docs" / "policy.md"
+            policy.parent.mkdir()
+            policy.write_text("Portable policy.\n", encoding="utf-8")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex"], "owner": "agents", "source": {"codex": "codex/skills/portable"}, "install_target": {"codex": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": [{"id": "policy-doc", "kind": "traveling_document", "platforms": ["codex"], "owner": "agents", "source": {"codex": "docs/policy.md"}, "install_target": {"codex": "docs/policy.md"}}]}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            errors, warnings = validate_catalog(repo)
+
+        self.assertEqual(warnings, [])
+        self.assertEqual(errors, ["portable (codex): skill-relative doc reference is not materialized by the same asset: docs/policy.md"])
+
+    def test_unlabeled_former_allowlist_name_fails_both_validators(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            write_skill(repo, "codex", "portable", "Open `docs/loop-closure.md` before continuing.")
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex"], "owner": "agents", "source": {"codex": "codex/skills/portable"}, "install_target": {"codex": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            catalog_errors, catalog_warnings = validate_catalog(repo)
+            skill_errors, skill_warnings = VALIDATE_SKILLS.check_doc_references(repo / "codex" / "skills" / "portable", repo)
+
+        self.assertEqual(catalog_warnings, [])
+        self.assertEqual(catalog_errors, ["portable (codex): doc reference not found: docs/loop-closure.md"])
+        self.assertEqual(skill_warnings, [])
+        self.assertEqual(skill_errors, ["portable: doc reference not found: docs/loop-closure.md"])
+
+    def test_catalog_and_skill_validator_share_line_local_example_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            body = "Example-only: `docs/prefix.md`\ndocs/plain-suffix.md (example-only)\n`docs/backtick-suffix.md` (example-only)\n\"docs/quote-suffix.md\" (example-only)\n"
+            write_skill(repo, "codex", "portable", body)
+            catalog = {"assets_comment": "fixture", "skills": [{"id": "portable", "kind": "skill", "platforms": ["codex"], "owner": "agents", "source": {"codex": "codex/skills/portable"}, "install_target": {"codex": "skills/portable"}}], "commands": [], "subagents": [], "rules": [], "hooks": [], "global_instructions": [], "traveling_documents": []}
+            (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            catalog_errors, catalog_warnings = validate_catalog(repo)
+            skill_errors, skill_warnings = VALIDATE_SKILLS.check_doc_references(repo / "codex" / "skills" / "portable", repo)
+
+        self.assertEqual(VALIDATE_SKILLS.classified_doc_references(body), ([], ["docs/backtick-suffix.md", "docs/plain-suffix.md", "docs/prefix.md", "docs/quote-suffix.md"]))
+        self.assertEqual(catalog_errors, [])
+        self.assertEqual(len(catalog_warnings), 4)
+        self.assertTrue(all("classified example-only" in warning for warning in catalog_warnings))
+        self.assertEqual(skill_errors, [])
+        self.assertEqual(len(skill_warnings), 4)
+        self.assertTrue(all("classified example-only" in warning for warning in skill_warnings))
+
+    def test_shared_classifier_accepts_opening_delimiters_for_home_labels(self) -> None:
+        text = "Example-only: `/Users/alice/example.md`\nruntime-home: \"~/.cache/tool\"\n"
+        dependencies, examples, runtime_homes = VALIDATE_SKILLS.user_home_references(text)
+        self.assertEqual(dependencies, [])
+        self.assertEqual(examples, ["/Users/alice/example.md"])
+        self.assertEqual(runtime_homes, ["~/.cache/tool"])
+
+    def test_only_real_home_root_document_consumer_remains(self) -> None:
+        catalog = json.loads((REPO_ROOT / "catalog.json").read_text(encoding="utf-8"))
+        self.assertEqual([entry["id"] for entry in catalog["traveling_documents"]], ["model-and-effort-doc"])
 
     def test_user_home_dependency_requires_path_local_classification(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

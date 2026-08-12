@@ -2,7 +2,7 @@
 
 Read this when choosing model or effort for a subagent, a workflow `agent()` call, a delegated Claude job, or a handoff prompt for another session.
 
-The hard invariant — explicit `--model` in argv for every scripted `claude` invocation — lives in the always-on rule `~/.claude/rules/model-and-effort.md`, not here.
+The hard invariant — explicit `--model` in argv for every scripted `claude` invocation — lives in the always-on rule `~/.claude/rules/model-and-effort.md` (runtime-home), not here.
 
 ## Separate Levers
 

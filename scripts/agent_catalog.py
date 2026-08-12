@@ -52,11 +52,24 @@ RESERVED_TARGETS = {
 }
 DOC_REF_RE = re.compile(r"(?<!/)docs/[A-Za-z0-9/_.-]+\.md")
 TEMPLATED_DOC_MARKERS = ("RUN_ID", "YYYYMMDD")
-EXAMPLE_DOC_REFS = {"docs/architecture.md", "docs/loop-closure.md"}
+REFERENCE_PREFIX_RE = re.compile(r"(?P<label>example-only|runtime-home):\s*[`'\"]?\s*$", re.IGNORECASE)
+REFERENCE_SUFFIX_RE = re.compile(r"\s*[`'\"]?\s*\((?P<label>example-only|runtime-home)\)", re.IGNORECASE)
 
 
 class CatalogError(ValueError):
     """Raised when catalog structure or source coverage is invalid."""
+
+
+def line_reference_classification(text: str, start: int, end: int) -> str | None:
+    """Return a line-local example-only/runtime-home label for one reference."""
+    line_start = text.rfind("\n", 0, start) + 1
+    line_end = text.find("\n", end)
+    line = text[line_start : None if line_end == -1 else line_end]
+    prefix = REFERENCE_PREFIX_RE.search(line[: start - line_start])
+    if prefix:
+        return prefix.group("label").lower()
+    suffix = REFERENCE_SUFFIX_RE.match(line[end - line_start :])
+    return suffix.group("label").lower() if suffix else None
 
 
 @dataclass(frozen=True)
@@ -467,15 +480,35 @@ def validate_catalog(repo: Path) -> tuple[list[str], list[str]]:
             }
             for platform in PLATFORMS
         }
+        desired_by_platform = {
+            platform: desired_files(repo, tuple(assets), platform)
+            for platform in PLATFORMS
+        }
+        assets_by_id = {asset.id: asset for asset in assets}
         for platform, asset_id, text in _managed_text_sources(repo, assets):
-            for ref in sorted(set(DOC_REF_RE.findall(text))):
+            operative_refs: set[str] = set()
+            example_refs: set[str] = set()
+            for match in DOC_REF_RE.finditer(text):
+                ref = match.group(0)
                 if any(marker in ref for marker in TEMPLATED_DOC_MARKERS):
                     continue
-                if ref in EXAMPLE_DOC_REFS and not (repo / ref).is_file():
-                    warnings.append(f"{asset_id} ({platform}): example-only doc reference {ref}")
+                if line_reference_classification(text, match.start(), match.end()) == "example-only":
+                    example_refs.add(ref)
                     continue
+                operative_refs.add(ref)
+            warnings.extend(
+                f"{asset_id} ({platform}): doc reference classified example-only: {ref}"
+                for ref in sorted(example_refs)
+            )
+            for ref in sorted(operative_refs):
                 if not (repo / ref).is_file():
                     errors.append(f"{asset_id} ({platform}): doc reference not found: {ref}")
+                    continue
+                local_target = f"skills/{asset_id}/{ref}"
+                local = desired_by_platform[platform].get(local_target)
+                if assets_by_id[asset_id].kind == "skill":
+                    if local is None or local.asset.id != asset_id or local.source.resolve() != (repo / ref).resolve():
+                        errors.append(f"{asset_id} ({platform}): skill-relative doc reference is not materialized by the same asset: {ref}")
                 elif ref not in traveling_by_platform[platform]:
                     errors.append(f"{asset_id} ({platform}): doc reference is not cataloged for travel: {ref}")
     except (OSError, json.JSONDecodeError, CatalogError) as exc:

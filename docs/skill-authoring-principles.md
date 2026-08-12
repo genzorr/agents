@@ -84,6 +84,8 @@ Keep the body focused on what the agent must do now.
 
 Use a reference pointer that says when to open the file, not just what the file is called.
 
+A non-operative `docs/*.md` illustration may use a line-local `example-only:` prefix or `(example-only)` suffix; validators retain it as a classified warning rather than treating it as a runtime dependency. Do not use that label for guidance the skill actually opens.
+
 ## Claim breadth
 
 When finite observations are being turned into reusable skill behavior, conditionally open the Agents-owned `docs/claim-discipline.md` reference. First choose the least restrictive behavior that remains correct for the supported cases and required safety/authority boundaries. Then express that behavior as compactly as possible. Textual brevity is an encoding objective, not a generalization objective. Keep the resulting instruction non-vacuous: it needs a real trigger, required behavior, observable output or stop condition, and applicable boundaries.
@@ -113,7 +115,7 @@ Match proof to the changed behavior and the claim it must support; do not make e
 
 - **Static contract proof** — use existing deterministic validators for packaging, references, metadata, syntax, exact structural invariants, and other mechanically decidable changes. This supports only those properties.
 - **Behavioral conformance proof** — when a change alters invocation, routing, authority, stop conditions, completion behavior, or another semantic contract, exercise the smallest representative cases through the same skill interface callers use. Prefer an observed material failure as a regression case; create a persistent fixture without one only when repeated demonstrated need justifies its upkeep.
-- **Outcome proof** — a curated conformance pass does not establish general task improvement, stable triggering, lower rework, or safe additional autonomy. A claim that would change a default or authority boundary belongs in the existing [`design-experiment` → `review-experiment` Protocol/Readout workflow](experiment-protocol-readout-contract.md), with a baseline and decision-relevant evidence.
+- **Outcome proof** — a curated conformance pass does not establish general task improvement, stable triggering, lower rework, or safe additional autonomy. A claim that would change a default or authority boundary belongs in the existing `design-experiment` → `review-experiment` workflow defined by `docs/experiment-protocol-readout-contract.md`, with a baseline and decision-relevant evidence.
 
 Do not add a runner, judge, schema, repeated-trial ritual, or standing case corpus until concrete repeated work shows that a shared mechanism would remove more complexity than it adds.
 

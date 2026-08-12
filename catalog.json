@@ -7,8 +7,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/architecture-review",
-        "claude": "claude/skills/architecture-review"
+        "codex": [{"path": "codex/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}],
+        "claude": [{"path": "claude/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}]
       },
       "install_target": {
         "codex": "skills/architecture-review",
@@ -104,8 +104,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/design-experiment",
-        "claude": "shared/skills/design-experiment"
+        "codex": [{"path": "shared/skills/design-experiment", "target": "skills/design-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/design-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/design-experiment/docs/experiment-protocol-readout-contract.md"}],
+        "claude": [{"path": "shared/skills/design-experiment", "target": "skills/design-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/design-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/design-experiment/docs/experiment-protocol-readout-contract.md"}]
       },
       "install_target": {
         "codex": "skills/design-experiment",
@@ -133,8 +133,16 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/distill-source",
-        "claude": "claude/skills/distill-source"
+        "codex": [
+          {"path": "codex/skills/distill-source", "target": "skills/distill-source"},
+          {"path": "docs/distill-source-contract.md", "target": "skills/distill-source/docs/distill-source-contract.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/distill-source/docs/claim-discipline.md"}
+        ],
+        "claude": [
+          {"path": "claude/skills/distill-source", "target": "skills/distill-source"},
+          {"path": "docs/distill-source-contract.md", "target": "skills/distill-source/docs/distill-source-contract.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/distill-source/docs/claim-discipline.md"}
+        ]
       },
       "install_target": {
         "codex": "skills/distill-source",
@@ -148,7 +156,7 @@
       "owner": "agents",
       "source": {
         "codex": "codex/skills/doc-audit",
-        "claude": "claude/skills/doc-audit"
+        "claude": [{"path": "claude/skills/doc-audit", "target": "skills/doc-audit"}, {"path": "docs/context-file-authoring.md", "target": "skills/doc-audit/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/doc-audit/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/doc-audit/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/doc-audit/docs/experiment-protocol-readout-contract.md"}]
       },
       "install_target": {
         "codex": "skills/doc-audit",
@@ -205,7 +213,7 @@
       "owner": "agents",
       "source": {
         "codex": "codex/skills/goal-prompt",
-        "claude": "claude/skills/goal-prompt"
+        "claude": [{"path": "claude/skills/goal-prompt", "target": "skills/goal-prompt"}, {"path": "docs/model-and-effort.md", "target": "skills/goal-prompt/docs/model-and-effort.md"}]
       },
       "install_target": {
         "codex": "skills/goal-prompt",
@@ -247,8 +255,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/integrate-research",
-        "claude": "claude/skills/integrate-research"
+        "codex": [{"path": "codex/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}],
+        "claude": [{"path": "claude/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}]
       },
       "install_target": {
         "codex": "skills/integrate-research",
@@ -276,7 +284,7 @@
       "owner": "agents",
       "source": {
         "codex": "codex/skills/prepare-dynamic-workflow",
-        "claude": "claude/skills/prepare-dynamic-workflow"
+        "claude": [{"path": "claude/skills/prepare-dynamic-workflow", "target": "skills/prepare-dynamic-workflow"}, {"path": "docs/model-and-effort.md", "target": "skills/prepare-dynamic-workflow/docs/model-and-effort.md"}]
       },
       "install_target": {
         "codex": "skills/prepare-dynamic-workflow",
@@ -317,8 +325,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/review-change",
-        "claude": "claude/skills/review-change"
+        "codex": [{"path": "codex/skills/review-change", "target": "skills/review-change"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}],
+        "claude": [{"path": "claude/skills/review-change", "target": "skills/review-change"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}]
       },
       "install_target": {
         "codex": "skills/review-change",
@@ -331,8 +339,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/review-experiment",
-        "claude": "shared/skills/review-experiment"
+        "codex": [{"path": "shared/skills/review-experiment", "target": "skills/review-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/review-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-experiment/docs/experiment-protocol-readout-contract.md"}],
+        "claude": [{"path": "shared/skills/review-experiment", "target": "skills/review-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/review-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-experiment/docs/experiment-protocol-readout-contract.md"}]
       },
       "install_target": {
         "codex": "skills/review-experiment",
@@ -360,8 +368,22 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/skill-lifecycle",
-        "claude": "shared/skills/skill-lifecycle"
+        "codex": [
+          {"path": "shared/skills/skill-lifecycle", "target": "skills/skill-lifecycle"},
+          {"path": "docs/skill-lifecycle-policy.md", "target": "skills/skill-lifecycle/docs/skill-lifecycle-policy.md"},
+          {"path": "docs/skill-authoring-principles.md", "target": "skills/skill-lifecycle/docs/skill-authoring-principles.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/skill-lifecycle/docs/claim-discipline.md"},
+          {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/skill-lifecycle/docs/experiment-protocol-readout-contract.md"},
+          {"path": "docs/skill-installer-contract.md", "target": "skills/skill-lifecycle/docs/skill-installer-contract.md"}
+        ],
+        "claude": [
+          {"path": "shared/skills/skill-lifecycle", "target": "skills/skill-lifecycle"},
+          {"path": "docs/skill-lifecycle-policy.md", "target": "skills/skill-lifecycle/docs/skill-lifecycle-policy.md"},
+          {"path": "docs/skill-authoring-principles.md", "target": "skills/skill-lifecycle/docs/skill-authoring-principles.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/skill-lifecycle/docs/claim-discipline.md"},
+          {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/skill-lifecycle/docs/experiment-protocol-readout-contract.md"},
+          {"path": "docs/skill-installer-contract.md", "target": "skills/skill-lifecycle/docs/skill-installer-contract.md"}
+        ]
       },
       "install_target": {
         "codex": "skills/skill-lifecycle",
@@ -402,8 +424,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/systemic-diagnosis",
-        "claude": "shared/skills/systemic-diagnosis"
+        "codex": [{"path": "shared/skills/systemic-diagnosis", "target": "skills/systemic-diagnosis"}, {"path": "docs/claim-discipline.md", "target": "skills/systemic-diagnosis/docs/claim-discipline.md"}, {"path": "docs/systemic-diagnosis-selector.md", "target": "skills/systemic-diagnosis/docs/systemic-diagnosis-selector.md"}, {"path": "docs/whole-system-review.md", "target": "skills/systemic-diagnosis/docs/whole-system-review.md"}],
+        "claude": [{"path": "shared/skills/systemic-diagnosis", "target": "skills/systemic-diagnosis"}, {"path": "docs/claim-discipline.md", "target": "skills/systemic-diagnosis/docs/claim-discipline.md"}, {"path": "docs/systemic-diagnosis-selector.md", "target": "skills/systemic-diagnosis/docs/systemic-diagnosis-selector.md"}, {"path": "docs/whole-system-review.md", "target": "skills/systemic-diagnosis/docs/whole-system-review.md"}]
       },
       "install_target": {
         "codex": "skills/systemic-diagnosis",
@@ -632,15 +654,7 @@
     }
   ],
   "traveling_documents": [
-    {"id": "claim-discipline-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md"}, "install_target": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md"}},
-    {"id": "context-file-authoring-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/context-file-authoring.md"}, "install_target": {"claude": "docs/context-file-authoring.md"}},
-    {"id": "distill-source-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/distill-source-contract.md", "claude": "docs/distill-source-contract.md"}, "install_target": {"codex": "docs/distill-source-contract.md", "claude": "docs/distill-source-contract.md"}},
-    {"id": "experiment-protocol-readout-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md"}, "install_target": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md"}},
-    {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}},
-    {"id": "skill-authoring-principles-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md"}, "install_target": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md"}},
-    {"id": "skill-lifecycle-policy-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/skill-lifecycle-policy.md", "claude": "docs/skill-lifecycle-policy.md"}, "install_target": {"codex": "docs/skill-lifecycle-policy.md", "claude": "docs/skill-lifecycle-policy.md"}},
-    {"id": "systemic-diagnosis-selector-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/systemic-diagnosis-selector.md", "claude": "docs/systemic-diagnosis-selector.md"}, "install_target": {"codex": "docs/systemic-diagnosis-selector.md", "claude": "docs/systemic-diagnosis-selector.md"}},
-    {"id": "whole-system-review-doc", "kind": "traveling_document", "platforms": ["codex", "claude"], "owner": "agents", "source": {"codex": "docs/whole-system-review.md", "claude": "docs/whole-system-review.md"}, "install_target": {"codex": "docs/whole-system-review.md", "claude": "docs/whole-system-review.md"}}
+    {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}}
   ],
   "boundary_notes": {
     "$comment": "Documentation only. These owners are NOT installable/prunable through this catalog — this repo never manages, prunes, or removes them. See AGENTS.md Boundary section and docs/skill-installer-contract.md.",

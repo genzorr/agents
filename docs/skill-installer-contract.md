@@ -50,7 +50,7 @@ CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --prune --dry-run
 ```
 
-Running install, update, prune, or uninstall against the real `~/.codex` or `~/.claude` requires an explicit operator approval every time. Repository validation and all prescribed verification use scratch homes and must not mutate live global state.
+Running install, update, prune, or uninstall against the real `~/.codex` (runtime-home) or `~/.claude` (runtime-home) requires an explicit operator approval every time. Repository validation and all prescribed verification use scratch homes and must not mutate live global state.
 
 ## 5. Platform adapter safety
 
@@ -66,9 +66,9 @@ The settings-hooks adapter is per-host. Its catalog entry declares one `posix-sc
 
 Each catalog entry declares `id`, `kind`, `platforms`, `owner`, `source`, `install_target`, and optional `handling`, `tags`, and `$comment`. Any other key is rejected rather than ignored, so prose belongs in `$comment` and a new field must earn loader support. A source may be a file or complete directory; directory sources include every nested file, support asset, template, script, metadata file, and source mode. Ordered source-layer objects take `path`, `target`, and `role`, and may give each layer an explicit non-colliding target or an adapter-only role such as Claude settings hooks.
 
-Install targets are relative to the selected platform home and never repeat `~/.codex` or `~/.claude`. The loader rejects path traversal, absolute paths, missing or escaping sources, symlinked source trees, duplicate ids, duplicate targets, source-layer collisions, invalid platform declarations, incomplete physical coverage, and reserved cross-repository ids.
+Install targets are relative to the selected platform home and never repeat `~/.codex` (runtime-home) or `~/.claude` (runtime-home). The loader rejects path traversal, absolute paths, missing or escaping sources, symlinked source trees, duplicate ids, duplicate targets, source-layer collisions, invalid platform declarations, incomplete physical coverage, and reserved cross-repository ids.
 
-Traveling documents use `kind: traveling_document` and explicit source and platform target entries. Runtime text scanning never decides what is installed. The transition reader accepts the old `.agents-doc-manifest` once, records its paths in historical state with a trusted-baseline marker, and removes the legacy file only after successful migration; an untrusted legacy baseline cannot authorize destructive removal.
+Document ownership follows the consumer that resolves the path. A skill-relative `docs/<name>.md` reference is an explicit source layer of that skill at `skills/<skill-id>/docs/<name>.md`, and its operative `docs/*.md` closure travels under the same skill root; a home-root copy does not satisfy that reference. A non-skill home-root consumer uses `kind: traveling_document` with an explicit platform target, as Claude's always-on model rule does for the model-and-effort document. Do not keep an additional home-root copy without a real home-root consumer. Runtime text scanning never decides what is installed. The transition reader accepts the old `.agents-doc-manifest` once, records its paths in historical state with a trusted-baseline marker, and removes the legacy file only after successful migration; an untrusted legacy baseline cannot authorize destructive removal.
 
 ## 7. Historical install state
 

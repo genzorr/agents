@@ -98,6 +98,16 @@ class BoundedCognitionContractsTest(unittest.TestCase):
         self.assertIn("Source mechanism | Existing owner / surface | Coverage | Gap", contract)
         self.assertIn("does not enter scope automatically", contract)
 
+    def test_review_twins_discriminate_semantic_fidelity_from_plausible_shortcuts(self) -> None:
+        for platform in ("codex", "claude"):
+            review = self.read_skill(platform, "review-change")
+            for phrase in (
+                "implements a source or paper, claims a behavior-preserving refactor, or transforms data whose meaning must survive",
+                "ordinary happy-path test could accept a plausible semantic shortcut",
+                "only when semantic fidelity is material",
+            ):
+                self.assertIn(phrase, review, f"{platform}: {phrase}")
+
     def test_whole_system_reference_is_conditional_and_progressively_disclosed(self) -> None:
         reference = self.read("docs/whole-system-review.md")
         self.assertIn("Skip it for a contained local refactor", reference)

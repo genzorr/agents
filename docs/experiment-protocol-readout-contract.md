@@ -187,8 +187,5 @@ or the import/freeze transition is **process success only**. On its own it:
 ## References
 
 - Product decision: `/tmp/agent-handoffs/os/20260720-readout-area-brief-rd-prd.md`
-- This repo: `docs/harness/work/slices/S-3.md`, `docs/harness/work/tasks/T-7.md`
-  through `T-11.md`
-- Harness: `docs/harness/work/slices/S-33.md`,
-  `docs/harness/work/tasks/T-130.md` (contract-alignment counterpart to this
-  document) and `T-126` through `T-128`
+- This repo: slice `S-3`, tasks `T-7`–`T-11`
+- Harness: slice `S-33`, task `T-130` (contract-alignment counterpart to this document), and tasks `T-126`–`T-128`

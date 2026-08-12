@@ -76,6 +76,16 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             self.assertIn("For non-Git targets, capture a stable version or digest", text, platform)
             self.assertIn("stop if none can be established", text, platform)
 
+    def test_goal_prompt_conditionally_preserves_semantics_and_rejects_shortcuts(self) -> None:
+        for platform in ("codex", "claude"):
+            text = self.read(f"{platform}/skills/goal-prompt/SKILL.md")
+            for phrase in (
+                "implements a source or paper, claims a behavior-preserving refactor, or transforms data whose meaning must survive",
+                "require discriminating proof that would fail for that shortcut",
+                "when exact semantic preservation is immaterial",
+            ):
+                self.assertIn(phrase, text, f"{platform}: {phrase}")
+
     def test_goal_prompt_preserves_platform_specific_bootstrap(self) -> None:
         codex = self.read("codex/skills/goal-prompt/SKILL.md")
         claude = self.read("claude/skills/goal-prompt/SKILL.md")

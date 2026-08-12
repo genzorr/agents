@@ -4,7 +4,7 @@ This traveling policy governs generic personal/global agent assets physically ow
 
 ## Scope and authority
 
-Source ownership follows physical presence. Apply this policy to Agents-owned skills, commands, subagents, rules, global instructions, and their referenced guidance; treat installed `~/.codex` and `~/.claude` content as outputs, not audit sources. The per-repository installer boundary remains defined by `docs/skill-installer-contract.md`.
+Source ownership follows physical presence. Apply this policy to Agents-owned skills, commands, subagents, rules, global instructions, and their referenced guidance; treat installed `~/.codex` (runtime-home) and `~/.claude` (runtime-home) content as outputs, not audit sources. The per-repository installer boundary remains defined by `docs/skill-installer-contract.md`.
 
 Harness-owned `harness-*` assets use this policy only as generic background. Harness's lifecycle policy is the stricter project-specific overlay for those assets; it remains scoped to the Harness repository and its protocols. Other repositories retain their own source ownership and any project overlay.
 
@@ -57,7 +57,9 @@ Treat process sediment as a proposal to capture or trim, never an automatic dele
 
 Use `docs/skill-authoring-principles.md` when creating, changing, or slimming an asset. Keep every skill small as correct, self-contained after installation, progressively disclosed, and composable with a clear role. Retain core trigger, boundaries, procedure, output contract, guardrails, and verification; move only genuinely conditional heavy material into an explicit traveling reference.
 
-Use repo-relative `docs/*.md` references for shared material that must travel; the installers copy resolved references into the scratch install home. A hard-coded user-home dependency, including `/Users/alice`, `/home/alice`, or `C:\Users\alice`, is a packaging defect. An illustrative user-home path must be labelled `example-only` on that same line. A portable `~`, `$HOME`, or `${HOME}` location is allowed only when labelled `runtime-home` on that same line; use it only for a real installed-home/cache/runtime location, never to disguise a source dependency.
+For every operative skill-relative `docs/*.md` reference, require a same-asset source layer at `skills/<skill-id>/docs/...` that resolves to the referenced source, including the nested operative reference closure. A home-root traveling document is valid only for a real home-root consumer and does not satisfy a skill-relative path. A non-operative doc illustration must use the line-local `example-only:` or `(example-only)` classification defined by the authoring principles and remains visible as a validator warning.
+
+Use repo-relative references for shared material that must travel. A hard-coded user-home dependency, including `/Users/alice` (example-only), `/home/alice` (example-only), or `C:\Users\alice` (example-only), is a packaging defect. An illustrative user-home path must be labelled `example-only` on that same line. A portable `~` (runtime-home), `$HOME` (runtime-home), or `${HOME}` (runtime-home) location is allowed only when labelled `runtime-home` on that same line; use it only for a real installed-home/cache/runtime location, never to disguise a source dependency.
 
 ## Proposal output
 

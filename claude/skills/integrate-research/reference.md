@@ -124,11 +124,11 @@ When showing proposed updates:
 ```
 I found these docs that may need updates:
 
-1. .claude/specs/architecture.md
+1. Example-only: `docs/architecture.md`
    - Add section on [new component]
    - Update [existing section] with [new approach]
 
-2. docs/loop-closure.md
+2. Example-only: `docs/loop-closure.md`
    - Update method comparison table
    - Add KISS-Matcher to recommended approaches
 
@@ -158,7 +158,7 @@ Research integration complete.
 
 **Documentation updated:**
 - research/decentralized-architecture/inter-agent-lc.md - Added KISS-Matcher section
-- docs/loop-closure.md - Updated method comparison
+- Example-only: `docs/loop-closure.md` - Updated method comparison
 
 **Key findings:**
 1. KISS-Matcher recommended for coarse alignment (faster than FPFH+RANSAC)

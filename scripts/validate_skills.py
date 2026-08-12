@@ -44,9 +44,9 @@ import sys
 from pathlib import Path
 
 try:
-    from agent_catalog import CatalogError, load_catalog, validate_catalog
+    from agent_catalog import CatalogError, line_reference_classification, load_catalog, validate_catalog
 except ModuleNotFoundError:  # Imported as a module from repository tests.
-    from scripts.agent_catalog import CatalogError, load_catalog, validate_catalog
+    from scripts.agent_catalog import CatalogError, line_reference_classification, load_catalog, validate_catalog
 
 # Claude-runtime frontmatter fields that Codex skills omit by convention.
 # Listed here only to document the deliberate cross-tree parity deferral.
@@ -71,17 +71,11 @@ USER_HOME_REF_RE = re.compile(
     r"))",
     re.IGNORECASE,
 )
-EXAMPLE_ONLY_PREFIX_RE = re.compile(r"example-only:\s*$", re.IGNORECASE)
-EXAMPLE_ONLY_SUFFIX_RE = re.compile(r"\s*[`'\"]?\s*\(example-only\)", re.IGNORECASE)
-RUNTIME_HOME_PREFIX_RE = re.compile(r"runtime-home:\s*$", re.IGNORECASE)
-RUNTIME_HOME_SUFFIX_RE = re.compile(r"\s*[`'\"]?\s*\(runtime-home\)", re.IGNORECASE)
-
 # Run-local templated / generated doc paths (e.g. `docs/harness/ops/RUN_ID/*`,
 # `docs/audits/YYYYMMDD-*`). These are produced inside a run directory at runtime
 # and never exist as static repo files; the installers skip them on copy and the
 # validator skips them on check.
 TEMPLATED_DOC_MARKERS = ("RUN_ID", "YYYYMMDD")
-EXAMPLE_DOC_REFS = {"docs/architecture.md", "docs/loop-closure.md"}
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -138,21 +132,28 @@ def check_skill(skill_dir: Path) -> list[str]:
     return errors
 
 
-def doc_references(text: str) -> list[str]:
-    """Return the static ``docs/*.md`` references in skill text, sorted-unique.
+def classified_doc_references(text: str) -> tuple[list[str], list[str]]:
+    """Return (operative, example-only) static ``docs/*.md`` references.
 
     Run-local templated/generated paths (`RUN_ID`, `YYYYMMDD`) are excluded — the
     installers skip them on copy, so the validator skips them on check.
     """
     refs = set()
+    examples = set()
     for match in DOC_REF_RE.finditer(text):
         if match.start() > 0 and text[match.start() - 1] == "/":
             continue
         ref = match.group(0)
         if any(marker in ref for marker in TEMPLATED_DOC_MARKERS):
             continue
-        refs.add(ref)
-    return sorted(refs)
+        target = examples if line_reference_classification(text, match.start(), match.end()) == "example-only" else refs
+        target.add(ref)
+    return sorted(refs), sorted(examples)
+
+
+def doc_references(text: str) -> list[str]:
+    """Return operative static ``docs/*.md`` references, sorted-unique."""
+    return classified_doc_references(text)[0]
 
 
 def skill_directory_text(skill_dir: Path) -> str:
@@ -175,20 +176,11 @@ def user_home_references(text: str) -> tuple[list[str], list[str], list[str]]:
     examples: set[str] = set()
     runtime_homes: set[str] = set()
     for match in USER_HOME_REF_RE.finditer(text):
-        line_start = text.rfind("\n", 0, match.start()) + 1
-        line_end = text.find("\n", match.end())
-        line = text[line_start : None if line_end == -1 else line_end]
-        relative_start = match.start() - line_start
         path = match.group("path").rstrip(".,;:!?")
-        relative_end = relative_start + len(path)
-        if EXAMPLE_ONLY_PREFIX_RE.search(line[:relative_start]) or EXAMPLE_ONLY_SUFFIX_RE.match(
-            line[relative_end:]
-        ):
+        classification = line_reference_classification(text, match.start(), match.start() + len(path))
+        if classification == "example-only":
             examples.add(path)
-        elif path.startswith(("~", "$HOME", "${HOME}")) and (
-            RUNTIME_HOME_PREFIX_RE.search(line[:relative_start])
-            or RUNTIME_HOME_SUFFIX_RE.match(line[relative_end:])
-        ):
+        elif path.startswith(("~", "$HOME", "${HOME}")) and classification == "runtime-home":
             runtime_homes.add(path)
         else:
             dependencies.add(path)
@@ -205,14 +197,16 @@ def check_doc_references(skill_dir: Path, repo_root: Path) -> tuple[list[str], l
     errors: list[str] = []
     warnings: list[str] = []
     text = skill_directory_text(skill_dir)
-    for ref in doc_references(text):
+    references, example_references = classified_doc_references(text)
+    warnings.extend(
+        f"{skill_dir.name}: doc reference classified example-only: {ref}"
+        for ref in example_references
+    )
+    for ref in references:
         if (repo_root / ref).is_file():
             continue
         message = f"{skill_dir.name}: doc reference not found: {ref}"
-        if ref in EXAMPLE_DOC_REFS:
-            warnings.append(f"{message} (example-only)")
-        else:
-            errors.append(message)
+        errors.append(message)
     dependencies, examples, _runtime_homes = user_home_references(text)
     errors.extend(
         f"{skill_dir.name}: operative user-home dependency: {path} "

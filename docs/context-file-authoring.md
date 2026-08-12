@@ -1,6 +1,6 @@
 # Context File Authoring
 
-Use this as the craft rubric when writing or slimming the always-on context layer: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and `@` references. `skill-authoring-principles.md` is the sibling rubric for skills; this document covers everything that loads *before* the agent knows the task.
+Use this as the craft rubric when writing or slimming the always-on context layer: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and `@` references. `docs/skill-authoring-principles.md` is the sibling rubric for skills; this document covers everything that loads *before* the agent knows the task.
 
 Calibrated for the Claude 5 generation (Opus 5, Fable 5). Older models needed guardrails these files should no longer carry.
 
@@ -24,9 +24,9 @@ Place each instruction in exactly one layer. Duplication across layers is the mo
 | Layer | Holds | Cost |
 |---|---|---|
 | Harness system prompt | Product behavior. Not yours to edit. | — |
-| `~/.claude/rules/` | Cross-project personal standards. | Always-on, every session **and every subagent** |
+| `~/.claude/rules` (runtime-home) | Cross-project personal standards. | Always-on, every session **and every subagent** |
 | Project `CLAUDE.md` | What this repo is; its gotchas. | Always-on in this repo and all descendants |
-| Traveling docs (`~/.claude/docs/`) | Contracts and rubrics consulted mid-task. | Only when referenced |
+| Traveling docs (`~/.claude/docs` (runtime-home)) | Contracts and rubrics consulted mid-task. | Only when referenced |
 | Skills | Opinionated procedures. | Description always-on; body on invocation |
 | `@` references | Specs, mockups, test suites, code to port. | Inlined at launch when imported |
 
@@ -138,7 +138,7 @@ Reach for prose only for intent and constraints that no artifact encodes.
 
 ## Pruning
 
-Duplication, sediment, no-op, and sprawl are defined in `skill-authoring-principles.md` §Pruning and apply here unchanged. Two failure modes are specific to context files:
+Duplication, sediment, no-op, and sprawl are defined in `docs/skill-authoring-principles.md` §Pruning and apply here unchanged. Two failure modes are specific to context files:
 
 - **Cross-layer duplication** — the same meaning in a global rule and a project file, or in a file and the system prompt. Delete the broader copy; keep the one closest to where it applies.
 - **Stale authority** — a context file that confidently describes an architecture the code has since moved past. It outranks the code in the agent's attention and produces confidently wrong work. Prefer pointing at code over describing it.
