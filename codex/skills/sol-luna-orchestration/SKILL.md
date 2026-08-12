@@ -21,7 +21,8 @@ If invoked without a resolved task and coherent implementation chunk, confirm th
 ## Operating Model
 
 - Sol remains planner, decision-maker, orchestrator, reviewer, and acceptance authority.
-- Luna is the implementation worker for one coherent bounded task.
+- Luna owns one coherent bounded implementation task and its implementation-depth verification: recover authoritative contracts, inspect the full final diff, test plausible wrong implementations, trace failure and recovery paths, and report material uncertainty.
+- Sol performs a narrow independent gate: challenge load-bearing assumptions, scientific validity when applicable, and release or GPU readiness when applicable without redoing Luna's implementation work.
 - Luna's report is evidence, not acceptance. Sol accepts work only after inspecting the actual repository state, diff, and proportionate verification evidence.
 - Saving Sol tokens must not weaken task definition, verification, authority boundaries, or review quality.
 
@@ -33,9 +34,10 @@ If invoked without a resolved task and coherent implementation chunk, confirm th
 4. Before launch, state that the operator's explicit lens invocation requests a Luna worker and name the Luna model choice plus any intentional effort override.
 5. Create a new ordinary Codex thread using Luna and send the compact worker contract below. Do not use a subagent and do not change the originating thread's model.
 6. After the Luna thread is successfully started, satisfy any existing driver checkpoint requirement and immediately return a concise normal response that identifies the Luna thread and delegated objective. Do not wait, poll, repeatedly check status, or emit no-op progress messages.
-7. Luna performs the local investigation required by its bounded task, implements, runs proportionate validation, and reports the result to the originating Sol thread ID through the native existing-thread continuation mechanism.
-8. Sol reviews the actual changed state and evidence. Review the targeted diff and material risks without repeating Luna's full investigation or routine test execution.
-9. Send follow-up fixes for the same task to the same Luna thread so it retains context. Start a new Luna thread only for a genuinely separate task.
+7. Luna performs the local investigation required by its bounded task, implements, completes implementation-depth verification, and reports the result to the originating Sol thread ID through the native existing-thread continuation mechanism.
+8. Sol reviews the actual changed state and evidence through the narrow independent gate. Review the targeted diff and material risks without repeating Luna's full investigation or routine test execution.
+9. If Sol discovers a basic implementation fact Luna should have found, send the immediate correction to the same Luna thread. Classify the lesson as task-specific or reusable: carry a task-specific lesson in that thread's follow-up contract; carry a reusable lesson into later Luna worker contracts and propose a durable update to this skill or the governing project checklist. Do not silently modify durable assets without authority.
+10. Send follow-up fixes for the same task to the same Luna thread so it retains context. Start a new Luna thread only for a genuinely separate task.
 
 If the running Codex surface cannot create an ordinary Luna thread, expose the new thread ID, or send a message to the originating Sol thread ID, report the exact missing capability. Do not substitute a subagent, controller, daemon, queue, workflow script, side-channel file, or invented command.
 
@@ -50,7 +52,7 @@ Send only the minimum sufficient contract:
 - **Scope and ownership:** files or components Luna owns plus explicit non-goals and overlap boundaries.
 - **Authority:** local write, validation, commit, push, and external-write permissions exactly as granted by the user and governing project rules.
 - **Success criteria:** observable completion conditions and required artifacts.
-- **Verification:** exact or proportional checks Luna must run and evidence it must preserve.
+- **Verification:** authoritative contracts Luna must recover and cite; exact or proportional checks; plausible wrong implementations the tests must distinguish; failure and recovery paths to trace; full-diff audit; and evidence to preserve.
 - **Stop/ask gates:** architecture decisions, user-owned choices, unsafe scope expansion, missing authority, unavailable infrastructure, or material ambiguity Luna must escalate instead of guessing.
 - **Return route:** the originating Sol thread ID and instruction to report there.
 - **Return format:** outcome; changed files or commit; verification; blockers; material uncertainty.
@@ -59,7 +61,11 @@ Do not include builder reasoning, long conversation history, failed-attempt narr
 
 ## Luna Worker Rules
 
-- Investigate enough local context to implement the bounded task correctly; do not blindly follow an under-specified patch recipe.
+- Recover and cite the authoritative inherited contracts before implementation; do not substitute an internally consistent interpretation for the governing definition.
+- Inspect the entire final diff, including tests and generated or configuration changes, before reporting review-ready.
+- Run adversarial consequence tests that distinguish plausible wrong implementations, not only happy-path or source-shape checks.
+- Trace fail-closed, error, retry, and recovery behavior in proportion to the task's failure surface.
+- Challenge the implementation and evidence against task nonclaims and report residual uncertainty explicitly.
 - Keep changes within the delegated scope and preserve unrelated user work.
 - Escalate architecture changes, contract changes, unsafe broad rewrites, missing authority, or materially different interpretations to Sol.
 - Never upgrade Luna work to Sol automatically.
@@ -68,10 +74,11 @@ Do not include builder reasoning, long conversation history, failed-attempt narr
 
 ## Sol Token-Efficiency Rules
 
-- Spend Sol tokens on planning, decomposition, architecture and risk decisions, worker contract quality, targeted review, and acceptance.
-- Let Luna own broad routine scans, line-by-line implementation, local diagnostics, and test execution needed for its bounded task.
+- Spend Sol tokens on planning, decomposition, architecture and risk decisions, worker contract quality, the narrow independent gate, and acceptance.
+- Let Luna own authoritative-contract recovery, broad routine scans, line-by-line implementation, local diagnostics, adversarial verification, full-diff inspection, and test execution needed for its bounded task.
 - Prefer durable paths and exact symbols over pasted source and long summaries.
-- Review the material diff, affected contracts, and verification evidence; do not redo Luna's entire investigation by default.
+- Challenge load-bearing assumptions, scientific validity, and release or GPU readiness as applicable; do not redo Luna's implementation-depth verification by default.
+- Treat a basic implementation fact rediscovered by Sol as Luna-handoff feedback: correct the current task, carry reusable lessons into later worker contracts, and propose the appropriate durable checklist update.
 - Do not poll or repeat “still working” messages. Luna reports back when it has a result or blocker.
 
 ## Parallel Work

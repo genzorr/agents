@@ -170,6 +170,22 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("point to files instead of pasting their contents", text)
         self.assertIn("Do not include builder reasoning", text)
 
+    def test_sol_luna_assigns_deep_verification_to_luna_and_narrow_gate_to_sol(self) -> None:
+        text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
+        for phrase in (
+            "Luna owns one coherent bounded implementation task and its implementation-depth verification",
+            "recover authoritative contracts",
+            "inspect the full final diff",
+            "test plausible wrong implementations",
+            "trace failure and recovery paths",
+            "Sol performs a narrow independent gate",
+            "without redoing Luna's implementation work",
+            "carry a reusable lesson into later Luna worker contracts",
+            "propose a durable update to this skill or the governing project checklist",
+            "Do not silently modify durable assets without authority",
+        ):
+            self.assertIn(phrase, text)
+
     def test_research_prompt_twins_share_sufficiency_contract(self) -> None:
         codex = self.read("codex/skills/research-prompt/SKILL.md")
         claude = self.read("claude/skills/research-prompt/SKILL.md")
