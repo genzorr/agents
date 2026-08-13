@@ -86,6 +86,21 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             ):
                 self.assertIn(phrase, text, f"{platform}: {phrase}")
 
+    def test_goal_prompt_carries_reviewed_behavior_spines_into_completion_contracts(self) -> None:
+        for platform in ("codex", "claude"):
+            text = self.read(f"{platform}/skills/goal-prompt/SKILL.md")
+            for phrase in (
+                "**Reviewed behavior spine:**",
+                "approved behavior authority",
+                "supported public seam",
+                "prohibited shortcuts",
+                "independent oracle",
+                "semantics-preserving implementation refactor to remain green",
+                "detector ledger for deleted or weakened tests",
+                "small local changes or unstable behavior",
+            ):
+                self.assertIn(phrase, text, f"{platform}: {phrase}")
+
     def test_goal_prompt_preserves_platform_specific_bootstrap(self) -> None:
         codex = self.read("codex/skills/goal-prompt/SKILL.md")
         claude = self.read("claude/skills/goal-prompt/SKILL.md")
@@ -183,6 +198,12 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "carry a reusable lesson into later Luna worker contracts",
             "propose a durable update to this skill or the governing project checklist",
             "Do not silently modify durable assets without authority",
+            "implementation-derived oracle",
+            "semantics-preserving implementation refactor remains green",
+            "plausible production defect turns the spine red",
+            "detector ledger",
+            "isolated scratch state",
+            "Do not infer oracle independence from a green suite",
         ):
             self.assertIn(phrase, text)
 

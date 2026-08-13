@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { esc, renderDefinitions, textUnits } from '../shared/utils.mjs';
-import { animateAttr, loadDiagram, writeDiagram, svgRootAttrs } from '../shared/cli.mjs';
+import { animateAttr, loadDiagram, writeDiagram, svgRootAttrs, svgAccessibleContent } from '../shared/cli.mjs';
 import {
   asArray,
   isFinitePoint,
@@ -439,7 +439,7 @@ function renderLegend() {
 }
 
 function renderSvg() {
-  return `      <svg viewBox="0 0 ${viewBox[0]} ${viewBox[1]}" ${svgRootAttrs(workflow.meta, 'workflow diagram')}>
+  return `      <svg viewBox="0 0 ${viewBox[0]} ${viewBox[1]}" ${svgRootAttrs(workflow.meta, 'workflow diagram')}>${svgAccessibleContent(workflow.meta, 'workflow diagram')}
 ${renderDefinitions()}
 
         <!-- Background Grid -->

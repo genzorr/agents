@@ -34,6 +34,27 @@ addCheck('single_svg', svgMatches.length === 1, [`found ${svgMatches.length} <sv
 
 if (svgMatches.length === 1) {
   const svg = svgMatches[0][0];
+  const rootMatch = svg.match(/^<svg\b([^>]*)>/i);
+  const rootAttrs = rootMatch ? parseAttrs(rootMatch[1]) : {};
+  const children = svg.replace(/^<svg\b[^>]*>/i, '');
+  const titleMatch = children.match(/^\s*<title\b([^>]*)>([\s\S]*?)<\/title>/i);
+  const descMatch = children.match(/^\s*<title\b[^>]*>[\s\S]*?<\/title>\s*<desc\b([^>]*)>([\s\S]*?)<\/desc>/i);
+  const ids = [...svg.matchAll(/\bid="([^"]+)"/gi)].map((match) => match[1]);
+  const titleId = titleMatch ? parseAttrs(titleMatch[1]).id : undefined;
+  const descId = descMatch ? parseAttrs(descMatch[1]).id : undefined;
+  const labelledBy = (rootAttrs['aria-labelledby'] || '').split(/\s+/).filter(Boolean);
+  addCheck('accessible_name', Boolean(
+    rootAttrs.role === 'img'
+      && labelledBy.length === 2
+      && titleMatch && descMatch
+      && titleId && descId
+      && titleMatch[2].trim() && descMatch[2].trim()
+      && labelledBy[0] === titleId && labelledBy[1] === descId
+      && titleId !== descId
+      && new Set(ids).size === ids.length
+      && ids.filter((id) => id === titleId).length === 1
+      && ids.filter((id) => id === descId).length === 1,
+  ));
   addCheck('finite_svg', !/\b(?:NaN|undefined|Infinity|-Infinity)\b/.test(svg));
   const legendStart = svg.indexOf('<!-- Legend -->');
   const beforeLegend = legendStart >= 0 ? svg.slice(0, legendStart) : svg;

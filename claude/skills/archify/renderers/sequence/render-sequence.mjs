@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { esc, renderDefinitions, textUnits } from '../shared/utils.mjs';
-import { animateAttr, loadDiagram, writeDiagram, svgRootAttrs } from '../shared/cli.mjs';
+import { animateAttr, loadDiagram, writeDiagram, svgRootAttrs, svgAccessibleContent } from '../shared/cli.mjs';
 import { componentFill, arrowClassMap, rectsOverlap, asArray, isFinitePoint } from '../shared/geometry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -220,7 +220,7 @@ function renderLegend() {
 
 function renderSvg() {
   const participantList = [...participants.values()];
-  return `      <svg viewBox="0 0 ${viewBox[0]} ${viewBox[1]}" ${svgRootAttrs(sequence.meta, 'sequence diagram')}>
+  return `      <svg viewBox="0 0 ${viewBox[0]} ${viewBox[1]}" ${svgRootAttrs(sequence.meta, 'sequence diagram')}>${svgAccessibleContent(sequence.meta, 'sequence diagram')}
 ${renderDefinitions()}
 
         <!-- Background Grid -->

@@ -15,6 +15,7 @@
       "properties": {
         "title": { "type": "string", "minLength": 1 },
         "subtitle": { "type": "string" },
+        "description": { "type": "string" },
         "output": { "type": "string" },
         "animation": { "enum": ["trace", "none"] },
         "viewBox": {

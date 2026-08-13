@@ -31,6 +31,7 @@ For a stable, meaningful behavior that spans states or artifacts, depends on a r
 - Good tests describe behavior, not implementation shape.
 - Before proposing an assertion, name the production defect it would catch and the observable consequence it protects.
 - Do not pin an exact value, relationship, text, or source shape when it could change legitimately without a production defect. Exact assertions remain appropriate when the value, text, or shape is itself a documented public, safety, compatibility, or shipped-artifact contract.
+- An oracle that derives expected behavior from production identifiers, generated keys, internal paths, or source shape is implementation-derived rather than independent, unless that exact shape is itself the documented public, safety, compatibility, or shipped-artifact contract.
 - Tests should survive internal refactors.
 - Avoid mocking internal collaborators just because they are convenient.
 - Mock true external systems, time, randomness, and slow/unavailable services when needed.

@@ -60,6 +60,8 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 "production defect it would catch",
                 "observable consequence it protects",
                 "documented public, safety, compatibility, or shipped-artifact contract",
+                "production identifiers, generated keys, internal paths, or source shape",
+                "implementation-derived rather than independent",
             ):
                 self.assertIn(phrase, tdd, f"{platform} tdd: {phrase}")
 
@@ -75,6 +77,9 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 "plausible production defect turns it red",
                 "detector ledger",
                 "documented public, safety, compatibility, or shipped-artifact contract",
+                "Do not infer oracle independence from a green suite",
+                "production identifiers, generated keys, internal paths, or source shape",
+                "isolated scratch state",
             ):
                 self.assertIn(phrase, review, f"{platform} review-change: {phrase}")
 

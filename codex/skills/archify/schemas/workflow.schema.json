@@ -33,6 +33,9 @@
         "subtitle": {
           "type": "string"
         },
+        "description": {
+          "type": "string"
+        },
         "output": {
           "type": "string"
         },

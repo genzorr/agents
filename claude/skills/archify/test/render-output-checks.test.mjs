@@ -13,7 +13,18 @@ const checker = path.join(skillRoot, 'scripts/check-render-output.mjs');
 
 function checkHtml(name, svgBody) {
   const htmlPath = path.join(tmp, `${name}.html`);
-  fs.writeFileSync(htmlPath, `<!doctype html><html><body><svg viewBox="0 0 240 160">${svgBody}</svg></body></html>`);
+  fs.writeFileSync(htmlPath, `<!doctype html><html><body><svg viewBox="0 0 240 160" role="img" aria-labelledby="test-title test-desc"><title id="test-title">Test diagram</title><desc id="test-desc">Test description</desc>${svgBody}</svg></body></html>`);
+  try {
+    const stdout = execFileSync('node', [checker, htmlPath], { encoding: 'utf8' });
+    return { code: 0, result: JSON.parse(stdout) };
+  } catch (err) {
+    return { code: err.status ?? 1, result: JSON.parse(String(err.stdout || '{}')) };
+  }
+}
+
+function checkAccessible(name, svg) {
+  const htmlPath = path.join(tmp, `${name}.html`);
+  fs.writeFileSync(htmlPath, `<!doctype html><html><body>${svg}</body></html>`);
   try {
     const stdout = execFileSync('node', [checker, htmlPath], { encoding: 'utf8' });
     return { code: 0, result: JSON.parse(stdout) };
@@ -71,5 +82,18 @@ test('render output check: ignores unmarked sequence lifelines near legend', () 
   assert.equal(code, 0);
   assert.equal(result.ok, true);
 });
+
+for (const [name, svg] of [
+  ['duplicate-accessible-ids', '<svg role="img" aria-labelledby="same same"><title id="same">Title</title><desc id="same">Description</desc></svg>'],
+  ['broken-accessible-ref', '<svg role="img" aria-labelledby="missing desc"><title id="title">Title</title><desc id="desc">Description</desc></svg>'],
+  ['wrong-accessible-order', '<svg role="img" aria-labelledby="desc title"><desc id="desc">Description</desc><title id="title">Title</title></svg>'],
+  ['empty-accessible-content', '<svg role="img" aria-labelledby="title desc"><title id="title"></title><desc id="desc">Description</desc></svg>'],
+]) {
+  test(`render output check: rejects ${name}`, () => {
+    const { code, result } = checkAccessible(name, svg);
+    assert.notEqual(code, 0);
+    assert.equal(result.checks.find((item) => item.name === 'accessible_name').ok, false);
+  });
+}
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));

@@ -1,0 +1,9 @@
+# Output and fidelity
+
+Choose the destination, detail level, audience, and format before drawing. Prefer prose, a small table, or a compact text diagram when a visual does not materially clarify relationships. When HTML and D2 are both requested, report source count, rendered count, merges, collapses, drops, and the preserved main story; HTML preserves exact geometry and motion while D2 preserves diagram-core meaning and editability, so route, pixel, and typography equivalence is not promised.
+
+Use this deterministic compression ladder: preserve nodes, states, participants, directed relationships, labels, and meaningful grouping; then merge repeated presentation-only details; then collapse low-value decoration; never drop a core relationship or silently change direction. Name any HTML-only fields such as coordinates, connector routes, cards, toolbar controls, theme chrome, and animation metadata in the fidelity receipt.
+
+The D2 adapter preserves workflow phase labels as real text nodes, dataflow classifications in flow labels, lifecycle type/tag semantics in state labels, and sequence segment labels/order as D2 sequence groups. HTML activation bars, exact y coordinates, connector routes, cards, toolbar controls, theme chrome, and animation metadata remain presentation-only differences.
+
+Mechanisms in this reference were re-authored from cathrynlavery/diagram-design at commit f3622cf66a3c557cb2ead57b687a3c1ff63f5a2b (MIT); no upstream templates, icons, or runtime were copied.

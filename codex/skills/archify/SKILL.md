@@ -1,11 +1,11 @@
 ---
 name: archify
-description: Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.
+description: Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG; optionally emit validated editable D2 or HTML+D2 artifacts from the same typed input when local D2 is available. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.
 ---
 
 # Archify Skill
 
-Create professional technical diagrams as self-contained HTML files with inline SVG, a theme toggle, and a built-in image/SVG export menu.
+Create professional technical diagrams as self-contained HTML files with inline SVG, a theme toggle, and a built-in image/SVG export menu. HTML is the default artifact; the explicit renderer selector also supports validated editable D2 source with `--format d2` or sibling HTML+D2 with `--format html+d2` when a local `d2` executable is available.
 
 Based on `tt-a1i/archify` 2.8, MIT licensed, which is based on `Cocoon-AI/architecture-diagram-generator` v1.0, MIT licensed. Keep `LICENSE` with copied or substantial portions.
 
@@ -50,6 +50,8 @@ When the user pastes Mermaid code, do NOT try to render or parse it mechanically
 Drop Mermaid styling; keep only the topology and meaning. You choose grouping, lane order, and what deserves emphasis — that judgment is the product.
 
 ## Renderer Modes (architecture / workflow / sequence / dataflow / lifecycle)
+
+Read [references/output-fidelity.md](references/output-fidelity.md) when choosing destination, audience, detail, compression, or dual-format fidelity. Read [references/semantic-patterns.md](references/semantic-patterns.md) when behavior-rich content needs a nearest-type semantic pattern. The D2 adapter uses the same typed JSON authority as HTML, encodes all input strings safely, validates with local `d2 fmt --check`, `d2 validate`, and an ephemeral compile, and publishes no compiled derivative.
 
 All five modes follow the same loop:
 
@@ -238,4 +240,4 @@ Typography inherits JetBrains Mono from the SVG root. Sizes: 11–12px component
 
 ## Output
 
-A single self-contained `.html`: embedded CSS (Google Fonts loads async and degrades to system monospace offline), inline SVG, ~19KB embedded JS for theme + export. It renders directly in any modern browser. Raster exports render natively at up to 4× the viewBox (large diagrams step down to 3×/2× to stay under canvas limits); the SVG download is dual-theme self-contained and follows the host's `prefers-color-scheme` (manual override via `svg[data-theme="..."]`).
+A single self-contained `.html`: embedded CSS (Google Fonts loads async and degrades to system monospace offline), inline SVG, about 19KB embedded JS for theme + export. It renders directly in any modern browser. Raster exports render natively at up to 4× the viewBox (large diagrams step down to 3×/2× to stay under canvas limits); the SVG download is dual-theme self-contained and follows the host's `prefers-color-scheme` (manual override via `svg[data-theme="..."]`).

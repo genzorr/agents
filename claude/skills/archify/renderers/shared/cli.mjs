@@ -30,11 +30,25 @@ export function writeDiagram({ outPath, template, meta, footerLabel, svg, cards 
   console.log(outPath);
 }
 
+function accessibleNameParts(meta, kind) {
+  const name = meta.subtitle ? `${meta.title} — ${meta.subtitle}` : meta.title;
+  const base = `${name} (${kind})`;
+  const hash = [...base].reduce((value, char) => ((value * 33) ^ char.charCodeAt(0)) >>> 0, 5381).toString(36);
+  return { base, titleId: `archify-title-${hash}`, descId: `archify-desc-${hash}` };
+}
+
 // Accessible name for the generated diagram SVG.
 export function svgRootAttrs(meta, kind) {
-  const name = meta.subtitle ? `${meta.title} — ${meta.subtitle}` : meta.title;
+  const { titleId, descId } = accessibleNameParts(meta, kind);
   const animation = meta.animation === 'trace' ? ' data-animation="trace"' : '';
-  return `role="img" aria-label="${esc(`${name} (${kind})`)}"${animation}`;
+  return `role="img" aria-labelledby="${titleId} ${descId}"${animation}`;
+}
+
+export function svgAccessibleContent(meta, kind) {
+  const { base, titleId, descId } = accessibleNameParts(meta, kind);
+  const name = meta.subtitle ? `${meta.title} — ${meta.subtitle}` : meta.title;
+  const description = meta.description || `Diagram showing ${name}.`;
+  return `<title id="${titleId}">${esc(base)}</title><desc id="${descId}">${esc(description)}</desc>`;
 }
 
 export function animateAttr(meta, kind, step) {

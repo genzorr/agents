@@ -52,7 +52,7 @@ Send only the minimum sufficient contract:
 - **Scope and ownership:** files or components Luna owns plus explicit non-goals and overlap boundaries.
 - **Authority:** local write, validation, commit, push, and external-write permissions exactly as granted by the user and governing project rules.
 - **Success criteria:** observable completion conditions and required artifacts.
-- **Verification:** authoritative contracts Luna must recover and cite; exact or proportional checks; plausible wrong implementations the tests must distinguish; failure and recovery paths to trace; full-diff audit; and evidence to preserve.
+- **Verification:** authoritative contracts Luna must recover and cite; exact or proportional checks; plausible wrong implementations the tests must distinguish; when a reviewed behavior spine applies, proof that its oracle is independent, a semantics-preserving implementation refactor remains green, a plausible production defect turns the spine red, and a detector ledger accounts for deleted or weakened tests; failure and recovery paths to trace; full-diff audit; and evidence to preserve.
 - **Stop/ask gates:** architecture decisions, user-owned choices, unsafe scope expansion, missing authority, unavailable infrastructure, or material ambiguity Luna must escalate instead of guessing.
 - **Return route:** the originating Sol thread ID and instruction to report there.
 - **Return format:** outcome; changed files or commit; verification; blockers; material uncertainty.
@@ -64,6 +64,7 @@ Do not include builder reasoning, long conversation history, failed-attempt narr
 - Recover and cite the authoritative inherited contracts before implementation; do not substitute an internally consistent interpretation for the governing definition.
 - Inspect the entire final diff, including tests and generated or configuration changes, before reporting review-ready.
 - Run adversarial consequence tests that distinguish plausible wrong implementations, not only happy-path or source-shape checks.
+- Reject an implementation-derived oracle: expected behavior must not come from production identifiers, generated keys, internal paths, or source shape unless that exact shape is the documented contract.
 - Trace fail-closed, error, retry, and recovery behavior in proportion to the task's failure surface.
 - Challenge the implementation and evidence against task nonclaims and report residual uncertainty explicitly.
 - Keep changes within the delegated scope and preserve unrelated user work.
@@ -78,6 +79,7 @@ Do not include builder reasoning, long conversation history, failed-attempt narr
 - Let Luna own authoritative-contract recovery, broad routine scans, line-by-line implementation, local diagnostics, adversarial verification, full-diff inspection, and test execution needed for its bounded task.
 - Prefer durable paths and exact symbols over pasted source and long summaries.
 - Challenge load-bearing assumptions, scientific validity, and release or GPU readiness as applicable; do not redo Luna's implementation-depth verification by default.
+- Do not infer oracle independence from a green suite. When a reviewed behavior spine applies and it is practical, use isolated scratch state to confirm a semantics-preserving implementation refactor remains green and a plausible production defect turns the spine red.
 - Treat a basic implementation fact rediscovered by Sol as Luna-handoff feedback: correct the current task, carry reusable lessons into later worker contracts, and propose the appropriate durable checklist update.
 - Do not poll or repeat “still working” messages. Luna reports back when it has a result or blocker.
 
