@@ -167,7 +167,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start"):
             self.assertNotIn(forbidden, text)
 
-    def test_luna_worker_contract_is_compact_and_complete(self) -> None:
+    def test_luna_worker_contract_is_complete(self) -> None:
         text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
         for field in (
             "**Objective:**",
@@ -181,7 +181,10 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "**Return format:**",
         ):
             self.assertIn(field, text)
-        self.assertIn("outcome, changed files or commit, verification, blockers, and material uncertainty", text)
+        self.assertIn("outcome; changed files or commit; verification; blockers; material uncertainty; when decision-bearing evidence applies, a concise inspection summary naming scope, depth, load-bearing observations that support or weaken acceptance, limitations (including uninspected items and reasons), and any divergence from the expected evidence set", text)
+        self.assertIn("Report using the return format above; keep any decision-bearing inspection summary concise", text)
+        self.assertIn("the expected decision-bearing evidence set, criteria for decision-critical items, proportional inspection depth, and how to report newly discovered evidence or divergence from the expected set", text)
+        self.assertIn("ambiguous or conflicting evidence, or other material ambiguity", text)
         self.assertIn("point to files instead of pasting their contents", text)
         self.assertIn("Do not include builder reasoning", text)
 
@@ -190,10 +193,14 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for phrase in (
             "Luna owns one coherent bounded implementation task and its implementation-depth verification",
             "recover authoritative contracts",
-            "inspect the full final diff",
+            "inspect the full final diff and decision-bearing evidence",
+            "Inspect the entire final diff and the decision-bearing artifacts",
+            "Cover each non-interchangeable decision-bearing artifact in the first pass",
+            "Do not treat a producer's success signal, metadata, or contract checks as inspection of the decision-bearing artifact",
             "test plausible wrong implementations",
             "trace failure and recovery paths",
             "Sol performs a narrow independent gate",
+            "send no routine progress or acknowledgement messages",
             "without redoing Luna's implementation work",
             "carry a reusable lesson into later Luna worker contracts",
             "propose a durable update to this skill or the governing project checklist",
@@ -206,6 +213,16 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Do not infer oracle independence from a green suite",
         ):
             self.assertIn(phrase, text)
+        for heading in ("## Operating Model\n", "## Delegation Sequence\n", "## Sol Token-Efficiency Rules\n", "## Parallel Work\n"):
+            self.assertIn(heading, text)
+        operating_model = text.split("## Operating Model\n", 1)[1].split("## Delegation Sequence", 1)[0]
+        sol_rules = text.split("## Sol Token-Efficiency Rules\n", 1)[1].split("## Parallel Work", 1)[0]
+        self.assertIn("decision-critical subset", operating_model)
+        self.assertIn("evidence whose observation could change acceptance", operating_model)
+        self.assertIn("directly at proportionate depth", operating_model)
+        self.assertIn("expand only for conflicts, unexplained gaps, or acceptance-critical uncertainty", operating_model)
+        self.assertIn("apply the decision-critical gate defined in the Operating Model at proportionate depth", sol_rules)
+        self.assertIn("expanding only for conflicts, unexplained gaps, or acceptance-critical uncertainty", sol_rules)
 
     def test_research_prompt_twins_share_sufficiency_contract(self) -> None:
         codex = self.read("codex/skills/research-prompt/SKILL.md")
