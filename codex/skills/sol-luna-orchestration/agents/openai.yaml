@@ -1,6 +1,6 @@
 interface:
   display_name: "Sol-Luna Orchestration"
-  short_description: "Configure Sol-led delegation to Luna."
-  default_prompt: "Use $sol-luna-orchestration to configure Sol-led planning and review with bounded Luna implementation."
+  short_description: "Configure Luna/xhigh work and reusable Sol/high review."
+  default_prompt: "Use $sol-luna-orchestration to configure Sol-led work with reusable Luna/xhigh subagents by default, conditional reusable Sol/high review when independent judgment can change acceptance, and an ordinary Luna task/thread only when I request one."
 policy:
   allow_implicit_invocation: false
