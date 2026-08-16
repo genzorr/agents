@@ -409,11 +409,25 @@ def migrate_legacy_entries(repo: Path, home: Path, state: dict[str, Any], desire
         }
 
 
-def is_codex_managed_global(path: Path) -> bool:
+GLOBAL_MANAGED_MARKERS = {
+    "codex": "<!-- managed-by: genzorr/agents; asset: codex-agents-md -->",
+    "claude": "<!-- managed-by: genzorr/agents; asset: claude-claude-md -->",
+}
+
+
+def is_managed_global(path: Path, header: str, marker: str) -> bool:
     if not path.exists() or path.is_symlink() or not path.is_file() or path.stat().st_size == 0:
         return True
-    first = path.read_text(encoding="utf-8", errors="replace").splitlines()[:1]
-    return first == ["# Global Codex Instructions"]
+    first_lines = path.read_text(encoding="utf-8", errors="replace").splitlines()[:2]
+    return first_lines == [header, marker]
+
+
+def is_codex_managed_global(path: Path) -> bool:
+    return is_managed_global(path, "# Global Codex Instructions", GLOBAL_MANAGED_MARKERS["codex"])
+
+
+def is_claude_managed_global(path: Path) -> bool:
+    return is_managed_global(path, "# Global Claude Instructions", GLOBAL_MANAGED_MARKERS["claude"])
 
 
 def source_text(layer: SourceLayer, repo: Path) -> str:
@@ -783,13 +797,18 @@ def plan_install(
                 actions.append(FileAction("update", target, item))
             next_state["files"][target] = state_record(item)
             continue
-        if item.asset.kind == "global_instructions" and platform == "codex" and is_codex_managed_global(destination):
+        if current == desired_signature:
+            next_state["files"][target] = state_record(item)
+            continue
+        managed_global = item.asset.kind == "global_instructions" and (
+            (platform == "codex" and is_codex_managed_global(destination))
+            or (platform == "claude" and is_claude_managed_global(destination))
+        )
+        if managed_global:
             if current != desired_signature:
                 actions.append(FileAction("update", target, item))
                 next_state["files"][target] = state_record(item)
-        elif current == desired_signature:
-            next_state["files"][target] = state_record(item)
-        elif item.asset.kind == "global_instructions" and platform == "codex":
+        elif item.asset.kind == "global_instructions":
             conflicts.append(f"{target}: skipped unmanaged global file; preserved")
         else:
             conflicts.append(f"{target}: unmanaged destination differs from source; preserved")

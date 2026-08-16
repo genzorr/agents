@@ -24,6 +24,7 @@ Place each instruction in exactly one layer. Duplication across layers is the mo
 | Layer | Holds | Cost |
 |---|---|---|
 | Harness system prompt | Product behavior. Not yours to edit. | — |
+| Global `~/.claude/CLAUDE.md` (runtime-home) | Cross-project Claude controls without a narrower rule file. | Always-on, every session and subagent |
 | `~/.claude/rules` (runtime-home) | Cross-project personal standards. | Always-on, every session **and every subagent** |
 | Project `CLAUDE.md` | What this repo is; its gotchas. | Always-on in this repo and all descendants |
 | Traveling docs (`~/.claude/docs` (runtime-home)) | Contracts and rubrics consulted mid-task. | Only when referenced |

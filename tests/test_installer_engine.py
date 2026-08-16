@@ -22,6 +22,10 @@ from scripts.agent_catalog import CatalogError, validate_asset_target, validate_
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRE_ADAPTER_MERGE_STATE = REPO_ROOT / "tests" / "fixtures" / "claude-hook-pre-adapter-merge-state.json"
+GLOBAL_MANAGED_MARKERS = {
+    "codex": "<!-- managed-by: genzorr/agents; asset: codex-agents-md -->",
+    "claude": "<!-- managed-by: genzorr/agents; asset: claude-claude-md -->",
+}
 
 
 posix_host_only = unittest.skipIf(
@@ -132,9 +136,12 @@ def write_fixture(repo: Path, platform: str = "codex", *, travel: bool = False, 
     assets["skills"].append({"id": "sample", "kind": "skill", "platforms": [platform], "owner": "agents", "source": {platform: f"{platform}/skills/sample"}, "install_target": {platform: "skills/sample"}})
 
     if global_file:
-        (repo / "codex").mkdir(exist_ok=True)
-        (repo / "codex" / "AGENTS.md").write_text("# Global Codex Instructions\nfixture\n", encoding="utf-8")
-        assets["global_instructions"].append({"id": "codex-agents-md", "kind": "global_instructions", "platforms": ["codex"], "owner": "agents", "source": {"codex": "codex/AGENTS.md"}, "install_target": {"codex": "AGENTS.md"}})
+        filename = "AGENTS.md" if platform == "codex" else "CLAUDE.md"
+        header = "# Global Codex Instructions" if platform == "codex" else "# Global Claude Instructions"
+        (repo / platform).mkdir(exist_ok=True)
+        marker = GLOBAL_MANAGED_MARKERS[platform]
+        (repo / platform / filename).write_text(f"{header}\n{marker}\nfixture\n", encoding="utf-8")
+        assets["global_instructions"].append({"id": f"{platform}-global-md", "kind": "global_instructions", "platforms": [platform], "owner": "agents", "source": {platform: f"{platform}/{filename}"}, "install_target": {platform: filename}})
 
     if travel:
         rule_root = repo / "claude" / "rules"
@@ -469,6 +476,70 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stderr)
             self.assertEqual(destination.read_text(), "operator instructions\n")
             self.assertFalse((home / ".agents-install-state.json").exists())
+
+    def test_header_only_global_file_is_preserved_without_ownership_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for platform in ("codex", "claude"):
+                repo, home = root / f"repo-{platform}", root / f"home-{platform}"
+                write_fixture(repo, platform, global_file=True)
+                filename = "AGENTS.md" if platform == "codex" else "CLAUDE.md"
+                header = "# Global Codex Instructions" if platform == "codex" else "# Global Claude Instructions"
+                destination = home / filename
+                destination.parent.mkdir(parents=True)
+                destination.write_text(f"{header}\noperator additions\n", encoding="utf-8")
+
+                result = self.run_installer(repo, platform, home)
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(destination.read_text(), f"{header}\noperator additions\n")
+                self.assertFalse((home / ".agents-install-state.json").exists())
+
+    def test_claude_managed_global_file_updates_and_unmanaged_file_is_preserved(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, home = Path(tmp) / "repo", Path(tmp) / "home"
+            write_fixture(repo, "claude", global_file=True)
+            destination = home / "CLAUDE.md"
+            destination.parent.mkdir(parents=True)
+            destination.write_text(
+                f"# Global Claude Instructions\n{GLOBAL_MANAGED_MARKERS['claude']}\noperator additions\n",
+                encoding="utf-8",
+            )
+            result = self.run_installer(repo, "claude", home)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(destination.read_bytes(), (repo / "claude/CLAUDE.md").read_bytes())
+
+            shutil.rmtree(home)
+            home.mkdir()
+            destination = home / "CLAUDE.md"
+            destination.write_text("operator instructions\n", encoding="utf-8")
+            result = self.run_installer(repo, "claude", home)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertEqual(destination.read_text(), "operator instructions\n")
+
+    def test_exact_preexisting_global_file_is_adopted_and_uninstalled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for platform in ("codex", "claude"):
+                repo, home = root / f"repo-{platform}", root / f"home-{platform}"
+                write_fixture(repo, platform, global_file=True)
+                filename = "AGENTS.md" if platform == "codex" else "CLAUDE.md"
+                source = repo / platform / filename
+                destination = home / filename
+                destination.parent.mkdir(parents=True)
+                destination.write_bytes(source.read_bytes())
+
+                installed = self.run_installer(repo, platform, home)
+
+                self.assertEqual(installed.returncode, 0, installed.stderr)
+                state = json.loads((home / ".agents-install-state.json").read_text())
+                self.assertEqual(state["files"][filename]["asset_id"], f"{platform}-global-md")
+
+                uninstalled = self.run_installer(repo, platform, home, "--uninstall")
+
+                self.assertEqual(uninstalled.returncode, 0, uninstalled.stderr)
+                self.assertFalse(destination.exists())
+                self.assertFalse((home / ".agents-install-state.json").exists())
 
     def test_ancestor_symlinks_fail_closed_for_install_prune_and_uninstall(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1153,6 +1224,14 @@ class InstallerEngineTest(unittest.TestCase):
             (repo / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
             errors, _warnings = validate_catalog(repo)
             self.assertTrue(any("not cataloged for travel" in error for error in errors))
+
+    def test_unlisted_claude_global_file_is_reported_by_catalog_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            write_fixture(repo, "claude")
+            (repo / "claude/CLAUDE.md").write_text("# Global Claude Instructions\nfixture\n", encoding="utf-8")
+            errors, _warnings = validate_catalog(repo)
+            self.assertIn("disk: claude/CLAUDE.md has no catalog entry", errors)
 
     def test_catalog_rejects_traversal_and_layer_collision(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

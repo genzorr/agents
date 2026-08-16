@@ -593,6 +593,18 @@
       }
     },
     {
+      "id": "response-shape",
+      "kind": "rule",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/rules/response-shape.md"
+      },
+      "install_target": {
+        "claude": "rules/response-shape.md"
+      }
+    },
+    {
       "id": "surgical-changes",
       "kind": "rule",
       "platforms": ["claude"],
@@ -650,6 +662,18 @@
       },
       "install_target": {
         "codex": "AGENTS.md"
+      }
+    },
+    {
+      "id": "claude-claude-md",
+      "kind": "global_instructions",
+      "platforms": ["claude"],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/CLAUDE.md"
+      },
+      "install_target": {
+        "claude": "CLAUDE.md"
       }
     }
   ],

@@ -4,7 +4,7 @@ A durable, repo-neutral contract for how `repos/agents`, `repos/harness`, and `r
 
 ## 1. Purpose and ownership
 
-Each repository manages only assets physically present in its own source tree. It never manages, prunes, or removes another repository's assets or a foreign/unknown installed asset such as `codex-primary-runtime`. Agents owns generic personal/global skills, commands, subagents, rules, Codex global instructions, Claude notification files, and explicitly cataloged traveling documents. Harness owns its `harness-*` assets and coupled Codex stop-gate files. session-harvester owns `skills/harvest-sessions/`.
+Each repository manages only assets physically present in its own source tree. It never manages, prunes, or removes another repository's assets or a foreign/unknown installed asset such as `codex-primary-runtime`. Agents owns generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, Claude notification files, and explicitly cataloged traveling documents. Harness owns its `harness-*` assets and coupled Codex stop-gate files. session-harvester owns `skills/harvest-sessions/`.
 
 Agents uses `catalog.json` as the sole desired-state authority. The catalog loader, installer engine, and validators derive identity, platform, sources, source layers, targets, adapters, and traveling documents from that file; the compatibility shell wrappers contain no asset allowlists or copy/prune logic.
 
@@ -54,7 +54,7 @@ Running install, update, prune, or uninstall against the real `~/.codex` (runtim
 
 ## 5. Platform adapter safety
 
-Codex writes global `AGENTS.md` only when the destination is absent, empty, or has the exact first-line header `# Global Codex Instructions`; other global instructions are preserved and reported. Codex permission-profile merging remains in `scripts/install-codex-permissions.py` and is not part of the generic engine.
+Codex writes global `AGENTS.md` and Claude writes global `CLAUDE.md` only when the destination is absent, empty, exactly matches the source and can be adopted, is recorded as unchanged, or has the exact platform header plus its managed ownership marker; other global instructions are preserved and reported. Codex permission-profile merging remains in `scripts/install-codex-permissions.py` and is not part of the generic engine.
 
 Claude never overwrites `settings.json` wholesale. It merges the catalog hook fragment while preserving unrelated hook commands, and records the exact Agents commands and script target needed for later reconciliation. Invalid JSON, malformed adapter data, missing prerequisites, and modified historical Agents commands produce an unresolved conflict with non-success status; they do not authorize destructive cleanup. Uninstall removes only exact recorded or safely inferred Agents commands and preserves unrelated settings and hooks. Existing settings mode is preserved, and new settings use normal file-creation mode.
 

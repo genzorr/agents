@@ -1,18 +1,19 @@
 # Global Codex Instructions
+<!-- managed-by: genzorr/agents; asset: codex-agents-md -->
 
 These instructions apply across Codex sessions unless a project-level `AGENTS.md` gives a more specific rule.
 
-## Response Discipline
+## Response Contract
 
-- Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler.
-- Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Reuse established project and domain terms for existing concepts. Introduce a new term only when it names a genuine new distinction. Briefly define a necessary term when the intended reader may not know it. Apply this to responses, documentation, commit messages, and pull-request descriptions. Prefer precision over blanket style bans: state claims directly; do not manufacture a “not X but Y” contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are acceptable when they are the clearest form.
-- Keep delegated or subagent prompts focused: include only the task and context the worker needs; omit builder reasoning, implementation narrative, and logs of failed attempts.
-- Do not use step-narration banners like "Step 1", "---", or "Now implementing" in user-facing output.
-- Do not restate the user's request before answering.
-- Do not add a closing recap when a concrete summary already exists, such as a verifier table, diff list, or commit message.
-- If correction is warranted, acknowledge briefly and move on.
+- Lead with the result, conclusion, recommendation, or finding. Organize the response around the reader's next decision or action.
+- Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut generic filler, repetition, process narration, and request restatement.
+- Preserve necessary evidence, material caveats, uncertainty, thresholds, scope, decisions, and the next action; brevity must not remove them.
+- Use blank-line-separated blocks; use headings, lists, tables, or code fences when they improve scanning. Match depth to the request: concise for direct questions, thorough for walkthroughs, reviews, plans, and "why" questions.
+- Keep delegated or subagent prompts focused: include only the task and context the worker needs; omit builder reasoning, implementation narrative, and failed-attempt logs.
+- Do not use step-narration banners like "Step 1", "---", or "Now implementing" in user-facing output. Do not add a closing recap when a concrete summary already exists.
+- For standalone artifacts, keep commentary outside the artifact unless context is necessary. Follow a task-specific skill's output contract when one exists.
 
-Exceptions: detailed explanations, walkthroughs, plans, ADRs, handoffs, and genuine ambiguities where structure is the content.
+Apply this to responses, documentation, commit messages, and pull-request descriptions. Detailed explanations, walkthroughs, plans, ADRs, handoffs, and genuine ambiguities may use more structure and depth. Do not carry chat layout into source code, comments, commit messages, documentation, or files written to disk.
 
 ## Line Breaks In Files
 
@@ -74,16 +75,10 @@ Applies to code you write. Do not restyle comments in code your task did not oth
 
 - Prefer a tool's native blocking wait or status/result command over a manual polling loop.
 - Do not tight-poll a long-running or background job (e.g. every few seconds); it burns tokens without adding information.
-- When polling is unavoidable, use a task-sized interval — minutes, not seconds — long enough that most checks find real progress.
+- When polling is unavoidable, use minutes rather than seconds.
 
-### Quiet waits
-
-- While a long-running or background job has not changed state, emit no user-visible update. This includes Harness Runs packets, delegated agents/review threads, CI/check runs, automations, remote benchmarks, and other external work you are waiting on. Do not post "still running", "still waiting", "no change yet", or similar reassurance, and do not restate the same status you already reported.
-- Emit a visible update only when state actually changes: completion, failure, a blocker that needs user input, an explicit user request for status, or new actionable output. This is the only trigger — elapsed time alone is not.
-- If a wait runs long with no state change, stay silent until at least 10-15 minutes have passed, and even then keep it to a single line noting that the job is still running and roughly how long it has taken. Do not repeat that line on a fixed cadence.
-- This discipline overrides any default periodic status commentary (for example, an app-driven ~30-second cadence): an unchanged wait stays quiet regardless of elapsed time until the threshold or a real state change, whichever comes first. Reading a thread, job, CI, or agent status just to see whether it changed is polling and follows this rule.
-- If a project-level instruction appears to permit generic periodic polling, interpret it narrowly: quiet waits still govern user-visible updates unless the local rule gives a concrete safety/recovery reason and interval. If the conflict is unclear, do not poll and mention the conflict once when it matters.
-- When state does change, keep the report concise — one line for a blocker or a completion is enough. Preserve necessary user-facing updates; the goal is to cut repeated no-op chatter, not to hide progress that carries information.
+- While state is unchanged, emit no update; report only completion, failure, a blocker, an explicit status request, or new actionable output.
+- After 10-15 minutes without change, one brief status line is allowed; do not repeat it on a fixed cadence.
 
 ## Think Before Coding
 
@@ -100,18 +95,8 @@ Applies to code you write. Do not restyle comments in code your task did not oth
 - Stop and ask when requirements are contradictory or the current state does not make sense.
 - Do not ask about trivial preferences where the existing codebase gives an obvious default.
 
-## Model And Effort
+## Preserve Thread Model
 
-Any script or workflow that invokes the upstream `claude` executable directly (including `claude -p` or `claude --print`) must pass an explicit `--model <model>` in argv for every invocation. Never rely on Claude settings, environment variables, or an inherited configured model for scripted execution. `claude-headless run --spec` requires a non-empty `model` in the JobRequest and passes it through; callers that bypass that interface remain outside its request validation.
-
-- Prefer improving the prompt, scope, context, tools, and workflow before considering a more expensive model or higher reasoning effort.
-
-### Preserve Thread Model
-
-- Never change an existing thread's model. The model for the current chat is fixed; the user will change it manually if needed.
-- Do not change an existing thread's reasoning effort silently. If a different effort level would help, stop and explicitly tell the user before changing it, and wait for the user's approval.
-- Entering goal mode, resuming work, finalizing a branch, reviewing a run, or encountering difficult work does not authorize a model or effort change.
-- When sending a message to an existing thread, omit model and effort overrides so its current settings are preserved.
-- When creating a thread, use the model and effort explicitly requested by the user. If none were requested, preserve the configured default rather than selecting a stronger model.
-- Never upgrade Luna or Terra work to Sol automatically. If the current model appears insufficient, explain why and ask the user to change it manually.
-- State any intentional model or effort override before launching a new thread.
+- Preserve an existing thread's model and effort; omit overrides when sending to an existing thread.
+- For new subagents or delegated jobs, use requested settings or preserve configured defaults; never upgrade Luna or Terra work to Sol automatically.
+- State intentional model or effort overrides before launching new work.

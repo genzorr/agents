@@ -159,7 +159,7 @@ def validate_asset_target(
     elif kind == "hook":
         valid = target.startswith("hooks/")
     elif kind == "global_instructions":
-        valid = target == "AGENTS.md"
+        valid = target == ("CLAUDE.md" if platform == "claude" else "AGENTS.md")
     else:
         valid = target.startswith("docs/")
     if not valid:
@@ -390,7 +390,7 @@ def _physical_asset_paths(repo: Path) -> set[str]:
         root = repo / "claude" / category
         if root.is_dir():
             paths.update(path.relative_to(repo).as_posix() for path in root.iterdir() if path.is_file() and path.suffix == ".md")
-    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "hooks.json"):
+    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "CLAUDE.md", repo / "claude" / "hooks.json"):
         if path.is_file():
             paths.add(path.relative_to(repo).as_posix())
     hook_root = repo / "claude" / "hooks"

@@ -14,7 +14,7 @@ prunes, or removes another repo's skills.
 
 | Repo | Owns / installs |
 |---|---|
-| **agents** (this repo) | generic personal/global skills, commands, subagents, rules, Codex global instructions, Claude notification hook |
+| **agents** (this repo) | generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, Claude notification hook |
 | `repos/harness` | `harness-*` skills, the `execute` command, `harness-task-bootstrap`/`task-verifier` subagents, the Codex stop-gate hook, and the Harness CLI/data-model those call |
 | `repos/session-harvester` | the `harvest-sessions` Claude skill only |
 | foreign (e.g. `codex-primary-runtime`) | visible-only; never installed or pruned by any repo here |
@@ -33,6 +33,7 @@ config/
   codex-permissions.toml # source-managed named Custom permission profile
   claude-auto-mode.json  # primary-macOS Claude auto-mode record (manual, not installed)
 claude/
+  CLAUDE.md             # global Claude instructions
   skills/<id>/SKILL.md
   commands/*.md       # generic slash commands (dual-review, plan)
   agents/*.md         # generic subagents (code-reviewer, planner)
