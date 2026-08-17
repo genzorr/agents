@@ -56,7 +56,7 @@ Use only stable native product behavior. Do not fabricate syntax, controllers, r
 
 ## Dispatch Preamble
 
-Before every dispatch, state the lane identity, workstream and assignment, whether the identity is new or reused, route, model and effort in force, and context mode. For a reviewer, also state the three-part escalation rationale required below. Do not dispatch when any required fact is unknown.
+Before every dispatch, state the lane identity, workstream and assignment, whether the identity is new or reused, route, model and effort in force, and context mode. For a worker dispatch, also name the root work this lane substitutes for, the unique output it owns, and the named downstream decision it will affect or accelerate, and confirm that this is a non-duplicative substitution rather than parallel coverage of an existing lane. For a reviewer, also state the three-part escalation rationale required below; reviewer escalation adds independent judgment and is not a worker substitution. Do not dispatch when any required fact is unknown.
 
 ## Worker Lifecycle And Continuity
 

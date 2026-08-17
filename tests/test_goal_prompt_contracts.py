@@ -157,6 +157,20 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start"):
             self.assertNotIn(forbidden, text)
 
+    def test_sol_luna_dispatch_preamble_requires_nonduplicative_decision_trace(self) -> None:
+        text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
+        preamble = text.split("## Dispatch Preamble\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
+        for anchor in (
+            "Before every dispatch, state the lane identity",
+            "For a worker dispatch, also name",
+            "root work this lane substitutes for",
+            "unique output it owns",
+            "named downstream decision it will affect or accelerate",
+            "non-duplicative substitution rather than parallel coverage of an existing lane",
+            "reviewer escalation adds independent judgment and is not a worker substitution",
+        ):
+            self.assertIn(anchor, preamble)
+
     def test_sol_luna_worker_contract_supports_handoffs_reuse_and_recovery(self) -> None:
         text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
         for field in (

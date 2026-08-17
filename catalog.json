@@ -7,8 +7,8 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "codex/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}],
-        "claude": [{"path": "claude/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}]
+        "codex": [{"path": "codex/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}],
+        "claude": [{"path": "claude/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}]
       },
       "install_target": {
         "codex": "skills/architecture-review",
@@ -703,8 +703,8 @@
     "foreign": {
       "owner": "foreign",
       "manage": false,
-      "assets": ["codex-primary-runtime"],
-      "note": "Installed-only, source unknown (likely a Codex companion plugin). Visible-only; never installed, updated, or pruned by any repo in this workspace."
+      "assets": ["codex-primary-runtime", "Visualize (Codex bundled/plugin capability)"],
+      "note": "Outside Agents ownership and management. codex-primary-runtime is installed-only with unknown source; Visualize is a Codex bundled/plugin capability. Both are visible-only and are never installed, updated, or pruned by any repo in this workspace."
     }
   }
 }

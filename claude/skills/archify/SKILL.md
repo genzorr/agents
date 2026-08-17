@@ -11,7 +11,7 @@ Based on `tt-a1i/archify` 2.8, MIT licensed, which is based on `Cocoon-AI/archit
 
 Every diagram ships with a **dark/light theme toggle** (persists in `localStorage`, respects `prefers-color-scheme`), an **export menu** (copy PNG to clipboard; download PNG/JPEG/WebP rasterized natively at up to 4× resolution; download a **dual-theme SVG** that follows the embedding host's `prefers-color-scheme` — ideal for GitHub READMEs), and a **CSS-variable color system** that keeps both themes consistent.
 
-When the user asks for an architecture critique or system map rather than a diagram artifact, use `/architecture-review` or `/zoom-out` first. Use Archify when the requested deliverable is the visual artifact itself or when another skill's output should become an exportable diagram.
+When understanding is the goal, use `/explain` even when a diagram makes the mental model clearer; pair the visual with a textual trace and evidence anchors. When the user asks for an architecture critique or system map rather than a diagram artifact, use `/architecture-review` or `/zoom-out` first. Use Archify when the requested deliverable is an exportable technical diagram artifact itself or when another skill's output should become one.
 
 ## Setup (one-time, renderer modes only)
 

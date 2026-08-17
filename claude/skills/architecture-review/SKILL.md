@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Find architecture, module-boundary, interface, and refactor opportunities in a codebase. Use when the user asks about scalability, modularity, large files, bad seams, testability, refactoring, deepening modules, or whether a design/codebase shape is good. Audit-only by default.
+description: Find architecture, module-boundary, interface, and refactor opportunities in a codebase. Use when the user asks about scalability, modularity, large files, bad seams, testability, refactoring, deepening modules, or whether a design/codebase shape is good, or explicitly requests a comprehensive, exhaustive, repo-wide, or entire-codebase architecture audit. Audit-only by default.
 ---
 
 # Architecture Review
@@ -30,6 +30,7 @@ Use these terms consistently in findings.
 ## Workflow
 
 1. Read the user's concern, planned change, or upcoming work. If this is a harness task, also read `harness snapshot`, the active task, and the parent slice. Use those sources to scope the review. When none supplies a scope, inspect recent Git history to prioritize repeatedly changed paths; treat churn as a priority signal, not evidence of an architecture defect.
+   If the user explicitly asks for a comprehensive, exhaustive, repo-wide, or entire-codebase audit, open [docs/comprehensive-codebase-audit.md](docs/comprehensive-codebase-audit.md) and follow that protocol; ordinary scoped reviews continue with this workflow, and Architecture Review remains the owner and selection authority.
 2. Read relevant docs, findings, ADRs, glossary/context docs, and tests. Respect existing decisions unless there is concrete friction.
 3. Trace callers, data flow, configuration, side effects, and verification seams. Use Grep/Glob first; avoid broad rewrites.
 4. When the target area changes integration topology, a shared substrate, cross-component coordination, or failure containment, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local refactors.

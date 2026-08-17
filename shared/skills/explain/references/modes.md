@@ -2,6 +2,20 @@
 
 Choose one primary route. A mixed request may teach a prerequisite concept or architecture slice first, but it should still converge on the user's concrete target.
 
+## Compact Code-Shape Vocabulary
+
+Choose one or two shapes that answer the user's current question; do not turn the explanation into a catalog or a decorative diagram. Keep labels, calls, files, props, state, and boundaries grounded in the evidence map, mark inferred relationships, and provide a plain-text equivalent plus source anchors for any visual shape.
+
+- **Pseudocode** — show a small algorithm, rule, or state transition when syntax is not the point.
+- **Call tree** — show runtime control flow, ownership, or one representative call stack.
+- **Component tree** — show UI structure, state, and module boundaries that matter to the question.
+- **Shallow responsibility tree** — show file or subsystem ownership without dumping the whole repository.
+- **Types/signatures** — show the contract between values, interfaces, or functions when data shape is the key to the model.
+- **Focused diff** — show what changes when the surrounding shape is already known; include the whole relevant block when omission would hide order or ownership.
+- **Mermaid** — render only in chat or Markdown output for labeled component interaction, control flow, or data flow when a compact graph answers one question; the inert static renderer has no diagram block, so an HTML artifact includes Mermaid only as clearly labeled code text while the accompanying trace remains authoritative.
+
+These are explanatory representations owned by Explain. They do not create a new route or change the output-medium default: a nontrivial explanation still uses the inert static renderer, and an exportable technical diagram artifact belongs to `archify`.
+
 ## Change Or Pull Request
 
 **Learning outcome:** The user can state why the change exists, predict old and new behavior, trace the important implementation path, and identify how the behavior is verified.

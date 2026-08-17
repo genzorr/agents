@@ -66,6 +66,54 @@ class ExplainRendererTest(unittest.TestCase):
         self.assertIn("Use in-chat Markdown alone for a short explanation or when the user requests it", skill)
         self.assertIn("Do not add JavaScript to the default explainer", safety)
 
+    def test_explain_selects_compact_code_shapes_without_foreign_visualize_dependency(self) -> None:
+        skill = (SHARED_SKILL / "SKILL.md").read_text(encoding="utf-8")
+        modes = (SHARED_SKILL / "references" / "modes.md").read_text(encoding="utf-8")
+        safety = (SHARED_SKILL / "references" / "html-safety.md").read_text(encoding="utf-8")
+        shared_explain = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in sorted(SHARED_SKILL.rglob("*"))
+            if path.is_file()
+        )
+
+        for shape in (
+            "Pseudocode",
+            "Call tree",
+            "Component tree",
+            "Shallow responsibility tree",
+            "Types/signatures",
+            "Focused diff",
+            "Mermaid",
+        ):
+            with self.subTest(shape=shape):
+                self.assertIn(shape, modes)
+        self.assertIn("plain-text equivalent", modes)
+        self.assertIn("platform-independent exception", safety)
+        self.assertNotIn("visualize", shared_explain.lower())
+        for specialist in ("zoom-out", "architecture-review", "prototype", "Figma", "image-generation"):
+            with self.subTest(specialist=specialist):
+                self.assertIn(specialist, skill)
+        self.assertIn("host exposes those capabilities", skill)
+        self.assertIn("Explain's own evidence-backed workflow remains complete", skill)
+        self.assertIn("user requests that destination", skill)
+        self.assertIn("external-write approval is in hand", skill)
+
+    def test_codex_metadata_separates_understanding_from_optional_interactive_exploration(self) -> None:
+        metadata = (ROOT / "codex" / "skills" / "explain" / "agents" / "openai.yaml").read_text(encoding="utf-8")
+
+        self.assertIn("Understand systems with evidence-backed explanations", metadata)
+        self.assertIn("Visualize only when available for explicit interactive exploration", metadata)
+
+    def test_archify_is_reserved_for_exportable_technical_diagram_artifacts(self) -> None:
+        for relative, invocation in (
+            (Path("codex/skills/archify/SKILL.md"), "`explain`"),
+            (Path("claude/skills/archify/SKILL.md"), "`/explain`"),
+        ):
+            with self.subTest(relative=relative):
+                archify = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(f"understanding is the goal, use {invocation}", archify)
+                self.assertIn("exportable technical diagram artifact", archify)
+
     def test_renderer_escapes_source_text_and_emits_inert_html(self) -> None:
         hostile = '</script><script src="https://attacker.invalid/x.js">alert(1)</script>'
         spec = {

@@ -1,5 +1,6 @@
 """Behavior contracts for bounded-cognition and source-distillation guidance."""
 
+import json
 import unittest
 from pathlib import Path
 
@@ -237,6 +238,66 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             self.assertIn("Skip it when work stays behind one existing interface, entrypoints share only a product-free primitive, or the project already has one proven behavior path and the new work does not change it.", reference_paragraphs[0])
             self.assertFalse((REPO_ROOT / platform / "skills" / "capability-core-adapters").exists())
             self.assertFalse((REPO_ROOT / platform / "skills" / "capability-contract").exists())
+
+    def test_architecture_review_conditionally_applies_comprehensive_audit_protocol(self) -> None:
+        reference = self.read("docs/comprehensive-codebase-audit.md")
+        for behavior in (
+            "explicitly asks for a comprehensive, exhaustive, repo-wide, or entire-codebase architecture audit",
+            "Inventory every identifiable subsystem",
+            "stable ID and name",
+            "exact ownership boundary",
+            "fresh read-only lane",
+            "exact boundary that does not overlap another lane",
+            "bounded to the number the coordinator can actively manage",
+            "schedule remaining inventory rows in explicit batches",
+            "mark the audit `partial`",
+            "do not claim independently validated comprehensive completion",
+            "fixed maximum of two material findings or `skip` per lane",
+            "split it into narrower inventory rows and review each in its own lane",
+            "Verdict: recommend | skip",
+            "Confidence: high | medium | low",
+            "Dependency shape: <in-process | local-substitutable | remote-owned | true-external>",
+            "independently verifies every finding",
+            "Deduplicate overlapping findings",
+            "Overlap and duplication",
+            "Materiality and over-abstraction",
+            "Schema completeness",
+            "Dependency-aware ranking",
+            "fresh Luna lanes",
+            "do not automatically escalate to a Sol reviewer",
+            "Unchanged-repository completion",
+            "repository must be unchanged by the audit",
+            "each accepted finding as exactly one numbered entry under the normal `Candidates:` heading",
+            "Only after the operator selects one candidate",
+            "grill-with-docs",
+        ):
+            self.assertIn(behavior, reference)
+        self.assertIn("Candidates:\n1. <short name>", reference)
+        self.assertIn("If scratch writes are unavailable, keep the ledger in visible session state", reference)
+        self.assertIn("first ledger entry declares the audited boundary", reference)
+        self.assertIn("prepare-dynamic-workflow", reference)
+        self.assertIn("explicitly invoked Sol–Luna on Codex", reference)
+
+        for platform in ("codex", "claude"):
+            text = self.read_skill(platform, "architecture-review")
+            reference_paragraphs = [
+                paragraph
+                for paragraph in text.split("\n\n")
+                if "docs/comprehensive-codebase-audit.md" in paragraph
+            ]
+            self.assertEqual(len(reference_paragraphs), 1)
+            self.assertIn("explicitly asks for a comprehensive, exhaustive, repo-wide, or entire-codebase audit", reference_paragraphs[0])
+            self.assertIn("ordinary scoped reviews continue with this workflow", reference_paragraphs[0])
+            self.assertIn("explicitly requests a comprehensive, exhaustive, repo-wide, or entire-codebase architecture audit", text)
+
+    def test_catalog_keeps_visualize_outside_agents_ownership(self) -> None:
+        catalog = json.loads((REPO_ROOT / "catalog.json").read_text(encoding="utf-8"))
+        foreign = catalog["boundary_notes"]["foreign"]
+        self.assertFalse(foreign["manage"])
+        self.assertIn("codex-primary-runtime", foreign["assets"])
+        self.assertIn("Visualize (Codex bundled/plugin capability)", foreign["assets"])
+        self.assertIn("Outside Agents ownership and management", foreign["note"])
+        self.assertIn("never installed, updated, or pruned", foreign["note"])
 
     def test_grill_with_docs_routes_unknowns_to_evidence_without_forcing_a_choice(self) -> None:
         for platform in ("codex", "claude"):

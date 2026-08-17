@@ -76,7 +76,7 @@ The renderer rejects unknown fields and block types, escapes every source-derive
 
 ## Rich Micro-World Exception
 
-Use a separate micro-world artifact only when the learning contract requires manipulation or time-varying state that the static renderer cannot express.
+Use a separate micro-world artifact only when the learning contract requires manipulation or time-varying state that the static renderer cannot express. This platform-independent exception does not change the ordinary inert explainer default.
 
 - Do not add JavaScript to the default explainer for navigation, theming, filtering, or answer reveal; use native HTML and CSS. JavaScript remains an exception for a concrete learning interaction.
 - Keep it in `/tmp` unless the user requests a repo artifact. Use synthetic data and no network, cookies, local storage, service workers, clipboard access, forms that submit, external fonts/assets, iframes, `object`, or `embed`.

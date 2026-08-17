@@ -113,15 +113,19 @@ class SkillValidatorContractsTest(unittest.TestCase):
                         self.assertEqual(installed[target].asset.id, skill)
                         self.assertEqual(installed[target].source.resolve(), (REPO_ROOT / reference).resolve())
 
-    def test_architecture_review_materializes_shared_multi_entrypoint_reference(self) -> None:
+    def test_architecture_review_materializes_shared_references(self) -> None:
         assets = load_catalog(REPO_ROOT)
-        expected_source = (REPO_ROOT / "docs" / "multi-entrypoint-capability-review.md").resolve()
-        target = "skills/architecture-review/docs/multi-entrypoint-capability-review.md"
+        expected_references = (
+            (REPO_ROOT / "docs" / "multi-entrypoint-capability-review.md").resolve(),
+            (REPO_ROOT / "docs" / "comprehensive-codebase-audit.md").resolve(),
+        )
         for platform in ("codex", "claude"):
             installed = desired_files(REPO_ROOT, assets, platform)
-            self.assertIn(target, installed)
-            self.assertEqual(installed[target].asset.id, "architecture-review")
-            self.assertEqual(installed[target].source.resolve(), expected_source)
+            for expected_source in expected_references:
+                target = f"skills/architecture-review/docs/{expected_source.name}"
+                self.assertIn(target, installed)
+                self.assertEqual(installed[target].asset.id, "architecture-review")
+                self.assertEqual(installed[target].source.resolve(), expected_source)
 
     def test_skill_local_doc_layer_satisfies_catalog_travel_validation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
