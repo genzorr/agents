@@ -1,6 +1,7 @@
 """Static contracts for goal quality, Sol–Luna orchestration, and research sufficiency."""
 
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -138,26 +139,30 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         frontmatter = text.split("---\n", 2)[1]
         profiles = text.split("## Resolve Role Profiles\n", 1)[1].split("## Select New Or Reused Ownership", 1)[0]
         for anchor in (
-            "Use only after the operator explicitly invokes orchestrate-feature",
-            "Defaults are Sol/high owner, Sol/medium workers, and Sol/high reviewer",
-            "never mutates the current orchestrator",
+            "Use only after the operator invokes orchestrate-feature",
+            "Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review",
+            "requested reviewer Sol/high",
+            "never mutates the orchestrator",
         ):
             self.assertIn(anchor, frontmatter)
         for anchor in (
             "Feature owner | `gpt-5.6-sol` / `high`",
             "Implementation worker | Native `gpt-5.6-sol` / `medium`",
-            "Independent reviewer | Native `gpt-5.6-sol` / `high`",
-            "an owner override changes only owner creation",
-            "a worker override changes only the inner worker profile",
-            "a reviewer override changes only the independent reviewer profile",
-            "inherits its own role's default, never another role's override",
+            "Independent reviewer | Disabled; when explicitly requested, native `gpt-5.6-sol` / `high`",
+            "owner and worker overrides change only their profiles",
+            "reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile",
+            "only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it",
+            "standing or global reviewer preferences never activate review",
+            "inherits its enabled role's default, never another override",
+            "Never infer reviewer activation",
+            "driver requirement without operator authorization stops",
             "Do not cascade",
-            "Stop when a selected value cannot be set or validated; never substitute",
-            "profile provenance, not independent post-creation readback",
+            "never substitute or validate reviewer controls while disabled",
+            "profile provenance, not independent readback",
         ):
             self.assertIn(anchor, profiles)
         self.assertIn('display_name: "Orchestrate Feature"', metadata)
-        self.assertIn('short_description: "Dispatch profiled feature owners and workers"', metadata)
+        self.assertIn('short_description: "Launch feature owners with opt-in review"', metadata)
 
     def test_orchestrate_feature_preserves_immutable_orchestrator_and_authority(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
@@ -178,7 +183,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "**Scope and shared state:**",
             "**Authority:**",
             "**Driver and lens:**",
-            "**Resolved role map and inner route:**",
+            "**Resolved role map, reviewer request, and inner route:**",
             "**Success, artifacts, verification, and evidence:**",
             "**Stop/ask and reporting gates:**",
             "**Notification and return contract:**",
@@ -189,8 +194,10 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "never broaden worktree, Git, live-install, or external-write authority",
             "native leaf workers only",
             "forbid the optional ordinary implementation-task route",
-            "owns integration, primary review, and feature acceptance",
-            "cannot delegate authority or create an ordinary task",
+            "reviewer activation recorded as `disabled` or `operator-requested`",
+            "exact operator-request provenance, acceptance target",
+            "owns integration, default self-review, and feature acceptance",
+            "cannot delegate or create an ordinary task",
         ):
             self.assertIn(anchor, contract)
         self.assertIn("must not spawn or duplicate the feature owner's implementation workers or reviewer directly", text)
@@ -283,22 +290,26 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Use only after explicit invocation of orchestrate-workers",
             "operator-authorized feature launch",
             "explicit sol-luna-orchestration preset",
-            "without changing the coordinator profile or lifecycle driver",
+            "Preserve coordinator profile and driver",
         ):
             self.assertIn(anchor, frontmatter)
         for anchor in (
             "Coordinator:",
             "any product-exposed profile",
-            "Implementation worker | Native subagent | `gpt-5.6-sol` | `medium`",
-            "Independent reviewer | Native subagent | `gpt-5.6-sol` | `high`",
-            "one override never changes the coordinator or another role",
-            "Stop if an exact selected route/model/effort/context control cannot be set or validated",
+            "Implementation worker | When delegated | Native subagent | `gpt-5.6-sol` | `medium`",
+            "Independent reviewer | Disabled unless explicitly operator-requested | Native subagent | `gpt-5.6-sol` | `high`",
+            "one override never changes another role or the coordinator",
+            "Reviewer activation and profile are separate",
+            "Only an explicit operator request activates review",
+            "launch contract must carry the request",
+            "do not resolve or validate reviewer controls, identity, or protocol",
+            "Stop if an exact control cannot be validated",
         ):
             self.assertIn(anchor, profiles)
         for anchor in (
-            "worker/reviewer profile only on explicit operator instruction, an operator-authorized launch contract, or the explicit `sol-luna-orchestration` preset",
-            "ordinary implementation-task route always requires a separate explicit operator request",
-            "neither a launch contract nor the preset authorizes that route by itself",
+            "Use another enabled-role profile only on explicit operator instruction",
+            "ordinary task route always requires a separate explicit request",
+            "neither contract nor preset authorizes it",
         ):
             self.assertIn(anchor, profiles)
         self.assertNotIn("Require the current coordinator to run Sol", text)
@@ -312,7 +323,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "## Worker Lifecycle And Continuity",
             "## Compact Worker Contract",
             "## Worker Rules",
-            "## Escalated Independent Review",
+            "## Operator-Requested Independent Review",
             "## Operator-Requested Ordinary Implementation Route",
         ):
             self.assertIn(heading, text)
@@ -344,7 +355,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "unique output",
             "downstream decision affected",
             "why the lane is non-duplicative",
-            "three-part escalation rationale",
+            "explicit operator request and exact acceptance target",
         ):
             self.assertIn(anchor, preamble)
 
@@ -394,7 +405,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "failure/recovery paths",
         ):
             self.assertIn(anchor, operating)
-        worker_rules = text.split("## Worker Rules\n", 1)[1].split("## Escalated Independent Review", 1)[0]
+        worker_rules = text.split("## Worker Rules\n", 1)[1].split("## Operator-Requested Independent Review", 1)[0]
         for anchor in (
             "decision-bearing artifact",
             "not producer signals",
@@ -404,20 +415,121 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, worker_rules)
 
-    def test_orchestrate_workers_preserves_reviewer_escalation_gates(self) -> None:
+    def test_orchestrate_workers_requires_operator_requested_review(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
-        review = text.split("## Escalated Independent Review\n", 1)[1].split("## Operator-Requested Ordinary Implementation Route", 1)[0]
+        review = text.split("## Operator-Requested Independent Review\n", 1)[1].split("## Operator-Requested Ordinary Implementation Route", 1)[0]
         for anchor in (
-            "coordinator is the default reviewer",
-            "named acceptance-critical target",
-            "material expected value",
-            "Generic confidence",
-            "If any is missing, do not dispatch",
+            "coordinator reviews and accepts by default",
+            "Only an explicit operator request for this task activates a reviewer",
+            "No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review",
+            "unauthorized driver requirement is a stop-and-ask condition",
+            "Do not resolve or validate reviewer route/model/effort, read the reviewer protocol, or create/reuse a reviewer while disabled",
+            "record the operator request and exact acceptance target",
             "Reuse one compatible idle reviewer",
-            "Create a fresh reviewer only when escalation is required",
-            "The ordinary implementation route never changes reviewer routing",
+            "Create a fresh reviewer only when operator-requested review is active",
+            "ordinary implementation route never changes reviewer activation or routing",
         ):
             self.assertIn(anchor, review)
+        for forbidden in (
+            "otherwise escalate",
+            "fresh judgment has material expected value",
+            "conflicting plausible interpretations",
+            "concrete anchoring concern",
+            "If any is missing, do not dispatch",
+        ):
+            self.assertNotIn(forbidden, review)
+
+    def test_orchestration_family_rejects_implicit_reviewer_activation_language(self) -> None:
+        paths = (
+            "codex/skills/orchestrate-feature/SKILL.md",
+            "codex/skills/orchestrate-workers/SKILL.md",
+            "codex/skills/sol-luna-orchestration/SKILL.md",
+        )
+        review_target = re.compile(r"\b(review|reviewer|reviewers|independent review)\b")
+        allowed_review_fragments = {
+            "description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested.",
+            "Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review, and requested reviewer Sol/high.",
+            "- **Role map:** immutable current-orchestrator observation plus independently resolved owner and worker profiles, reviewer activation, and the reviewer profile only when operator-requested.",
+            "| Independent reviewer | Disabled;",
+            "Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it;",
+            "standing or global reviewer preferences never activate review.",
+            "reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile.",
+            "Never infer reviewer activation;",
+            "never substitute or validate reviewer controls while disabled.",
+            "- **Resolved role map, reviewer request, and inner route:** complete role map;",
+            "reviewer activation recorded as `disabled` or `operator-requested`;",
+            "when requested, exact operator-request provenance, acceptance target, and separate reviewer profile/provenance;",
+            "State that the owner owns integration, default self-review, and feature acceptance;",
+            "may create only native leaf workers and an operator-requested reviewer;",
+            "Pass the worker profile and reviewer activation as `disabled` or `operator-requested`;",
+            "only when requested, also pass the exact operator-request provenance, acceptance target, and reviewer profile/provenance.",
+            "The lens owns decomposition, contracts, context, continuity, evidence, review routing, and acceptance;",
+            "The project orchestrator must not spawn or duplicate the feature owner's implementation workers or reviewer directly.",
+            "Independent reviewers receive fresh context with no exception.",
+            "Keep every worker and reviewer a leaf and keep their identities separate.",
+            "The owner remains planner, integrator, default reviewer, and acceptance authority;",
+            "without requested review it reviews the integrated change itself.",
+            "description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
+            "Defaults are native Sol/medium workers, coordinator self-review, and requested reviewer native Sol/high.",
+            "This lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",
+            "it may use any product-exposed profile and remains planner, integrator, primary reviewer, and acceptance authority.",
+            "- **Independent reviewer:** separate operator-requested native leaf;",
+            "| Independent reviewer | Disabled unless explicitly operator-requested | Native subagent | `gpt-5.6-sol` | `high` |",
+            "Reviewer activation and profile are separate.",
+            "Only an explicit operator request activates review;",
+            "While disabled, do not resolve or validate reviewer controls, identity, or protocol.",
+            "the same applies to any explicitly requested reviewer verdict.",
+            "Savings never weaken scope, verification, authority, or review quality.",
+            "Keep every worker and reviewer a leaf.",
+            "For a reviewer, state the explicit operator request and exact acceptance target.",
+            "Keep implementation and reviewer identities separate.",
+            "## Operator-Requested Independent Review",
+            "Only an explicit operator request for this task activates a reviewer.",
+            "No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review.",
+            "Do not resolve or validate reviewer route/model/effort, read the reviewer protocol, or create/reuse a reviewer while disabled.",
+            "Reuse one compatible idle reviewer keyed by exact reviewer role, project, checkout, trust, authority, isolation, route, model, and effort.",
+            "Create a fresh reviewer only when operator-requested review is active and no compatible identity is reachable.",
+            "New reviewers always receive fresh context with no history exception.",
+            "The ordinary implementation route never changes reviewer activation or routing.",
+            "When the operator activates review, read [references/independent-reviewer-protocol.md](references/independent-reviewer-protocol.md) completely and follow it.",
+            "Do not infer reviewer authorization from task characteristics or evidence gaps.",
+            "description: Configure the current Sol task through orchestrate-workers with Luna/xhigh workers, self-review, an optional explicitly requested Sol/high reviewer, and an ordinary Luna/xhigh task only when separately requested.",
+            "that generic lens owns decomposition, worker/reviewer contracts, context, continuity, evidence, optional-review routing, acceptance, and lifecycle rules.",
+            "The current Sol coordinator remains planner, integrator, primary reviewer, and acceptance authority.",
+            "| Independent reviewer | Disabled unless explicitly operator-requested | Native Sol subagent | `gpt-5.6-sol` | `high` |",
+            "Explicit operator review or reviewer-profile wording activates a Sol/high reviewer.",
+            "do not resolve disabled reviewer controls.",
+            "keep independent reviewer activation unchanged and apply that lens's exact callback identity, action, acceptance, and delivery-failure contract;",
+            "It will implement, validate, and report back to this Sol task for review.",
+            "Apply every generic context, leaf topology, shared-checkout ownership, reset/reuse/recycle, verification, operator-requested reviewer, and acceptance rule from `orchestrate-workers`.",
+            "Only when the operator activates independent review, use its generic `references/independent-reviewer-protocol.md`;",
+            "do not recreate a Sol-specific reviewer protocol here.",
+        }
+
+        def review_fragments(text: str) -> list[str]:
+            fragments = (fragment for line in text.splitlines() for fragment in re.split(r"(?<=[.;])\s+", line))
+            return [fragment for fragment in fragments if review_target.search(fragment.lower())]
+
+        observed_review_fragments = set()
+        for path in paths:
+            observed_review_fragments.update(review_fragments(self.read(path)))
+        self.assertEqual(observed_review_fragments, allowed_review_fragments)
+        for regression in (
+            "High-risk tasks require independent review.",
+            "Ambiguity dispatches an independent reviewer.",
+            "A driver preference adds independent review.",
+            "Risk requires a separate reviewer.",
+            "Without a named oracle, add independent review.",
+            "A driver preference requires independent review unless explicitly waived.",
+            "Risk does not require a checklist and dispatches an independent reviewer.",
+            "The operator creates workers and the driver dispatches independent review.",
+            "No other worker requires context, but ambiguity creates an independent reviewer.",
+            "Route high-risk work to an independent reviewer.",
+            "Use an independent reviewer when evidence is ambiguous.",
+            "Assign a reviewer when the task is important.",
+        ):
+            self.assertNotIn(regression, allowed_review_fragments)
+            self.assertEqual(review_fragments(regression), [regression])
 
     def test_orchestrate_workers_preserves_ordinary_route_delivery(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
@@ -484,20 +596,14 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "terminal classification",
         ):
             self.assertIn(anchor, supervision)
-        self.assertIn("owns integration, primary review, and feature acceptance", text)
+        self.assertIn("owns integration, default self-review, and feature acceptance", text)
 
     def test_orchestrate_workers_preserves_independent_review_protocol(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
-        review = text.split("## Escalated Independent Review\n", 1)[1].split("## Operator-Requested Ordinary Implementation Route", 1)[0]
+        review = text.split("## Operator-Requested Independent Review\n", 1)[1].split("## Operator-Requested Ordinary Implementation Route", 1)[0]
         for anchor in (
-            "named acceptance-critical target",
-            "fresh judgment has material expected value",
-            "conflicting plausible interpretations",
-            "named reliable deterministic oracle",
-            "concrete anchoring concern",
-            "cross-worker boundary",
-            "If any is missing, do not dispatch",
-            "Create a fresh reviewer only when escalation is required",
+            "explicit operator request for this task",
+            "Create a fresh reviewer only when operator-requested review is active",
             "fresh context with no history exception",
             "Independence comes from separate identity",
             "references/independent-reviewer-protocol.md",
@@ -515,6 +621,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "voided",
             "coordinator remains acceptance authority",
             "exact reviewer profile",
+            "explicit operator-request provenance",
         ):
             self.assertIn(anchor, protocol)
         self.assertIn("isolated scratch state outside the reviewed checkout", protocol)
@@ -528,9 +635,12 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Require the current coordinator to run Sol",
             "never change it",
             "Invoke `orchestrate-workers` explicitly",
-            "Native Luna subagent | `gpt-5.6-luna` | `xhigh`",
-            "Native Sol subagent | `gpt-5.6-sol` | `high`",
-            "Luna/xhigh remains the direct-invocation implementation default",
+            "Implementation worker | When delegated | Native Luna subagent | `gpt-5.6-luna` | `xhigh`",
+            "Independent reviewer | Disabled unless explicitly operator-requested | Native Sol subagent | `gpt-5.6-sol` | `high`",
+            "Luna/xhigh is the worker default",
+            "Sol self-reviews",
+            "Explicit operator review or reviewer-profile wording activates a Sol/high reviewer",
+            "do not resolve disabled reviewer controls",
             "only when the operator separately requests it",
             "apply that lens's exact callback identity, action, acceptance, and delivery-failure contract",
             "return the launch response immediately",
@@ -539,7 +649,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "no second copy of that protocol",
         ):
             self.assertIn(anchor, text)
-        for forbidden in ("## Compact Worker Contract", "## Worker Rules", "## Escalated Independent Review", "## Worker Lifecycle And Continuity"):
+        for forbidden in ("## Compact Worker Contract", "## Worker Rules", "## Operator-Requested Independent Review", "## Escalated Independent Review", "## Worker Lifecycle And Continuity"):
             self.assertNotIn(forbidden, text)
         self.assertIn('display_name: "Sol-Luna Orchestration"', metadata)
         self.assertIn("allow_implicit_invocation: false", metadata)
@@ -559,18 +669,18 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             for generic_protocol_phrase in (
                 "provisional results satisfy no dependency",
                 "Inspect artifacts, not producer signals",
-                "three-part escalation rationale",
+                "Do not resolve or validate reviewer route/model/effort",
                 "Do not recycle for granularity, assignment count",
             ):
                 self.assertNotIn(generic_protocol_phrase, text)
         for generic_protocol_phrase in (
             "provisional results satisfy no dependency",
             "Inspect artifacts, not producer signals",
-            "three-part escalation rationale",
+            "Do not resolve or validate reviewer route/model/effort",
             "Do not recycle for granularity, assignment count",
         ):
             self.assertIn(generic_protocol_phrase, generic)
-        for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start", "claude-headless"):
+        for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start", "claude-headless", "Claude"):
             self.assertNotIn(forbidden, outer + generic + preset)
 
     def test_research_prompt_twins_share_sufficiency_contract(self) -> None:

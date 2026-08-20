@@ -1,6 +1,6 @@
 ---
 name: orchestrate-feature
-description: Dispatch or reuse one ordinary profiled feature-owner task from a long-lived project orchestrator and configure reusable native profiled workers plus an independently profiled reviewer through orchestrate-workers. Defaults are Sol/high owner, Sol/medium workers, and Sol/high reviewer; explicit role-local overrides are allowed for one feature. Use only after the operator explicitly invokes orchestrate-feature or requests this exact topology. Invocation authorizes one resolved feature lane; it never mutates the current orchestrator or broadens project, Git, branch, worktree, external-write, or live-install authority.
+description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested. Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review, and requested reviewer Sol/high. Allows explicit role-local overrides. Use only after the operator invokes orchestrate-feature or requests this topology. Invocation authorizes one feature lane; it never mutates the orchestrator or broadens project, Git, branch, worktree, external-write, or live-install authority.
 ---
 
 # Orchestrate Feature
@@ -12,7 +12,7 @@ description: Dispatch or reuse one ordinary profiled feature-owner task from a l
 - **Project orchestrator:** current long-lived task preserving program context and decisions.
 - **Feature owner:** ordinary task at the resolved owner profile that owns one feature's detailed lifecycle and feature-level acceptance.
 - **Role profile:** exact route when applicable, model identifier, effort, and default/override provenance for one role.
-- **Role map:** immutable current-orchestrator observation plus independently resolved owner, worker, and reviewer profiles.
+- **Role map:** immutable current-orchestrator observation plus independently resolved owner and worker profiles, reviewer activation, and the reviewer profile only when operator-requested.
 - **Launch contract:** authoritative context, scope, state, authority, role map, success, verification, stop, and notification packet sent to the feature owner.
 - **Notification contract:** selected delivery mode/target/action, mandatory and extended events, message shape, and truthful fallback; callback identity/action fields apply only to callback.
 - **Supervision state:** ready feature identity, host when required, and latest wait cursor retained after creation; do not fabricate it in the initial child packet.
@@ -42,11 +42,11 @@ Use this no-override map:
 | Project orchestrator | Current task model / current effort; immutable |
 | Feature owner | `gpt-5.6-sol` / `high` |
 | Implementation worker | Native `gpt-5.6-sol` / `medium` |
-| Independent reviewer | Native `gpt-5.6-sol` / `high` |
+| Independent reviewer | Disabled; when explicitly requested, native `gpt-5.6-sol` / `high` |
 
-Accept only explicit, unambiguous overrides tied to this feature or a durable user decision. Resolve each role independently: an owner override changes only owner creation, a worker override changes only the inner worker profile, and a reviewer override changes only the independent reviewer profile. An omitted model or effort inherits its own role's default, never another role's override. Do not cascade, infer from task size/cost/availability/history, silently upgrade/downgrade, or convert a nickname into an unsupported identifier. An override never waives a governing role-profile requirement; conflict stops.
+Accept only explicit, unambiguous overrides tied to this feature. Owner and worker overrides may also come from a durable operator decision governing their roles. Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it; standing or global reviewer preferences never activate review. Resolve roles independently: owner and worker overrides change only their profiles; reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile. An omitted field inherits its enabled role's default, never another override. Never infer reviewer activation; a driver requirement without operator authorization stops for a decision. Do not cascade, silently change effort, or convert a nickname into an unsupported identifier. An override never waives a governing profile requirement; conflict stops.
 
-Echo the complete map with `default` or `operator override` provenance before dispatch. Feature-detect exact route, model, effort, and context controls. Stop when a selected value cannot be set or validated; never substitute. Treat accepted creation/spawn as profile provenance, not independent post-creation readback, and disclose a missing readback surface.
+Echo the map with `default`, `disabled`, or `operator override` provenance. Validate exact controls only for enabled roles; never substitute or validate reviewer controls while disabled. Treat accepted creation/spawn as profile provenance, not independent readback, and disclose missing readback.
 
 ## Select New Or Reused Ownership
 
@@ -65,7 +65,7 @@ Recycle only for a different feature/project/repository/checkout, trust/permissi
 3. Select the exact resolved owner model and effort and resolve saved project/environment first. Personal OS-managed repositories use the existing checkout unless the operator explicitly authorizes a worktree. Other projects follow user and project policy, then the native default when no stricter rule exists. The inner lens's no-worktree-without-operator-approval rule governs an additional worktree created after launch, not a task environment already assigned under this compliant outer policy. Use the exact intended existing branch/ref or explicitly intended working-tree state; never invent either.
 4. Send only the complete launch contract to a concise project-and-feature title. Distill chat-only facts and point to durable paths; never inherit or paste parent history. Conversation history is context, not authority.
 5. Distinguish pending from ready identity and request validation from readback. Retain ready identity, host, and latest wait cursor; perform one bounded `wait_threads` wait/snapshot for immediate completion, failure, or attention. Timeout leaves `launched, awaiting handoff` and supports no later-notification claim.
-6. Report identity, objective, requested owner profile, worker/reviewer profiles, environment/context, delivery route, wait state, fallback, and every readback limitation.
+6. Report identity, objective, role map, environment/context, delivery route, wait state, fallback, and readback limitations.
 
 ## Feature Owner Launch Contract
 
@@ -77,23 +77,23 @@ Include every applicable field whose absence can change behavior or authority:
 - **Scope and shared state:** ownership, interfaces, dependencies, sibling boundaries, writers, Git/generated/build/test/port/device ownership.
 - **Authority:** edit, validation, commit, push, PR, merge, branch/lifecycle, external-write, task-creation, and delegation authority exactly as granted; never broaden worktree, Git, live-install, or external-write authority.
 - **Driver and lens:** project workflow remains driver; explicitly invoke `orchestrate-workers` under this operator-authorized launch.
-- **Resolved role map and inner route:** immutable orchestrator observation/requirement plus exact owner, worker, and reviewer profiles/provenance; native leaf workers only; forbid the optional ordinary implementation-task route.
+- **Resolved role map, reviewer request, and inner route:** complete role map; reviewer activation recorded as `disabled` or `operator-requested`; when requested, exact operator-request provenance, acceptance target, and separate reviewer profile/provenance; native leaf workers only; forbid the optional ordinary implementation-task route.
 - **Success, artifacts, verification, and evidence:** observable criteria, commands, decision-bearing artifacts, plausible wrong implementations, and failure/recovery paths where material.
 - **Stop/ask and reporting gates:** user-owned decisions, architecture/contract change, unsafe expansion, missing authority/infrastructure, dependency invalidation, shared-resource conflict, and required phase gates.
 - **Notification and return contract:** selected target/action, mandatory blocker/gate/terminal events, message shape, extended gates, and fallback. Under callback include exact originating `threadId`/`hostId` when required plus native `send_message_to_thread`; accepted terminal send establishes delivery. Under active waiting use native attention for gates/blockers and terminal result for final handoff while attached; observation establishes delivery, timeout does not. A replacement names its validated mechanism/target. Manual supervision remains unobserved until later inspection.
 - **Final handoff:** `complete`, `blocked`, `partial`, or `failed`; outcome; exact repository/branch/commit/checkout/tested state; artifacts; checks; criteria; decisions/divergence; blockers/uncertainty; downstream action; continuity; actual role map and readback limits.
 
-State that the owner owns integration, primary review, and feature acceptance; may create only native leaf workers and the separately escalated native reviewer; cannot delegate authority or create an ordinary task; and treats worker reports as evidence, not acceptance.
+State that the owner owns integration, default self-review, and feature acceptance; may create only native leaf workers and an operator-requested reviewer; cannot delegate or create an ordinary task; and treats reports as evidence.
 
 ## Constrain Inner Delegation
 
-Require the feature owner to apply `orchestrate-workers` while its project workflow or launch contract remains driver. The relayed invocation in this operator-authorized launch satisfies explicit activation for this feature. Pass the resolved worker and reviewer profiles independently. The generic lens owns decomposition, contracts, fresh context, continuity, evidence, escalation, and acceptance; do not duplicate its protocol here.
+Require the owner to apply `orchestrate-workers` under its project workflow or launch contract. This relayed invocation activates the lens for the feature. Pass the worker profile and reviewer activation as `disabled` or `operator-requested`; only when requested, also pass the exact operator-request provenance, acceptance target, and reviewer profile/provenance. The lens owns decomposition, contracts, context, continuity, evidence, review routing, and acceptance; do not duplicate it.
 
 The project orchestrator must not spawn or duplicate the feature owner's implementation workers or reviewer directly. All feature-lane child dispatch, correction, reuse, and aggregation stays with the feature owner.
 
 Create native workers with no parent turns by default. An inherited-turn fork is exceptional: use only the smallest bounded recent slice for one named load-bearing fact with no durable source that cannot be accurately distilled without material loss, and state the fact, reason, and exact slice. Independent reviewers receive fresh context with no exception. Full parent-history inheritance is prohibited. Keep every worker and reviewer a leaf and keep their identities separate.
 
-The owner remains planner, integrator, primary reviewer, and acceptance authority. It must not create another feature task, use the optional ordinary implementation-task route, delegate authority, or treat worker/reviewer profile names as proof of acceptance or independence.
+The owner remains planner, integrator, default reviewer, and acceptance authority; without requested review it reviews the integrated change itself. It must not create another feature task, use the ordinary task route, delegate, or treat profile names as proof.
 
 ## Supervise And Complete
 

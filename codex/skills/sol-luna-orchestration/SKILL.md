@@ -1,11 +1,11 @@
 ---
 name: sol-luna-orchestration
-description: Configure the current Sol task through orchestrate-workers with historical native Luna/xhigh implementation defaults, Sol/high independent reviewer default, and an ordinary Luna/xhigh implementation task only when separately requested. Use only when the operator explicitly invokes sol-luna-orchestration or asks for Sol–Luna orchestration; invocation configures the current resolved task without launching work, changing the Sol coordinator, authorizing unrelated work, or replacing the task driver.
+description: Configure the current Sol task through orchestrate-workers with Luna/xhigh workers, self-review, an optional explicitly requested Sol/high reviewer, and an ordinary Luna/xhigh task only when separately requested. Use only when the operator invokes sol-luna-orchestration or asks for Sol–Luna orchestration. Configures one task without launching work, changing the coordinator, authorizing unrelated work, or replacing the driver.
 ---
 
 # Sol–Luna Orchestration
 
-**Composition role: explicit preset lens.** Keep the current task skill or workflow as driver. This preset supplies historical profiles and routes to `orchestrate-workers`; that generic lens owns decomposition, worker/reviewer contracts, context, continuity, evidence, escalation, acceptance, and lifecycle rules. This preset grants no additional authority and contains no second copy of that protocol.
+**Composition role: explicit preset lens.** Keep the current task skill or workflow as driver. This preset supplies historical profiles and routes to `orchestrate-workers`; that generic lens owns decomposition, worker/reviewer contracts, context, continuity, evidence, optional-review routing, acceptance, and lifecycle rules. This preset grants no additional authority and contains no second copy of that protocol.
 
 ## Configure Only
 
@@ -19,16 +19,16 @@ Preserve permissions, approval policy, scope, stop gates, and no-worktree-withou
 
 Pass this default profile map to `orchestrate-workers`:
 
-| Role | Route | Model | Effort |
-|---|---|---|---|
-| Implementation worker | Native Luna subagent | `gpt-5.6-luna` | `xhigh` |
-| Independent reviewer | Native Sol subagent | `gpt-5.6-sol` | `high` |
+| Role | Activation | Route | Model | Effort |
+|---|---|---|---|---|
+| Implementation worker | When delegated | Native Luna subagent | `gpt-5.6-luna` | `xhigh` |
+| Independent reviewer | Disabled unless explicitly operator-requested | Native Sol subagent | `gpt-5.6-sol` | `high` |
 
-Luna/xhigh remains the direct-invocation implementation default; Sol/high remains the independent-review default. Another worker or reviewer profile requires an explicit operator instruction and changes only that role. Before every dispatch, state route, exact model, effort, context mode, and default/override provenance. If the exact selection cannot be set or validated, stop; never substitute, cascade an override, raise/lower silently, or claim independent readback from request acceptance.
+Luna/xhigh is the worker default; Sol self-reviews. Explicit operator review or reviewer-profile wording activates a Sol/high reviewer. Another enabled-role profile requires explicit instruction and changes only that role. State enabled controls and provenance before dispatch; do not resolve disabled reviewer controls. Stop if a selection cannot be validated; never substitute, cascade, silently change effort, or claim independent readback.
 
 ## Ordinary Luna Implementation Route
 
-Enable the ordinary Codex implementation task route only when the operator separately requests it for the resolved task. Pass ordinary task/thread route plus `gpt-5.6-luna`/`xhigh` to `orchestrate-workers`; keep independent reviewer routing unchanged and apply that lens's exact callback identity, action, acceptance, and delivery-failure contract; return the launch response immediately, do not wait or poll, and send only a genuine blocker or final handoff. Across tasks require fresh preset invocation and another explicit ordinary-route request.
+Enable the ordinary Codex implementation task route only when the operator separately requests it for the resolved task. Pass ordinary task/thread route plus `gpt-5.6-luna`/`xhigh` to `orchestrate-workers`; keep independent reviewer activation unchanged and apply that lens's exact callback identity, action, acceptance, and delivery-failure contract; return the launch response immediately, do not wait or poll, and send only a genuine blocker or final handoff. Across tasks require fresh preset invocation and another explicit ordinary-route request.
 
 Use this historical response shape after a ready launch:
 
@@ -36,4 +36,4 @@ Use this historical response shape after a ready launch:
 Launched Luna task/thread <thread-id> for <bounded objective>. It will implement, validate, and report back to this Sol task for review.
 ```
 
-Apply every generic context, leaf topology, shared-checkout ownership, reset/reuse/recycle, verification, reviewer escalation, and acceptance rule from `orchestrate-workers`. When independent review fires, use its generic `references/independent-reviewer-protocol.md`; do not recreate a Sol-specific reviewer protocol here.
+Apply every generic context, leaf topology, shared-checkout ownership, reset/reuse/recycle, verification, operator-requested reviewer, and acceptance rule from `orchestrate-workers`. Only when the operator activates independent review, use its generic `references/independent-reviewer-protocol.md`; do not recreate a Sol-specific reviewer protocol here.

@@ -1,6 +1,6 @@
 interface:
   display_name: "Sol-Luna Orchestration"
-  short_description: "Configure Luna/xhigh work and escalated Sol/high review."
-  default_prompt: "Use $sol-luna-orchestration to configure Sol-led work with reusable Luna/xhigh subagents by default, reusable Sol/high review only for a named acceptance-critical target where independent judgment has material value, and an ordinary Luna task/thread only when I request one."
+  short_description: "Configure Luna/xhigh work with opt-in Sol review"
+  default_prompt: "Use $sol-luna-orchestration to configure Sol-led work with reusable Luna/xhigh subagents and coordinator self-review unless I explicitly request a Sol/high reviewer or ordinary Luna task."
 policy:
   allow_implicit_invocation: false

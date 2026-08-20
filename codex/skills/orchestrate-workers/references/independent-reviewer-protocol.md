@@ -1,6 +1,6 @@
 # Independent Reviewer Protocol
 
-Read this reference only after the escalation rule in `SKILL.md` requires independent review.
+Read this reference only after the operator explicitly requests independent review for the resolved task.
 
 ## Prepare
 
@@ -13,7 +13,7 @@ Use a compatible idle reviewer identity. For a new reviewer, apply the skill's n
 Send:
 
 - review ID;
-- named target and three-part escalation rationale;
+- named acceptance target and explicit operator-request provenance;
 - operator goal and acceptance criteria;
 - exact accumulated change set or revisions;
 - interfaces, constraints, and nonclaims;
@@ -41,9 +41,9 @@ Require one outcome:
 
 If mutation occurs, report it, recycle the reviewer, and restore state only within authority. Stop if restoration is incomplete. Re-establish and verify the integrated baseline before review or acceptance.
 
-When review is required, withhold acceptance until the coordinator resolves the disposition and receives a valid verdict or the operator explicitly waives review. Re-dispatch failed review to the same compatible reviewer when reachable; otherwise recycle it. The verdict is evidence; the coordinator remains acceptance authority.
+When review is operator-requested, withhold acceptance until the coordinator resolves the disposition and receives a valid verdict or the operator explicitly waives review. Re-dispatch failed review to the same compatible reviewer when reachable; otherwise recycle it. The verdict is evidence; the coordinator remains acceptance authority.
 
-Send `fix-first` corrections to the original implementation worker when resumable, then integrate and verify. `rethink` returns decisions to the coordinator. Any implementation change invalidates the verdict, not reviewer identity; when review remains required, send a reset packet against new state.
+Send `fix-first` corrections to the original implementation worker when resumable, then integrate and verify. `rethink` returns decisions to the coordinator. Any implementation change invalidates the verdict, not reviewer identity; while the operator's review request remains active, send a reset packet against new state.
 
 ## Reviewer Continuity
 
