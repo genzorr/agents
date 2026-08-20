@@ -1,0 +1,6 @@
+interface:
+  display_name: "Orchestrate Workers"
+  short_description: "Delegate with explicit worker and reviewer profiles"
+  default_prompt: "Use $orchestrate-workers to delegate this resolved task with the selected worker and reviewer profiles."
+policy:
+  allow_implicit_invocation: false

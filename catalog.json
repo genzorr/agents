@@ -278,17 +278,30 @@
       }
     },
     {
-      "id": "orchestrate-sol-feature",
+      "id": "orchestrate-feature",
       "kind": "skill",
       "platforms": ["codex"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/orchestrate-sol-feature"
+        "codex": "codex/skills/orchestrate-feature"
       },
       "install_target": {
-        "codex": "skills/orchestrate-sol-feature"
+        "codex": "skills/orchestrate-feature"
       },
       "tags": ["role:helper", "domain:orchestration"]
+    },
+    {
+      "id": "orchestrate-workers",
+      "kind": "skill",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/orchestrate-workers"
+      },
+      "install_target": {
+        "codex": "skills/orchestrate-workers"
+      },
+      "tags": ["role:lens", "domain:orchestration"]
     },
     {
       "id": "prepare-dynamic-workflow",

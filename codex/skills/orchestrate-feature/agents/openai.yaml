@@ -1,0 +1,6 @@
+interface:
+  display_name: "Orchestrate Feature"
+  short_description: "Dispatch profiled feature owners and workers"
+  default_prompt: "Use $orchestrate-feature to launch or resume this agreed feature with the resolved role profiles."
+policy:
+  allow_implicit_invocation: false
