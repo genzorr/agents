@@ -69,6 +69,24 @@ Codex skills do not expose a typed parameter schema; the skill treats only expli
 
 Before dispatch, classify whether a separate feature owner has material value. The gate passes when the work is expected to be multi-phase, produce substantial implementation or evidence context, contain multiple coherent assignments, progress independently, or when the operator explicitly requests this topology. Otherwise recommend contained work in the current task and return.
 
+## Choosing The Entrypoint
+
+Use the ownership boundary, not task importance, to choose an entrypoint:
+
+| Operator intent | Entrypoint | Ownership result |
+| --- | --- | --- |
+| Keep the current task as planner, integrator, primary reviewer, and acceptance authority while delegating bounded implementation or verification | `$orchestrate-workers` | The current task remains coordinator; native workers and any required independent reviewer operate beneath it. |
+| Preserve the current project-orchestrator context while another ordinary task owns a substantial feature lifecycle | `$orchestrate-feature` | The current task remains project orchestrator; a separate feature owner applies `orchestrate-workers` internally. |
+| Complete a small contained task whose handoff cost would exceed its delegation value | Neither | The current task performs the work directly. |
+
+Direct `orchestrate-workers` use is appropriate when the design is already resolved in the current task and implementation plus fresh review would help without creating another ownership layer. For example, the operator can say: `Use $orchestrate-workers to implement this caching change in the current task. Delegate implementation to Sol/medium and require independent Sol/high review before acceptance.` The current task decomposes the work, sends the compact contract, integrates and checks the result, routes corrections, and alone accepts the change.
+
+It is also appropriate when the current task owns a migration or similarly coherent task with genuinely non-overlapping implementation lanes, such as application changes and independent test-fixture changes. Prefer one coherent worker; add workers only when each owns a distinct output that changes or accelerates a named downstream decision. The current task integrates all lanes and retains one visible acceptance boundary.
+
+Invoking `orchestrate-workers` does not guarantee an independent reviewer unless the operator or governing driver requires one or the named escalation conditions fire. State `require independent review` when review must occur. New workers receive fresh context and a compact contract by default, every worker and reviewer remains a leaf, and one invocation applies to one resolved task. The skill changes no coordinator profile, permission, Git authority, worktree authority, or external-write authority.
+
+When the operator invokes `$orchestrate-feature`, no separate `$orchestrate-workers` invocation is necessary. The operator-authorized feature launch explicitly activates the inner lens in the feature-owner task and forbids its optional ordinary implementation-task route. Both public skills remain explicit-only; intentional outer invocation authorizes the composed owner-and-worker topology without adding a confirmation gate at every layer.
+
 ## Operating Model
 
 ```text

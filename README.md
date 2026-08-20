@@ -60,6 +60,8 @@ docs/
   context-file-authoring.md       # craft rubric for CLAUDE.md / AGENTS.md / rules (always-on layer)
   destructive-command-guard.md # external cross-agent command guard decision and setup
   model-and-effort.md             # choosing model/effort for subagents, workflows, delegated jobs
+  orchestrate-feature-prd.md      # operator entrypoint guide and feature-orchestration product contract
+  orchestrate-feature-spec.md     # technical contract and verification requirements for orchestration skills
   skill-authoring-principles.md   # craft rubric for writing/reviewing skills
   skill-lifecycle-policy.md       # generic lifecycle thresholds and audit method for skill-lifecycle
   skill-installer-contract.md     # reusable per-repo installer contract (shared by all repos)
