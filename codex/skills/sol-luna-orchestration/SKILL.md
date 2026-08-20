@@ -9,13 +9,13 @@ description: Configure Sol-led planning, delegation, and review with reusable Lu
 
 ## Configure Only
 
-If invoked without a resolved task and coherent delegation boundary, confirm provisional configuration, name what Sol must resolve before delegation, and return without launching Luna. Activation applies only to the current resolved task. A later task, or a task resolved after provisional configuration, requires a fresh explicit invocation.
+If invoked without a resolved task and coherent delegation boundary, confirm provisional configuration, name what Sol must resolve before delegation, and return without launching a worker. Activation applies only to the current resolved task. A later task, or a task resolved after provisional configuration, requires a fresh explicit invocation. An explicit lens invocation relayed in an operator-authorized ordinary-task launch contract satisfies this requirement for that resolved task; an agent-relayed request without such an operator-authorized contract does not.
 
 ## Terms
 
 - **Task:** the general unit of work owned by the driver, independent of project tracking.
 - **Sol session:** the current Codex task/thread running Sol and hosting orchestration.
-- **Worker:** a Luna subagent, or an ordinary Luna task/thread on the operator-requested route.
+- **Worker:** the selected native implementation subagent, or the explicitly operator-requested ordinary implementation task/thread; Luna/xhigh remains the default profile.
 - **Reviewer:** the independent Sol subagent used only by the escalation rule below; never an implementation worker.
 - **Workstream:** a coherent ownership lane within a task.
 - **Assignment:** one bounded contract sent to a worker; a compatible worker may receive sequential assignments.
@@ -39,19 +39,19 @@ Use only stable native product behavior. Do not fabricate syntax, controllers, r
 ## Operating Model
 
 - Sol remains planner, decision-maker, coordinator, integrator, primary reviewer, and acceptance authority. Keep one visible acceptance boundary.
-- Luna owns bounded implementation and implementation-depth verification. It recovers governing contracts, inspects its full owned diff and decision-bearing evidence, tests plausible wrong implementations, traces proportionate failure and recovery paths, and reports uncertainty.
-- Main Sol performs a narrow independent gate over the integrated state and decision-critical evidence. Treat Luna's successful, current, scope-complete checks as evidence; do not rerun them routinely. Execute only checks that are missing, stale after integration, contradicted, or needed to resolve a decision-critical question.
-- Luna's report is evidence, not acceptance. Sol accepts only after inspecting the integrated repository state, diff, and verification evidence.
+- The selected worker owns bounded implementation and implementation-depth verification. It recovers governing contracts, inspects its full owned diff and decision-bearing evidence, tests plausible wrong implementations, traces proportionate failure and recovery paths, and reports uncertainty.
+- Main Sol performs a narrow independent gate over the integrated state and decision-critical evidence. Treat the worker's successful, current, scope-complete checks as evidence; do not rerun them routinely. Execute only checks that are missing, stale after integration, contradicted, or needed to resolve a decision-critical question.
+- A worker report is evidence, not acceptance. Sol accepts only after inspecting the integrated repository state, diff, and verification evidence.
 - Dispatch is not completion. Keep the task open until every planned lane, launched worker, and required handoff is classified and Sol finishes acceptance.
 - Token or wall-clock savings must not weaken scope, verification, authority boundaries, or review quality.
 
 ## Decompose And Route
 
 1. Resolve architecture, scope, user-owned decisions, risks, authoritative contracts, stop gates, and observable completion before delegation. Point to durable paths and exact symbols instead of pasting conversation history.
-2. Prefer one coherent Luna worker. Add workers only for coherent, non-overlapping ownership lanes; each writer needs distinct durable write ownership. Keep a sequential dependency chain over one ownership lane with one reused worker.
+2. Prefer one coherent worker. Add workers only for coherent, non-overlapping ownership lanes; each writer needs distinct durable write ownership. Keep a sequential dependency chain over one ownership lane with one reused worker.
 3. Before parallel dispatch, define a compact map for each lane: objective, owned files/components, read/write boundary, required inputs, downstream recipient, expected artifact, verification responsibility, and integration order. Launch only the dependency-free frontier within the product concurrency limit; keep deferred lanes visible until dispatch, explicit replan, or cancellation.
 4. Treat the checkout as shared. Assign one owner for Git state, generated artifacts, build outputs, test databases, ports, formatters, code generation, and other shared mutable state; defer contending operations. Each concurrent worker verifies its owned surface. Afterward, the designated state owner may run serialized shared-state commands, and Sol adjudicates the integrated diff and verification evidence. Parallelism never authorizes a worktree.
-5. Launch new Luna workers without parent-chat history by default. Confirm the no-parent-history setting and use the Compact Luna Worker Contract plus durable references as the context boundary. Inherit only the smallest bounded recent slice when a named load-bearing fact has no durable source and cannot be summarized without material loss; state the fact, reason, and exact inherited slice before dispatch. Never inherit the full parent conversation. Inherited history is context, not authority; restate scope, permissions, decisions, and completion criteria in the contract.
+5. Launch new workers without parent-chat history by default. Confirm the no-parent-history setting and use the Compact Worker Contract plus durable references as the context boundary. Inherit only the smallest bounded recent slice when a named load-bearing fact has no durable source and cannot be summarized without material loss; state the fact, reason, and exact inherited slice before dispatch. Never inherit the full parent conversation. Inherited history is context, not authority; restate scope, permissions, decisions, and completion criteria in the contract.
 6. Keep every worker and reviewer a leaf. Sol alone creates agents, aggregates results, and mediates handoffs.
 
 ## Dispatch Preamble
@@ -60,10 +60,10 @@ Before every dispatch, state the lane identity, workstream and assignment, wheth
 
 ## Worker Lifecycle And Continuity
 
-1. Send the Compact Luna Worker Contract and make the applicable Luna Worker Rules part of it by reference when readable or by inlining only the applicable rules.
+1. Send the Compact Worker Contract and make the applicable Worker Rules part of it by reference when readable or by inlining only the applicable rules.
 2. After subagent dispatch, continue useful Sol work and then wait through the native result surface. After an operator-requested ordinary task/thread launch, return immediately and never poll; check it once only when the operator asks for status or reports missing delivery.
 3. Route every dependency through Sol. Dispatch a dependent lane only after the upstream assignment is classified and Sol validates the smallest required handoff. A provisional or mid-run result never satisfies a dependency.
-4. Send bounded corrections and compatible successive assignments to the same worker. If Sol's contract was wrong, correct it without forcing a failed retry. If Luna/xhigh no longer fits the required judgment or risk handling, stop and ask the operator; never upgrade Luna work to Sol automatically.
+4. Send bounded corrections and compatible successive assignments to the same worker. If Sol's contract was wrong, correct it without forcing a failed retry. If the selected worker profile no longer fits the required judgment or risk handling, stop and ask the operator; never raise its model or effort without an explicit operator request.
 5. If a worker is blocked, partial, failed, or invalidated by changed assumptions, halt dependents and replan. Use native correction/stop controls when available; otherwise let it finish, classify the output as invalid for integration, and redo only under a corrected contract. Never replace a stalled or failed worker silently.
 6. Classify every worker as complete, blocked, partial, or failed. Reconcile shared state and account for every planned lane and required handoff; none may disappear during aggregation or compaction.
 7. Reuse a compatible idle worker when its identity remains reachable and the project, checkout, trust boundary, authority envelope, role, ownership, model, and effort still fit. Compaction is expected and does not itself justify recycling.
@@ -71,7 +71,7 @@ Before every dispatch, state the lane identity, workstream and assignment, wheth
 9. Recycle only for a material repository/checkout/trust/authority/permission change; incompatible model or effort; an uncorrected superseded contract; a decision-critical constraint that cannot be restored after compaction; a repeated acceptance-critical miss, stale assumption, or overbuilt direction after correction; hidden unresolved prior state; unreachable identity; or an explicit operator request. Report lost continuity and the prior disposition before replacement.
 10. Do not recycle for task granularity, a fixed assignment count, token budget, elapsed time, routine correction, delayed handoff, or a compatible new operator decision. An additional independent owner adds a lane; it does not replace a healthy owner. Keep implementation and reviewer identities separate.
 
-## Compact Luna Worker Contract
+## Compact Worker Contract
 
 Send only fields that apply:
 
@@ -83,7 +83,7 @@ Send only fields that apply:
 - **Context and continuity:** new/reused identity, assignment/workstream, authoritative checkpoint, carry-over facts, and invalidated prior authority or claims.
 - **Dependencies and handoffs:** required inputs, downstream owner, expected artifact/fact, delivery condition, order, and Sol as recipient.
 - **Success criteria:** observable completion and required artifacts.
-- **Verification:** task-specific contracts, checks, expected evidence, plausible wrong implementations, and failure/recovery paths; apply Luna Worker Rules for depth.
+- **Verification:** task-specific contracts, checks, expected evidence, plausible wrong implementations, and failure/recovery paths; apply Worker Rules for depth.
 - **Reviewed behavior-spine proof, only when the driver requires it:** independent oracle, semantics-preserving refactor remains green, plausible defect turns red, and detector ledger covers removed/weakened tests.
 - **Stop/ask gates:** user-owned choices, architecture or contract change, unsafe expansion, missing authority or infrastructure, dependency failure, or material ambiguity.
 - **Return route:** parent Sol session for a subagent, or exact originating Sol session ID for an ordinary task/thread.
@@ -91,7 +91,7 @@ Send only fields that apply:
 
 Omit builder reasoning, hidden chain-of-thought, long history, and failed-attempt narration. Send only a blocker/stop escalation or final report through the selected route.
 
-## Luna Worker Rules
+## Worker Rules
 
 - Recover and cite governing contracts before implementation; do not substitute an internally consistent interpretation.
 - Inspect the entire final diff for owned paths and each non-interchangeable decision-bearing artifact. During concurrency, report foreign changes to Sol; do not treat them as owned verification.
@@ -111,7 +111,7 @@ Main Sol is the default reviewer. A Sol reviewer is required when the operator o
 - Main Sol materially designed or revised the disputed surface and can name a concrete anchoring concern.
 - A cross-worker boundary depends on judgment not covered by completed checks.
 
-Generic confidence, task importance, a risk label, Luna completion, multiple workers, a public interface, or reviewer availability does not qualify. Before dispatch, state: (1) the exact review target, (2) why independence adds value beyond main Sol's review, and (3) how possible verdicts would change acceptance. If any part is missing, do not dispatch.
+Generic confidence, task importance, a risk label, worker completion, multiple workers, a public interface, or reviewer availability does not qualify. Before dispatch, state: (1) the exact review target, (2) why independence adds value beyond main Sol's review, and (3) how possible verdicts would change acceptance. If any part is missing, do not dispatch.
 
 Reuse one compatible idle Sol reviewer. Create a fresh Sol/high reviewer only when escalation is required and no compatible identity is reachable. New reviewers receive fresh context with no bounded-history exception. The ordinary Luna task/thread route never changes the reviewer route.
 
@@ -134,7 +134,7 @@ Launched Luna task/thread <thread-id> for <bounded objective>. It will implement
 ## Sol Depth Budget
 
 - Spend Sol effort on planning, architecture and risk decisions, dependency design, worker contract quality, integration, decision-critical evidence, and acceptance.
-- Let Luna own broad routine scans, line-by-line implementation, local diagnostics, implementation-depth verification, owned-diff inspection, and task checks.
+- Let the selected worker own broad routine scans, line-by-line implementation, local diagnostics, implementation-depth verification, owned-diff inspection, and task checks.
 - Add parallel scouts or workers only when their output can change or accelerate a named downstream decision.
 - Do not infer oracle independence from a green suite. When a reviewed behavior spine applies and is practical, use isolated scratch state to show a semantics-preserving refactor stays green and a plausible defect turns it red.
 - Treat a basic implementation or evidence fact rediscovered by Sol as handoff feedback: correct the current workstream and carry the lesson into later worker contracts. Propose durable skill/checklist changes only under normal authority.

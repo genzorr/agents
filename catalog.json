@@ -278,6 +278,19 @@
       }
     },
     {
+      "id": "orchestrate-sol-feature",
+      "kind": "skill",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/orchestrate-sol-feature"
+      },
+      "install_target": {
+        "codex": "skills/orchestrate-sol-feature"
+      },
+      "tags": ["role:helper", "domain:orchestration"]
+    },
+    {
       "id": "prepare-dynamic-workflow",
       "kind": "skill",
       "platforms": ["codex", "claude"],

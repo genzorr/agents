@@ -126,7 +126,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Use only when the operator explicitly invokes",
             "Composition role: lens",
             "## Configure Only",
-            "return without launching Luna",
+            "return without launching a worker",
             "requires a fresh explicit invocation",
         ):
             self.assertIn(anchor, text)
@@ -207,13 +207,13 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "do not rerun them routinely",
             "missing, stale after integration, contradicted",
             "decision-critical question",
-            "Luna's report is evidence, not acceptance",
+            "A worker report is evidence, not acceptance",
         ):
             self.assertIn(anchor, operating)
-        worker_contract = text.split("## Compact Luna Worker Contract\n", 1)[1].split("## Luna Worker Rules", 1)[0]
+        worker_contract = text.split("## Compact Worker Contract\n", 1)[1].split("## Worker Rules", 1)[0]
         for anchor in ("commands run", "exact checkout state tested", "paths and criteria covered"):
             self.assertIn(anchor, worker_contract)
-        worker_rules = text.split("## Luna Worker Rules\n", 1)[1].split("## Escalated Independent Sol Review", 1)[0]
+        worker_rules = text.split("## Worker Rules\n", 1)[1].split("## Escalated Independent Sol Review", 1)[0]
         for anchor in (
             "governing contracts",
             "decision-bearing artifact",
@@ -281,6 +281,127 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("read [references/sol-reviewer-protocol.md]", text)
         self.assertNotIn("voided", text)
         self.assertIn("voided", protocol)
+
+    def test_sol_luna_supports_explicit_alternate_worker_profiles_without_changing_defaults(self) -> None:
+        text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
+        metadata = self.read("codex/skills/sol-luna-orchestration/agents/openai.yaml")
+        frontmatter = text.split("---\n", 2)[1]
+        defaults = text.split("## Preconditions And Defaults\n", 1)[1].split("## Operating Model", 1)[0]
+        for anchor in (
+            "Luna/xhigh remains the default profile",
+            "selected native implementation subagent",
+            "only when the operator explicitly requests it",
+            "never raise its model or effort without an explicit operator request",
+            "operator-authorized ordinary-task launch contract satisfies this requirement",
+            "an agent-relayed request without such an operator-authorized contract does not",
+        ):
+            self.assertIn(anchor, text)
+        self.assertIn("gpt-5.6-luna", defaults)
+        self.assertIn("xhigh", defaults)
+        self.assertIn("reusable Luna/xhigh subagents by default", frontmatter)
+        self.assertIn("Luna/xhigh", metadata)
+        self.assertNotIn("Compact Luna Worker Contract", text)
+        self.assertNotIn("Luna Worker Rules", text)
+
+    def test_orchestrate_sol_feature_is_explicit_codex_only_helper(self) -> None:
+        text = self.read("codex/skills/orchestrate-sol-feature/SKILL.md")
+        metadata = self.read("codex/skills/orchestrate-sol-feature/agents/openai.yaml")
+        catalog = json.loads(self.read("catalog.json"))
+        entry = {item["id"]: item for item in catalog["skills"]}["orchestrate-sol-feature"]
+
+        self.assertEqual(entry["platforms"], ["codex"])
+        self.assertEqual(entry["source"], {"codex": "codex/skills/orchestrate-sol-feature"})
+        self.assertEqual(entry["install_target"], {"codex": "skills/orchestrate-sol-feature"})
+        self.assertEqual(entry["tags"], ["role:helper", "domain:orchestration"])
+        self.assertFalse((REPO_ROOT / "claude/skills/orchestrate-sol-feature").exists())
+        skill_files = {
+            path.relative_to(REPO_ROOT / "codex/skills/orchestrate-sol-feature").as_posix()
+            for path in (REPO_ROOT / "codex/skills/orchestrate-sol-feature").rglob("*")
+            if path.is_file()
+        }
+        self.assertEqual(skill_files, {"SKILL.md", "agents/openai.yaml"})
+        frontmatter = text.split("---\n", 2)[1]
+        self.assertIn("Use only after the operator explicitly invokes orchestrate-sol-feature", frontmatter)
+        self.assertIn("does not authorize unrelated work or broaden", frontmatter)
+        self.assertIn("Composition role: helper", text)
+        self.assertIn('display_name: "Orchestrate Sol Feature"', metadata)
+        self.assertIn('short_description: "Dispatch Sol/high features with Sol/medium workers"', metadata)
+        self.assertIn("allow_implicit_invocation: false", metadata)
+
+    def test_orchestrate_sol_feature_enforces_the_three_level_owner_topology(self) -> None:
+        text = self.read("codex/skills/orchestrate-sol-feature/SKILL.md")
+        for anchor in (
+            "ordinary `gpt-5.6-sol` / `high` task",
+            "native `gpt-5.6-sol` / `medium` leaf subagent",
+            "independent `gpt-5.6-sol` / `high` subagent",
+            "Use the native ordinary-task creation surface, never a native subagent spawn",
+            "The inner lens's no-worktree-without-operator-approval rule governs an additional worktree created after launch, not a task environment already assigned under this compliant outer policy",
+            "title that distinguishes it from the project orchestrator and sibling feature owners",
+            "project orchestrator must not spawn or duplicate the feature's implementation workers directly",
+            "forbid workers from delegating",
+            "forbid the feature owner from creating another ordinary task",
+            "Forbid the inner ordinary Luna task/thread route",
+            "owns integration, review, and feature-level acceptance",
+        ):
+            self.assertIn(anchor, text)
+
+    def test_orchestrate_sol_feature_launch_contract_preserves_context_and_authority(self) -> None:
+        text = self.read("codex/skills/orchestrate-sol-feature/SKILL.md")
+        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Constrain Feature-Owner Delegation", 1)[0]
+        for field in (
+            "**Objective:**",
+            "**Durable references:**",
+            "**Decisions, assumptions, unknowns, and non-goals:**",
+            "**Project and starting state:**",
+            "**Scope and shared state:**",
+            "**Authority:**",
+            "**Driver and lens:**",
+            "**Worker profile and topology:**",
+            "**Success criteria and artifacts:**",
+            "**Verification and decision-bearing evidence:**",
+            "**Stop/ask and reporting gates:**",
+            "**Return route:**",
+            "**Final handoff format:**",
+        ):
+            self.assertIn(field, contract)
+        for anchor in (
+            "never inherit or paste the full parent conversation",
+            "Conversation history is context, not authority",
+            "never broaden worktree, branch, push, PR, merge, live-install, or external-write authority",
+            "one active durable writer per checkout",
+            "do not fabricate one",
+        ):
+            self.assertIn(anchor, text)
+
+    def test_orchestrate_sol_feature_reuse_identity_and_reporting_are_truthful(self) -> None:
+        text = self.read("codex/skills/orchestrate-sol-feature/SKILL.md")
+        reuse = text.split("## Select New Or Reused Ownership\n", 1)[1].split("## Launch A New Feature Owner", 1)[0]
+        for anchor in (
+            "Before every new or reused dispatch, require one active durable writer per checkout by default",
+            "counting the project orchestrator and all feature owners",
+            "If active-writer state cannot be recovered from recorded launches and native inspection, treat it as unresolved and serialize or ask",
+            "Concurrent writers otherwise require disjoint ownership or explicit worktree authority",
+            "exact known task identity",
+            "A title, summary, or unsupported recollection is never sufficient",
+            "send a complete reset",
+            "Preserve a compatible task's configured model and effort",
+            "Never replace a stalled, failed, or blocked owner silently",
+        ):
+            self.assertIn(anchor, reuse)
+        for anchor in (
+            "profile provenance, not independent metadata readback",
+            "Never use a pending client identity where a ready task identity is required",
+            "`launched, awaiting handoff`",
+            "Do not poll repeatedly",
+            "`complete`, `blocked`, `partial`, or `failed`",
+        ):
+            self.assertIn(anchor, text)
+
+    def test_orchestrate_sol_feature_uses_progressive_disclosure(self) -> None:
+        text = self.read("codex/skills/orchestrate-sol-feature/SKILL.md")
+        inner = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
+        self.assertLess(len(text.split()), 3000)
+        self.assertLess(len(inner.split()), 3600)
 
     def test_research_prompt_twins_share_sufficiency_contract(self) -> None:
         codex = self.read("codex/skills/research-prompt/SKILL.md")

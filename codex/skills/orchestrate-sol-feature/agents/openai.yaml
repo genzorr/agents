@@ -1,0 +1,6 @@
+interface:
+  display_name: "Orchestrate Sol Feature"
+  short_description: "Dispatch Sol/high features with Sol/medium workers"
+  default_prompt: "Use $orchestrate-sol-feature to launch or resume this agreed feature from the current project orchestrator."
+policy:
+  allow_implicit_invocation: false
