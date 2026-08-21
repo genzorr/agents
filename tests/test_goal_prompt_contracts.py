@@ -197,13 +197,84 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "reviewer activation recorded as `disabled` or `operator-requested`",
             "exact operator-request provenance, acceptance target",
             "owns integration, default self-review, and feature acceptance",
-            "cannot delegate or create an ordinary task",
+            "cannot delegate authority or create an ordinary task",
         ):
             self.assertIn(anchor, contract)
         self.assertIn("must not spawn or duplicate the feature owner's implementation workers or reviewer directly", text)
         self.assertIn("All feature-lane child dispatch, correction, reuse, and aggregation stays with the feature owner", text)
         self.assertIn("both requested for the same unresolved feature", readiness)
         self.assertIn("stop and ask the operator to choose one owner topology", readiness)
+
+    def test_orchestrate_feature_binds_owner_depth_budget_and_boundaries(self) -> None:
+        text = self.read("codex/skills/orchestrate-feature/SKILL.md")
+        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Constrain Inner Delegation", 1)[0]
+        delegation = text.split("## Constrain Inner Delegation\n", 1)[1].split("## Supervise And Complete", 1)[0]
+        for anchor in (
+            "cannot delegate authority or create an ordinary task",
+            "delegate coherent execution-depth work—broad investigation, implementation, implementation-depth diagnostics, builds, focused tests, and owned-diff inspection—to configurable native workers when a safe delegation boundary exists",
+            "Workers may perform substantial implementation, build, test, diagnostic, and inspection work; they are not limited to code-writing.",
+            "It retains architecture/risk decisions, assignment contracts, feature-lane Git/shared-state writer assignment",
+            "synthesis and integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo",
+            "reporting; external-landing authority stays exactly as granted",
+            "It names exactly one writer—owner or worker—per shared mutable resource within granted authority",
+            "it serializes all others, including itself, and evaluates evidence",
+            "It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch preamble",
+            "existing final handoff `decisions/divergence`",
+            "it creates no new file, ledger, side channel, or notification event",
+            "It may perform trivial glue, narrow corrections, decision-critical inspection, or work without a coherent delegation boundary.",
+        ):
+            self.assertIn(anchor, contract)
+        for anchor in (
+            "Owner must primarily orchestrate through synthesis, integration, integrated-diff inspection, evidence judgment, and retain-or-redo/acceptance.",
+            "It cannot create another feature task, use the ordinary task route, delegate authority, or treat profile names as proof; it must delegate execution-depth work at safe boundaries.",
+            "Sequential compatible-worker assignments remain valid; parallel workers require non-overlapping lanes.",
+        ):
+            self.assertIn(anchor, delegation)
+
+    def test_orchestrate_feature_docs_bind_delegation_contract_in_named_sections(self) -> None:
+        prd = self.read("docs/orchestrate-feature-prd.md")
+        goals = prd.split("## Goals\n", 1)[1].split("## Non-Goals", 1)[0]
+        owner = prd.split("### Feature owner\n", 1)[1].split("### Implementation workers", 1)[0]
+        workers = prd.split("### Implementation workers\n", 1)[1].split("### Independent reviewer", 1)[0]
+        for anchor in (
+            "primarily an active orchestrator",
+            "exactly one named writer at a time",
+        ):
+            self.assertIn(anchor, goals)
+        for anchor in (
+            "delegate coherent execution-depth work whenever a safe delegation boundary exists",
+            "no-boundary reason",
+        ):
+            self.assertIn(anchor, owner)
+        self.assertIn(
+            "may perform substantial implementation, build, test, diagnostic, and inspection work",
+            workers,
+        )
+        self.assertIn("cannot delegate, and return only blockers", workers)
+        self.assertNotIn("cannot delegate authority", workers)
+
+        spec = self.read("docs/orchestrate-feature-spec.md")
+        authority = spec.split("## Authority And Scope\n", 1)[1].split("## Source Ownership", 1)[0]
+        contract = spec.split("## Feature Owner Launch Contract\n", 1)[1].split("## Feature-Task And Subagent Continuity", 1)[0]
+        static = spec.split("## Static And Behavioral Contracts\n", 1)[1].split("## Validation", 1)[0]
+        acceptance = spec.split("## Acceptance\n", 1)[1]
+        self.assertIn("T-42 owns feature-owner delegation", authority)
+        for anchor in (
+            "delegate coherent execution-depth work",
+            "one writer at a time",
+            "no-boundary reason",
+        ):
+            self.assertIn(anchor, contract)
+        for anchor in (
+            "worker model/effort remains resolved from the role map",
+            "tests do not require a worker count",
+        ):
+            self.assertIn(anchor, static)
+        for anchor in (
+            "sequentially on one compatible worker",
+            "without creating another feature-owner task",
+        ):
+            self.assertIn(anchor, acceptance)
 
     def test_orchestrate_feature_preserves_fresh_context_writer_and_profile_safe_reuse(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
@@ -374,6 +445,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "**Return format:**",
         ):
             self.assertIn(field, contract)
+        self.assertIn("delegation is always none", contract)
         return_route = next(line for line in contract.splitlines() if line.startswith("- **Return route:**"))
         for anchor in (
             "exact originating coordinator `threadId` and `hostId` when required",
@@ -467,8 +539,6 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "The project orchestrator must not spawn or duplicate the feature owner's implementation workers or reviewer directly.",
             "Independent reviewers receive fresh context with no exception.",
             "Keep every worker and reviewer a leaf and keep their identities separate.",
-            "The owner remains planner, integrator, default reviewer, and acceptance authority;",
-            "without requested review it reviews the integrated change itself.",
             "description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
             "Defaults are native Sol/medium workers, coordinator self-review, and requested reviewer native Sol/high.",
             "This lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",

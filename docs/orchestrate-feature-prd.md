@@ -38,6 +38,8 @@ Remove `orchestrate-sol-feature` from the source and catalog rather than keeping
 - Preserve executable sparse delivery, bounded supervision, project instructions, sandbox and approval policy, checkout/worktree rules, Git authority, external-write gates, and task-specific workflow drivers.
 - Keep model/effort selection and readback claims truthful: exact unsupported profiles stop rather than substitute, and validation is not misreported as independent metadata readback.
 - Keep feature-owner/coordinator self-review as the default and never infer separate-review authorization from task size, importance, risk, ambiguity, evidence gaps, cross-worker boundaries, or agent judgment.
+- Make the feature owner primarily an active orchestrator: the launch contract delegates coherent execution-depth work to configurable native workers whenever a safe boundary exists, while the owner retains architecture/risk decisions, integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo, acceptance, and terminal reporting.
+- Give each shared mutable resource exactly one named writer at a time within already-granted authority; serialize every other writer, including the owner, and record a no-boundary reason for substantial direct owner execution in the in-task plan or dispatch preamble and existing final handoff.
 
 ## Non-Goals
 
@@ -106,13 +108,13 @@ The orchestrator must not directly spawn the feature's implementation workers or
 
 ### Feature owner
 
-The ordinary task at the resolved feature-owner profile owns detailed architecture within the launch contract, decomposition, native subagent assignments, integration, owned-state inspection, verification, feature-level review, and feature-level acceptance. It uses the applicable project workflow as driver and `orchestrate-workers` only as a delegation and review lens.
+The ordinary task at the resolved feature-owner profile is primarily an active orchestrator. Its launch contract requires `orchestrate-workers` to delegate coherent execution-depth work whenever a safe delegation boundary exists; the owner retains architecture/risk decisions, assignment contracts, the feature-lane Git/shared-state writer assignment, integrated-state synthesis, integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo decisions, feature acceptance, terminal reporting, and exactly the external-landing authority granted. It uses the applicable project workflow as driver and `orchestrate-workers` as the delegation and review lens. Substantial direct execution is allowed only with a no-boundary reason recorded in the in-task plan or dispatch preamble and existing final handoff; trivial integration glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed. Sequential assignments to one compatible worker are valid; parallel workers require genuinely non-overlapping ownership lanes.
 
 The feature owner must not create another ordinary feature task, delegate project-level authority, or treat a worker report as acceptance. It delivers only the events required by the selected notification mode. A non-Sol feature owner is valid when the product can create and validate its exact profile and the generic inner lens can operate under that coordinator profile.
 
 ### Implementation workers
 
-Workers use the independently resolved worker profile and own bounded questions, files, components, tests, or evidence packets under the compact worker contract. They receive no parent-turn history by default, cannot delegate, and return only blockers or a final classified report to the feature owner. A bounded inherited-turn slice is exceptional and requires one named load-bearing fact with no durable source that cannot be accurately distilled without material loss, plus the reason and exact inherited slice. Full-history forks remain prohibited.
+Workers use the independently resolved worker profile and own bounded questions, files, components, tests, or evidence packets under the compact worker contract. They may perform substantial implementation, build, test, diagnostic, and inspection work rather than serving only as code-writing assistants. They receive no parent-turn history by default, cannot delegate, and return only blockers or a final classified report to the feature owner. A bounded inherited-turn slice is exceptional and requires one named load-bearing fact with no durable source that cannot be accurately distilled without material loss, plus the reason and exact inherited slice. Full-history forks remain prohibited.
 
 ### Independent reviewer
 

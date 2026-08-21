@@ -83,7 +83,9 @@ Include every applicable field whose absence can change behavior or authority:
 - **Notification and return contract:** selected target/action, mandatory blocker/gate/terminal events, message shape, extended gates, and fallback. Under callback include exact originating `threadId`/`hostId` when required plus native `send_message_to_thread`; accepted terminal send establishes delivery. Under active waiting use native attention for gates/blockers and terminal result for final handoff while attached; observation establishes delivery, timeout does not. A replacement names its validated mechanism/target. Manual supervision remains unobserved until later inspection.
 - **Final handoff:** `complete`, `blocked`, `partial`, or `failed`; outcome; exact repository/branch/commit/checkout/tested state; artifacts; checks; criteria; decisions/divergence; blockers/uncertainty; downstream action; continuity; actual role map and readback limits.
 
-State that the owner owns integration, default self-review, and feature acceptance; may create only native leaf workers and an operator-requested reviewer; cannot delegate or create an ordinary task; and treats reports as evidence.
+State that the owner owns integration, default self-review, and feature acceptance; may create only native leaf workers and an operator-requested reviewer; cannot delegate authority or create an ordinary task; and treats reports as evidence. It must use `orchestrate-workers` to delegate coherent execution-depth work—broad investigation, implementation, implementation-depth diagnostics, builds, focused tests, and owned-diff inspection—to configurable native workers when a safe delegation boundary exists. Workers may perform substantial implementation, build, test, diagnostic, and inspection work; they are not limited to code-writing. It retains architecture/risk decisions, assignment contracts, feature-lane Git/shared-state writer assignment, synthesis and integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo, acceptance, reporting; external-landing authority stays exactly as granted.
+
+It names exactly one writer—owner or worker—per shared mutable resource within granted authority; it serializes all others, including itself, and evaluates evidence. It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch preamble and existing final handoff `decisions/divergence`; it creates no new file, ledger, side channel, or notification event. It may perform trivial glue, narrow corrections, decision-critical inspection, or work without a coherent delegation boundary.
 
 ## Constrain Inner Delegation
 
@@ -93,7 +95,7 @@ The project orchestrator must not spawn or duplicate the feature owner's impleme
 
 Create native workers with no parent turns by default. An inherited-turn fork is exceptional: use only the smallest bounded recent slice for one named load-bearing fact with no durable source that cannot be accurately distilled without material loss, and state the fact, reason, and exact slice. Independent reviewers receive fresh context with no exception. Full parent-history inheritance is prohibited. Keep every worker and reviewer a leaf and keep their identities separate.
 
-The owner remains planner, integrator, default reviewer, and acceptance authority; without requested review it reviews the integrated change itself. It must not create another feature task, use the ordinary task route, delegate, or treat profile names as proof.
+Owner must primarily orchestrate through synthesis, integration, integrated-diff inspection, evidence judgment, and retain-or-redo/acceptance. It cannot create another feature task, use the ordinary task route, delegate authority, or treat profile names as proof; it must delegate execution-depth work at safe boundaries. Sequential compatible-worker assignments remain valid; parallel workers require non-overlapping lanes.
 
 ## Supervise And Complete
 
