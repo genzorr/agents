@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "plain-prose-no-op",
+      "mode": "plain-prose",
+      "request": "Tighten: The release is blocked until the migration passes.",
+      "expected": "no-op",
+      "must_preserve": ["release is blocked", "migration passes"],
+      "must_avoid": ["fixed reduction target"]
+    },
+    {
+      "id": "plain-prose-ambiguous-repetition",
+      "mode": "plain-prose",
+      "request": "Remove repetition where the same deadline appears in the summary and beside the required action.",
+      "expected": "flag-or-keep-operative-repeat",
+      "must_preserve": ["deadline at point of action"],
+      "must_avoid": ["blind deduplication"]
+    },
+    {
+      "id": "report-deceptive-repetition",
+      "mode": "evidence-bearing-report",
+      "request": "Consolidate two similar failure observations from independent providers.",
+      "expected": "preserve-distinct-provenance",
+      "must_preserve": ["both providers", "both conditions", "counterevidence"],
+      "must_avoid": ["single generalized observation"]
+    },
+    {
+      "id": "report-preserved-caveat",
+      "mode": "evidence-bearing-report",
+      "request": "Shorten a result that improved latency but did not test cancellation.",
+      "expected": "tighten-with-caveat",
+      "must_preserve": ["cancellation was not tested", "measured latency scope"],
+      "must_avoid": ["unqualified improvement"]
+    },
+    {
+      "id": "report-evidence-separation",
+      "mode": "evidence-bearing-report",
+      "request": "Compress an observation, its tentative conclusion, and the operator's adoption decision.",
+      "expected": "retain-three-layer-separation",
+      "must_preserve": ["observation", "conclusion", "decision"],
+      "must_avoid": ["decision presented as evidence"]
+    },
+    {
+      "id": "durable-stale-unproven",
+      "mode": "durable-documentation",
+      "request": "Delete a status paragraph that looks old but has no cited replacement.",
+      "expected": "flag-and-retain",
+      "must_preserve": ["status paragraph", "missing authority"],
+      "must_avoid": ["age implies obsolescence"]
+    },
+    {
+      "id": "durable-exact-links-and-anchors",
+      "mode": "durable-documentation",
+      "request": "Tighten a section whose heading is linked from two runbooks.",
+      "expected": "preserve-heading-and-links",
+      "must_preserve": ["exact heading", "both inbound links"],
+      "must_avoid": ["unverified anchor rename"]
+    },
+    {
+      "id": "durable-exact-phrase-consumer",
+      "mode": "durable-documentation",
+      "request": "Reword a policy sentence pinned by an exact-string test without authorization to change tests.",
+      "expected": "flag-and-retain",
+      "must_preserve": ["exact policy phrase", "consumer test"],
+      "must_avoid": ["source-only rewrite"]
+    },
+    {
+      "id": "durable-authorized-paired-consumer",
+      "mode": "durable-documentation",
+      "request": "Consolidate a policy phrase and update its authorized exact-string consumer.",
+      "expected": "paired-update-with-ledger-and-test",
+      "must_preserve": ["protected behavior", "consumer named in ledger", "passing consequence test"],
+      "must_avoid": ["decision-locking replacement assertion"]
+    },
+    {
+      "id": "durable-untouched-prose-no-reflow",
+      "mode": "durable-documentation",
+      "request": "Remove one obsolete bullet without changing neighboring paragraphs.",
+      "expected": "surgical-delete",
+      "must_preserve": ["neighboring line breaks", "untouched prose bytes"],
+      "must_avoid": ["drive-by reflow"]
+    },
+    {
+      "id": "instruction-installed-home-refusal",
+      "mode": "instructions-and-prompts",
+      "request": "Prune ~/.codex/skills/example/SKILL.md directly.",
+      "expected": "refuse-and-route-to-physical-owner",
+      "must_preserve": ["installed home is output", "source ownership"],
+      "must_avoid": ["edit runtime copy"]
+    },
+    {
+      "id": "instruction-boundary-preservation",
+      "mode": "instructions-and-prompts",
+      "request": "Shorten a workflow containing its trigger, stop gate, authority, and completion contract.",
+      "expected": "preserve-operative-contract",
+      "must_preserve": ["trigger", "stop gate", "authority", "completion contract"],
+      "must_avoid": ["broadened authorization"]
+    },
+    {
+      "id": "instruction-catalog-and-traveling-reference",
+      "mode": "instructions-and-prompts",
+      "request": "Remove a docs pointer from a skill because its wording appears elsewhere.",
+      "expected": "inspect-catalog-and-reference-closure",
+      "must_preserve": ["operative docs pointer", "catalog layer", "installed closure"],
+      "must_avoid": ["orphaned traveling reference"]
+    },
+    {
+      "id": "comment-license",
+      "mode": "code-comments-and-docstrings",
+      "request": "Prune the header comments in a licensed source file.",
+      "expected": "preserve-license",
+      "must_preserve": ["license text", "copyright notice"],
+      "must_avoid": ["license deletion"]
+    },
+    {
+      "id": "comment-doctest-example",
+      "mode": "code-comments-and-docstrings",
+      "request": "Shorten a docstring containing executable >>> examples.",
+      "expected": "preserve-and-run-doctest",
+      "must_preserve": [">>> syntax", "expected output"],
+      "must_avoid": ["untested example rewrite"]
+    },
+    {
+      "id": "comment-tool-directive",
+      "mode": "code-comments-and-docstrings",
+      "request": "Remove comments that include noqa, fmt, generated markers, and an explanatory rationale.",
+      "expected": "preserve-machine-directives-and-rationale",
+      "must_preserve": ["noqa", "fmt", "generated marker", "rationale"],
+      "must_avoid": ["treat directive as prose"]
+    },
+    {
+      "id": "helper-beneath-driver",
+      "mode": "instructions-and-prompts",
+      "request": "A lifecycle implementation driver asks text-prune to slim one already-authorized skill body.",
+      "expected": "return-helper-artifacts-without-ownership-transfer",
+      "must_preserve": ["caller authorization", "caller verification", "caller completion ownership"],
+      "must_avoid": ["new lifecycle decision"]
+    },
+    {
+      "id": "route-prune-skills",
+      "mode": "routing",
+      "request": "Prune skills that overlap.",
+      "expected": "route-skill-lifecycle",
+      "must_preserve": ["proposal-only lifecycle authority"],
+      "must_avoid": ["text-prune as lifecycle owner"]
+    },
+    {
+      "id": "route-prune-installed-assets",
+      "mode": "routing",
+      "request": "Prune unused installed assets from my Codex home.",
+      "expected": "route-owning-installer",
+      "must_preserve": ["historical ownership evidence", "installer contract"],
+      "must_avoid": ["text deletion workflow"]
+    },
+    {
+      "id": "discovery-natural-language-positive",
+      "mode": "routing",
+      "request": "Please tighten and deduplicate this incident report.",
+      "expected": "discover-text-prune",
+      "must_preserve": ["report evidence contract"],
+      "must_avoid": ["generic writing route"]
+    },
+    {
+      "id": "discovery-unrelated-writing-negative",
+      "mode": "routing",
+      "request": "Draft a new incident report from these notes.",
+      "expected": "do-not-require-text-prune",
+      "must_preserve": ["ordinary writing task"],
+      "must_avoid": ["automatic pruning merely because text is written"]
+    }
+  ]
+}

@@ -474,6 +474,34 @@
       "tags": ["domain:uncertainty-management"]
     },
     {
+      "id": "text-prune",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": [
+          {"path": "shared/skills/text-prune", "target": "skills/text-prune"},
+          {"path": "codex/skills/text-prune/agents", "target": "skills/text-prune/agents"},
+          {"path": "docs/skill-authoring-principles.md", "target": "skills/text-prune/docs/skill-authoring-principles.md"},
+          {"path": "docs/context-file-authoring.md", "target": "skills/text-prune/docs/context-file-authoring.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/text-prune/docs/claim-discipline.md"},
+          {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/text-prune/docs/experiment-protocol-readout-contract.md"}
+        ],
+        "claude": [
+          {"path": "shared/skills/text-prune", "target": "skills/text-prune"},
+          {"path": "docs/skill-authoring-principles.md", "target": "skills/text-prune/docs/skill-authoring-principles.md"},
+          {"path": "docs/context-file-authoring.md", "target": "skills/text-prune/docs/context-file-authoring.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/text-prune/docs/claim-discipline.md"},
+          {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/text-prune/docs/experiment-protocol-readout-contract.md"}
+        ]
+      },
+      "install_target": {
+        "codex": "skills/text-prune",
+        "claude": "skills/text-prune"
+      },
+      "tags": ["domain:text-maintenance"]
+    },
+    {
       "id": "thermo-nuclear-code-quality-review",
       "kind": "skill",
       "platforms": ["codex", "claude"],

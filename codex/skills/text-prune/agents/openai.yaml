@@ -1,0 +1,7 @@
+interface:
+  display_name: "Text Prune"
+  short_description: "Compress text while preserving live information."
+  default_prompt: "Use $text-prune to tighten this text while preserving its live meaning, structure, and material caveats."
+
+policy:
+  allow_implicit_invocation: true
