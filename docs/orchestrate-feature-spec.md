@@ -17,15 +17,10 @@ Canonical Codex-only generic inner lens after T-39:
 - `codex/skills/orchestrate-workers/agents/openai.yaml`
 - `codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md`
 
-Compatibility preset retained and reduced:
-
-- `codex/skills/sol-luna-orchestration/SKILL.md`
-- `codex/skills/sol-luna-orchestration/agents/openai.yaml`
-
 Remove:
 
 - `codex/skills/orchestrate-sol-feature/`
-- `codex/skills/sol-luna-orchestration/references/sol-reviewer-protocol.md` after its generic content moves to the canonical inner lens
+- `codex/skills/sol-luna-orchestration/`
 
 Modify only as needed:
 
@@ -41,7 +36,7 @@ Do not add custom agents, runtime controllers, configuration, Claude counterpart
 
 The outer skill is a rename/generalization of an existing source asset; do not initialize a duplicate skeleton. Initialize the new `orchestrate-workers` skill through the system `skill-creator` initializer with only the `references` resource because this is a genuinely new canonical skill. Generate its UI metadata with the repository's authoring tooling, then replace any placeholder content completely.
 
-Use apply-patch-compatible file moves or deliberate add/delete changes so Git records the outer skill and reviewer protocol as renames when similarity permits. Do not retain the old outer path as a shim or alias. `sol-luna-orchestration` is the compatibility surface for the old inner preset, not for the old outer name.
+Use apply-patch-compatible file moves or deliberate add/delete changes so Git records the outer skill and reviewer protocol as renames when similarity permits. Do not retain the old outer path or the retired preset as a shim or alias.
 
 ## Canonical Outer Skill Metadata
 
@@ -55,7 +50,7 @@ The description must state:
 
 - It dispatches or reuses one ordinary profiled feature-owner task from a long-lived project orchestrator.
 - It configures the feature owner to use reusable native profiled workers and an independent reviewer only when the operator explicitly requests one through `orchestrate-workers`.
-- Defaults are Sol/high owner and Sol/medium workers with feature-owner self-review; an explicitly requested reviewer defaults to Sol/high, and explicit per-feature role overrides are allowed.
+- Defaults are Sol/medium owner and Luna/xhigh workers with feature-owner self-review; an explicitly requested reviewer defaults to Sol/high, and explicit per-feature role overrides are allowed.
 - It applies only after explicit invocation of `orchestrate-feature` or an explicit request for this exact topology.
 - Invocation authorizes one resolved feature lane but does not mutate the current orchestrator or broaden project/Git/worktree/external-write/live-install authority.
 
@@ -82,8 +77,8 @@ The description must state:
 
 - It is a generic current-task lens for profiled native implementation workers, optional explicitly requested ordinary implementation tasks, and an independent reviewer only when the operator explicitly requests one for the resolved task.
 - It owns decomposition, continuity, context, evidence, optional-review routing, and acceptance without changing the current coordinator's profile or lifecycle driver.
-- Defaults are native Sol/medium implementation workers with coordinator self-review; an explicitly requested reviewer defaults to native Sol/high. Another exact enabled-role profile requires explicit operator instruction, an operator-authorized launch contract carrying that operator request, or the explicit Sol-Luna preset, while the ordinary implementation-task route always requires a separate explicit operator request.
-- It applies only after explicit invocation of `orchestrate-workers`, a relayed invocation in an operator-authorized feature launch, or through the explicit `sol-luna-orchestration` preset.
+- Defaults are native Luna/xhigh implementation workers with coordinator self-review; an explicitly requested reviewer defaults to native Sol/high. Another exact enabled-role profile requires explicit operator instruction or an operator-authorized launch contract, while the ordinary implementation-task route always requires a separate explicit operator request.
+- It applies only after explicit invocation of `orchestrate-workers` or a relayed invocation in an operator-authorized feature launch.
 
 Required UI semantics:
 
@@ -96,26 +91,10 @@ policy:
   allow_implicit_invocation: false
 ```
 
-## Sol-Luna Compatibility Preset
-
-Keep the existing `sol-luna-orchestration` name, explicit-only policy, UI identity, and direct invocation contract. Replace duplicated generic procedure with the smallest self-contained preset that:
-
-- Requires the current coordinator to run Sol and never changes it.
-- Explicitly invokes `orchestrate-workers` for the current resolved task.
-- Sets default implementation to native `gpt-5.6-luna`/xhigh, keeps review with the Sol coordinator by default, and uses native `gpt-5.6-sol`/high only after explicit reviewer activation.
-- Preserves the separately operator-requested ordinary Luna/xhigh implementation-task route.
-- Allows another worker or enabled-reviewer profile only under an explicit operator instruction, preserving no-substitution behavior.
-- States that the generic lens owns decomposition, worker/reviewer contracts, context, continuity, evidence, optional-review routing, acceptance, and lifecycle rules.
-- Adds no second copy of the compact worker contract, reviewer protocol, reuse/recycle rules, or verification rules.
-
-Existing direct invocations must keep their Luna/xhigh default. The wrapper does not make Sol/medium the new direct default and does not become implicitly invocable.
-
 ## Composition Roles
 
 - `orchestrate-feature`: helper. The project-orchestrator driver retains program lifecycle, authority, priority, and completion ownership; the helper owns bounded launch readiness, profile/delivery resolution, feature-task dispatch/reuse, and handoff routing.
 - `orchestrate-workers`: lens. The current task driver retains lifecycle, success, and acceptance; the lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing.
-- `sol-luna-orchestration`: explicit preset lens. It supplies historical profiles/routes to `orchestrate-workers` and adds no independent lifecycle protocol.
-
 If a governing driver forbids task creation, delegation, or the proposed lifecycle change, stop rather than displacing it.
 
 ## Required Terms
@@ -155,8 +134,8 @@ Default map:
 
 ```text
 project orchestrator: current task model / current effort (immutable)
-feature owner: gpt-5.6-sol / high
-implementation worker: gpt-5.6-sol / medium
+feature owner: gpt-5.6-sol / medium
+implementation worker: gpt-5.6-luna / xhigh
 independent reviewer: disabled; when explicitly requested, gpt-5.6-sol / high
 ```
 
@@ -218,7 +197,7 @@ The generic inner lens keys worker/reviewer reuse by exact role, project, checko
 
 ## Generic Inner Lens Contract
 
-Move the generic behavioral body of `sol-luna-orchestration` into `orchestrate-workers`, preserving and generalizing:
+Keep the generic behavioral body in `orchestrate-workers`, preserving and generalizing:
 
 - Driver/lens separation and current-coordinator profile preservation.
 - One coherent worker by default; parallel workers only for independent ownership lanes and dependency-free frontier.
@@ -229,7 +208,7 @@ Move the generic behavioral body of `sol-luna-orchestration` into `orchestrate-w
 - Independent review disabled by default and activated only by an explicit operator request for the resolved task; no task characteristic, evidence gap, driver preference, or agent judgment supplies authorization.
 - Fresh reviewer context without history exception, separate reviewer identity, and generic reviewer protocol.
 
-Defaults for direct `orchestrate-workers` invocation are native Sol/medium implementation workers and coordinator self-review. An explicitly requested reviewer defaults to native Sol/high. Another worker profile may come from explicit operator instruction, an operator-authorized launch contract, or the explicit Sol-Luna preset; a reviewer profile is resolved only after explicit operator activation, including profile wording or a launch contract carrying the originating operator request. The ordinary implementation-task route always requires a separate explicit operator request; neither a launch contract nor the preset authorizes that route by itself. Before each enabled-role dispatch, state the actual route, model, effort, context mode, and whether each value is default or override. Do not resolve or validate reviewer controls while disabled. Stop when an enabled exact profile cannot be set/validated.
+Defaults for direct `orchestrate-workers` invocation are native Luna/xhigh implementation workers and coordinator self-review. An explicitly requested reviewer defaults to native Sol/high. Another worker profile may come from explicit operator instruction or an operator-authorized launch contract; a reviewer profile is resolved only after explicit operator activation, including profile wording or a launch contract carrying the originating operator request. The ordinary implementation-task route always requires a separate explicit operator request; a launch contract does not authorize that route by itself. Before each enabled-role dispatch, state the actual route, model, effort, context mode, and whether each value is default or override. Do not resolve or validate reviewer controls while disabled. Stop when an enabled exact profile cannot be set/validated.
 
 The current coordinator may use any product-exposed profile; the lens preserves it and does not infer that coordinator and workers/reviewer must share a model. The enabled reviewer profile constrains only the independent reviewer. Activation and independence remain behavioral contracts, not claims derived from a model name.
 
@@ -262,7 +241,7 @@ Catalog changes:
 
 - Replace outer ID `orchestrate-sol-feature` with `orchestrate-feature`, `kind: skill`, Codex-only, owner `agents`, source `codex/skills/orchestrate-feature`, install target `skills/orchestrate-feature`, tags `role:helper` and `domain:orchestration`.
 - Add `orchestrate-workers`, `kind: skill`, Codex-only, owner `agents`, source `codex/skills/orchestrate-workers`, install target `skills/orchestrate-workers`, tags `role:lens` and `domain:orchestration`.
-- Retain `sol-luna-orchestration` at its existing ID/path/install target with `role:lens` and updated dependency semantics only in its skill body; no Claude entry.
+- Remove the `sol-luna-orchestration` ID, source path, and install target; no Claude entry exists.
 
 The repository and scratch installed output contain no `orchestrate-sol-feature` source after migration. Reuse `InstallerEngineTest.test_catalog_deleted_asset_prunes_and_uninstall_uses_history` as the public behavior proof that unchanged managed assets removed from the catalog are pruneable; do not duplicate the installer mechanism. Add branch-specific scratch-upgrade evidence: install exact `main` into an isolated Codex home, run the current branch installer with `--prune`, and prove the old managed outer directory is removed, both new canonical assets are present, the retained preset remains, and an injected unmanaged sentinel outside those targets is unchanged. Use a dry-run/diff first, then perform the scratch mutation to prove the postcondition.
 
@@ -272,12 +251,12 @@ Focused tests must fail for these regressions:
 
 1. `orchestrate-feature` becomes implicit, loses helper role, or broadens authority.
 2. Old `orchestrate-sol-feature` source/catalog/install target remains or the managed prune path leaves it behind.
-3. Default behavior drifts from Sol/high owner, Sol/medium worker, feature-owner/coordinator self-review, and reviewer-disabled state; an enabled no-override reviewer drifts from Sol/high.
+3. Default behavior drifts from Sol/medium owner, Luna/xhigh worker, feature-owner/coordinator self-review, and reviewer-disabled state; an enabled no-override reviewer drifts from Sol/high.
 4. One role override cascades to another role, an omitted field inherits another override, or the current orchestrator is described as mutable.
 5. An unavailable exact role profile substitutes silently or creation validation is reported as independent readback.
-6. A non-Sol feature owner is routed through a Sol-only inner precondition or generic worker/reviewer lifecycle knowledge is duplicated across outer, generic lens, and compatibility preset.
+6. A non-Sol feature owner is routed through a Sol-only inner precondition or generic worker/reviewer lifecycle knowledge is duplicated across the outer and generic skills.
 7. Feature-owner/worker/reviewer reuse ignores role-profile compatibility or reuses a worker as independent reviewer.
-8. `sol-luna-orchestration` loses Sol coordinator, Luna/xhigh worker, opt-in Sol/high reviewer, ordinary Luna route, explicit-only policy, or thin-preset behavior.
+8. The retired `sol-luna-orchestration` source or catalog entry remains, or an active reference routes users to it.
 9. `orchestrate-workers` loses default coordinator self-review, operator-only reviewer activation, disabled-path token avoidance, fresh worker/reviewer context, leaf topology, continuity/reset, evidence, no-substitution, or acceptance boundaries.
 10. Any T-38 callback, bounded-wait/fallback, sparse event-floor, fresh feature-task, exceptional-fork, one-writer, or authority contract regresses.
 11. The transmitted feature-owner launch contract delegates coherent execution-depth work—broad investigation, implementation, implementation-depth diagnostics, builds, focused tests, and owned-diff inspection—to configurable native workers when a safe delegation boundary exists; workers may own substantial implementation, build, test, diagnostic, and inspection work, and worker model/effort remains resolved from the role map.
@@ -286,7 +265,7 @@ Focused tests must fail for these regressions:
 14. Substantial direct owner execution records a no-boundary reason in the in-task plan or dispatch preamble and existing final handoff `decisions/divergence`, without a new file, ledger, side channel, or notification event; trivial glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed.
 15. The owner uses `orchestrate-workers` to create native leaf implementation workers, never a nested feature owner or ordinary implementation-task route; sequential assignments may reuse one compatible worker, while parallel workers require genuinely non-overlapping ownership lanes and tests do not require a worker count.
 
-Assert all three skills remain Codex-only, UI policies are explicit-only, no scripts/custom agents/Claude layer/controller/watcher/registry is added, and progressive-disclosure ceilings remain focused. Phrase/source assertions are appropriate because these shipped instruction assets are the contract, but tests should section-scope route/profile clauses so contradictory text cannot pass merely by coexisting.
+Assert both orchestration skills remain Codex-only, UI policies are explicit-only, no scripts/custom agents/Claude layer/controller/watcher/registry is added, and progressive-disclosure ceilings remain focused. Phrase/source assertions are appropriate because these shipped instruction assets are the contract, but tests should section-scope route/profile clauses so contradictory text cannot pass merely by coexisting.
 
 ## Validation
 
@@ -295,7 +274,6 @@ Run at minimum:
 ```text
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" codex/skills/orchestrate-feature
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" codex/skills/orchestrate-workers
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" codex/skills/sol-luna-orchestration
 python3 scripts/validate_catalog.py
 python3 scripts/validate_skills.py
 python3 scripts/check_cross_repo_consistency.py
@@ -323,7 +301,7 @@ The upgrade fixture must contain the exact base-generated managed state and old 
 Required T-39 sequence:
 
 1. Codex authors and performs a read-only design review of the amended PRD/spec against T-39, the current catalog/installer, native schemas, and the accepted T-38 contracts. Resolve material design findings before implementation.
-2. Reuse the compatible existing `gpt-5.6-sol`/medium implementation leaf with a complete assignment reset. It may edit/validate only accepted paths and may not commit, push, open/merge a PR, install live, create a worktree, mutate Harness, or delegate.
+2. Use a compatible `gpt-5.6-luna`/xhigh implementation leaf with a complete assignment reset. It may edit/validate only accepted paths and may not commit, push, open/merge a PR, install live, create a worktree, mutate Harness, or delegate.
 3. Codex reviews the integrated diff and routes bounded fixes to the same worker.
 4. A fresh independent read-only reviewer checks the exact combined branch against T-39 and all retained T-38 criteria. Resolve every material finding and re-review substantive fixes.
 5. Close T-39/S-27, commit reviewed checkpoints, push `codex/orchestrate-feature`, and open one pull request into `main` describing both callback hardening and generic-profile migration.
@@ -332,4 +310,4 @@ Do not merge or install the live skill in this task.
 
 ## Acceptance
 
-T-39 implementation was accepted under its recorded review and publication sequence. The T-41 amendment is acceptable when default coordinator/feature-owner self-review, explicit operator-only reviewer activation, disabled-path non-resolution/non-loading, enabled-reviewer independence, Sol-Luna compatibility, and retained T-38/T-39 delivery/context/authority contracts pass focused tests and repository validation with no unrelated diff. The T-42 amendment is additionally acceptable when a code feature containing a Docker image build, focused tests, and a shared-host end-to-end test naturally yields coherent worker-owned implementation/build/test assignments (sequentially on one compatible worker unless lanes are genuinely non-overlapping), exactly one named shared-host writer at a time within authority, and owner-owned integration, integrated-diff/evidence inspection, verification-sufficiency judgment, retain-or-redo, and acceptance without creating another feature-owner task.
+T-39 implementation was accepted under its recorded review and publication sequence. The T-41 amendment is acceptable when default coordinator/feature-owner self-review, explicit operator-only reviewer activation, disabled-path non-resolution/non-loading, enabled-reviewer independence, generic profile routing, and retained T-38/T-39 delivery/context/authority contracts pass focused tests and repository validation with no unrelated diff. The T-42 amendment is additionally acceptable when a code feature containing a Docker image build, focused tests, and a shared-host end-to-end test naturally yields coherent worker-owned implementation/build/test assignments (sequentially on one compatible worker unless lanes are genuinely non-overlapping), exactly one named shared-host writer at a time within authority, and owner-owned integration, integrated-diff/evidence inspection, verification-sufficiency judgment, retain-or-redo, and acceptance without creating another feature-owner task.

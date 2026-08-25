@@ -1,6 +1,6 @@
 ---
 name: orchestrate-feature
-description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested. Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review, and requested reviewer Sol/high. Allows explicit role-local overrides. Use only after the operator invokes orchestrate-feature or requests this topology. Invocation authorizes one feature lane; it never mutates the orchestrator or broadens project, Git, branch, worktree, external-write, or live-install authority.
+description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested. Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review, and requested reviewer Sol/high. Allows explicit role-local overrides. Use only after the operator invokes orchestrate-feature or requests this topology. Invocation authorizes one feature lane; it never mutates the orchestrator or broadens project, Git, branch, worktree, external-write, or live-install authority.
 ---
 
 # Orchestrate Feature
@@ -40,8 +40,8 @@ Use this no-override map:
 | Role | Default |
 |---|---|
 | Project orchestrator | Current task model / current effort; immutable |
-| Feature owner | `gpt-5.6-sol` / `high` |
-| Implementation worker | Native `gpt-5.6-sol` / `medium` |
+| Feature owner | `gpt-5.6-sol` / `medium` |
+| Implementation worker | Native `gpt-5.6-luna` / `xhigh` |
 | Independent reviewer | Disabled; when explicitly requested, native `gpt-5.6-sol` / `high` |
 
 Accept only explicit, unambiguous overrides tied to this feature. Owner and worker overrides may also come from a durable operator decision governing their roles. Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it; standing or global reviewer preferences never activate review. Resolve roles independently: owner and worker overrides change only their profiles; reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile. An omitted field inherits its enabled role's default, never another override. Never infer reviewer activation; a driver requirement without operator authorization stops for a decision. Do not cascade, silently change effort, or convert a nickname into an unsupported identifier. An override never waives a governing profile requirement; conflict stops.

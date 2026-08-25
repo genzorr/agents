@@ -120,10 +120,11 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         expected = {
             "orchestrate-feature": ("codex/skills/orchestrate-feature", "skills/orchestrate-feature", "role:helper"),
             "orchestrate-workers": ("codex/skills/orchestrate-workers", "skills/orchestrate-workers", "role:lens"),
-            "sol-luna-orchestration": ("codex/skills/sol-luna-orchestration", "skills/sol-luna-orchestration", "role:lens"),
         }
         self.assertNotIn("orchestrate-sol-feature", entries)
         self.assertFalse((REPO_ROOT / "codex/skills/orchestrate-sol-feature").exists())
+        self.assertNotIn("sol-luna-orchestration", entries)
+        self.assertFalse((REPO_ROOT / "codex/skills/sol-luna-orchestration").exists())
         for skill_id, (source, target, role) in expected.items():
             entry = entries[skill_id]
             self.assertEqual(entry["platforms"], ["codex"])
@@ -140,14 +141,14 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         profiles = text.split("## Resolve Role Profiles\n", 1)[1].split("## Select New Or Reused Ownership", 1)[0]
         for anchor in (
             "Use only after the operator invokes orchestrate-feature",
-            "Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review",
+            "Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review",
             "requested reviewer Sol/high",
             "never mutates the orchestrator",
         ):
             self.assertIn(anchor, frontmatter)
         for anchor in (
-            "Feature owner | `gpt-5.6-sol` / `high`",
-            "Implementation worker | Native `gpt-5.6-sol` / `medium`",
+            "Feature owner | `gpt-5.6-sol` / `medium`",
+            "Implementation worker | Native `gpt-5.6-luna` / `xhigh`",
             "Independent reviewer | Disabled; when explicitly requested, native `gpt-5.6-sol` / `high`",
             "owner and worker overrides change only their profiles",
             "reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile",
@@ -360,14 +361,13 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for anchor in (
             "Use only after explicit invocation of orchestrate-workers",
             "operator-authorized feature launch",
-            "explicit sol-luna-orchestration preset",
             "Preserve coordinator profile and driver",
         ):
             self.assertIn(anchor, frontmatter)
         for anchor in (
             "Coordinator:",
             "any product-exposed profile",
-            "Implementation worker | When delegated | Native subagent | `gpt-5.6-sol` | `medium`",
+            "Implementation worker | When delegated | Native subagent | `gpt-5.6-luna` | `xhigh`",
             "Independent reviewer | Disabled unless explicitly operator-requested | Native subagent | `gpt-5.6-sol` | `high`",
             "one override never changes another role or the coordinator",
             "Reviewer activation and profile are separate",
@@ -380,7 +380,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for anchor in (
             "Use another enabled-role profile only on explicit operator instruction",
             "ordinary task route always requires a separate explicit request",
-            "neither contract nor preset authorizes it",
+            "the launch contract does not authorize it",
         ):
             self.assertIn(anchor, profiles)
         self.assertNotIn("Require the current coordinator to run Sol", text)
@@ -515,12 +515,11 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         paths = (
             "codex/skills/orchestrate-feature/SKILL.md",
             "codex/skills/orchestrate-workers/SKILL.md",
-            "codex/skills/sol-luna-orchestration/SKILL.md",
         )
         review_target = re.compile(r"\b(review|reviewer|reviewers|independent review)\b")
         allowed_review_fragments = {
             "description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested.",
-            "Defaults are Sol/high owner, Sol/medium workers, feature-owner self-review, and requested reviewer Sol/high.",
+            "Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review, and requested reviewer Sol/high.",
             "- **Role map:** immutable current-orchestrator observation plus independently resolved owner and worker profiles, reviewer activation, and the reviewer profile only when operator-requested.",
             "| Independent reviewer | Disabled;",
             "Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it;",
@@ -540,7 +539,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Independent reviewers receive fresh context with no exception.",
             "Keep every worker and reviewer a leaf and keep their identities separate.",
             "description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
-            "Defaults are native Sol/medium workers, coordinator self-review, and requested reviewer native Sol/high.",
+            "Defaults are native Luna/xhigh workers, coordinator self-review, and requested reviewer native Sol/high.",
             "This lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",
             "it may use any product-exposed profile and remains planner, integrator, primary reviewer, and acceptance authority.",
             "- **Independent reviewer:** separate operator-requested native leaf;",
@@ -563,17 +562,6 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "The ordinary implementation route never changes reviewer activation or routing.",
             "When the operator activates review, read [references/independent-reviewer-protocol.md](references/independent-reviewer-protocol.md) completely and follow it.",
             "Do not infer reviewer authorization from task characteristics or evidence gaps.",
-            "description: Configure the current Sol task through orchestrate-workers with Luna/xhigh workers, self-review, an optional explicitly requested Sol/high reviewer, and an ordinary Luna/xhigh task only when separately requested.",
-            "that generic lens owns decomposition, worker/reviewer contracts, context, continuity, evidence, optional-review routing, acceptance, and lifecycle rules.",
-            "The current Sol coordinator remains planner, integrator, primary reviewer, and acceptance authority.",
-            "| Independent reviewer | Disabled unless explicitly operator-requested | Native Sol subagent | `gpt-5.6-sol` | `high` |",
-            "Explicit operator review or reviewer-profile wording activates a Sol/high reviewer.",
-            "do not resolve disabled reviewer controls.",
-            "keep independent reviewer activation unchanged and apply that lens's exact callback identity, action, acceptance, and delivery-failure contract;",
-            "It will implement, validate, and report back to this Sol task for review.",
-            "Apply every generic context, leaf topology, shared-checkout ownership, reset/reuse/recycle, verification, operator-requested reviewer, and acceptance rule from `orchestrate-workers`.",
-            "Only when the operator activates independent review, use its generic `references/independent-reviewer-protocol.md`;",
-            "do not recreate a Sol-specific reviewer protocol here.",
         }
 
         def review_fragments(text: str) -> list[str]:
@@ -695,45 +683,15 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, protocol)
         self.assertIn("isolated scratch state outside the reviewed checkout", protocol)
-        self.assertFalse((REPO_ROOT / "codex/skills/sol-luna-orchestration/references/sol-reviewer-protocol.md").exists())
-
-    def test_sol_luna_is_a_thin_explicit_compatibility_preset(self) -> None:
-        text = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
-        metadata = self.read("codex/skills/sol-luna-orchestration/agents/openai.yaml")
-        for anchor in (
-            "Composition role: explicit preset lens",
-            "Require the current coordinator to run Sol",
-            "never change it",
-            "Invoke `orchestrate-workers` explicitly",
-            "Implementation worker | When delegated | Native Luna subagent | `gpt-5.6-luna` | `xhigh`",
-            "Independent reviewer | Disabled unless explicitly operator-requested | Native Sol subagent | `gpt-5.6-sol` | `high`",
-            "Luna/xhigh is the worker default",
-            "Sol self-reviews",
-            "Explicit operator review or reviewer-profile wording activates a Sol/high reviewer",
-            "do not resolve disabled reviewer controls",
-            "only when the operator separately requests it",
-            "apply that lens's exact callback identity, action, acceptance, and delivery-failure contract",
-            "return the launch response immediately",
-            "do not wait or poll",
-            "Launched Luna task/thread <thread-id>",
-            "no second copy of that protocol",
-        ):
-            self.assertIn(anchor, text)
-        for forbidden in ("## Compact Worker Contract", "## Worker Rules", "## Operator-Requested Independent Review", "## Escalated Independent Review", "## Worker Lifecycle And Continuity"):
-            self.assertNotIn(forbidden, text)
-        self.assertIn('display_name: "Sol-Luna Orchestration"', metadata)
-        self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_orchestration_family_uses_progressive_disclosure_without_protocol_duplication(self) -> None:
         outer = self.read("codex/skills/orchestrate-feature/SKILL.md")
         generic = self.read("codex/skills/orchestrate-workers/SKILL.md")
-        preset = self.read("codex/skills/sol-luna-orchestration/SKILL.md")
         protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
         self.assertLess(len(outer.split()), 2150)
         self.assertLess(len(generic.split()), 2100)
-        self.assertLess(len(preset.split()), 575)
         self.assertLess(len(protocol.split()), 625)
-        for text in (outer, preset):
+        for text in (outer,):
             self.assertNotIn("## Compact Worker Contract", text)
             self.assertNotIn("## Worker Rules", text)
             for generic_protocol_phrase in (
@@ -751,7 +709,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(generic_protocol_phrase, generic)
         for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start", "claude-headless", "Claude"):
-            self.assertNotIn(forbidden, outer + generic + preset)
+            self.assertNotIn(forbidden, outer + generic)
 
     def test_research_prompt_twins_share_sufficiency_contract(self) -> None:
         codex = self.read("codex/skills/research-prompt/SKILL.md")

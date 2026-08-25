@@ -1,6 +1,6 @@
 ---
 name: orchestrate-workers
-description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested. Preserve coordinator profile and driver while owning decomposition, continuity, fresh context, evidence, routing, and acceptance. Defaults are native Sol/medium workers, coordinator self-review, and requested reviewer native Sol/high. Other profiles require explicit operator instruction, an operator-authorized launch contract, or the explicit sol-luna-orchestration preset. Use only after explicit invocation of orchestrate-workers, a relayed invocation in an operator-authorized feature launch, or the explicit preset.
+description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested. Preserve coordinator profile and driver while owning decomposition, continuity, fresh context, evidence, routing, and acceptance. Defaults are native Luna/xhigh workers, coordinator self-review, and requested reviewer native Sol/high. Other profiles require explicit operator instruction or an operator-authorized launch contract. Use only after explicit invocation of orchestrate-workers or a relayed invocation in an operator-authorized feature launch.
 ---
 
 # Orchestrate Workers
@@ -9,7 +9,7 @@ description: Configure a current-task coordinator with profiled native implement
 
 ## Configure Only
 
-If invoked without a resolved task and coherent delegation boundary, confirm provisional configuration, name what the coordinator must resolve, and return without launching. Activation applies to the current resolved task. A later task, or one resolved after provisional configuration, requires a fresh explicit invocation. A relayed invocation in an operator-authorized feature launch or the explicit `sol-luna-orchestration` preset satisfies activation; another agent-relayed request does not.
+If invoked without a resolved task and coherent delegation boundary, confirm provisional configuration, name what the coordinator must resolve, and return without launching. Activation applies to the current resolved task. A later task, or one resolved after provisional configuration, requires a fresh explicit invocation. A relayed invocation in an operator-authorized feature launch satisfies activation; another agent-relayed request does not.
 
 ## Terms And Profiles
 
@@ -20,12 +20,12 @@ If invoked without a resolved task and coherent delegation boundary, confirm pro
 
 | Role | Activation | Default route | Model | Effort |
 |---|---|---|---|---|
-| Implementation worker | When delegated | Native subagent | `gpt-5.6-sol` | `medium` |
+| Implementation worker | When delegated | Native subagent | `gpt-5.6-luna` | `xhigh` |
 | Independent reviewer | Disabled unless explicitly operator-requested | Native subagent | `gpt-5.6-sol` | `high` |
 
 Reviewer activation and profile are separate. Only an explicit operator request activates review; profile wording counts, and a launch contract must carry the request. While disabled, do not resolve or validate reviewer controls, identity, or protocol.
 
-Use another enabled-role profile only on explicit operator instruction, an authorized launch contract, or the explicit preset. The ordinary task route always requires a separate explicit request; neither contract nor preset authorizes it. Resolve roles independently; one override never changes another role or the coordinator. Preserve coordinator model/effort. Before dispatch, state enabled-role controls and provenance. Stop if an exact control cannot be validated; never substitute, silently change effort, or claim independent readback.
+Use another enabled-role profile only on explicit operator instruction or an authorized launch contract. The ordinary task route always requires a separate explicit request; the launch contract does not authorize it. Resolve roles independently; one override never changes another role or the coordinator. Preserve coordinator model/effort. Before dispatch, state enabled-role controls and provenance. Stop if an exact control cannot be validated; never substitute, silently change effort, or claim independent readback.
 
 Preserve permissions, approval policy, scope, stop gates, and no-worktree-without-operator-approval. Use only stable native behavior; do not fabricate syntax, controllers, registries, ledgers, daemons, queues, side-channel files, or delivery mechanisms.
 

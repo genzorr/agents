@@ -20,9 +20,9 @@ T-38 corrected that boundary. Every feature lane must now select native callback
 
 ## Product Decision
 
-Make `orchestrate-feature` the only canonical outer entrypoint. It resolves one feature objective, one delivery contract, and an independent role-profile map, then creates or reuses one ordinary feature owner. The no-override behavior is feature owner `gpt-5.6-sol`/high, implementation worker `gpt-5.6-sol`/medium, and feature-owner self-review. Independent review is disabled unless the operator explicitly requests it for the resolved feature; when requested without a profile override, the reviewer defaults to `gpt-5.6-sol`/high.
+Make `orchestrate-feature` the only canonical outer entrypoint. It resolves one feature objective, one delivery contract, and an independent role-profile map, then creates or reuses one ordinary feature owner. The no-override behavior is feature owner `gpt-5.6-sol`/medium, implementation worker `gpt-5.6-luna`/xhigh, and feature-owner self-review. Independent review is disabled unless the operator explicitly requests it for the resolved feature; when requested without a profile override, the reviewer defaults to `gpt-5.6-sol`/high.
 
-Create one generic inner lens named `orchestrate-workers`. It owns worker decomposition, contracts, context, continuity, evidence, operator-requested reviewer routing, and acceptance rules for any product-exposed coordinator profile. Keep `sol-luna-orchestration` as a thin explicit compatibility preset that invokes the generic lens with its historical current-Sol coordinator requirement, Luna/xhigh implementation defaults, optional requested Sol/high reviewer profile, and operator-requested ordinary Luna task route. Do not duplicate the inner protocol in the wrapper or outer skill.
+Create one generic inner lens named `orchestrate-workers`. It owns worker decomposition, contracts, context, continuity, evidence, operator-requested reviewer routing, and acceptance rules for any product-exposed coordinator profile. Its defaults are Luna/xhigh implementation workers with coordinator self-review; explicit operator requests may select other enabled-role profiles or an independent reviewer. Do not duplicate the inner protocol in the outer skill.
 
 Remove `orchestrate-sol-feature` from the source and catalog rather than keeping two ambiguous outer entrypoints. Managed scratch-upgrade/prune evidence must show that the old installed asset is removed while the new canonical asset and generic lens are installed.
 
@@ -95,8 +95,8 @@ When the operator invokes `$orchestrate-feature`, no separate `$orchestrate-work
 
 ```text
 Long-lived project orchestrator — current immutable profile
-└── Ordinary feature owner — resolved profile; default gpt-5.6-sol / high
-    ├── Reusable native implementation workers — resolved profile; default gpt-5.6-sol / medium
+└── Ordinary feature owner — resolved profile; default gpt-5.6-sol / medium
+    ├── Reusable native implementation workers — resolved profile; default gpt-5.6-luna / xhigh
     └── Independent native reviewer only when explicitly requested — resolved profile; default gpt-5.6-sol / high
 ```
 
@@ -127,8 +127,8 @@ Resolve this map before every new or reused dispatch:
 | Role | Default | Override behavior |
 | --- | --- | --- |
 | Project orchestrator | Current task profile | Validate an explicit requirement; never mutate |
-| Feature owner | `gpt-5.6-sol` / high | Explicit per-feature model and/or effort override |
-| Implementation worker | `gpt-5.6-sol` / medium | Explicit per-feature model and/or effort override |
+| Feature owner | `gpt-5.6-sol` / medium | Explicit per-feature model and/or effort override |
+| Implementation worker | `gpt-5.6-luna` / xhigh | Explicit per-feature model and/or effort override |
 | Independent reviewer | Disabled; when explicitly requested, `gpt-5.6-sol` / high | Explicit request activates review; optional per-feature model and/or effort override |
 
 An override affects only its named role. Missing fields inherit that enabled role's default, not another role's value. A reviewer override in the current invocation or an authoritative operator decision explicitly scoped to the resolved feature constitutes reviewer activation; a standing or global reviewer preference does not. Absent activation, no reviewer profile is resolved or validated. Never cascade a feature-owner override to workers or reviewer, never upgrade or downgrade a role silently, and never convert a model nickname into an unsupported identifier. An explicit override does not waive a governing driver or project requirement for a particular role profile; conflicting requirements stop at readiness. Before dispatch, echo the complete resolved map and distinguish `disabled`, `default`, and `operator override`.
@@ -167,11 +167,9 @@ Create a new feature owner through native `create_thread` with fresh context, ne
 
 Create new native workers and reviewers with no parent turns by default. Inherit only the smallest bounded recent slice for one named load-bearing fact with no durable source that cannot be accurately distilled without material loss; state the fact, reason, and extent before dispatch. Independent reviewers never receive inherited history. Full parent-history inheritance is prohibited.
 
-## Inner Lens And Compatibility Preset
+## Inner Lens
 
 `orchestrate-workers` is the canonical generic lens. The feature-owner launch contract explicitly invokes it for the resolved feature, passes the resolved worker profile and reviewer activation as `disabled` or `operator-requested`, and, only when review is requested, carries the exact operator-request provenance, acceptance target, and separate reviewer profile/provenance. It forbids the optional ordinary implementation-task route and preserves the feature owner as planner, integrator, default reviewer, and acceptance authority. The lens owns worker/reviewer decomposition, contracts, context, continuity, evidence, optional-review routing, and acceptance rules.
-
-`sol-luna-orchestration` remains an explicit-only preset for direct current-task use. It requires a current Sol coordinator, supplies native Luna/xhigh implementation defaults, keeps review with the Sol coordinator unless the operator requests a separate Sol/high reviewer, preserves the separately operator-requested ordinary Luna task route, and delegates all generic lifecycle rules to `orchestrate-workers`. For that generic ordinary-task route, exact callback means the exact originating coordinator `threadId` and `hostId` when required plus explicit native `send_message_to_thread`; an accepted blocker/terminal send establishes delivery, while rejection or unavailability remains local delivery failure. The preset contains no second copy of the generic protocol.
 
 If the operator invokes both outer feature ownership and an ordinary implementation-task route for the same unresolved feature, stop and ask for one owner topology. `goal-prompt` remains the owner of durable autonomous goal handoffs; an existing goal artifact may be durable feature authority but does not replace native task/profile/delivery resolution.
 
@@ -198,7 +196,7 @@ The final handoff includes outcome, exact repository/branch/commit/checkout stat
 
 ## Migration And Release Boundary
 
-Rename the canonical outer source, catalog ID, install target, metadata, docs, and tests from `orchestrate-sol-feature` to `orchestrate-feature`. Do not keep the old outer source or catalog entry. Add `orchestrate-workers` as a Codex-only generic lens and retain `sol-luna-orchestration` as the compact compatibility preset.
+Rename the canonical outer source, catalog ID, install target, metadata, docs, and tests from `orchestrate-sol-feature` to `orchestrate-feature`. Do not keep the old outer source or catalog entry. Keep `orchestrate-workers` as the Codex-only generic lens and remove the redundant `sol-luna-orchestration` source and catalog entry.
 
 Scratch migration validation must model an existing managed installation containing `skills/orchestrate-sol-feature`, run the Codex installer in dry-run/diff prune mode, and show removal of the old managed asset plus installation of `skills/orchestrate-feature` and `skills/orchestrate-workers` without touching foreign/unmanaged assets. The PR does not authorize live installation.
 
@@ -207,7 +205,7 @@ T-39 authorizes the current branch, reviewed source implementation, commits, pus
 ## Success Measures
 
 - One memorable `orchestrate-feature` invocation produces the intended ownership topology with explicit, independently resolved role profiles.
-- No-override behavior preserves Sol/high feature ownership, Sol/medium workers, feature-owner self-review, and no separate reviewer dispatch.
+- No-override behavior preserves Sol/medium feature ownership, Luna/xhigh workers, feature-owner self-review, and no separate reviewer dispatch.
 - Non-Sol feature owners can use the generic inner lens truthfully without copied protocol or a Sol-only precondition.
 - Exact profile requests, validation, and readback limitations are reported truthfully; no override cascades or mutates the current orchestrator.
 - Feature owners, workers, and reviewers reuse only compatible identities and receive complete resets.
@@ -218,7 +216,7 @@ T-39 authorizes the current branch, reviewed source implementation, commits, pus
 
 - Generic-name overreach: keep one fixed topology and explicit role map; do not turn the skill into a general task controller.
 - Profile drift: echo complete defaults/overrides, validate exact profiles, prevent cascading, and key reuse by role profile.
-- Misleading compatibility: move generic protocol to `orchestrate-workers`; keep `sol-luna-orchestration` only as a thin historical preset.
+- Redundant compatibility: keep the generic protocol and its Luna/xhigh defaults in `orchestrate-workers` without retaining a duplicate preset.
 - Reviewer overuse or weakening: require explicit operator activation, avoid reviewer-only resolution/loading while disabled, and preserve separate identity, fresh context, and the acceptance protocol after activation.
 - Handoff loss: preserve T-38 route-specific delivery and bounded-supervision tests unchanged.
 - Context contamination: prohibit feature-task forks and full-history subagent forks; keep inherited turns exceptional and named.
