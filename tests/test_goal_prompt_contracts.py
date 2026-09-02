@@ -219,7 +219,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "reporting; external-landing authority stays exactly as granted",
             "It names exactly one writer—owner or worker—per shared mutable resource within granted authority",
             "it serializes all others, including itself, and evaluates evidence",
-            "It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch preamble",
+            "It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch context",
             "existing final handoff `decisions/divergence`",
             "it creates no new file, ledger, side channel, or notification event",
             "It may perform trivial glue, narrow corrections, decision-critical inspection, or work without a coherent delegation boundary.",
@@ -374,7 +374,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Only an explicit operator request activates review",
             "launch contract must carry the request",
             "do not resolve or validate reviewer controls, identity, or protocol",
-            "Stop if an exact control cannot be validated",
+            "stop if an exact control cannot be validated",
         ):
             self.assertIn(anchor, profiles)
         for anchor in (
@@ -390,7 +390,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
         for heading in (
             "## Decompose And Route",
-            "## Dispatch Preamble",
+            "## Dispatch Readiness",
             "## Worker Lifecycle And Continuity",
             "## Compact Worker Contract",
             "## Worker Rules",
@@ -419,16 +419,22 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
 
     def test_orchestrate_workers_preserves_nonduplicative_dispatch_trace(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
-        preamble = text.split("## Dispatch Preamble\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
+        preamble = text.split("## Dispatch Readiness\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
         for anchor in (
-            "Before every dispatch, state lane",
+            "Before every dispatch, internally resolve and validate the lane",
             "root work it substitutes for",
             "unique output",
             "downstream decision affected",
-            "why the lane is non-duplicative",
+            "non-duplicative rationale",
             "explicit operator request and exact acceptance target",
+            "consequential profile override",
+            "inherited-context exception",
+            "unresolved or unobservable control",
+            "degraded supervision or delivery",
+            "changed topology/authority/shared-state ownership or conflict",
         ):
             self.assertIn(anchor, preamble)
+        self.assertNotIn("Before every dispatch, state lane", preamble)
 
     def test_orchestrate_workers_preserves_complete_handoffs_and_recovery(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
@@ -550,7 +556,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "the same applies to any explicitly requested reviewer verdict.",
             "Savings never weaken scope, verification, authority, or review quality.",
             "Keep every worker and reviewer a leaf.",
-            "For a reviewer, state the explicit operator request and exact acceptance target.",
+            "For a reviewer, disclose the explicit operator request and exact acceptance target.",
             "Keep implementation and reviewer identities separate.",
             "## Operator-Requested Independent Review",
             "Only an explicit operator request for this task activates a reviewer.",
@@ -683,6 +689,202 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, protocol)
         self.assertIn("isolated scratch state outside the reviewed checkout", protocol)
+
+    def test_orchestration_narration_is_exception_driven_and_continuity_is_fail_safe(self) -> None:
+        dispatch_scope = re.compile(
+            r"\b(?:before|prior to)\s+(?:(?:each|every)\s+)?(?:new\s+or\s+reused\s+)?dispatch\b"
+            r"|\b(?:each|every)\s+(?:new\s+or\s+reused\s+)?dispatch(?:es)?\b|\bpre[- ]dispatch\b",
+            re.IGNORECASE,
+        )
+        dispatch_action = re.compile(
+            r"\b(?:state|report|echo|recite|restate|repeat|narrate|expose|disclose)\b", re.IGNORECASE
+        )
+        dispatch_field_names = ("route", "model", "effort", "provenance", "context", "default")
+        exception_scope = re.compile(
+            r"(?=[^.\n]*\bonly\b)(?=[^.\n]*\b(?:overrides?|exceptions?|changed|conflicts?|decision[- ]bearing)\b)"
+            r"|\b(?:unresolved|unobservable|degraded)\b",
+            re.IGNORECASE,
+        )
+
+        def has_unconditional_full_dispatch_recital(text: str) -> bool:
+            for sentence in re.split(r"[.\n]", text):
+                if not dispatch_scope.search(sentence) or not dispatch_action.search(sentence):
+                    continue
+                if not re.search(r"\b(?:lane|role map)\b", sentence, re.IGNORECASE):
+                    continue
+                fields = {
+                    field
+                    for field in dispatch_field_names
+                    if re.search(rf"\b{re.escape(field)}\b", sentence, re.IGNORECASE)
+                }
+                if len(fields) < 3:
+                    continue
+                if exception_scope.search(sentence):
+                    continue
+                return True
+            return False
+
+        workers = self.read("codex/skills/orchestrate-workers/SKILL.md")
+        readiness = workers.split("## Dispatch Readiness\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
+        for anchor in (
+            "internally resolve and validate",
+            "Send the complete worker contract",
+            "consequential profile override",
+            "inherited-context exception",
+            "unresolved or unobservable control",
+            "degraded supervision or delivery",
+            "changed topology/authority/shared-state ownership or conflict",
+            "other decision-bearing variation",
+        ):
+            self.assertIn(anchor, readiness)
+        self.assertNotIn("Before every dispatch, state lane", readiness)
+
+        feature = self.read("codex/skills/orchestrate-feature/SKILL.md")
+        role_profiles = feature.split("## Resolve Role Profiles\n", 1)[1].split("## Select New Or Reused Ownership", 1)[0]
+        self.assertIn("Keep map/provenance internal", role_profiles)
+        self.assertNotIn("Echo the map", role_profiles)
+        self.assertIn("Post-launch, report one compact truthful receipt", feature)
+        for section in (readiness, role_profiles):
+            self.assertFalse(has_unconditional_full_dispatch_recital(section))
+            for full_map_mutation in (
+                "Before every dispatch, always echo the complete resolved role map, route, model, effort, provenance, and context.",
+                "Echo the complete resolved role map, route, model, effort, provenance, and context before every dispatch.",
+                "Before every dispatch, state the lane and complete role map, route, model, effort, provenance, and context when the worker launches.",
+                "Before every dispatch, state the lane and complete role map, route, model, effort, provenance, and context if the worker launches.",
+                "Before every dispatch, state the lane and complete role map, route, model, effort, provenance, and context unless the worker launches.",
+            ):
+                self.assertTrue(has_unconditional_full_dispatch_recital(section + "\n" + full_map_mutation))
+            for exception_only_mutation in (
+                "Before every dispatch, always disclose only consequential role map overrides affecting route, model, effort, provenance, and context.",
+                "Before every dispatch, disclose only consequential model overrides.",
+                "Before every dispatch, disclose unresolved or unobservable controls.",
+                "Before every dispatch, always disclose unresolved or unobservable controls.",
+                "Before every dispatch, disclose degraded delivery exceptions.",
+            ):
+                self.assertFalse(has_unconditional_full_dispatch_recital(section + "\n" + exception_only_mutation))
+
+        protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
+        continuity = protocol.split("## Reviewer Continuity\n", 1)[1]
+        for anchor in (
+            "reviewer identity or continuity is established, recycled, recovered, or uncertain",
+            "full continuity receipt",
+            "genuine compaction recovery",
+            "fail safe",
+            "decision-bearing deltas",
+        ):
+            self.assertIn(anchor, continuity)
+        self.assertNotIn("After each dispatch/classification change, restate", continuity)
+        unconditional_reviewer_restatement = re.compile(
+            r"(?:\b(?:after|for)\s+(?:each|every)\s+(?:compatible\s+)?dispatch(?:/classification)?\s+change\b"
+            r"[^.\n]{0,40}(?:always\s+)?(?:restate|report|emit|repeat|include)\b|"
+            r"\b(?:each|every)\s+(?:compatible\s+)?dispatch(?:/classification)?\s+change\b"
+            r"[^.\n]{0,40}(?:always|must|shall|required to)\s+"
+            r"(?:restate|report|emit|repeat|include)\b)"
+            r"(?=[^.\n]*\breviewer\s+identity\b)"
+            r"(?=[^.\n]*\breuse\s+status\b)"
+            r"(?=[^.\n]*\b(?:disposition|reviewed\s+state|exact\s+reviewer\s+profile)\b)"
+            r"[^.\n]{0,320}\b(?:reviewer\s+identity|reuse\s+status|disposition|reviewed\s+state|"
+            r"exact\s+reviewer\s+profile)\b",
+            re.IGNORECASE,
+        )
+        self.assertIsNone(unconditional_reviewer_restatement.search(continuity))
+        self.assertIsNone(
+            unconditional_reviewer_restatement.search(
+                continuity + "\nAfter every compatible dispatch change, report only decision-bearing reviewer state deltas."
+            )
+        )
+        self.assertIsNotNone(
+            unconditional_reviewer_restatement.search(
+                continuity
+                + "\nAfter every compatible dispatch/classification change, restate the full reviewer identity, reuse status, last review ID, disposition, reviewed state, and exact reviewer profile."
+            )
+        )
+        self.assertIsNotNone(
+            unconditional_reviewer_restatement.search(
+                continuity
+                + "\nEvery compatible dispatch/classification change must restate the full reviewer identity, reuse status, last review ID, disposition, reviewed state, and exact reviewer profile."
+            )
+        )
+
+    def test_dynamic_workflow_prompt_only_structure_follows_task_facts(self) -> None:
+        dynamic_terms = r"(?:implementation|Git|independent(?:/adversarial)?\s+review|P0/P1/P2\s+board|completion[- ]audit)"
+        universal_dynamic_ceremony = (
+            re.compile(
+                r"\bAt minimum,\s+include phases for read-only audit, implementation planning, implementation,"
+                r"\s+verification, independent/adversarial review, and final handoff\."
+            ),
+            re.compile(
+                r"(?:\b(?:every|all|any)\s+(?:prompt-only\s+)?(?:dynamic\s+)?(?:workflow|run|handoff|task)s?\b"
+                r"(?![^.\n]*\b(?:only|unless|exclude|must\s+not)\b)"
+                r"[^.\n]{0,220}\b(?:(?:must|shall|required\s+to|always)\s+)?"
+                r"(?:add|adds|include|includes|require|requires|retain|retains|have|has|define|defines|"
+                r"use|uses|perform|performs|run|runs)\b|"
+                r"\b(?:always|universally)\b(?![^.\n]{0,120}\b(?:only|unless|exclude|must\s+not)\b)"
+                r"[^.\n]{0,220}\b(?:add|include|require|retain|have|define|use|perform|run)\b)"
+                r"[^.\n]{0,220}\b"
+                + dynamic_terms
+                + r"\b",
+                re.IGNORECASE,
+            ),
+        )
+        contradictory_dynamic_requirements = (
+            "At minimum, include phases for read-only audit, implementation planning, implementation, verification, independent/adversarial review, and final handoff.",
+            "Every workflow must add implementation planning.",
+            "Every workflow must include an implementation phase.",
+            "Every workflow must require an independent review.",
+            "Every workflow must retain Git cadence and branch rules.",
+            "Every workflow must have a P0/P1/P2 board.",
+            "Every workflow must include a completion-audit section.",
+        )
+        accepted_dynamic_alternatives = (
+            "Every workflow must exclude implementation and Git phases unless task facts require them.",
+            "Every workflow must not include implementation or Git ceremony for read-only research.",
+            "Every workflow must retain implementation and Git phases only when migration facts require them.",
+            "Every workflow must include independent review only when evidence risk makes it decision-bearing.",
+        )
+        for platform in ("codex", "claude"):
+            text = self.read(f"{platform}/skills/prepare-dynamic-workflow/SKILL.md")
+            prompt_only = text.split("## Prompt-only handoff (+ durable WORKFLOW.md)\n", 1)[1].split("### Handoff prompt output", 1)[0]
+            handoff = text.split("### Handoff prompt output\n", 1)[1].split("```text\n", 1)[1].split("\n```", 1)[0]
+            for anchor in (
+                "Add a P0/P1/P2 board only when",
+                "phases for audit, design/invariants, implementation, verification, and independent review only when task facts require them",
+                "Read-only research, verification, and planning keep their needed",
+                "without acquiring implementation or Git ceremony",
+                "Implementation or migration workflows may retain",
+                "completion-audit section only when",
+                "independent/adversarial review of objective *completeness* when task facts",
+                "second-pass self-audit only when",
+                "unselected, reversible approach detail",
+                "outcome, scope, authority, compatibility, acceptance, and frozen-Protocol envelope",
+                "record a material deviation in the existing handoff",
+                "Stop and route to the owner before changing",
+            ):
+                self.assertIn(anchor, prompt_only, f"{platform}: {anchor}")
+            self.assertNotIn("a P0/P1/P2 board where P0/P1 are\nclose-blocking", prompt_only)
+            self.assertIn("phases match task facts", handoff)
+            self.assertIn("always retain a final handoff", handoff)
+            self.assertIn("Read-only research, verification, and planning must not acquire implementation or Git phases", handoff)
+            self.assertIn("When WORKFLOW.md requires a completion audit", handoff)
+            bounded_workflow_sections = prompt_only + "\n" + handoff
+            for pattern in universal_dynamic_ceremony:
+                self.assertIsNone(pattern.search(bounded_workflow_sections), f"{platform}: {pattern.pattern}")
+            for mutation in contradictory_dynamic_requirements:
+                self.assertTrue(
+                    any(pattern.search(bounded_workflow_sections + "\n" + mutation) for pattern in universal_dynamic_ceremony),
+                    f"{platform}: detector missed {mutation}",
+                )
+            for valid_alternative in accepted_dynamic_alternatives:
+                self.assertFalse(
+                    any(pattern.search(bounded_workflow_sections + "\n" + valid_alternative) for pattern in universal_dynamic_ceremony),
+                    f"{platform}: detector rejected {valid_alternative}",
+                )
+
+    def test_skill_authoring_requires_a_consumer_or_consequence_without_runtime_surface(self) -> None:
+        text = self.read("docs/skill-authoring-principles.md")
+        self.assertIn("every required plan, checkpoint, gate, review, status stream, or durable artifact", text)
+        self.assertIn("downstream consumer or change execution, authority, recovery, verification, or acceptance", text)
+        self.assertIn("not a runtime checklist, emitted field, or report", text)
 
     def test_orchestration_family_uses_progressive_disclosure_without_protocol_duplication(self) -> None:
         outer = self.read("codex/skills/orchestrate-feature/SKILL.md")

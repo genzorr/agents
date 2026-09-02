@@ -46,7 +46,7 @@ Use this no-override map:
 
 Accept only explicit, unambiguous overrides tied to this feature. Owner and worker overrides may also come from a durable operator decision governing their roles. Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it; standing or global reviewer preferences never activate review. Resolve roles independently: owner and worker overrides change only their profiles; reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile. An omitted field inherits its enabled role's default, never another override. Never infer reviewer activation; a driver requirement without operator authorization stops for a decision. Do not cascade, silently change effort, or convert a nickname into an unsupported identifier. An override never waives a governing profile requirement; conflict stops.
 
-Echo the map with `default`, `disabled`, or `operator override` provenance. Validate exact controls only for enabled roles; never substitute or validate reviewer controls while disabled. Treat accepted creation/spawn as profile provenance, not independent readback, and disclose missing readback.
+Keep map/provenance internal; disclose pre-dispatch only consequential profile overrides, inherited-context exceptions, unresolved/unobservable controls, degraded supervision, changed topology/authority/shared-state conflicts, or decision-bearing variation. Validate exact controls; never substitute or validate reviewer controls while disabled. Accepted creation is profile provenance, not independent readback.
 
 ## Select New Or Reused Ownership
 
@@ -60,12 +60,12 @@ Recycle only for a different feature/project/repository/checkout, trust/permissi
 
 ## Launch A New Feature Owner
 
-1. Resolve callback identity/action only under callback; otherwise resolve the selected delivery mechanism and target without fabricating an origin route.
+1. Resolve callback identity/action only under callback; otherwise resolve selected delivery mechanism and target without fabricating an origin route.
 2. Use native `create_thread` with fresh context, never a native subagent spawn or `fork_thread`. An operator-requested task fork is a different topology and requires an explicit boundary decision.
-3. Select the exact resolved owner model and effort and resolve saved project/environment first. Personal OS-managed repositories use the existing checkout unless the operator explicitly authorizes a worktree. Other projects follow user and project policy, then the native default when no stricter rule exists. The inner lens's no-worktree-without-operator-approval rule governs an additional worktree created after launch, not a task environment already assigned under this compliant outer policy. Use the exact intended existing branch/ref or explicitly intended working-tree state; never invent either.
-4. Send only the complete launch contract to a concise project-and-feature title. Distill chat-only facts and point to durable paths; never inherit or paste parent history. Conversation history is context, not authority.
+3. Select the exact resolved owner model and effort and resolve saved project/environment first. Personal OS-managed repositories use the existing checkout unless the operator explicitly authorizes a worktree. Other projects follow user and project policy, then the native default when no stricter rule exists. The inner lens's no-worktree-without-operator-approval rule governs an additional worktree created after launch, not a task environment already assigned under this compliant outer policy. Use exact intended existing branch/ref or explicitly intended working-tree state; never invent either.
+4. Send only the complete launch contract to a project-and-feature title. Distill chat-only facts and point to durable paths; never inherit or paste parent history. Conversation history is context, not authority.
 5. Distinguish pending from ready identity and request validation from readback. Retain ready identity, host, and latest wait cursor; perform one bounded `wait_threads` wait/snapshot for immediate completion, failure, or attention. Timeout leaves `launched, awaiting handoff` and supports no later-notification claim.
-6. Report identity, objective, role map, environment/context, delivery route, wait state, fallback, and readback limitations.
+6. Post-launch, report one compact truthful receipt: identity, objective, role map, environment/context, delivery route, wait state, fallback, and readback limitations.
 
 ## Feature Owner Launch Contract
 
@@ -85,7 +85,7 @@ Include every applicable field whose absence can change behavior or authority:
 
 State that the owner owns integration, default self-review, and feature acceptance; may create only native leaf workers and an operator-requested reviewer; cannot delegate authority or create an ordinary task; and treats reports as evidence. It must use `orchestrate-workers` to delegate coherent execution-depth work—broad investigation, implementation, implementation-depth diagnostics, builds, focused tests, and owned-diff inspection—to configurable native workers when a safe delegation boundary exists. Workers may perform substantial implementation, build, test, diagnostic, and inspection work; they are not limited to code-writing. It retains architecture/risk decisions, assignment contracts, feature-lane Git/shared-state writer assignment, synthesis and integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo, acceptance, reporting; external-landing authority stays exactly as granted.
 
-It names exactly one writer—owner or worker—per shared mutable resource within granted authority; it serializes all others, including itself, and evaluates evidence. It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch preamble and existing final handoff `decisions/divergence`; it creates no new file, ledger, side channel, or notification event. It may perform trivial glue, narrow corrections, decision-critical inspection, or work without a coherent delegation boundary.
+It names exactly one writer—owner or worker—per shared mutable resource within granted authority; it serializes all others, including itself, and evaluates evidence. It records substantial direct work and its no-boundary reason in its in-task plan or worker-dispatch context and existing final handoff `decisions/divergence`; it creates no new file, ledger, side channel, or notification event. It may perform trivial glue, narrow corrections, decision-critical inspection, or work without a coherent delegation boundary.
 
 ## Constrain Inner Delegation
 

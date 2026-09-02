@@ -47,7 +47,7 @@ Send `fix-first` corrections to the original implementation worker when resumabl
 
 ## Reviewer Continuity
 
-After each dispatch/classification change, restate reviewer identity, reuse status, last review ID, disposition, reviewed state, and exact reviewer profile in visible coordinator state. This is the compaction recovery point.
+When reviewer identity or continuity is established, recycled, recovered, or uncertain, emit a full continuity receipt naming identity, reuse status, last review ID, disposition, reviewed state, and exact reviewer profile. Use the full receipt for genuine compaction recovery and fail safe to it whenever the event cannot establish that continuity remains intact. After continuity is established, later compatible dispatch or classification changes need only decision-bearing deltas. This receipt remains the compaction recovery point.
 
 Reuse across fixes and later compatible tasks only within the same reviewer role, project, checkout, trust, authority, isolation, route, model, and effort. Never assign concurrent reviews. Compaction, task boundaries, elapsed time, and prior verdicts do not justify recycling.
 

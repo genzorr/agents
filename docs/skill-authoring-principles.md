@@ -16,6 +16,8 @@ Ask of each line:
 - Is this meaning already stated somewhere else?
 - Can the agent tell when this step is complete?
 
+Ask one more question of every required plan, checkpoint, gate, review, status stream, or durable artifact: does it name a downstream consumer or change execution, authority, recovery, verification, or acceptance? If neither, remove it from the skill; this is an authoring test, not a runtime checklist, emitted field, or report.
+
 ## Invocation
 
 Choose invocation deliberately.

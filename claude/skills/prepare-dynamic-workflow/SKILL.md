@@ -175,13 +175,9 @@ Always create or replace a durable workflow spec before writing the prompt:
 - `WORKFLOW.md` is the execution contract. Reference any PRD/harness task/design doc/`GOAL.md` as supporting
   context instead of duplicating it; mark a possibly stale `GOAL.md` as background unless the user says it is current.
 
-The spec defines: objective and non-goals; required references; a P0/P1/P2 board where P0/P1 are
-close-blocking; phases (audit, design/invariants, implementation, verification, independent review, final
-handoff); hard exit conditions including elapsed-time gates when requested; benchmark/measurement
-requirements; commit cadence and branch rules; and stop/ask gates for risky decisions, missing evidence,
-destructive changes, or unclear ownership.
+The spec defines objective and non-goals, required references, evidence/measurement needs, hard exit conditions, and stop/ask gates for risky decisions, missing evidence, destructive changes, or unclear ownership. Add a P0/P1/P2 board only when multiple close-blocking deliverables make priority accounting decision-bearing. Add phases for audit, design/invariants, implementation, verification, and independent review only when task facts require them; always retain a final-handoff phase. Read-only research, verification, and planning keep their needed evidence/research/planning phases without acquiring implementation or Git ceremony. Implementation or migration workflows may retain implementation, verification, independent review, completion audit, commit cadence, and branch rules when they change execution, authority, recovery, verification, or acceptance. Add elapsed-time gates and a second-pass self-audit only when explicitly requested or materially decision-bearing.
 
-Convert broad goals into falsifiable deliverables before writing the board:
+When a board or requirement table is warranted, convert broad goals into falsifiable deliverables before writing it:
 
 - Derive a requirement table: `Requirement | Required artifact/evidence | Completion test | May not be satisfied by`.
 - Do not leave close-blocking items as broad verbs ("audit", "improve", "investigate", "make faster")
@@ -193,17 +189,13 @@ Convert broad goals into falsifiable deliverables before writing the board:
 - Label intentionally-incomplete requirements P2 or non-goal up front; do not hide a primary requirement as
   an `ACCEPT_WITH_TRADEOFF` caveat.
 
-Add a completion-audit section: the final handoff must include `Requirement | Evidence inspected | Status |
-Remaining gap`. P0/P1 statuses may be `done` or `blocked`; `deferred`, `unknown`, `partially done`, and
-`not measured` are not closeable. Missing evidence for a primary P0/P1 requirement must produce
-`BLOCKED_MISSING_EVIDENCE`, `EXPERIMENT_ONLY`, or continued work.
+Add a completion-audit section only when completeness is materially ambiguous, acceptance requires criterion-to-evidence accounting, or a downstream owner needs it. When present, the final handoff must include `Requirement | Evidence inspected | Status | Remaining gap`; P0/P1 statuses may be `done` or `blocked`, and missing evidence for a primary P0/P1 requirement must produce `BLOCKED_MISSING_EVIDENCE`, `EXPERIMENT_ONLY`, or continued work. Otherwise, the ordinary final handoff records the outcome, evidence, and remaining gaps without a board or audit table.
 
-Strengthen review: require an independent/adversarial review of objective *completeness*, not only
-correctness of implemented claims, comparing the original objective and completion audit against the diff,
-tests, benchmark artifacts, and docs. If an elapsed-time gate exists and the run is ready to finish before
-using ~half of it, require a second-pass self-audit.
+Use independent/adversarial review of objective *completeness* when task facts, an explicit requirement, or the evidence risk makes independent evidence decision-bearing; otherwise perform a self-check against the objective and evidence. If an elapsed-time gate exists and the run is ready to finish before using ~half of it, add a second-pass self-audit only when that gate is material.
 
 Keep workflow instructions focused on execution structure; put domain detail in the durable spec or harness task.
+
+When evidence contradicts an unselected, reversible approach detail, adapt it only within the stated outcome, scope, authority, compatibility, acceptance, and frozen-Protocol envelope; preserve the evidence and record a material deviation in the existing handoff. Stop and route to the owner before changing a selected decision, acceptance outcome, authority or safety boundary, public or compatibility contract, difficult-to-reverse design, or frozen Protocol.
 
 ### Handoff prompt output
 
@@ -218,17 +210,11 @@ Read <WORKFLOW.md path> first. WORKFLOW.md, plus the files it references, is the
 this run; do not rely on this prompt after compaction. Treat any referenced GOAL.md as background only
 unless WORKFLOW.md explicitly says it is current.
 
-Create and use a dynamic workflow for this run. At minimum, include phases for read-only audit,
-implementation planning, implementation, verification, independent/adversarial review, and final handoff.
-Keep the workflow updated as work progresses.
+Create and use a dynamic workflow whose phases match task facts: include read-only audit/research, design/invariants, implementation, verification, and independent/adversarial review only when each changes execution or evidence, and always retain a final handoff. Read-only research, verification, and planning must not acquire implementation or Git phases. Retain implementation, migration, Git, and review phases when their task facts or explicit requirements make them consequential. Keep the workflow updated as work progresses.
 
-Follow the hard exit conditions, stop gates, benchmark/measurement requirements, commit cadence, and
-final-accounting rules in the durable spec. Do not stop after one useful fix, one passing smoke test, or one
-commit while P0/P1 workflow items remain actionable.
+Follow the hard exit conditions, stop gates, benchmark/measurement requirements, and any task-triggered board, completion-accounting, commit, or branch rules in the durable spec. When the spec defines close-blocking P0/P1 items, do not stop after one useful fix, one passing smoke test, or one commit while they remain actionable.
 
-Before final handoff, perform the completion audit required by WORKFLOW.md. Do not mark P0/P1 complete from
-intent, partial evidence, or a narrower successful result. If a primary requirement remains unmeasured or
-only partially proven, keep working or return a blocked/experimental verdict rather than `ACCEPT`.
+When WORKFLOW.md requires a completion audit, perform it before final handoff; do not mark P0/P1 complete from intent, partial evidence, or a narrower successful result. If a primary requirement remains unmeasured or only partially proven, keep working or return a blocked/experimental verdict rather than `ACCEPT`.
 
 If the durable spec is under-specified in a way that would change the work, ask before proceeding. Otherwise
 proceed autonomously within the spec.

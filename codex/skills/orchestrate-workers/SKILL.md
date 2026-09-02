@@ -25,7 +25,7 @@ If invoked without a resolved task and coherent delegation boundary, confirm pro
 
 Reviewer activation and profile are separate. Only an explicit operator request activates review; profile wording counts, and a launch contract must carry the request. While disabled, do not resolve or validate reviewer controls, identity, or protocol.
 
-Use another enabled-role profile only on explicit operator instruction or an authorized launch contract. The ordinary task route always requires a separate explicit request; the launch contract does not authorize it. Resolve roles independently; one override never changes another role or the coordinator. Preserve coordinator model/effort. Before dispatch, state enabled-role controls and provenance. Stop if an exact control cannot be validated; never substitute, silently change effort, or claim independent readback.
+Use another enabled-role profile only on explicit operator instruction or an authorized launch contract. The ordinary task route always requires a separate explicit request; the launch contract does not authorize it. Resolve roles independently; one override never changes another role or the coordinator. Preserve coordinator model/effort. Before dispatch, resolve enabled-role controls and provenance internally. Disclose a profile override or any unresolved or unobservable control before dispatch; stop if an exact control cannot be validated. Never substitute, silently change effort, or claim independent readback.
 
 Preserve permissions, approval policy, scope, stop gates, and no-worktree-without-operator-approval. Use only stable native behavior; do not fabricate syntax, controllers, registries, ledgers, daemons, queues, side-channel files, or delivery mechanisms.
 
@@ -45,9 +45,9 @@ Preserve permissions, approval policy, scope, stop gates, and no-worktree-withou
 5. Launch new workers with no parent turns by default and confirm that setting. Treat an inherited-turn fork as exceptional: use only the smallest bounded recent slice for one named load-bearing fact with no durable source that cannot be accurately distilled without material loss; state the fact, reason, and exact slice. Never inherit full parent history. Inherited context is not authority; restate scope, permissions, decisions, and criteria.
 6. Keep every worker and reviewer a leaf. The coordinator alone creates agents, aggregates results, and mediates handoffs.
 
-## Dispatch Preamble
+## Dispatch Readiness
 
-Before every dispatch, state lane, workstream/assignment, new/reused identity, route, model, effort, provenance, and context mode. For a worker, also name the root work it substitutes for, unique output, downstream decision affected, and why the lane is non-duplicative. For a reviewer, state the explicit operator request and exact acceptance target. Do not dispatch with unknown required facts.
+Before every dispatch, internally resolve and validate the lane, workstream/assignment, new or reused identity, route, model, effort, provenance, context mode, root work it substitutes for, unique output, downstream decision affected, and non-duplicative rationale. Send the complete worker contract with those facts. Disclose them before dispatch only for a consequential profile override, inherited-context exception, unresolved or unobservable control, degraded supervision or delivery, changed topology/authority/shared-state ownership or conflict, or other decision-bearing variation. For a reviewer, disclose the explicit operator request and exact acceptance target. Do not dispatch with unknown required facts.
 
 ## Worker Lifecycle And Continuity
 
