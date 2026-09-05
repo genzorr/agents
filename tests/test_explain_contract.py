@@ -41,6 +41,19 @@ class ExplainContractTest(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, skill)
 
+    def test_visualizer_is_bounded_helper_and_explain_owns_the_narrative_contract(self) -> None:
+        skill = (SHARED_SKILL / "SKILL.md").read_text(encoding="utf-8")
+
+        for phrase in (
+            "use it as a bounded helper for the visual surface",
+            "rendering, embedding, accessibility",
+            "Explain governs the surrounding causal narrative",
+            "source anchors, limitations, and textual equivalent",
+            "do not suppress Explain's complete explanation or evidence handoff",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+
     def test_visualizer_and_export_boundaries_preserve_security_and_fidelity(self) -> None:
         skill = (SHARED_SKILL / "SKILL.md").read_text(encoding="utf-8")
 
