@@ -38,25 +38,15 @@ Choose exactly one primary mode. Add at most one secondary mode only when it con
 
 The primary mode owns framing, context authority, stop conditions, and the main Required Output. A secondary mode may add a bounded section after the primary result; it must not contradict, reopen, or relax the primary mode. If the two modes conflict, omit the secondary mode or make the primary mode control explicit. Do not chain more than two modes.
 
-## Context Authority
+## Shared Context Authority
 
-Sort supplied context before writing the consult:
-
-1. **Primary evidence** — source code, configuration, tests, exact repository records, and directly recorded measurements, commands, artifacts, and provenance.
-2. **User requirements and constraints** — desired outcomes, compatibility requirements, deadlines, operational limits, non-goals, and acceptance criteria.
-3. **Working synthesis** — prior conclusions, architectural models, review summaries, or design reasoning that should be evaluated rather than treated as source truth.
-4. **Hypotheses** — suspected causes, tentative explanations, or proposed mechanisms.
-5. **Selected decisions** — directions the user has chosen and that subsequent work should preserve unless explicitly reopened.
-6. **Preferences and decision criteria** — softer user-owned values, priorities, and tradeoffs used to compare alternatives.
-7. **Assumptions and unknowns** — provisional defaults, inaccessible evidence, unresolved facts, and uncertain interpretations.
-
-Never flatten these categories into one narrative. Tell Pro what to inspect as evidence, what to verify or challenge, what to preserve as a hard constraint, what to use as a softer criterion, and what remains open.
+Apply the canonical [Shared Context Authority](../SKILL.md#shared-context-authority) from the entrypoint when sorting supplied context. Keep its categories distinct, preserve hard requirements and selected decisions, use preferences as comparison criteria, and label inferences, recommendations, contradictions, and unresolved gaps. Pro-specific evidence and GitHub rules below add repository authority without redefining the shared categories.
 
 ## Workflow
 
 1. Read the user's task for requested deliverable formats. Invoking this skill does not request a PDF; preserve an explicit request such as "do provide PDF along with other output" in the consult's Artifact Output instructions.
 2. Choose task type, one primary mode, and an optional secondary mode under the rules above. Do not default every consult to Discover merely because independent judgment is useful.
-3. Classify supplied context using the authority model. Preserve useful context instead of deleting it in the name of neutrality.
+3. Classify supplied context using the shared authority model. Preserve useful context instead of deleting it in the name of neutrality.
 4. Identify each GitHub repo and stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, and its role in the task. For a change review, record both base and head commits.
 5. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then inspect `git status --short` and the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
 6. Build a proportional source manifest. Name authoritative starting paths and add symbols, errors, or search strings only when they materially improve discovery. Do not turn a broad task into an exhaustive file checklist.

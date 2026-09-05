@@ -75,8 +75,6 @@ The complete typed inputs live in `examples/*.json`, and the renderer READMEs ca
 - **Lifecycle**: use the required `main` lane for phases and `terminal` for outcomes; other lanes share the middle event band. Keep transition labels sparse and event-like, and use state tags or step numbers for detail.
 - **Architecture**: place components with free `pos` coordinates, describe boundaries with `wraps`, and route connections with explicit sides or orthogonal routes. Use the renderer's overlap, collision, and off-canvas diagnostics rather than hand-tuning around them.
 
-Set `meta.animation: "trace"` only when the user asks for motion or a presentation/demo view. It respects `prefers-reduced-motion` and leaves default static output unchanged.
-
 ## Architecture Mode
 
 Architecture has the same read-schema-then-render loop as the other modes — prefer it. Hand-placed SVG is the fallback for when renderers can't run.

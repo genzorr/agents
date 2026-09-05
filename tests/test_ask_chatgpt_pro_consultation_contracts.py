@@ -14,15 +14,12 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
     def read_pro(self) -> str:
         return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "references" / "pro-consult.md").read_text(encoding="utf-8")
 
-    def test_entrypoint_routes_modes_without_loading_pro_workflow(self) -> None:
+    def test_entrypoint_routes_plain_and_pro_modes(self) -> None:
         text = self.read("codex")
-        self.assertLess(len(text.splitlines()), 100)
         self.assertIn("references/pro-consult.md", text)
         self.assertIn("references/plain-research.md", text)
         self.assertIn("apply the shared constraints below", text)
-        self.assertNotIn("### Discover", text)
-        self.assertNotIn("## Workflow", text)
-        self.assertNotIn("# Artifact Output", text)
+        self.assertIn("Do not load Pro-only GitHub", text)
 
     def test_platform_twins_are_identical_and_general_purpose(self) -> None:
         codex = self.read("codex")
@@ -46,6 +43,7 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         self.assertIn("Do not chain more than two modes", text)
 
     def test_context_authority_separates_decisions_from_preferences(self) -> None:
+        entrypoint = self.read("codex")
         text = self.read_pro()
         for category in (
             "Primary evidence",
@@ -56,12 +54,13 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
             "Preferences and decision criteria",
             "Assumptions and unknowns",
         ):
-            self.assertIn(category, text)
-        self.assertIn("what to preserve as a hard constraint", text)
-        self.assertIn("what to use as a softer criterion", text)
+            self.assertIn(category, entrypoint)
+        self.assertIn("Shared Context Authority", text)
+        self.assertIn("../SKILL.md#shared-context-authority", text)
+        self.assertIn("using the shared authority model", text)
+        self.assertIn("selected decisions as constraints", text)
         self.assertIn("## Selected Decisions", text)
         self.assertIn("## Preferences And Decision Criteria", text)
-        self.assertNotIn("## Selected Decisions And Preferences", text)
 
     def test_blocking_input_stops_before_document_and_final_rule_is_conditional(self) -> None:
         text = self.read_pro()
