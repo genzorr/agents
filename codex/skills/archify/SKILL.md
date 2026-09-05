@@ -65,131 +65,23 @@ Schema violations exit non-zero with path-prefixed messages like `/nodes/3 (id/l
 
 Set `meta.animation: "trace"` only when the user asks for motion or a presentation/demo view. It adds lightweight SVG/CSS trace animation to renderer-marked arrows and nodes, respects `prefers-reduced-motion`, and leaves the default static output unchanged.
 
-### Workflow
+### Mode guidance
 
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "workflow",
-  "meta": { "title": "Release Workflow", "subtitle": "PR to production", "output": "release.html" },
-  "lanes": [ { "id": "dev", "label": "Developer" }, { "id": "ci", "label": "CI" }, { "id": "exceptions", "label": "Exception Handling", "variant": "exception" } ],
-  "phases": [ { "id": "intake", "label": "Intake", "fromCol": 0, "toCol": 1 } ],
-  "groups": [ { "id": "checks", "label": "Parallel checks", "lane": "ci", "fromCol": 1, "toCol": 3, "variant": "emphasis" } ],
-  "mainPath": ["pr", "build"],
-  "nodes": [
-    { "id": "pr", "lane": "dev", "col": 0, "type": "frontend", "label": "Open PR", "sublabel": "feature branch" },
-    { "id": "build", "lane": "ci", "col": 1, "type": "backend", "label": "Build", "sublabel": "lint + test", "tag": "blocking" }
-  ],
-  "edges": [
-    { "from": "pr", "to": "build", "label": "webhook", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "drop" }
-  ],
-  "cards": []
-}
-```
+The complete typed inputs live in `examples/*.json`, and the renderer READMEs carry detailed layout language for workflow, sequence, dataflow, and lifecycle. Read the matching schema and canonical example before the first diagram; read the mode README where one exists. These bundled files are the canonical examples, so this entrypoint keeps only the constraints that prevent common layout mistakes.
 
-**Layout budget**: 6 columns (`col` 0–5) at fixed x positions `[88, 220, 300, 430, 500, 625]` — columns 1↔2 and 3↔4 are only 70–80px apart, so default-width (92px) nodes in those adjacent columns of the same lane overlap; skip a column or shrink `width`. Lane content width is 640px. Omit `meta.viewBox` — the renderer sizes height to the lane count automatically. Use `phases` for top-of-diagram story beats, `groups` to frame parallel work or a branch inside one lane, and `lane.variant: "exception"` for error/retry/fallback lanes. `mainPath` is optional but recommended: list the happy-path node ids in order so the renderer can catch missing edges or accidental backward movement. Edge routes: `straight`, `drop` (bend between lanes; `bias` 0–1 picks where), `outside-right`, `return-left`, `bottom-channel`, `up-channel`, or explicit `via` points. Keep adjacent-step edges unlabeled; reserve labels for cross-lane transitions, approvals, async traces, and returns.
+- **Workflow**: use lanes, optional phases and groups, and an optional ordered `mainPath`; reserve labels for cross-lane transitions, approvals, asynchronous work, and returns. The six columns are at x positions `[88, 220, 300, 430, 500, 625]`; adjacent columns 1↔2 and 3↔4 are too close for default-width nodes in one lane. Omit `meta.viewBox` so height follows lane count, and use exception lanes for retry or fallback paths.
+- **Sequence**: keep participants to the available width (x = 62 + index×108, at most eight in the default viewBox), keep messages at least 28px apart on shared spans and at least 60px across, and remember that segment and activation `from`/`to` values are y coordinates. Keep labels short and event-like.
+- **Dataflow**: use 2–5 stages, rows 0–4, and labeled flows; put sensitivity in `classification` and use `emphasis`, `security`, or `dashed` for primary, policy-sensitive, or asynchronous paths. The default grid uses x = 100 + stage×215 and y = `[128, 242, 356, 470, 584]`.
+- **Lifecycle**: use the required `main` lane for phases and `terminal` for outcomes; other lanes share the middle event band. Keep transition labels sparse and event-like, and use state tags or step numbers for detail.
+- **Architecture**: place components with free `pos` coordinates, describe boundaries with `wraps`, and route connections with explicit sides or orthogonal routes. Use the renderer's overlap, collision, and off-canvas diagnostics rather than hand-tuning around them.
 
-### Sequence
-
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "sequence",
-  "meta": { "title": "Cache Miss Request", "subtitle": "auth and cache fallback", "output": "cache-miss.html" },
-  "participants": [
-    { "id": "web", "type": "frontend", "label": "Web App", "sublabel": "React UI" },
-    { "id": "api", "type": "backend", "label": "API", "sublabel": "handler" }
-  ],
-  "segments": [ { "from": 160, "to": 320, "label": "01 / AUTH" } ],
-  "messages": [
-    { "from": "web", "to": "api", "y": 200, "label": "GET /data", "variant": "emphasis" },
-    { "from": "api", "to": "web", "y": 290, "label": "200 JSON", "variant": "return" }
-  ],
-  "activations": [ { "participant": "api", "from": 190, "to": 300, "type": "backend" } ],
-  "cards": []
-}
-```
-
-**Layout budget**: participants sit at x = 62 + index×108, so a 920-wide viewBox fits at most 8. Message `y` must stay within `[160, viewBox_height − 83]`; messages that share horizontal space need ≥28px vertical separation; arrows need ≥60px horizontal span. `segments[].from/to` and `activations[].from/to` are **y pixel coordinates**, not participant ids. A taller `meta.viewBox` (default `[920, 760]`) buys more timeline room. Keep labels short: "GET /path", "verify JWT", "cache miss", "200 JSON".
-
-### Dataflow
-
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "dataflow",
-  "meta": { "title": "Product Analytics", "subtitle": "events to consumers", "output": "analytics.html" },
-  "stages": [ { "label": "Sources" }, { "label": "Ingest" }, { "label": "Store" } ],
-  "nodes": [
-    { "id": "web", "type": "frontend", "label": "Web App", "stage": 0, "row": 0, "sublabel": "clickstream" },
-    { "id": "kafka", "type": "messagebus", "label": "Kafka", "stage": 1, "row": 0, "tag": "accepted events" }
-  ],
-  "flows": [
-    { "from": "web", "to": "kafka", "label": "events", "classification": "PII touch", "variant": "emphasis" }
-  ],
-  "cards": []
-}
-```
-
-**Layout budget**: 2–5 stages at x = 100 + stage×215; 5 rows (`row` 0–4) at y `[128, 242, 356, 470, 584]`; default node 112×58. Default viewBox `[940, 720]`. Flow labels are mandatory and asset-like ("clickstream", "identity map", "feature vectors"); put sensitivity in `classification` ("PII touch", "approved only", "non-PII"). Variants: `emphasis` = primary path, `security` = PII/policy/consent, `dashed` = async/batch.
-
-### Lifecycle
-
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "lifecycle",
-  "meta": { "title": "Agent Run Lifecycle", "subtitle": "states and terminal outcomes", "output": "agent-run.html" },
-  "lanes": [
-    { "id": "main", "label": "Lifecycle phases" },
-    { "id": "waiting", "label": "Interruptions" },
-    { "id": "terminal", "label": "Terminal exits" }
-  ],
-  "states": [
-    { "id": "queued", "type": "start", "label": "Queued", "lane": "main", "col": 0, "step": "01" },
-    { "id": "running", "type": "active", "label": "Executing", "lane": "main", "col": 2, "step": "02" },
-    { "id": "approval", "type": "waiting", "label": "Needs Approval", "lane": "waiting", "col": 0 },
-    { "id": "done", "type": "success", "label": "Completed", "lane": "terminal", "col": 2 }
-  ],
-  "transitions": [
-    { "from": "queued", "to": "running", "variant": "emphasis" },
-    { "from": "running", "to": "approval", "label": "needs approval", "variant": "security", "fromSide": "bottom", "toSide": "right" },
-    { "from": "running", "to": "done", "label": "success", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" }
-  ],
-  "cards": []
-}
-```
-
-**Layout budget — lane ids are semantic and reserved**: `main` is required and maps to the top phase band (cols 0–4); `terminal` maps to the bottom outcome band (cols 0–2); **every other lane id shares the single middle event band** (cols 0–2) — separate same-band states with different `col` or `yOffset`. Band headers render from your lane labels. Default viewBox `[980, 660]`. Keep transition labels event-like and sparse ("retry", "timeout", "cancel"); prefer state `tag`s, `step` numbers, and summary cards over label-heavy arrows. Put terminal states in the `terminal` lane so endings are unambiguous.
-
-### Per-mode deep guidance
-
-Each renderer has a README with its full design language (route presets, semantic types, story guidance): `renderers/workflow/README.md`, `renderers/sequence/README.md`, `renderers/dataflow/README.md`, `renderers/lifecycle/README.md`. Read the matching one before your first diagram of that mode in a session.
+Set `meta.animation: "trace"` only when the user asks for motion or a presentation/demo view. It respects `prefers-reduced-motion` and leaves default static output unchanged.
 
 ## Architecture Mode
 
 Architecture has the same read-schema-then-render loop as the other modes — prefer it. Hand-placed SVG is the fallback for when renderers can't run.
 
-```json
-{
-  "schema_version": 1,
-  "diagram_type": "architecture",
-  "meta": { "title": "Sample Web App", "subtitle": "3-tier SaaS on AWS", "output": "web-app.html" },
-  "components": [
-    { "id": "users", "type": "external", "label": "Users", "sublabel": "Browser", "pos": [40, 300] },
-    { "id": "api", "type": "backend", "label": "API Server", "sublabel": "FastAPI :8000", "pos": [460, 300] },
-    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": ":5432", "pos": [680, 300] }
-  ],
-  "boundaries": [
-    { "kind": "region", "label": "AWS us-west-2", "wraps": ["api", "db"] }
-  ],
-  "connections": [
-    { "from": "users", "to": "api", "label": "HTTPS", "variant": "emphasis" },
-    { "from": "api", "to": "db", "label": "SQL" }
-  ],
-  "cards": []
-}
-```
+Use the canonical `examples/web-app.architecture.json` input when you need a concrete architecture shape.
 
 Render: `node renderers/architecture/render-architecture.mjs <input>.json <output>.html`.
 

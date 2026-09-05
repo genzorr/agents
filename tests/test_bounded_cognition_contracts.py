@@ -46,6 +46,24 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             ):
                 self.assertIn(phrase, text, path)
 
+    def test_global_authorization_preserves_mixed_requests_and_existing_consent(self) -> None:
+        for path in ("codex/AGENTS.md", "claude/rules/think-before-coding.md"):
+            text = self.read(path)
+            self.assertIn("unless the current session already authorizes that action and scope", text)
+        claude = self.read("claude/rules/think-before-coding.md")
+        self.assertIn("Do not implement unless the request also authorizes changes", claude)
+        self.assertIn("Ask only for user-owned or difficult-to-reverse choices", claude)
+        self.assertNotIn("If you are not confident in it, ask instead of guessing", claude)
+
+    def test_denials_distinguish_user_refusal_from_runtime_enforcement(self) -> None:
+        text = self.read("claude/CLAUDE.md")
+        for source in ("explicit user refusal", "automatic approval denial", "sandbox restriction", "application failure"):
+            self.assertIn(source, text)
+        self.assertIn("Do not retry, broaden, or route around a denied action", text)
+        self.assertIn("existing authorization is not permission to bypass a denial", text)
+        self.assertIn("runtime’s supported escalation procedure", text)
+        self.assertNotIn("A denied tool call means the user declined it", text)
+
     def test_tdd_and_review_twins_require_reviewed_behavior_spine_semantics(self) -> None:
         for platform in ("codex", "claude"):
             tdd = self.read_skill(platform, "tdd")
@@ -144,10 +162,12 @@ class BoundedCognitionContractsTest(unittest.TestCase):
 
         for text in (codex, claude):
             self.assertIn("**Explicit discovery pass:** Driver", text)
-            self.assertIn("**Autonomous checkpoint:** Helper", text)
-            self.assertIn("Become a **router** only when explicitly transferring control", text)
+            self.assertIn("Use only when the user explicitly invokes this skill or asks to identify unknowns or blind spots", text)
+            self.assertIn("ordinary ambiguity, source checking, and assumption handling stay with the active workflow", text)
             self.assertIn("Keep exactly one driver active", text)
-            self.assertIn("same observed evidence and decision branch", text)
+            self.assertIn("return the bounded finding to that driver rather than creating a parallel driver", text)
+            self.assertNotIn("Autonomous checkpoint", text)
+            self.assertNotIn("Re-entry Guard", text)
             self.assertIn("highest expected decision value net of inspection, delay, and interruption cost", text)
             self.assertIn("not empirically validated, exhaustive categories or mandatory stages", text)
             self.assertIn("teach enough structure before asking them to choose", text)
@@ -170,14 +190,27 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             self.assertIn("observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns", text)
             self.assertIn("remaining verification gaps in the final handoff", text)
 
-    def test_surface_unknowns_codex_metadata_allows_implicit_invocation(self) -> None:
+    def test_surface_unknowns_codex_metadata_requires_explicit_invocation(self) -> None:
         metadata = self.read("codex/skills/surface-unknowns/agents/openai.yaml")
         self.assertIn('default_prompt: "Use $surface-unknowns', metadata)
-        self.assertIn("allow_implicit_invocation: true", metadata)
+        self.assertIn("allow_implicit_invocation: false", metadata)
 
         catalog = self.read("catalog.json")
         surface_entry = catalog.split('"id": "surface-unknowns"', 1)[1].split('"id": "thermo-nuclear-code-quality-review"', 1)[0]
         self.assertNotIn('"role:router"', surface_entry)
+
+    def test_systemic_diagnosis_is_an_explicit_optional_lens(self) -> None:
+        text = self.read("shared/skills/systemic-diagnosis/SKILL.md")
+        selector = self.read("docs/systemic-diagnosis-selector.md")
+        metadata = self.read("codex/skills/systemic-diagnosis/agents/openai.yaml")
+        self.assertIn("Use only when the user explicitly requests systemic diagnosis", text)
+        self.assertIn("Do not infer activation from the shape of an ordinary task", text)
+        self.assertIn("Normal uncertainty handling, source checking, and bounded software diagnosis remain with the active workflow", text)
+        self.assertIn("adds questions and evidence discipline", text)
+        self.assertIn("only after the user explicitly requests", selector)
+        self.assertIn("An ordinary recurring or cross-boundary symptom does not activate it", selector)
+        self.assertIn('default_prompt: "Use $systemic-diagnosis', metadata)
+        self.assertIn("allow_implicit_invocation: false", metadata)
 
     def test_no_source_branded_umbrella_skill_was_added(self) -> None:
         for platform in ("codex", "claude"):
@@ -310,7 +343,7 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 "stop pursuing that branch",
                 "resume it only after the evidence exists",
                 "prototype",
-                "research-prompt",
+                "ask-chatgpt-pro",
                 "design-experiment",
                 'Treat "I don\'t know" as valid information',
                 "preserve a user-owned choice",

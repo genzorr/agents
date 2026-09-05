@@ -55,7 +55,7 @@ A Readout is the one place execution validity, observations, interpretation, sco
 - Never fabricate or infer `observations`/`interpretation` on the user's behalf. Elicit them; do not decide the science for the user.
 - Never expand a Protocol's closed `run_set`. A run outside the declared set needs a Protocol successor from `design-experiment`, not a Readout.
 - Never mutate an Area Brief, regardless of the recorded `area_brief_disposition`. That mutation is a separate explicit action (`harness add-area-brief`), run by the user or a different flow — this skill only records the disposition.
-- Never create, update, or otherwise authorize an ADR, regardless of the recorded `adoption_disposition`. ADR authority is exclusive and separate (e.g. `harness-adr`) — this skill only records the disposition and, when `update-adr`, the ADR id it must pair with.
+- Never create, update, or otherwise authorize an ADR, regardless of the recorded `adoption_disposition`. ADR authority is exclusive and separate (e.g. the authorized `harness add-decision` workflow) — this skill only records the disposition and, when `update-adr`, the ADR id it must pair with.
 - Never promote legacy `E-*` Evidence. That lookup stays historical/searchable only; nothing here restores it to current authority.
 - Never implement a second mutable store for Readouts. When Harness is present, the one canonical Readout lives at Harness's own deterministic destination, written/validated only through Harness's own `add-readout`/`replace-readout`/`retract-readout` commands.
 - Never re-import a frozen external source, and never give a predecessor Readout a back-reference to its successor — only the successor carries `replaces`.

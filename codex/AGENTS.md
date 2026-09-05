@@ -13,13 +13,13 @@ These instructions apply across Codex sessions unless a project-level `AGENTS.md
 - Do not use step-narration banners like "Step 1", "---", or "Now implementing" in user-facing output. Do not add a closing recap when a concrete summary already exists.
 - For standalone artifacts, keep commentary outside the artifact unless context is necessary. Follow a task-specific skill's output contract when one exists.
 
-Apply this to responses, documentation, commit messages, and pull-request descriptions. Detailed explanations, walkthroughs, plans, ADRs, handoffs, and genuine ambiguities may use more structure and depth. Do not carry chat layout into source code, comments, commit messages, documentation, or files written to disk.
+Apply this writing discipline to responses, documentation, commit messages, and pull-request descriptions. For files, follow the project’s format and keep chat narration out of the artifact.
 
 ## Line Breaks In Files
 
 Never hard-wrap prose to a column width. One paragraph, bullet, or table row is one line, however long. This applies to Markdown, comments, docstrings, and commit message bodies.
 
-No formatter in these repos wraps Markdown, so every wrapped line is an authoring choice, and wrapping actively breaks things: a phrase split across a newline plus indentation no longer matches `grep`, `sed`, a patch context line, or a substring assertion. Instruction files in these repos have tests that pin exact phrases, and re-wrapping has broken them. Reflowing also inflates diffs, hiding the real change.
+Hard-wrapping breaks exact text searches and patches and adds diff noise.
 
 Do not re-wrap or unwrap prose your task did not otherwise change — that is a drive-by edit.
 
@@ -27,7 +27,7 @@ Do not re-wrap or unwrap prose your task did not otherwise change — that is a 
 
 - For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
 - For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
-- Require confirmation for external writes, destructive actions, purchases, or material scope expansion. A project or skill policy may impose a stricter gate.
+- Require confirmation for external writes, destructive actions, purchases, or material scope expansion unless the current session already authorizes that action and scope. A project or skill policy may impose a stricter gate.
 - For Personal OS and repositories it manages, including Agents, Harness, and session-harvester, use the existing local checkout by default. Create or use a Git worktree only when the user explicitly asks for one; parallel tasks do not imply worktree authorization.
 
 ## Reading Discipline
@@ -87,13 +87,12 @@ Applies to code you write. Do not restyle comments in code your task did not oth
 - If new evidence invalidates the plan, stop for user-owned, high-impact, or difficult-to-reverse changes; otherwise choose a defensible reversible default, preserve the evidence and reason, continue, and disclose the deviation and remaining verification gaps in the final handoff.
 - If evidence supports multiple plausible interpretations that would lead to materially different actions, resolve the gap at a natural decision boundary: inspect locally answerable facts; ask one pointed question only for user-owned or difficult-to-reverse choices; otherwise name a reversible assumption and continue. Do not interrupt when one interpretation dominates or resolution costs more than it can change.
 - If there is a materially simpler approach than the one implied by the request, surface it briefly before implementing.
-- Test consequences, not decisions. Before adding an assertion, name the production defect it would catch and the observable behavior it protects. If a person could legitimately change a value or a relationship between independently configurable profiles tomorrow without code being wrong, test its consequences rather than the decision; this includes mirrored shipped config, cross-environment equality, and source shape used as a behavior proxy. Assertions about source or text are appropriate when that source or text is itself the artifact or contract under test. Test parsers, validators, and deserializers with synthetic valid and invalid inputs; enforce safety or compatibility commitments in production code and test that enforcement through observable behavior. When a value-mirroring test fails after a legitimate change, inspect production enforcement before updating it. When a guard is removed, test what the remaining production code still guarantees instead of re-asserting the removed condition or encoding a transient TODO state as an invariant. Reframe or delete an in-scope test when it protects no consequence; propose deletion rather than silently removing an unrelated pre-existing test.
+- Test consequences, not decisions. Each assertion needs a production defect it would catch and an observable behavior it protects. Do not pin changeable values or implementation details unless they are the artifact or contract under test. Use synthetic valid and invalid inputs for parsers and validators; enforce safety and compatibility in production and test that enforcement through observable behavior. After a legitimate change, inspect production enforcement before updating an expectation. When removing a guard, test what the remaining production code still guarantees. Reframe or delete an in-scope test with no protected consequence; propose removal of unrelated tests instead of silently deleting them.
 - Optimize for local reasoning and bounded failure. Before adding or changing a mechanism, identify the hidden state, ordering, authority, and failure knowledge future callers would need, plus the credible blast radius. Localize repeated knowledge behind an existing or minimal interface, and apply safeguards in proportion to externally controlled input, irreversibility, and spread. Keep contained local changes simple.
 - When changing shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, inspect the end-to-end failure and recovery path; local component correctness is not sufficient.
 - Before adding new code, dependencies, helpers, CLIs, abstractions, or skills, walk the reuse-before-build ladder: skip if unnecessary; reuse an existing repo pattern/tool; use the standard library; use native platform or framework capability; use an existing dependency; prefer a config, flag, or rule change; only then add minimal new code.
 - After walking that ladder, when candidate designs otherwise satisfy correctness, safety, authority, proportional-proof, cost, latency, and maintainability constraints, prefer mechanisms whose quality can improve through stronger models, search, learning, evaluation, or compute over accumulating task-specific heuristics. This tie-break does not override domain invariants, deterministic checks, or bounded task-specific logic, and does not license a new evaluator, judge, corpus, runner, dependency, or abstraction.
 - When adding a product or operational entrypoint, first find and reuse the existing path for its durable behavior; do not implement a parallel copy in the nearest adapter.
-- Stop and ask when requirements are contradictory or the current state does not make sense.
 - Do not ask about trivial preferences where the existing codebase gives an obvious default.
 
 ## Preserve Thread Model

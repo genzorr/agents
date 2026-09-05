@@ -59,7 +59,8 @@ class SessionHandoffContractsTest(unittest.TestCase):
         claude = self.read("claude")
         self.assertIn("use `goal-prompt`", codex)
         self.assertIn("use `/goal-prompt`", claude)
-        self.assertIn("use `harness-task-checkpoint`", codex)
+        self.assertIn("use `harness-record` with `harness checkpoint`", codex)
+        self.assertNotIn("harness-task-checkpoint", codex)
         self.assertIn("use `/harness-task-checkpoint`", claude)
         for text in (codex, claude):
             self.assertNotIn("`harness close", text)

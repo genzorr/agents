@@ -500,7 +500,9 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "coordinator reviews and accepts by default",
             "Only an explicit operator request for this task activates a reviewer",
             "No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review",
-            "unauthorized driver requirement is a stop-and-ask condition",
+            "unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review",
+            "Complete already-authorized implementation and verification first",
+            "do not claim independent acceptance or waive the driver’s review requirement",
             "Do not resolve or validate reviewer route/model/effort, read the reviewer protocol, or create/reuse a reviewer while disabled",
             "record the operator request and exact acceptance target",
             "Reuse one compatible idle reviewer",
@@ -524,6 +526,10 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         )
         review_target = re.compile(r"\b(review|reviewer|reviewers|independent review)\b")
         allowed_review_fragments = {
+            "a driver requirement without operator authorization stops at required review.",
+            "An unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review.",
+            "Complete already-authorized implementation and verification first, then leave a concrete review handoff;",
+            "do not claim independent acceptance or waive the driver’s review requirement.",
             "description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested.",
             "Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review, and requested reviewer Sol/high.",
             "- **Role map:** immutable current-orchestrator observation plus independently resolved owner and worker profiles, reviewer activation, and the reviewer profile only when operator-requested.",
@@ -913,34 +919,29 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for forbidden in ("spawn_agent", "codex-reply", "thread/start", "turn/start", "claude-headless", "Claude"):
             self.assertNotIn(forbidden, outer + generic)
 
-    def test_research_prompt_twins_share_sufficiency_contract(self) -> None:
-        codex = self.read("codex/skills/research-prompt/SKILL.md")
-        claude = self.read("claude/skills/research-prompt/SKILL.md")
-        for text in (codex, claude):
-            self.assertIn("## Research Quality Contract", text)
-            for field in (
-                "**Decision or downstream action:**",
-                "**Evidence standard:**",
-                "**Scope boundaries:**",
-                "**Sufficiency bar:**",
-                "**Unresolved/stop condition:**",
-            ):
-                self.assertIn(field, text)
-            self.assertIn("Do not score research numerically", text)
-            self.assertIn("final gap review", text)
-            self.assertIn("preserve the gap explicitly", text)
-        self.assertIn("open `reference.md`", claude)
-        reference = self.read("claude/skills/research-prompt/reference.md")
-        self.assertIn("## Research Quality Contract", reference)
-        self.assertIn("**Sufficiency bar:**", reference)
-        self.assertIn("explicit no-decision result", reference)
+    def test_plain_research_preserves_sufficiency_without_pro_workflow(self) -> None:
+        entrypoint = self.read("shared/skills/ask-chatgpt-pro/SKILL.md")
+        research = self.read("shared/skills/ask-chatgpt-pro/references/plain-research.md")
+        self.assertIn("references/plain-research.md", entrypoint)
+        for field in (
+            "Decision or downstream action",
+            "Evidence standard",
+            "Scope boundaries",
+            "Sufficiency bar",
+            "Unresolved/stop condition",
+        ):
+            self.assertIn(field, research)
+        self.assertIn("final gap review", research)
+        self.assertIn("preserve the gap explicitly", research)
+        self.assertIn("explicit no-decision result", research)
 
-    def test_research_skill_family_is_retained_without_define_goal(self) -> None:
+    def test_retired_research_and_audit_entries_have_retained_owners(self) -> None:
         catalog = json.loads(self.read("catalog.json"))
         entries = {entry["id"]: entry for entry in catalog["skills"]}
-        self.assertIn("research-prompt", entries)
-        self.assertIn("integrate-research", entries)
-        self.assertNotIn("define-goal", entries)
+        for retired in ("bro", "research-prompt", "doc-audit", "define-goal"):
+            self.assertNotIn(retired, entries)
+        for retained in ("ask-chatgpt-pro", "integrate-research", "review-change", "explain", "zoom-out", "archify"):
+            self.assertIn(retained, entries)
 
 
 if __name__ == "__main__":

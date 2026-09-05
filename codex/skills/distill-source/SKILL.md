@@ -73,12 +73,12 @@ keep/reject/defer/propose decisions—never only `done`.
 ## Composes with
 
 - `source-capture` — obtains a bounded packet before this skill when the source is not yet readable.
-- `ask-oracle` / `research-prompt` — external deep-research consult beyond the provided source.
+- `ask-oracle` / `ask-chatgpt-pro` — external deep-research consult beyond the provided source.
 - `prepare-dynamic-workflow` — many sources, or one large completeness-critical source as described
   above.
 - `integrate-research` — completed research reports rather than raw sources.
 - `skill-lifecycle` — evaluates an approved skill delta; this skill only proposes it.
-- `harness-add-inbox` / `harness-add-tasks` / `harness-adr` — perform explicit approved routing.
+- `harness-record` — capture approved inbox items, task changes, or ADRs; `harness-work` — prepare approved implementation work.
 
 ## Guardrails
 

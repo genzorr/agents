@@ -1,80 +1,23 @@
 ---
 name: integrate-research
-description: Process research outputs and integrate relevant findings into project documentation.
+description: Compare completed research outputs with source evidence and current project documentation, then summarize findings or apply already-authorized documentation updates while preserving provenance, conflicts, and uncertainty.
 ---
 
 # Integrate Research
 
-Use when the user provides research output files and wants a findings summary or documentation updates.
+Use this skill for completed research outputs. Use `distill-source` when a supplied paper, article, documentation page, repository, or skill file still needs to be analyzed for what the project should adapt.
 
 ## Input
 
-Accept:
-
-- one or more research output paths: PDF, markdown, text, or directories
-- optional `--prompt <path>` for the original research prompt
-- optional free-text guidance
+Accept one or more PDF, Markdown, text, or directory paths, an optional `--prompt <path>` for the original research prompt, and free-text guidance. Parse flags and paths separately from ordinary guidance.
 
 ## Workflow
 
-1. Parse paths, prompt path, and user guidance.
-2. Read the research outputs and original prompt if provided.
-3. Read project context likely to receive the findings: `AGENTS.md`, `README.md`, `docs/`, `research/`, `drafts/`, ADRs, and relevant specs.
-4. When findings could become reusable guidance, a default, or a project-level recommendation, open `docs/claim-discipline.md` before synthesis. Keep source observations, target-project evidence, alternatives, counterevidence, supported conditions, and explicit non-claims visible; select the weakest non-vacuous conclusion supported by that complete record, then determine any recommendation or documentation decision separately.
-5. Ask only what is needed:
-   - focus areas if the research covers multiple topics
-   - summary-only versus updating docs
-   - target files if documentation updates are requested
-6. Write a findings summary to `research/findings/YYYYMMDD-topic-findings.md`.
-7. If the user approved doc updates:
-   - list target files and proposed changes
-   - apply only approved documentation edits
-   - keep source research files unchanged
-8. Report the findings file and any updated docs.
+1. Read the research output and original prompt when supplied. Keep source paths, dates, versions, citations, and other provenance attached to the claims they support; an uncited assertion is not project fact.
+2. Read the relevant `AGENTS.md` or `CLAUDE.md`, README, current docs/research/drafts, ADRs/specs, and named source or configuration. Compare research claims and citations with current documents and source evidence before deciding what carries over.
+3. Preserve selected decisions and explicit constraints unless the user asks to reopen them. Keep verified claims, project evidence, inferences, recommendations, conflicts, stale assumptions, counterevidence, and uncertainty distinct; when reusable claims or guidance are involved, read [claim discipline](docs/claim-discipline.md). For experiment protocols or readouts, preserve the applicable checks from the experiment owner.
+4. If documentation updates are already authorized, identify the affected files and apply only the in-scope changes without asking again. Otherwise report the comparison, implications, conflicts, uncertainty, and evidence gaps in chat, with proposals where useful.
 
-## Findings Format
+## Scope and output
 
-```markdown
-# Research Findings: <topic>
-
-**Generated:** YYYY-MM-DD
-**Source:** <path>
-**Original prompt:** <path or none>
-**User guidance:** <guidance or none>
-
-## Executive Summary
-
-- ...
-
-## Detailed Findings
-
-### <area>
-
-**Key insight:** ...
-
-**Implications for project:**
-- ...
-
-## Recommendations
-
-### Immediate Actions
-1. ...
-
-### Future Considerations
-1. ...
-
-## Updated Documentation
-
-- `path` — <what changed>
-
-## References
-
-- ...
-```
-
-## Rules
-
-- Keep project-specific implications separate from raw research claims.
-- Do not overwrite existing research findings; create a new findings file.
-- Documentation updates must be scoped to files the user approved or clearly requested.
-- If sources conflict, record the conflict instead of hiding it.
+Update only documentation or other files explicitly placed in scope. Leave research source files, source code, and configuration unchanged unless separately authorized. Preserve provenance, conflicts, and uncertainty on important claims and updates, and preserve a no-decision result when the sufficiency bar is unmet. Do not create a maintained findings file automatically; create the requested format/path only when the user requests a findings artifact or an already-authorized workflow requires it.

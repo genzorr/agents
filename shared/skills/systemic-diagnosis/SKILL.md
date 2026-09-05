@@ -1,14 +1,11 @@
 ---
 name: systemic-diagnosis
-description: Experimental, optional lens for recurring or cross-boundary problems that survive local fixes or plausibly involve delays, feedback, incentives, or backfiring effects. Adds evidence labels, causal mapping, refutation, and cheapest-test selection without replacing a driver or requiring a systemic method.
+description: Experimental, optional lens for recurring or cross-boundary problems that survive local fixes or plausibly involve delays, feedback, incentives, or backfiring effects. Use only when the user explicitly requests systemic diagnosis. Adds evidence labels, causal mapping, refutation, and cheapest-test selection without replacing a driver or requiring a systemic method.
 ---
 
 # Systemic Diagnosis
 
-Use this experimental lens only when a problem recurs, spans components or teams, survives local
-fixes, or plausibly involves delayed or backfiring effects. Do not use it as a mandatory global
-method, router, workflow, or swarm. An active driver remains responsible for sequencing, decisions,
-actions, and the final result.
+Use this experimental lens only when the user explicitly invokes it or asks for systemic diagnosis and the problem recurs, spans components or teams, survives local fixes, or plausibly involves delayed or backfiring effects. Do not infer activation from the shape of an ordinary task. Normal uncertainty handling, source checking, and bounded software diagnosis remain with the active workflow. Do not use this lens as a mandatory global method, router, workflow, or swarm. An active driver remains responsible for sequencing, decisions, actions, and the final result.
 
 ## Lens
 

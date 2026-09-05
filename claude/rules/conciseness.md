@@ -1,6 +1,6 @@
 # Conciseness
 
-Lead with the conclusion. Preserve necessary evidence, material caveats, decisions, and the next action; omit repetition and generic filler unless the user asks for detail.
+Preserve necessary evidence, material caveats, decisions, and the next action; cut repetition and generic filler. `response-shape.md` owns organization and response depth.
 
 Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Reuse established project and domain terms for existing concepts. Introduce a new term only when it names a genuine new distinction. Briefly define a necessary term when the intended reader may not know it. Apply this to responses, documentation, commit messages, and pull-request descriptions.
 
@@ -19,14 +19,8 @@ Keep delegated and subagent prompts focused: the task and the context the worker
 
 Never hard-wrap prose to a column width. One paragraph, bullet, or table row is one line, however long. This applies to Markdown, comments, docstrings, and commit message bodies.
 
-No formatter in these repos wraps Markdown, so every wrapped line is an authoring choice, and wrapping actively breaks things: a phrase split across a newline plus indentation no longer matches `grep`, `Edit`'s `old_string`, `sed`, or a substring assertion. `tests/test_bounded_cognition_contracts.py` pins exact phrases from these very rule files, and re-wrapping has broken it. Reflowing also inflates diffs, hiding the real change.
+Hard-wrapping breaks exact text searches and patches and adds diff noise.
 
 Do not re-wrap or unwrap prose your task did not otherwise change — that is a drive-by edit.
 
-## Exceptions
-
-- The user asks for a detailed explanation, walk-through, or teaching answer.
-- Presenting a plan, ADR, or handoff where structure is the content.
-- Surfacing a genuine ambiguity: one pointed question with context beats guessing silently.
-
-Applies to all skills, commands, subagents, and free-form responses. A skill's own tighter cap wins.
+Apply this across skills, commands, subagents, and ordinary responses. Follow task-specific output formats within the user’s requested depth and scope.

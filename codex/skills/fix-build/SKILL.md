@@ -18,17 +18,18 @@ Use when the user provides a build, test, compiler, or linter log and wants the 
    - linker errors
    - linter/format errors
 4. For each failure:
-   - determine the root cause
+   - determine the root cause from the log and affected source, and distinguish verified evidence from unverified reports
    - inspect affected source files
    - apply the smallest fix that preserves existing behavior and test intent
 5. If an API signature changed, search all call sites before editing.
 6. Run the relevant failing command if it is available, then run the project checks expected by local instructions.
-7. Report the fixed files and the verification result.
+7. Report the fixed files, the evidence status, and the verification result.
 
 ## Rules
 
 - Fix all related failures from the log, not just the first one.
 - Do not change the API itself unless the log proves the API implementation is wrong.
 - Preserve test intent; update tests only when expectations are stale or call signatures changed.
-- If a failure is ambiguous, fix the most likely root cause and state the ambiguity.
+- Do not fix a guessed cause: apply a fix only when log and source evidence support it; otherwise investigate the competing causes or state what evidence is missing.
+- Run meaningful regression verification for changed behavior when it exists. A tiny textual or configuration repair does not require a generic new test when source inspection and existing checks provide the relevant evidence.
 - Keep the final response to one short summary plus verification.

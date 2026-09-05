@@ -17,10 +17,7 @@ horizontal, mis-ordered, or stale). When the target is an existing slice/task-se
 
 - Read the slice and its tasks first (`harness show <slice-id>` / `harness show <task-id>`) plus
   the active goal/board state, before asking anything.
-- Write the Decision Summary **back into those tasks** — update their Context/Approach/acceptance
-  criteria, or reorder/split/stop them — not into a free-floating plan doc. Use the board
-  mechanics in `harness-pick-work` → *Rescope / Replan The Board* for the exact transitions, and
-  `harness-add-tasks` for any net-new tracer-bullet tasks.
+- When capture is authorized, write the Decision Summary **back into those tasks** through `harness-record`: update Context/Approach/acceptance criteria or propose reorder/split/stop changes. Use `harness-work` to prepare new implementation tasks and the project CLI for lifecycle transitions.
 
 ## Workflow
 
@@ -35,7 +32,7 @@ horizontal, mis-ordered, or stale). When the target is an existing slice/task-se
    - **Needs evidence** — a sharp decision that conversation and repository evidence cannot settle, such as UI feel, interaction behavior, or uncertain runtime behavior. Identify the cheapest reliable discriminator instead of asking the user to speculate.
    - **Fog** — an area that is probably relevant later but cannot be phrased sharply until another
      decision lands. Do not pre-split fog into fake questions.
-5. If a material branch **Needs evidence**, name what is missing and route it to `prototype` for experiential feedback, `research-prompt` for external facts, or `design-experiment` for an empirical comparison. Record it as an open question or stop gate, stop pursuing that branch, and resume it only after the evidence exists.
+5. If a material branch **Needs evidence**, name what is missing and route it to `prototype` for experiential feedback, `ask-chatgpt-pro` for external facts, or `design-experiment` for an empirical comparison. Record it as an open question or stop gate, stop pursuing that branch, and resume it only after the evidence exists.
 6. Ask the single most important **Ask now** question. Include your recommended answer, why it
    matters, and any immediately relevant inferred defaults the user can correct.
 7. After each answer, update and re-rank the pool. Treat "I don't know" as valid information: route an empirically answerable question through **Needs evidence**, or preserve a user-owned choice as an explicit stop gate instead of manufacturing certainty. Promote fog only when it becomes a sharp question; demote questions whose answers are now inferable.
@@ -110,16 +107,10 @@ becomes structured work instead of unstructured chat. It must stand alone — th
 - <tests / seams / commands that will prove the work>
 
 ### Durable capture recommendation
-- <one of: harness-add-tasks (new tasks) · harness-add-inbox → harness-process-inbox (capture + triage) · harness-plan (file-level plan first) · evidence route (prototype · research-prompt · design-experiment) before capture · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
+- <one of: harness-work (new work or planning) · harness-record (capture + triage) · evidence route (prototype · ask-chatgpt-pro · design-experiment) before capture · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
 ```
 
-Hand it off directly: the **Proposed work** + **Implied acceptance criteria** are written to
-be pasted into `harness-add-tasks` (or captured via `harness-add-inbox`) without
-re-explaining the discussion. This skill **recommends** the capture step — it does not create
-tasks itself and does not duplicate `harness-add-tasks` routing/sizing logic. When the result is
-a no-op, a simple existing-task update, or a rescope of an existing slice/task-set, say so; do
-not invent work to capture. For where each kind of durable knowledge lives, see
-the target project's knowledge-homes guidance.
+Hand off the **Proposed work** + **Implied acceptance criteria** to `harness-work` for implementation planning or `harness-record` for capture. This skill **recommends** the capture step; it does not create tasks or duplicate the recipient’s routing/sizing logic. State when no new task is needed. Follow the target project’s knowledge-homes guidance for durable records.
 
 ## Rules
 
@@ -131,4 +122,4 @@ the target project's knowledge-homes guidance.
   let the user correct it before capture.
 - Do not keep rephrasing a question that requires missing evidence or a user-owned decision.
 - Do not edit docs until the user confirms the decision or asks for capture.
-- When the plan is ready, emit the Decision Summary and recommend its capture path (`harness-add-tasks`, `harness-add-inbox` → `harness-process-inbox`, `harness-plan`, `architecture-review`, ADR, glossary update, existing-task update/rescope, or no-op). Do not create tasks automatically.
+- When the plan is ready, emit the Decision Summary and recommend its capture path (`harness-work`, `harness-record`, `architecture-review`, ADR, glossary update, existing-task update/rescope, or no-op). Do not create tasks automatically.
