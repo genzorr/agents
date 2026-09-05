@@ -73,20 +73,6 @@
       }
     },
     {
-      "id": "bro",
-      "kind": "skill",
-      "platforms": ["codex", "claude"],
-      "owner": "agents",
-      "source": {
-        "codex": "codex/skills/bro",
-        "claude": "claude/skills/bro"
-      },
-      "install_target": {
-        "codex": "skills/bro",
-        "claude": "skills/bro"
-      }
-    },
-    {
       "id": "codex-project-init",
       "kind": "skill",
       "platforms": ["codex"],
@@ -147,20 +133,6 @@
       "install_target": {
         "codex": "skills/distill-source",
         "claude": "skills/distill-source"
-      }
-    },
-    {
-      "id": "doc-audit",
-      "kind": "skill",
-      "platforms": ["codex", "claude"],
-      "owner": "agents",
-      "source": {
-        "codex": "codex/skills/doc-audit",
-        "claude": [{"path": "claude/skills/doc-audit", "target": "skills/doc-audit"}, {"path": "docs/context-file-authoring.md", "target": "skills/doc-audit/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/doc-audit/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/doc-audit/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/doc-audit/docs/experiment-protocol-readout-contract.md"}]
-      },
-      "install_target": {
-        "codex": "skills/doc-audit",
-        "claude": "skills/doc-audit"
       }
     },
     {
@@ -332,27 +304,13 @@
       }
     },
     {
-      "id": "research-prompt",
-      "kind": "skill",
-      "platforms": ["codex", "claude"],
-      "owner": "agents",
-      "source": {
-        "codex": "codex/skills/research-prompt",
-        "claude": "claude/skills/research-prompt"
-      },
-      "install_target": {
-        "codex": "skills/research-prompt",
-        "claude": "skills/research-prompt"
-      }
-    },
-    {
       "id": "review-change",
       "kind": "skill",
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "codex/skills/review-change", "target": "skills/review-change"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}],
-        "claude": [{"path": "claude/skills/review-change", "target": "skills/review-change"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}]
+        "codex": [{"path": "codex/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}],
+        "claude": [{"path": "claude/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}]
       },
       "install_target": {
         "codex": "skills/review-change",
@@ -437,7 +395,7 @@
       "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "shared/skills/systemic-diagnosis", "target": "skills/systemic-diagnosis"}, {"path": "docs/claim-discipline.md", "target": "skills/systemic-diagnosis/docs/claim-discipline.md"}, {"path": "docs/systemic-diagnosis-selector.md", "target": "skills/systemic-diagnosis/docs/systemic-diagnosis-selector.md"}, {"path": "docs/whole-system-review.md", "target": "skills/systemic-diagnosis/docs/whole-system-review.md"}],
+        "codex": [{"path": "shared/skills/systemic-diagnosis", "target": "skills/systemic-diagnosis"}, {"path": "codex/skills/systemic-diagnosis/agents", "target": "skills/systemic-diagnosis/agents"}, {"path": "docs/claim-discipline.md", "target": "skills/systemic-diagnosis/docs/claim-discipline.md"}, {"path": "docs/systemic-diagnosis-selector.md", "target": "skills/systemic-diagnosis/docs/systemic-diagnosis-selector.md"}, {"path": "docs/whole-system-review.md", "target": "skills/systemic-diagnosis/docs/whole-system-review.md"}],
         "claude": [{"path": "shared/skills/systemic-diagnosis", "target": "skills/systemic-diagnosis"}, {"path": "docs/claim-discipline.md", "target": "skills/systemic-diagnosis/docs/claim-discipline.md"}, {"path": "docs/systemic-diagnosis-selector.md", "target": "skills/systemic-diagnosis/docs/systemic-diagnosis-selector.md"}, {"path": "docs/whole-system-review.md", "target": "skills/systemic-diagnosis/docs/whole-system-review.md"}]
       },
       "install_target": {

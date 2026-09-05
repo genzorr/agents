@@ -1,7 +1,6 @@
 # Systemic Diagnosis Selector
 
-Open this reference only when the experimental `systemic-diagnosis` lens is active. Select the
-smallest useful lens; do not run every branch or force a diagram.
+Open this reference only after the user explicitly requests the experimental `systemic-diagnosis` lens. An ordinary recurring or cross-boundary symptom does not activate it. Select the smallest useful lens; do not run every branch or force a diagram.
 
 | Situation | Start with |
 | --- | --- |

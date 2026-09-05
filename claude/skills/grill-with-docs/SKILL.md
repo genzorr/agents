@@ -35,7 +35,7 @@ horizontal, mis-ordered, or stale). When the target is an existing slice/task-se
    - **Needs evidence** — a sharp decision that conversation and repository evidence cannot settle, such as UI feel, interaction behavior, or uncertain runtime behavior. Identify the cheapest reliable discriminator instead of asking the user to speculate.
    - **Fog** — an area that is probably relevant later but cannot be phrased sharply until another
      decision lands. Do not pre-split fog into fake questions.
-5. If a material branch **Needs evidence**, name what is missing and route it to `/prototype` for experiential feedback, `/research-prompt` for external facts, or `/design-experiment` for an empirical comparison. Record it as an open question or stop gate, stop pursuing that branch, and resume it only after the evidence exists.
+5. If a material branch **Needs evidence**, name what is missing and route it to `/prototype` for experiential feedback, `/ask-chatgpt-pro` for external facts, or `/design-experiment` for an empirical comparison. Record it as an open question or stop gate, stop pursuing that branch, and resume it only after the evidence exists.
 6. Ask the single most important **Ask now** question. Include your recommended answer, why it
    matters, and any immediately relevant inferred defaults the user can correct.
 7. After each answer, update and re-rank the pool. Treat "I don't know" as valid information: route an empirically answerable question through **Needs evidence**, or preserve a user-owned choice as an explicit stop gate instead of manufacturing certainty. Promote fog only when it becomes a sharp question; demote questions whose answers are now inferable.
@@ -110,7 +110,7 @@ becomes structured work instead of unstructured chat. It must stand alone — th
 - <tests / seams / commands that will prove the work>
 
 ### Durable capture recommendation
-- <one of: /harness-add-tasks (new tasks) · /harness-add-inbox → /harness-process-inbox (capture + triage) · /plan (file-level plan first) · evidence route (/prototype · /research-prompt · /design-experiment) before capture · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
+- <one of: /harness-add-tasks (new tasks) · /harness-add-inbox → /harness-process-inbox (capture + triage) · /plan (file-level plan first) · evidence route (/prototype · /ask-chatgpt-pro · /design-experiment) before capture · ADR (durable tradeoff) · glossary update (use the target project's glossary location; for Harness homes follow that project's knowledge-homes guidance) · existing-task update/rescope · no-op> — and why.
 ```
 
 Hand it off directly: the **Proposed work** + **Implied acceptance criteria** are written to

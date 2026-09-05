@@ -12,7 +12,7 @@ Use this skill as the driver when pruning text is the whole request. When anothe
 - Handle text supplied by the user or bounded files placed in scope. Edit files only when the request authorizes edits, and follow the repository's source-of-truth, formatting, and verification rules.
 - Route decisions to add, change, slim, merge, deprecate, remove, or keep an instruction asset to `skill-lifecycle`. Perform an authorized textual slimming only after that decision; do not make it here.
 - Route pruning or uninstalling materialized assets to the owning installer contract. Installed `~/.codex` (runtime-home), `~/.claude` (runtime-home), and other installer-owned runtime copies are outputs: refuse direct edits and redirect to the repository that physically owns the source.
-- Keep `doc-audit` audit-only and `review-change` independent. Their findings may be inputs, but this skill does not absorb their authority.
+- Keep documentation audits and code reviews under `review-change` read-only and independent of pruning. Their findings may be inputs, but this skill does not absorb their authority.
 
 ## Workflow
 

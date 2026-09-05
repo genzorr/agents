@@ -8,7 +8,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class PdfArtifactContractsTest(unittest.TestCase):
     def read(self, platform: str, skill: str) -> str:
-        return (REPO_ROOT / "shared" / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+        filename = "references/pro-consult.md" if skill == "ask-chatgpt-pro" else "SKILL.md"
+        return (REPO_ROOT / "shared" / "skills" / skill / filename).read_text(encoding="utf-8")
 
     def test_external_handoff_skills_keep_pdf_opt_in(self) -> None:
         for platform in ("codex", "claude"):

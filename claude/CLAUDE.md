@@ -23,5 +23,5 @@ Cross-project standards that already have rule files live in `~/.claude/rules` (
 
 ## Permission Denials
 
-- A denied tool call means the user declined it; distinguish that from an application failure before deciding what to do next.
-- Do not retry verbatim, broaden the command, invent a workaround, or synthesize a fresh approval gate for an action the user already authorized elsewhere.
+- Distinguish an explicit user refusal, an automatic approval denial, a sandbox restriction, and an application failure from the tool’s reported reason; do not attribute every denial to the user.
+- Honor explicit refusals and approval denials. Do not retry, broaden, or route around a denied action. For an authorized action blocked only by the sandbox, follow the runtime’s supported escalation procedure; existing authorization is not permission to bypass a denial.

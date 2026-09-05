@@ -49,7 +49,7 @@ Remove `orchestrate-sol-feature` from the source and catalog rather than keeping
 - Do not make every feature use a separate task; contained interactive work remains in the current task when a separate owner would add more handoff cost than context protection.
 - Do not create feature owners by forking the project-orchestrator task or permit full-history subagent forks.
 - Do not make the project orchestrator a duplicate feature-level reviewer or require it to rerun all accepted child verification.
-- Do not create, resolve, validate, or load a separate reviewer unless the operator explicitly requests one for the resolved task; a driver requirement without that authorization stops for operator direction.
+- Do not create, resolve, validate, or load a separate reviewer unless the operator explicitly requests one for the resolved task; a driver requirement without that authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance.
 - Do not add routine progress chatter or describe bounded `wait_threads` as a background watcher, durable subscription, or later-notification guarantee.
 - Do not permit feature owners, workers, or reviewers to create nested ordinary tasks except the generic lens's separately operator-requested ordinary implementation route; `orchestrate-feature` explicitly forbids that route inside its feature owner.
 - Do not authorize pushes, pull requests, merges, branch deletion, destructive cleanup, live skill installation, external writes, or worktrees beyond existing user and project authority.
@@ -118,7 +118,7 @@ Workers use the independently resolved worker profile and own bounded questions,
 
 ### Independent reviewer
 
-The reviewer is a separate native leaf identity at the independently resolved reviewer profile. It is disabled by default and created or reused only after an explicit operator request for the resolved task. Reviewer profile wording itself activates review. Task size, importance, risk, ambiguity, missing oracles, cross-worker boundaries, agent judgment, reviewer availability, or a generic driver preference cannot activate it. A driver requirement without explicit operator authorization stops for operator direction. When activated, reviewer independence comes from separate identity, fresh context, no implementation ownership, and the review protocol; changing its profile never permits reuse of an implementation worker as reviewer.
+The reviewer is a separate native leaf identity at the independently resolved reviewer profile. It is disabled by default and created or reused only after an explicit operator request for the resolved task. Reviewer profile wording itself activates review. Task size, importance, risk, ambiguity, missing oracles, cross-worker boundaries, agent judgment, reviewer availability, or a generic driver preference cannot activate it. A driver requirement without explicit operator authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance. When activated, reviewer independence comes from separate identity, fresh context, no implementation ownership, and the review protocol; changing its profile never permits reuse of an implementation worker as reviewer.
 
 ## Role Profile Contract
 

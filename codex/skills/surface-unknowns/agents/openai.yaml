@@ -4,4 +4,4 @@ interface:
   default_prompt: "Use $surface-unknowns to help me understand this problem, expose consequential unknowns, and recommend the next way to resolve them."
 
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

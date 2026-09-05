@@ -11,21 +11,25 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
     def read(self, platform: str) -> str:
         return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "SKILL.md").read_text(encoding="utf-8")
 
+    def read_pro(self) -> str:
+        return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "references" / "pro-consult.md").read_text(encoding="utf-8")
+
+    def test_entrypoint_routes_plain_and_pro_modes(self) -> None:
+        text = self.read("codex")
+        self.assertIn("references/pro-consult.md", text)
+        self.assertIn("references/plain-research.md", text)
+        self.assertIn("apply the shared constraints below", text)
+        self.assertIn("Do not load Pro-only GitHub", text)
+
     def test_platform_twins_are_identical_and_general_purpose(self) -> None:
         codex = self.read("codex")
         claude = self.read("claude")
         self.assertEqual(codex, claude)
-        self.assertIn(
-            "repository inspection, verification, synthesis refinement, decision support, or execution planning",
-            codex,
-        )
-        self.assertIn(
-            "Task type may be code/change review, debugging, architecture/system review, research/comparison, decision support, execution planning, document/log analysis, or mixed",
-            codex,
-        )
+        self.assertIn("direct repository inspection", codex)
+        self.assertIn("standalone research handoff", codex)
 
     def test_modes_have_canonical_semantics_and_bounded_secondary_composition(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
         for mode in ("Discover", "Verify", "Refine", "Decide", "Execute"):
             self.assertIn(f"**{mode}**", text)
             self.assertIn(f"### {mode}", text)
@@ -39,7 +43,8 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         self.assertIn("Do not chain more than two modes", text)
 
     def test_context_authority_separates_decisions_from_preferences(self) -> None:
-        text = self.read("codex")
+        entrypoint = self.read("codex")
+        text = self.read_pro()
         for category in (
             "Primary evidence",
             "User requirements and constraints",
@@ -49,15 +54,16 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
             "Preferences and decision criteria",
             "Assumptions and unknowns",
         ):
-            self.assertIn(category, text)
-        self.assertIn("what to preserve as a hard constraint", text)
-        self.assertIn("what to use as a softer criterion", text)
+            self.assertIn(category, entrypoint)
+        self.assertIn("Shared Context Authority", text)
+        self.assertIn("../SKILL.md#shared-context-authority", text)
+        self.assertIn("using the shared authority model", text)
+        self.assertIn("selected decisions as constraints", text)
         self.assertIn("## Selected Decisions", text)
         self.assertIn("## Preferences And Decision Criteria", text)
-        self.assertNotIn("## Selected Decisions And Preferences", text)
 
     def test_blocking_input_stops_before_document_and_final_rule_is_conditional(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
         self.assertIn(
             "If an input is blocking, stop before writing the consult, ask one pointed question, and do not apply the Final Output Rule until the user answers",
             text,
@@ -67,7 +73,7 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         self.assertIn("If an input is blocking, stop before writing the consult, ask one pointed question, and do not return a document path", text)
 
     def test_discover_remains_analysis_only_unless_recommendations_are_requested(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
         discover = text.split("### Discover", 1)[1].split("### Verify", 1)[0]
         self.assertIn("Perform a fresh independent assessment", discover)
         self.assertIn(
@@ -76,7 +82,7 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         )
 
     def test_recommendation_grounding_uses_evidence_and_user_authority(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
         grounding = (
             "Ground recommendations in primary evidence and the applicable user requirements, selected decisions, preferences, and decision criteria. "
             "Label extrapolations beyond those inputs as inferences with confidence and missing evidence."
@@ -86,22 +92,23 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         self.assertIn("Treat selected decisions as constraints unless the user explicitly asks to reopen them", text)
 
     def test_source_manifest_output_depth_and_artifacts_are_proportional(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
+        artifact = text
         self.assertIn("Build a proportional source manifest", text)
         self.assertIn("Do not turn a broad task into an exhaustive file checklist", text)
         self.assertIn("Do not require every relevant file to be named in advance", text)
-        self.assertIn("focused verification or bounded question: about 500–900 words", text)
-        self.assertIn("narrow code, PR, or defect review: about 800–1,200 words", text)
+        self.assertIn("focused verification or bounded question: about 500–900 words", artifact)
+        self.assertIn("narrow code, PR, or defect review: about 800–1,200 words", artifact)
         self.assertIn(
             "multi-repository refinement, decision support, or execution planning: about 1,500–3,000 words",
-            text,
+            artifact,
         )
-        self.assertIn("broad architecture or research synthesis: about 2,500–5,000 words", text)
-        self.assertIn("These are planning ranges, not quotas", text)
-        self.assertNotIn("Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words", text)
+        self.assertIn("broad architecture or research synthesis: about 2,500–5,000 words", artifact)
+        self.assertIn("These are planning ranges, not quotas", artifact)
+        self.assertNotIn("Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words", artifact)
 
     def test_template_and_self_review_are_adaptive(self) -> None:
-        text = self.read("codex")
+        text = self.read_pro()
         self.assertIn("Include only sections that contain useful information", text)
         self.assertIn("[Insert the primary mode block.", text)
         self.assertIn("[Include only the applicable task-pattern fields below.]", text)

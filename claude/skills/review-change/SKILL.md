@@ -1,6 +1,6 @@
 ---
 name: review-change
-description: Review code changes, diffs, branches, pull requests, or implementation work for correctness, regressions, missed edge cases, security, performance, maintainability, over-engineering, and missing verification. Use when the user asks for a general code review, PR review, post-implementation review, or risk-focused review of changed code.
+description: Review code changes, diffs, branches, pull requests, implementation work, or documentation-only topics for correctness, regressions, missed edge cases, security, performance, maintainability, consistency, stale references, and missing verification. Use for general code/PR review, post-implementation review, risk-focused review, or a docs-only audit when no diff exists.
 ---
 
 # Review Change
@@ -21,7 +21,9 @@ Infer the rest from the project:
 - expected behavior: user context, active task/goal if present, specs/docs/tests, PR title/body, nearby code;
 - review scope: explicit paths/PR/branch first, then staged/unstaged diff, then current branch against upstream/main.
 
-If there is no discoverable diff, PR, branch comparison, or path scope, ask one concise question for the review target.
+If the request is explicitly a documentation-only audit, read and follow [references/docs-only-audit.md](references/docs-only-audit.md) instead of this code-review workflow. That route is read-only, does not require a code diff, and reports findings in chat by default.
+
+For a code or change review, if there is no discoverable diff, PR, branch comparison, or path scope, ask one concise question for the review target.
 
 ## Workflow
 

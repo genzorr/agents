@@ -1,30 +1,22 @@
 ---
 name: surface-unknowns
-description: Surface consequential unknowns in a problem or active task, build enough orientation to distinguish what is known, assumed, missing, and decision-relevant, and route each material gap to the cheapest reliable resolution. Use when the user asks for a blind-spot pass or help understanding an unfamiliar problem. Invoke autonomously only once per newly observed decision branch when evidence supports multiple plausible resolutions or a missing fact or authority cannot be recovered locally, those possibilities would materially change the work, and resolution is worth the inspection, delay, and interruption cost. Do not use when one interpretation dominates or for trivial, locally answerable, or safely reversible choices.
+description: Surface consequential unknowns in a problem or active task, build enough orientation to distinguish what is known, assumed, missing, and decision-relevant, and route each material gap to the cheapest reliable resolution. Use only when the user explicitly invokes this skill or asks to identify unknowns or blind spots. Ordinary work keeps its active driver's normal evidence checking and uncertainty handling without starting a separate surface-unknowns pass.
 ---
 
 # Surface Unknowns
 
-Run a bounded uncertainty pass that improves the user's or current agent's model of the problem and selects what should happen next. Surface consequential gaps; never promise a complete map.
+Run a bounded uncertainty pass that improves the user's or current agent's model of the problem and selects what should happen next. Surface consequential gaps; never promise a complete map. This pass is explicit: ordinary ambiguity, source checking, and assumption handling stay with the active workflow unless the user requests this skill.
 
-## Composition Roles And Invariant
+## Composition Boundary
 
 - **Explicit discovery pass:** Driver for the bounded orientation task. Own framing, inspection, minimum teaching, uncertainty triage, and one next-move recommendation, then stop.
-- **Autonomous checkpoint:** Helper under the active driver. Apply the uncertainty lens, return a compact finding, and leave lifecycle ownership with that driver. Become a **router** only when explicitly transferring control to another driver.
-- **No-op:** Make no role transition and create no separate output.
-- Keep exactly one driver active. A handoff transfers control; a checkpoint that returns a finding or reversible default leaves the current driver in charge.
+- Keep exactly one driver active. If the requested pass overlaps a workflow that already owns implementation, diagnosis, mapping, or a decision, return the bounded finding to that driver rather than creating a parallel driver.
 - Treat the four known/unknown quadrants from Thariq Shihipar's practitioner field guide as hypothesis-generating prompts, not empirically validated, exhaustive categories or mandatory stages. An item can move as evidence changes.
 - Prefer the smallest intervention that can change the decision. The goal is useful orientation and safer progress, not maximum questioning.
 
-## Choose Depth
+## Scope
 
-- **Explicit discovery pass:** Use when the user invokes the skill, asks for a blind-spot pass, or says they know little about the problem. Build a visible problem orientation and uncertainty map before recommending one next move.
-- **Autonomous checkpoint:** Run at a natural decision boundary or before difficult-to-reverse work only when the uncertainty is newly observed, evidence supports at least two plausible resolutions or a missing fact or authority cannot be recovered locally, the possibilities would lead to materially different actions, and resolution is worth the inspection, delay, and interruption cost.
-- **No-op:** If inspection shows only trivial, locally answerable, or safely reversible gaps, state any load-bearing assumption in the surrounding work and continue without a separate artifact.
-
-## Re-entry Guard
-
-Run at most once for the same observed evidence and decision branch. A downstream workflow inherits the checkpoint result and may reopen it only when new evidence changes the frame, plausible alternatives, authority, consequence, or reversibility. Do not route to the already-active driver; return the finding to it.
+Use when the user invokes the skill or explicitly asks to identify unknowns or blind spots. Build a visible problem orientation and uncertainty map before recommending one next move. If the request is ordinary implementation, explanation, diagnosis, review, or system mapping without that request, leave it to the applicable active workflow.
 
 ## Workflow
 
@@ -38,7 +30,7 @@ Run at most once for the same observed evidence and decision branch. A downstrea
    - Which failure paths, counterexamples, adjacent systems, external constraints, prior failed attempts, or missing coverage suggest blind-spot hypotheses?
 5. **Prioritize by decision leverage.** Keep a gap when plausible resolutions would lead to different actions or a missing fact or authority blocks safe progress. Weigh consequence if wrong, difficulty of reversal, evidence gap, and resolution cost; prefer the route with the highest expected decision value net of inspection, delay, and interruption cost. Use qualitative judgment without invented probabilities.
 6. **Assign authority and route.** Distinguish facts the territory owns, reversible discretion the agent owns, product or value choices the user owns, and external gates another authority owns. Select the cheapest reliable route from the table below.
-7. **Hand off or return.** Produce the proportionate output contract and recommend one next move. An explicit pass then stops. An autonomous checkpoint either returns the finding to the current driver or transfers control to one selected driver; do not absorb that workflow into this skill.
+7. **Hand off or return.** Produce the explicit-pass output contract and recommend one next move. If another workflow owns the resulting action, return the finding to that driver; do not absorb its lifecycle into this skill.
 
 ## Resolution Routes
 
@@ -100,16 +92,7 @@ Blind-spot hypotheses:
 Recommended next move: <one action>
 ```
 
-For an autonomous checkpoint, return to the current driver with only:
-
-```markdown
-Material uncertainty: <one sentence, or none>
-Basis: <observed evidence versus inference or assumption>
-Route: <continue with disclosed reversible default | inspect | ask | named skill/workflow>
-Residual risk or trigger: <what would require revisiting the choice>
-```
-
-Treat `Material uncertainty` plus `Basis` as the checkpoint identity for the re-entry guard. Omit empty sections. Create a durable ledger only when the user requests it or the active project workflow already owns one.
+Create a durable ledger only when the user requests it or the active project workflow already owns one.
 
 ## Guardrails
 

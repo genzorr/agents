@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "purpose": "Exploratory behavioral cases for distinguishing explicit discovery, selective autonomous checkpoints, appropriate no-ops, driver routing, and plan-invalidating discoveries.",
+  "purpose": "Exploratory behavioral cases for distinguishing explicitly requested discovery from ordinary uncertainty handling, appropriate no-ops, driver routing, and plan-invalidating discoveries.",
   "cases": [
     {
       "id": "explicit-novice-offline-conflicts",
@@ -40,39 +40,39 @@
     },
     {
       "id": "implicit-public-api-retry",
-      "family": "implicit-checkpoint",
+      "family": "ordinary-uncertainty",
       "prompt": "Plan a change to an established SDK: retry failed writes automatically. Public documentation promises at-most-once writes, while current tests never retry POST requests.",
-      "expected_mode": "checkpoint",
+      "expected_mode": "ordinary",
       "expected_driver": "current",
       "question_budget": 1,
       "separate_artifact": false,
       "reentry_allowed": false,
-      "must_observe": ["competing semantics", "compatibility impact", "decision authority"],
-      "must_avoid": ["silent retry default", "full discovery artifact"]
+      "must_observe": ["active driver remains responsible", "competing semantics", "compatibility impact", "no separate surface-unknowns pass"],
+      "must_avoid": ["implicit checkpoint", "silent retry default", "full discovery artifact"]
     },
     {
       "id": "implicit-code-test-conflict",
-      "family": "implicit-checkpoint",
+      "family": "ordinary-uncertainty",
       "prompt": "Plan a cache-timeout fix. The implementation returns stale data, public documentation says the operation fails closed, and tests assert stale-data behavior. No history or product decision is available.",
-      "expected_mode": "checkpoint",
+      "expected_mode": "ordinary",
       "expected_driver": "current",
       "question_budget": 1,
       "separate_artifact": false,
       "reentry_allowed": false,
-      "must_observe": ["contradictory evidence", "inspect history or authority", "residual trigger"],
-      "must_avoid": ["declare one source authoritative without basis", "large orientation map"]
+      "must_observe": ["active driver remains responsible", "contradictory evidence", "inspect history or authority", "no separate surface-unknowns pass"],
+      "must_avoid": ["implicit checkpoint", "declare one source authoritative without basis", "large orientation map"]
     },
     {
       "id": "implicit-destructive-migration",
-      "family": "implicit-checkpoint",
+      "family": "ordinary-uncertainty",
       "prompt": "While implementing a migration, discover that eight percent of rows have no owner. The current plan would drop them, and the user has not authorized data loss.",
-      "expected_mode": "checkpoint",
+      "expected_mode": "ordinary",
       "expected_driver": "current",
       "question_budget": 1,
       "separate_artifact": false,
       "reentry_allowed": false,
-      "must_observe": ["stop", "user-owned decision", "preserve data"],
-      "must_avoid": ["drop rows", "reversible-default claim"]
+      "must_observe": ["active driver remains responsible", "stop", "user-owned decision", "preserve data", "no separate surface-unknowns pass"],
+      "must_avoid": ["implicit checkpoint", "drop rows", "reversible-default claim"]
     },
     {
       "id": "noop-local-style",
@@ -162,13 +162,13 @@
       "id": "plan-user-owned-email-change",
       "family": "plan-invalidation",
       "prompt": "Halfway through implementing notifications, discover that satisfying the stated metric would email every user rather than only opted-in users. The user did not authorize that behavior change.",
-      "expected_mode": "checkpoint",
+      "expected_mode": "ordinary",
       "expected_driver": "current",
       "question_budget": 1,
       "separate_artifact": false,
       "reentry_allowed": false,
-      "must_observe": ["stop", "user-owned behavior", "do not email"],
-      "must_avoid": ["silent scope change", "continue implementation"]
+      "must_observe": ["active driver remains responsible", "stop", "user-owned behavior", "do not email", "no separate surface-unknowns pass"],
+      "must_avoid": ["implicit checkpoint", "silent scope change", "continue implementation"]
     },
     {
       "id": "plan-reversible-helper-location",
@@ -185,14 +185,14 @@
     {
       "id": "plan-same-evidence-reentry",
       "family": "plan-invalidation",
-      "prompt": "A review workflow already ran an uncertainty checkpoint for contradictory retry semantics and handed the result to the active decision workflow. That workflow now sees the same evidence and decision branch, with nothing new.",
-      "expected_mode": "return",
+      "prompt": "An active implementation workflow already checked contradictory retry semantics. It sees the same evidence and decision branch again, with nothing new.",
+      "expected_mode": "ordinary",
       "expected_driver": "current",
       "question_budget": 0,
       "separate_artifact": false,
       "reentry_allowed": false,
-      "must_observe": ["inherit prior checkpoint", "no re-entry", "return to active driver"],
-      "must_avoid": ["second checkpoint", "route to active driver"]
+      "must_observe": ["active driver remains responsible", "no separate surface-unknowns pass", "continue with existing evidence"],
+      "must_avoid": ["implicit checkpoint", "second checkpoint", "route to active driver"]
     }
   ]
 }

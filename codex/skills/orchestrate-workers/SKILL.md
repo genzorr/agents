@@ -90,7 +90,7 @@ Omit chain-of-thought, builder reasoning, long history, and failed-attempt narra
 
 ## Operator-Requested Independent Review
 
-The coordinator reviews and accepts by default. Only an explicit operator request for this task activates a reviewer. No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review. An unauthorized driver requirement is a stop-and-ask condition.
+The coordinator reviews and accepts by default. Only an explicit operator request for this task activates a reviewer. No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review. An unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review. Complete already-authorized implementation and verification first, then leave a concrete review handoff; do not claim independent acceptance or waive the driver’s review requirement.
 
 Do not resolve or validate reviewer route/model/effort, read the reviewer protocol, or create/reuse a reviewer while disabled. When activated, record the operator request and exact acceptance target before dispatch. Reuse one compatible idle reviewer keyed by exact reviewer role, project, checkout, trust, authority, isolation, route, model, and effort. Create a fresh reviewer only when operator-requested review is active and no compatible identity is reachable. New reviewers always receive fresh context with no history exception. Independence comes from separate identity, fresh context, no implementation ownership, and protocol—not model name. The ordinary implementation route never changes reviewer activation or routing.
 

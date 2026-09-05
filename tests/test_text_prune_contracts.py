@@ -44,7 +44,7 @@ class TextPruneContractsTest(unittest.TestCase):
         for phrase in (
             "Route decisions to add, change, slim, merge, deprecate, remove, or keep an instruction asset to `skill-lifecycle`",
             "Route pruning or uninstalling materialized assets to the owning installer contract",
-            "Keep `doc-audit` audit-only",
+            "Keep documentation audits and code reviews under `review-change` read-only",
             "Installed `~/.codex` (runtime-home)",
             "`~/.claude` (runtime-home)",
             "redirect to the repository that physically owns the source",

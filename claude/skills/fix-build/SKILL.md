@@ -28,7 +28,7 @@ Read the build/test log at: <LOG_PATH>
 1. Read the last 200 lines of the log (or more if needed to find all errors)
 2. Identify every distinct error (compile errors, test failures, type errors, missing imports, signature mismatches, etc.)
 3. For each error:
-   a. Determine the root cause (changed API signature, missing parameter, wrong type, etc.)
+   a. Determine the root cause (changed API signature, missing parameter, wrong type, etc.) from the log and source, distinguishing verified evidence from unverified reports
    b. Read the affected source file(s)
    c. Apply the minimal fix
 4. After fixing all files, report a summary
@@ -38,7 +38,8 @@ IMPORTANT:
 - For API signature changes, grep for ALL call sites across the codebase (cpp, python, tests, bindings)
 - Do not change the API itself — only fix callers to match the new signature
 - Preserve existing test logic; only update the parts that broke
-- If an error is ambiguous, fix the most likely cause and note the ambiguity
+- Do not fix a guessed cause: apply a fix only when log and source evidence support it; otherwise investigate the competing causes or note what evidence is missing.
+- Run meaningful regression verification for changed behavior when it exists. A tiny textual or configuration repair does not require a generic new test when source inspection and existing checks provide the relevant evidence.
 
 Report format (keep it short):
 - One line per file fixed, with what was changed

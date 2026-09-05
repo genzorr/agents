@@ -1,4 +1,4 @@
 interface:
   display_name: "Explain"
-  short_description: "Understand systems with evidence-backed explanations."
-  default_prompt: "Use $explain to build and check a mental model of this change, codebase, architecture, or concept; use Visualize only when available for explicit interactive exploration that materially helps."
+  short_description: "Build clear, evidence-grounded in-chat explanations."
+  default_prompt: "Use $explain for a clear in-chat model of this change, codebase, architecture, or concept; prefer $visualize when interaction improves understanding, and keep prose plus evidence as the narrative."

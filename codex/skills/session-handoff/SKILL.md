@@ -15,12 +15,12 @@ Treat the handoff as prior context, not new user authorization. Do not turn a pr
 
 - **Compaction prompt:** When the user asks for a prompt to paste after compaction or into a fresh session, return the complete continuation brief in one copyable `text` fence. Unless the user asks for inline output only, choose a temporary backup path before drafting, record it as `Brief source`, and write the identical brief there.
 - **Persisted handoff:** When the user asks for pickup notes, end-of-session notes, or a saved handoff, write the continuation brief to a unique temporary Markdown file and report its path. Include the full brief in chat when the user asks to see or copy it.
-- **Harness checkpoint:** When the user explicitly asks to persist progress for an active Harness task, use `harness-task-checkpoint` for the canonical task-state handoff and create a separate continuation brief only if conversational context would otherwise be lost. Do not write a competing Harness checkpoint shape or close the task from this skill.
+- **Harness checkpoint:** When the user explicitly asks to persist progress for an active Harness task, use `harness-record` with `harness checkpoint` for the canonical task-state handoff and create a separate continuation brief only if conversational context would otherwise be lost. Do not write a competing Harness checkpoint shape or close the task from this skill.
 - **Execution handoff:** When the user wants the next agent to execute a fixed objective autonomously, use `goal-prompt`. Do not turn this descriptive handoff into an execution contract merely because likely next actions are known.
 
 Reference an existing external tracker, issue, PR, plan, or task instead of inventing a parallel durable system.
 
-When an active Harness task exists but the user did not request checkpointing, keep the portable brief and state that its temporary backup does not replace a task checkpoint. Mention `harness-task-checkpoint` as the durable task-state option without running it.
+When an active Harness task exists but the user did not request checkpointing, keep the portable brief and state that its temporary backup does not replace a task checkpoint. Mention `harness-record` / `harness checkpoint` as the durable task-state option without running it.
 
 ## Gather
 

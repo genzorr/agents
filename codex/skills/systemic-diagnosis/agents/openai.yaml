@@ -1,0 +1,7 @@
+interface:
+  display_name: "Systemic Diagnosis"
+  short_description: "Map recurring system causes and tests."
+  default_prompt: "Use $systemic-diagnosis to analyze a recurring or cross-boundary problem, label evidence, and identify the cheapest test."
+
+policy:
+  allow_implicit_invocation: false
