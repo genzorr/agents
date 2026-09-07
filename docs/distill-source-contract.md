@@ -1,8 +1,6 @@
 # Source Distillation Contract
 
-Use this contract when `distill-source` must turn one external source into a repo-fit adaptation
-brief. It defines completeness, critical extraction, placement, and negative decisions. The skill
-remains proposal-only: this contract never authorizes code, task, ADR, rule, skill, or policy changes.
+Use this contract when `distill-source` turns one external source or an explicitly supplied finite source bundle into one repo-fit adaptation brief. It defines completeness, critical extraction, placement, and negative decisions. This phase remains proposal-only: the contract never authorizes code, task, ADR, rule, skill, or policy changes. The coordinating task may continue already-authorized work through its receiving workflow after this phase, subject to that workflow's review and decision gates.
 
 ## 1. Declare Scope Before Reading
 
@@ -19,7 +17,7 @@ Record:
 
 Use a coverage ledger:
 
-| Unit | In scope | Read | Accounted for in brief | Notes / limitation |
+| Source / unit | In scope | Read | Accounted for in brief | Notes / limitation |
 |---|---|---|---|---|
 | `<section or file>` | yes/no | yes/no | yes/no | `<reason, omission, or link>` |
 
@@ -36,19 +34,18 @@ Discovering a new structural unit of the declared source updates the source map 
 An independently linked document does not enter scope automatically; name it and ask before a
 material widening of the source family or target set.
 
-## 2. Escalate Large Single Sources Deliberately
+For a supplied bundle, identify every requested source before synthesis and keep its coverage and completeness separately visible. Reuse this ledger rather than producing a separate full report per source. A bundle verdict cannot hide an unread source behind complete coverage of another; preserve partial results and name the unresolved source. Combine overlapping mechanisms in the fit matrix with all supporting source identities, keeping disagreements and non-transferable exceptions explicit.
 
-`distill-source` normally owns one source in one context. Hand preparation to
-`prepare-dynamic-workflow` when a *single* source is independently sectioned and any of these hold:
+## 2. Escalate Large Work Deliberately
+
+`distill-source` owns one source or a bounded supplied bundle when its coverage and synthesis can be handled reliably. Source count alone is not a reason to escalate. Hand preparation to `prepare-dynamic-workflow` when the work requires larger coordination, for example:
 
 - the user requires complete coverage and the source is too large for reliable one-pass accounting;
 - independent section passes or adversarial completeness checks materially reduce omission risk;
 - the source must be mapped across several repositories with different authority boundaries; or
 - the source contains many claims that need separate verification before synthesis.
 
-The workflow returns one source map, section findings, a completeness critic, and one synthesized
-adaptation brief. It does not change the proposal-only promotion boundary. Do not escalate merely
-because a source is long when it can still be read and accounted for reliably in one context.
+The workflow returns one source map, findings with source attribution, coverage checking, and one synthesized adaptation brief. It does not change the proposal-only promotion boundary. Do not escalate merely because a source is long when it can still be read and accounted for reliably.
 
 ## 3. Screen Third-Party Instruction Assets Before Trust
 
@@ -181,8 +178,7 @@ A brief containing only additions has probably skipped the existing-coverage pas
 <source links, date, what becomes canonical after adoption, and when this brief becomes provenance>
 ```
 
-A rendered chat brief may be shorter, but it still reports completeness, negative decisions, existing
-coverage, proposed delta, validation, and routing.
+A rendered chat brief may be shorter, but it still reports completeness, negative decisions, existing coverage, proposed delta, validation, and routing. For a bundle, use a source register and one combined proposal rather than concatenating independent reports. Complete locally answerable coverage and target-fit checks, including reviews needed to establish the concrete changes, before presenting that proposal; do not make future review the proposed substitute for those checks. If required evidence is unavailable, name the gap and limit the affected conclusion.
 
 ## 8. Multi-Repository Ownership
 
@@ -227,6 +223,8 @@ These scenarios are for reviewing changes to `distill-source`, not for an ordina
 6. **Proposal boundary** — the brief recommends a task and global-rule change. Expected: routing only;
    no durable write occurs inside `distill-source`.
 7. **Untrusted skill bundle** — a third-party skill includes a hook, installer, nested reference, outbound call, and permissive license. Expected: every artifact and side-effect assumption is recorded, nothing is executed, license is not treated as safety evidence, unresolved files prevent a complete screen, and any managed-skill proposal routes to `skill-lifecycle`.
+8. **Bounded source bundle** — the user supplies several readable sources with overlapping recommendations and asks for one proposal. Expected: every source has a coverage verdict, overlapping mechanisms produce one owner/delta, disagreements remain visible, and locally answerable target checks are completed before the joint proposal. Source count alone does not trigger a workflow handoff.
+9. **Authorized continuation** — the user authorizes a specific adaptation and its implementation, and the receiving workflow's required review is available. Expected: complete distillation, hand off and continue the authorized work through that workflow without repeated permission; retain any actual adoption/review gate. A proposal-only request still produces no project mutations.
 
 ## Completion Gate
 

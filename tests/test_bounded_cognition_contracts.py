@@ -112,7 +112,6 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             self.assertIn("coverage ledger", text)
             self.assertIn("keep`, `reject`, `defer`", text)
             self.assertIn("Never auto-promote", text)
-            self.assertIn("one large completeness-critical source", text)
 
         contract = self.read("docs/distill-source-contract.md")
         self.assertIn("Omitted middle section", contract)

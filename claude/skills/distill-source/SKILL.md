@@ -1,13 +1,11 @@
 ---
 name: distill-source
-description: Read a user-provided paper, article, docs page, GitHub repo, or skill file and extract what should be adapted to the current repo - mechanisms, assumptions, invariants, failure modes - into a repo-fit adaptation brief before any code/doc/skill change. Use when the user points at a paper/article/docs page/GitHub skill file/source link and asks what to adapt to this repo/setup; this is source-to-codebase distillation, not ML knowledge distillation. Not for already-completed research write-ups (use integrate-research) or broad multi-source/multi-agent research (use prepare-dynamic-workflow).
+description: Assess a supplied source or finite source bundle for adaptation to the target repository, producing one evidence-grounded proposal. Use for source-to-repository adaptation, not ML distillation; use integrate-research for completed research reports.
 ---
 
 # distill-source
 
-Take one already-available external source and determine what, if anything, the target repo should
-adapt before touching code, docs, tasks, rules, or skills. Extract mechanisms and fit; do not merely
-summarize or default to adoption.
+Assess one already-available external source or an explicitly supplied finite source bundle and determine what, if anything, the target repositories should adapt. Produce one joint proposal for a bundle, preserving each source's coverage, lineage and disagreements. Extract mechanisms and fit; do not merely summarize or default to adoption.
 
 **Usage:**
 ```
@@ -26,8 +24,7 @@ When the source may influence reusable agent behavior, also open `docs/claim-dis
 ## Composition role
 
 - **Driver** for source scoping, reading, target-context inspection, and the adaptation brief.
-- **Helper** for everything downstream. Recommend a route, then stop; the receiving task/inbox/ADR/
-  skill workflow owns any durable write.
+- **Helper** for downstream work: return the brief to the coordinating task; the receiving task/inbox/ADR/skill workflow owns any durable write. If the surrounding request already authorizes subsequent work, continue through that workflow within the existing scope. Completing this phase does not end the surrounding task or require repeated approval; retain any actual review or operator-decision gate.
 - Defer to stricter protocols: Harness creators own Harness state, and `skill-lifecycle` decides
   whether a distilled idea warrants a skill change. Never bypass those gates.
 
@@ -42,11 +39,7 @@ scraper, crawler, monitor, or raw-source store.
 
 1. **Declare source, target, and scope.** Identify the canonical pointer, target repo(s), requested
    focus, and every discoverable in-scope unit. Name exclusions and access/rendering limitations.
-2. **Choose one-context or workflow preparation.** Keep ordinary one-source work here. Hand
-   preparation to `prepare-dynamic-workflow` when one independently sectioned source needs
-   completeness-critical section passes, adversarial coverage checking, many separately verified
-   claims, or multi-repo mapping that will not fit reliably in one context. Escalation does not
-   authorize promotion.
+2. **Choose direct work or workflow preparation.** Keep one source or a bounded supplied bundle here when its coverage and joint synthesis can be handled reliably. Source count alone does not require a workflow. Hand preparation to `prepare-dynamic-workflow` when coverage, separate claim verification or multi-repository mapping requires a larger coordinated workflow. Escalation does not authorize promotion.
 3. **Read and account for the source.** Fetch URLs with WebFetch and read local files/attachments
    directly, respecting access gates. Maintain the coverage ledger while reading. Add newly discovered
    structural units of the declared source (for example, table-of-contents pages), but do not widen
@@ -64,8 +57,7 @@ scraper, crawler, monitor, or raw-source store.
 7. **Map before proposing.** Fill the mechanism-to-owner matrix. Name existing coverage and choose
    `keep`, `reject`, `defer`, or the smallest concrete delta. Every proposal names one owner, the
    lowest reliable enforcement layer, a failure risk, observable validation, and route.
-8. **Produce the adaptation brief.** Follow the contract's output order. Keep source claims separate
-   from target implications and state material uncertainty/conflict rather than smoothing it away.
+8. **Produce the adaptation brief.** Complete locally answerable coverage and target-fit checks, including reviews needed to identify the concrete delta, before presenting the proposal. Do not replace them with a recommendation to review later. Follow the contract's output order, combining overlapping mechanisms for a bundle while retaining per-source attribution and conflicts. Report unavailable evidence explicitly; keep source claims separate from target implications.
 9. **Decide retention and routing.** Save only when actionable, reusable, or decision-shaping. Route
    to chat, inbox, task, ADR, or `skill-lifecycle` proposal; perform none of those writes here.
 
@@ -83,8 +75,7 @@ keep/reject/defer/propose decisions—never only `done`.
 
 - `source-capture` — obtains a bounded packet before this skill when the source is not yet readable.
 - `ask-oracle` / `ask-chatgpt-pro` — external deep-research consult beyond the provided source.
-- `prepare-dynamic-workflow` — many sources, or one large completeness-critical source as described
-  above.
+- `prepare-dynamic-workflow` — work requiring the larger coordinated preparation described above; a finite supplied source bundle alone is not a trigger.
 - `integrate-research` — completed research reports rather than raw sources.
 - `skill-lifecycle` — evaluates an approved skill delta; this skill only proposes it.
 - `harness-add-inbox` / `harness-add-tasks` / `harness-adr` — perform explicit approved routing.
@@ -99,7 +90,7 @@ keep/reject/defer/propose decisions—never only `done`.
 
 ## Stop and ask
 
-- Before fetching a private/authenticated source or retaining raw source material.
+- Before fetching a private/authenticated source or retaining raw source material without existing authorization for that action and scope.
 - Before materially widening beyond the declared source family or target-repository set.
 - Before installing a third-party asset verbatim.
-- Before any durable promotion or project change based on the brief.
+- Before a durable promotion or project change that lacks existing authorization, or when the receiving protocol requires a new operator decision.

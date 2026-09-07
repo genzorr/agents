@@ -6,4 +6,8 @@ Use this deterministic compression ladder: preserve nodes, states, participants,
 
 The D2 adapter preserves workflow phase labels as real text nodes, dataflow classifications in flow labels, lifecycle type/tag semantics in state labels, and sequence segment labels/order as D2 sequence groups. HTML activation bars, exact y coordinates, connector routes, cards, toolbar controls, theme chrome, and animation metadata remain presentation-only differences.
 
+For diagrams destined for a paper or a fixed-size report, derive the available size from that document and check the exported artifact at its final size. Reflow or shorten labels before shrinking a whole diagram into unreadable text. Prefer the existing vector SVG export when the destination supports it; inspect font rendering, clipping, connector labels and contrast in the destination's actual theme. A clean geometry check does not prove that an export remains legible after embedding. Preserve the typed source beside, or durably linked from, the deliverable so revisions can be regenerated. These checks do not change the HTML/D2 renderer contract or add a scientific plotting backend.
+
 Mechanisms in this reference were re-authored from cathrynlavery/diagram-design at commit f3622cf66a3c557cb2ead57b687a3c1ff63f5a2b (MIT); no upstream templates, icons, or runtime were copied.
+
+Publication export checks were re-authored from [alphaXiv/OpenResearch orx-figures](https://github.com/alphaXiv/OpenResearch/tree/db0ca91d0c77f122220bb398888db763e6d69bef/agent-skills/orx-figures) (MIT); no upstream code or templates were copied.
