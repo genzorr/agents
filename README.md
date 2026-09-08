@@ -50,22 +50,13 @@ Re-run the installer after updating your checkout. Install is copy-based and ide
 bash scripts/install-codex.sh --uninstall --dry-run --diff
 ```
 
-Keep `.agents-install-state.json` in the selected home: it records historical ownership needed for safe updates and removal. The Claude installer merges its notification hooks into `settings.json` while preserving unrelated settings. Conflicts return a non-success status and require inspection before retrying. To roll back, check out a known-good source commit and re-run the installer.
+The Claude installer merges its notification hooks while preserving unrelated settings. See the [installer contract](docs/skill-installer-contract.md) for conflict handling and recovery.
 
-See the [installer contract](docs/skill-installer-contract.md) for ownership, conflict handling, and recovery details.
+## Skills and configuration
 
-## Repository guide
+Browse the [Codex skills](codex/skills/) and [Claude skills](claude/skills/). Same-name skills can intentionally differ between platforms. The [catalog](catalog.json) lists everything each installer manages.
 
-| Path | Contents |
-|---|---|
-| [catalog.json](catalog.json) | Desired assets, source layers, install targets, and supporting documents |
-| [codex/](codex/) | Codex global instructions and skills |
-| [claude/](claude/) | Claude global instructions, skills, commands, subagents, rules, and notification hooks |
-| [shared/](shared/) | Source files shared by both platforms |
-| [scripts/](scripts/) | Installers and validators |
-| [docs/](docs/) | Usage guides and technical contracts |
-
-Same-name Codex and Claude skills are platform counterparts and can intentionally differ. Agents manages only its own cataloged assets and preserves assets installed by other tools.
+Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer.
 
 ## Development
 
@@ -80,4 +71,3 @@ bash scripts/test-prune-safety.sh
 
 Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](AGENTS.md).
 
-Optional configuration has separate setup instructions: [Codex permission profile installer](scripts/install-codex-permissions.py) and [Claude auto-mode configuration](docs/claude-auto-mode.md). Neither is applied by the generic asset installer; review its policy before use.

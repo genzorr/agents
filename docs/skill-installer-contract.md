@@ -1,6 +1,6 @@
 # Skill Installer Contract
 
-A durable, repo-neutral contract for how `repos/agents`, `repos/harness`, and `repos/session-harvester` install, update, prune, and uninstall the Codex/Claude assets they own. It defines the shared safety shape; each repository remains the source of truth for the assets physically present in that repository.
+This contract defines how Agents installs, updates, prunes, and uninstalls its Codex and Claude assets. Each repository manages only the assets it owns.
 
 ## 1. Purpose and ownership
 
@@ -80,7 +80,7 @@ Normal install creates missing desired targets, adopts exact existing targets, u
 
 ## 8. Validation behavior
 
-`scripts/validate_catalog.py` and the installer load the same stdlib catalog module. Validation covers catalog schema and identity, bidirectional source coverage, complete directory expansion, frontmatter name/description identity, safe relative targets, source-layer collisions, explicit traveling references across skills/commands/subagents/rules/global instructions, boundary ownership, and install-state schema compatibility. `scripts/validate_skills.py` retains skill portability checks and invokes the catalog-backed text/reference validation. Cross-tree presence asymmetry is explicit and allowed; exact sharedness is established mechanically by PR B rather than free-text counterpart metadata.
+`scripts/validate_catalog.py` and the installer load the same stdlib catalog module. Validation covers catalog schema and identity, bidirectional source coverage, complete directory expansion, frontmatter name/description identity, safe relative targets, source-layer collisions, explicit traveling references across skills/commands/subagents/rules/global instructions, boundary ownership, and install-state schema compatibility. `scripts/validate_skills.py` retains skill portability checks and invokes the catalog-backed text/reference validation. Platform-specific assets may differ; files under shared source layers must be byte-identical across their consumers.
 
 ## 9. Idempotency, conflict handling, and rollback
 
@@ -102,4 +102,3 @@ Rollback is to check out a known-good source commit and re-run the installer aga
 - `scripts/agent_catalog.py` — shared catalog model, validation, and expansion.
 - `scripts/install-assets.py` — shared stdlib installer engine.
 - `scripts/validate_catalog.py` and `scripts/validate_skills.py` — repository validation surfaces.
-- `repos/harness/scripts/install-claude.sh` and `install-codex.sh` — historical source of the platform safety guards preserved here.

@@ -680,30 +680,21 @@
     {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}}
   ],
   "boundary_notes": {
-    "$comment": "Documentation only. These owners are NOT installable/prunable through this catalog — this repo never manages, prunes, or removes them. See AGENTS.md Boundary section and docs/skill-installer-contract.md.",
+    "$comment": "These assets belong to other installers and must never appear as installable catalog entries.",
     "harness": {
-      "owner": "repos/harness",
+      "owner": "harness",
       "manage": false,
-      "assets": [
-        "all harness-* skills (codex and claude, 21 and 17 ids respectively)",
-        "claude commands/execute.md",
-        "claude agents/harness-task-bootstrap.md, agents/task-verifier.md",
-        "codex hooks.json + hooks/stop.sh (Stop-gate) and hooks/notifications.sh (sourced as a sibling dependency of stop.sh, so it stays with Harness even though the Claude notification hook moved here)",
-        "the Harness CLI / data model these skills and hooks call"
-      ],
-      "note": "Source-owned by repos/harness. This catalog never lists these as installable entries; the Harness repo's own installer/prune allowlist manages them."
+      "assets": ["harness-* skills", "execute command", "harness-task-bootstrap and task-verifier subagents", "Harness-coupled hooks"]
     },
     "session_harvester": {
-      "owner": "repos/session-harvester",
+      "owner": "session-harvester",
       "manage": false,
-      "assets": ["harvest-sessions (claude skill)"],
-      "note": "Source-owned by repos/session-harvester. Not represented as an installable entry in this catalog."
+      "assets": ["harvest-sessions skill"]
     },
     "foreign": {
       "owner": "foreign",
       "manage": false,
-      "assets": ["codex-primary-runtime", "Visualize (Codex bundled/plugin capability)"],
-      "note": "Outside Agents ownership and management. codex-primary-runtime is installed-only with unknown source; Visualize is a Codex bundled/plugin capability. Both are visible-only and are never installed, updated, or pruned by any repo in this workspace."
+      "assets": ["codex-primary-runtime", "platform-provided plugins and capabilities"]
     }
   }
 }

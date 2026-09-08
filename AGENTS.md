@@ -5,12 +5,7 @@ This repository owns generic Codex and Claude agent assets and their install, un
 ## Boundary
 
 - This repo is the **source of truth** for generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, and the Claude notification hook (POSIX and Windows notifiers, one settings adapter). Never hand-edit installer-owned copies under `~/.claude` or `~/.codex`. The Claude auto-mode example is not installer-owned; follow `docs/claude-auto-mode.md` for operator-approved manual configuration.
-- **Source ownership follows physical presence.** This repo installs, uninstalls, and prunes **only
-  the assets physically present here**. It never manages, prunes, or removes assets owned by
-  `repos/harness`, `repos/session-harvester`, or any foreign/unknown installed skill.
-- Harness-coupled `harness-*` assets stay source-owned by `repos/harness`. The `harvest-sessions`
-  skill stays source-owned by `repos/session-harvester`. Foreign installed skills such as
-  `codex-primary-runtime` are visible-only and never touched.
+- Manage only assets physically present in this repository and declared in its catalog. Never install, prune, or remove another repository's assets or foreign installed files. Reserved external asset identities are enforced by `scripts/agent_catalog.py`.
 - Maintainers may keep local work tracking in the ignored `docs/harness/` directory. It is not part of the public distribution; use it when present, and do not require it for installation or contribution.
 - Use this existing checkout by default. Create a worktree only when the operator explicitly requests one.
 
@@ -22,10 +17,7 @@ cross-tree presence gaps but does not force content/frontmatter parity.
 
 ## Installer contract
 
-All install/uninstall/validate behavior follows the reusable per-repo skill installer contract in
-[`docs/skill-installer-contract.md`](docs/skill-installer-contract.md). `repos/harness` and
-`repos/session-harvester` follow the same contract for their own physically-present assets.
-For Agents, `catalog.json` is the sole desired-state authority and each selected home records historical materialized files plus adapter reconciliation history in `.agents-install-state.json`; the shell scripts are compatibility wrappers around the shared stdlib engine.
+Follow the [installer contract](docs/skill-installer-contract.md). `catalog.json` defines desired assets; `.agents-install-state.json` records ownership in each selected home. The shell scripts wrap the shared standard-library engine.
 
 ## Stop / Ask gates
 
