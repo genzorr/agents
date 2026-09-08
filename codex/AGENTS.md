@@ -28,7 +28,7 @@ Do not re-wrap or unwrap prose your task did not otherwise change — that is a 
 - For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
 - For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
 - Require confirmation for external writes, destructive actions, purchases, or material scope expansion unless the current session already authorizes that action and scope. A project or skill policy may impose a stricter gate.
-- For Personal OS and repositories it manages, including Agents, Harness, and session-harvester, use the existing local checkout by default. Create or use a Git worktree only when the user explicitly asks for one; parallel tasks do not imply worktree authorization.
+- Follow project policy when selecting a checkout. Where an existing checkout is required, create or use a Git worktree only when the user explicitly asks for one; parallel tasks do not imply worktree authorization.
 
 ## Reading Discipline
 

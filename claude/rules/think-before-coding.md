@@ -7,7 +7,7 @@ Surface uncertainty before implementing, not after.
 - Requests to answer, explain, review, diagnose, or plan: inspect and report. Do not implement unless the request also authorizes changes.
 - Requests to change, build, or fix: make the in-scope changes and run relevant non-destructive validation without asking first.
 - External writes, destructive actions, purchases, and material scope expansion need confirmation unless the current session already authorizes that action and scope. A project or skill policy may impose a stricter gate.
-- For Personal OS and repositories it manages, including Agents, Harness, and session-harvester, use the existing local checkout by default. Create or use a Git worktree only when the user explicitly asks for one; parallel tasks do not imply worktree authorization.
+- Follow project policy when selecting a checkout. Where an existing checkout is required, create or use a Git worktree only when the user explicitly asks for one; parallel tasks do not imply worktree authorization.
 
 ## Rules
 

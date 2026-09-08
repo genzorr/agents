@@ -161,7 +161,7 @@ Retain the complete map with `disabled`, `default`, or `operator override` prove
 1. Resolve callback identity/action only when callback is selected; otherwise resolve the selected delivery mechanism and target without fabricating an origin route.
 2. Use native `create_thread` with fresh context, never a native subagent spawn or `fork_thread`.
 3. Select the exact resolved feature-owner model and effort as the new task's creation profile rather than the old hard-coded owner profile.
-4. Resolve saved project/environment and exact existing branch/ref or intended working-tree state under user/project policy. Personal OS-managed repos use the existing checkout without explicit worktree authority.
+4. Resolve saved project/environment and exact existing branch/ref or intended working-tree state under user/project policy. Honor project requirements to use an existing checkout; parallel work does not authorize a worktree.
 5. Give the task a concise project-and-feature title.
 6. Send only the complete Feature Owner Launch Contract. Do not inherit or paste parent history.
 7. Treat creation validation as profile provenance, not independent metadata readback. Distinguish pending from ready identity.

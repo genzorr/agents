@@ -1,0 +1,10 @@
+{
+  "$comment": "Generic example only; not installed by Agents. Customize private environment details outside this repository. See docs/claude-auto-mode.md.",
+  "autoMode": {
+    "environment": [
+      "$defaults",
+      "Repository visibility: source-control trust does not establish privacy or authorize transferring confidential material. Do not assume a repository is private without an explicit statement of its visibility and audience.",
+      "Internal sharing / snippet hosting: no additional services are trusted. Public paste and gist services remain outside the trust boundary."
+    ]
+  }
+}

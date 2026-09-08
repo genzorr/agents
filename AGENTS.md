@@ -1,22 +1,18 @@
 # AGENTS.md
 
-This repository owns **generic personal/global** Codex and Claude agent assets and the surface that
-installs/uninstalls/validates them. It was extracted from `repos/harness` under Personal OS slice
-S-17.
+This repository owns generic Codex and Claude agent assets and their install, uninstall, and validation tools.
 
 ## Boundary
 
-- This repo is the **source of truth** for generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, and the Claude notification hook (POSIX and Windows notifiers, one settings adapter). Never hand-edit installer-owned copies under `~/.claude` or `~/.codex`. The record-only Claude auto-mode config is an explicit operator-managed exception documented in `docs/claude-auto-mode.md`; applying it still requires operator approval.
+- This repo is the **source of truth** for generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, and the Claude notification hook (POSIX and Windows notifiers, one settings adapter). Never hand-edit installer-owned copies under `~/.claude` or `~/.codex`. The Claude auto-mode example is not installer-owned; follow `docs/claude-auto-mode.md` for operator-approved manual configuration.
 - **Source ownership follows physical presence.** This repo installs, uninstalls, and prunes **only
   the assets physically present here**. It never manages, prunes, or removes assets owned by
   `repos/harness`, `repos/session-harvester`, or any foreign/unknown installed skill.
 - Harness-coupled `harness-*` assets stay source-owned by `repos/harness`. The `harvest-sessions`
   skill stays source-owned by `repos/session-harvester`. Foreign installed skills such as
   `codex-primary-runtime` are visible-only and never touched.
-- Treat `/Users/example/dev/os` (Personal OS) as the source of truth for cross-project governance:
-  the OS/Harness boundary policy, the agents extraction plan, and the project registry. Use this
-  repo's `docs/harness/` for agents-local backlog and follow-up work; Personal OS Harness tracks the
-  original extraction (S-17).
+- Maintainers may keep local work tracking in the ignored `docs/harness/` directory. It is not part of the public distribution; use it when present, and do not require it for installation or contribution.
+- Use this existing checkout by default. Create a worktree only when the operator explicitly requests one.
 
 ## Same-name skills are platform twins
 
@@ -50,7 +46,7 @@ python3 scripts/validate_skills.py             # frontmatter, portability, and c
 python3 scripts/check_cross_repo_consistency.py # cross-repo ownership split
 python3 -m unittest discover -s tests          # instruction behavior contracts
 bash scripts/test-prune-safety.sh              # scratch prune/uninstall ownership guard
-harness check                                  # Harness state consistency
+harness check                                  # optional: local Harness state, when present
 CLAUDE_HOME=... bash scripts/install-claude.sh --dry-run --diff   # scratch-home dry run
 CODEX_HOME=...  bash scripts/install-codex.sh  --dry-run --diff
 ```
@@ -62,5 +58,4 @@ stdlib-only and may also be run with system `python3`.
 
 - Default branch: `main`.
 - Use short feature branches for non-trivial changes.
-- Remote is private `git@github.com:genzorr/agents.git`; GitHub changes and pushes are
-  external-effect actions and require explicit operator approval.
+- GitHub changes and pushes are external-effect actions and require explicit operator approval.

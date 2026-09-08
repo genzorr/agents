@@ -1,5 +1,5 @@
 {
-  "$comment": "Authoritative catalog of assets physically present in repos/agents. Generic personal/global Codex+Claude assets extracted from repos/harness under Personal OS slice S-17. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
+  "$comment": "Authoritative catalog of Codex and Claude assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
   "skills": [
     {
       "id": "architecture-review",

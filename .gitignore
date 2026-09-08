@@ -6,3 +6,8 @@ __pycache__/
 # Scratch install homes used by install/uninstall verification.
 .scratch-home/
 scratch-home*/
+
+# Private maintainer records are retained locally, not published.
+docs/harness/
+research/findings/
+config/claude-auto-mode.json

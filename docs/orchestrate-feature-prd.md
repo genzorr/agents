@@ -182,7 +182,7 @@ If the operator invokes both outer feature ownership and an ordinary implementat
 
 ## Project And Git Boundaries
 
-Resolve the target through native project/task surfaces and inspect project instructions before selecting a checkout or app-managed worktree. Personal OS and repositories it manages use the existing checkout unless the operator explicitly authorizes a worktree. Other projects follow user/project policy and then native defaults. Never invent a starting branch/ref.
+Resolve the target through native project/task surfaces and inspect project instructions before selecting a checkout or app-managed worktree. Honor project requirements to use an existing checkout unless the operator explicitly authorizes a worktree. Otherwise follow user/project policy and then native defaults. Never invent a starting branch/ref.
 
 Invocation inherits only authority already granted for edits, validation, commits, pushes, pull requests, merges, branch operations, external writes, task creation, and delegation. It never broadens those permissions.
 
