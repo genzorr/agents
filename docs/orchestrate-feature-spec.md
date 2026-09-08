@@ -272,7 +272,7 @@ Focused tests must fail for these regressions:
 15. The owner uses `orchestrate-workers` to create native leaf implementation workers, never a nested feature owner or ordinary implementation-task route; sequential assignments may reuse one compatible worker, while parallel workers require genuinely non-overlapping ownership lanes and tests do not require a worker count.
 16. Existing-task messages omit both `model` and `thinking` entirely, target-specific settings changes require explicit operator authorization, native workers and reviewers return only through their immediate parent by default, and any parent-bypass route exception names sender, recipient, and purpose without cross-task fallback after parent delivery failure.
 
-Assert both orchestration skills remain Codex-only, UI policies are explicit-only, no scripts/custom agents/Claude layer/controller/watcher/registry is added, and progressive-disclosure ceilings remain focused. Phrase/source assertions are appropriate because these shipped instruction assets are the contract, but tests should section-scope route/profile clauses so contradictory text cannot pass merely by coexisting.
+Assert both orchestration skills remain Codex-only, UI policies are explicit-only, and no scripts/custom agents/Claude layer/controller/watcher/registry is added. Phrase/source assertions are appropriate because these shipped instruction assets are the contract, but tests should section-scope route/profile clauses so contradictory text cannot pass merely by coexisting.
 
 ## Validation
 

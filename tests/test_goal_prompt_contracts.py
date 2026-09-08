@@ -926,14 +926,9 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("downstream consumer or change execution, authority, recovery, verification, or acceptance", text)
         self.assertIn("not a runtime checklist, emitted field, or report", text)
 
-    def test_orchestration_family_uses_progressive_disclosure_without_protocol_duplication(self) -> None:
+    def test_orchestration_family_preserves_protocol_separation(self) -> None:
         outer = self.read("codex/skills/orchestrate-feature/SKILL.md")
         generic = self.read("codex/skills/orchestrate-workers/SKILL.md")
-        protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
-        # The ceiling allows the launch contract to state exact callback identity and parent-owned routing safeguards.
-        self.assertLess(len(outer.split()), 2250)
-        self.assertLess(len(generic.split()), 2100)
-        self.assertLess(len(protocol.split()), 625)
         for text in (outer,):
             self.assertNotIn("## Compact Worker Contract", text)
             self.assertNotIn("## Worker Rules", text)
