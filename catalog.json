@@ -694,7 +694,8 @@
     "foreign": {
       "owner": "foreign",
       "manage": false,
-      "assets": ["codex-primary-runtime", "platform-provided plugins and capabilities"]
+      "assets": ["codex-primary-runtime", "Visualize (Codex bundled/plugin capability)"],
+      "note": "Outside Agents ownership and management; never installed, updated, or pruned by Agents."
     }
   }
 }
