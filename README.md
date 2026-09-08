@@ -70,4 +70,3 @@ bash scripts/test-prune-safety.sh
 ```
 
 Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](AGENTS.md).
-

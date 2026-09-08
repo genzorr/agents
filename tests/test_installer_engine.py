@@ -159,6 +159,8 @@ def write_fixture(repo: Path, platform: str = "codex", *, travel: bool = False, 
         (hook_root / "notifications.sh").write_text("#!/bin/sh\necho notify\n", encoding="utf-8")
         (hook_root / "notifications.sh").chmod(0o755)
         (hook_root / "notifications.ps1").write_text("exit 0\n", encoding="utf-8")
+        # The historical state fixture records a non-executable 0644 baseline.
+        (hook_root / "notifications.ps1").chmod(0o644)
         (repo / "claude" / "hooks.json").write_text(json.dumps({"hooks": {"Notification": [{"hooks": [{"type": "command", "command": "__CLAUDE_NOTIFY__"}]}]}}), encoding="utf-8")
         assets["hooks"].append(
             {
@@ -1135,9 +1137,16 @@ class InstallerEngineTest(unittest.TestCase):
             self.assertEqual(self.run_installer(repo, "claude", home).returncode, 0)
             self.assertEqual(settings.stat().st_mode & 0o777, 0o640)
 
-            new_home = Path(tmp) / "new-home"
-            self.assertEqual(self.run_installer(repo, "claude", new_home).returncode, 0)
-            self.assertEqual((new_home / "settings.json").stat().st_mode & 0o777, 0o644)
+            for mask, expected_mode in ((0o022, 0o644), (0o002, 0o664), (0o077, 0o600)):
+                with self.subTest(umask=oct(mask)):
+                    new_home = Path(tmp) / f"new-home-{mask:o}"
+                    previous_umask = os.umask(mask)
+                    try:
+                        result = self.run_installer(repo, "claude", new_home)
+                    finally:
+                        os.umask(previous_umask)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual((new_home / "settings.json").stat().st_mode & 0o777, expected_mode)
 
     def test_claude_hook_top_level_type_collision_is_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
