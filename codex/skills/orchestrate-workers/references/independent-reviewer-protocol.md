@@ -22,6 +22,8 @@ Send:
 - return route and result format;
 - explicit read-only, no-mutation, no-delegation instructions.
 
+The reviewer uses immediate-parent native route; no cross-task fallback. Existing-task review messages omit both `model` and `thinking` (including null/presumed-current values) and preserve settings. Settings changes require user authorization naming target and values; profiles, inherited context, delegated instructions, and callback permission never authorize them.
+
 For reuse, add prior review ID, disposition (`ship`, `fix-first`, `rethink`, `blocked`, `failed`, `voided`), and reviewed state. Invalidate the prior verdict; carry only confirmed project invariants and relevant findings.
 
 Require inspection of actual files, artifacts, and complete current diff before the coordinator's interpretation. Do not provide only fixes, summaries, or worker reports. Complete state-writing tests/builds/generation before dispatch; use isolated scratch state outside the reviewed checkout when reviewer execution is necessary and authorized.

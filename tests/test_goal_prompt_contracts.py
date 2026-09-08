@@ -332,6 +332,9 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Under active waiting use native attention for gates/blockers and terminal result",
             "A replacement names its validated mechanism/target",
             "Manual supervision remains unobserved until later inspection",
+            "The feature owner alone owns this callback",
+            "native children return only to it through native collaboration/results",
+            "existing-task messages omit both `model` and `thinking` fields",
         ):
             self.assertIn(anchor, contract)
         for anchor in (
@@ -375,6 +378,11 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "launch contract must carry the request",
             "do not resolve or validate reviewer controls, identity, or protocol",
             "stop if an exact control cannot be validated",
+            "Creation profile:",
+            "Existing-task message:",
+            "preserves the recipient's settings and omits both `model` and `thinking` fields entirely",
+            "including null or presumed-current values",
+            "a sender profile belongs in text metadata only when relevant",
         ):
             self.assertIn(anchor, profiles)
         for anchor in (
@@ -452,14 +460,24 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(field, contract)
         self.assertIn("delegation is always none", contract)
-        return_route = next(line for line in contract.splitlines() if line.startswith("- **Return route:**"))
+        route_lines = [line for line in contract.splitlines() if line.startswith("- **") and "route:**" in line]
+        self.assertEqual(len(route_lines), 3)
+        native_route = next(line for line in route_lines if line.startswith("- **Native subagent route:**"))
+        ordinary_route = next(line for line in route_lines if line.startswith("- **Separately authorized ordinary-task route:**"))
+        self.assertIn("**Return route:** include exactly one applicable route below; never copy fields from the other route.", contract)
+        for callback_handle in ("threadId", "hostId", "send_message_to_thread"):
+            self.assertNotIn(callback_handle, native_route)
         for anchor in (
+            "worker or reviewer returns only to its immediate parent through native collaboration/results",
+            "only after a separate explicit operator request",
+            "Verify the exact recipient and authorized callback purpose",
             "exact originating coordinator `threadId` and `hostId` when required",
             "explicit native `send_message_to_thread` action",
-            "accepted blocker/terminal sends establish delivery",
+            "Accepted blocker/terminal sends establish delivery",
             "rejection or unavailability remains local delivery failure",
         ):
-            self.assertIn(anchor, return_route)
+            self.assertIn(anchor, native_route if anchor.startswith("worker") else ordinary_route)
+        self.assertNotIn("sender, recipient, and purpose", ordinary_route)
         lifecycle = text.split("## Worker Lifecycle And Continuity\n", 1)[1].split("## Compact Worker Contract", 1)[0]
         for anchor in (
             "Route dependencies through the coordinator",
@@ -550,6 +568,9 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "The project orchestrator must not spawn or duplicate the feature owner's implementation workers or reviewer directly.",
             "Independent reviewers receive fresh context with no exception.",
             "Keep every worker and reviewer a leaf and keep their identities separate.",
+            "- **Creation profile:** model and effort selected while creating a new worker or reviewer identity.",
+            "- **Native subagent route:** worker or reviewer returns only to its immediate parent through native collaboration/results;",
+            "The native reviewer uses the immediate-parent route above and never falls back to a cross-task route.",
             "description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
             "Defaults are native Luna/xhigh workers, coordinator self-review, and requested reviewer native Sol/high.",
             "This lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",
@@ -639,6 +660,19 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "require explicit manual-supervision acceptance",
         ):
             self.assertIn(anchor, supervision)
+
+    def test_global_thread_policy_protects_settings_and_parent_routes(self) -> None:
+        text = self.read("codex/AGENTS.md")
+        thread_policy = text.split("## Preserve Thread Model\n", 1)[1]
+        for anchor in (
+            "omit both `model` and `thinking` fields entirely",
+            "explicit user authorization naming the exact target and requested values",
+            "explicit user authorization naming the sender, recipient, and purpose",
+            "Knowing task IDs or inheriting a callback does not grant route authority",
+            "If parent delivery fails, return natively and never fall back to a cross-task route",
+            "do not restore settings without authorization",
+        ):
+            self.assertIn(anchor, thread_policy)
 
     def test_orchestrate_feature_reuse_identity_and_reporting_are_truthful(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
@@ -896,7 +930,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         outer = self.read("codex/skills/orchestrate-feature/SKILL.md")
         generic = self.read("codex/skills/orchestrate-workers/SKILL.md")
         protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
-        self.assertLess(len(outer.split()), 2150)
+        # The ceiling allows the launch contract to state exact callback identity and parent-owned routing safeguards.
+        self.assertLess(len(outer.split()), 2250)
         self.assertLess(len(generic.split()), 2100)
         self.assertLess(len(protocol.split()), 625)
         for text in (outer,):

@@ -4,6 +4,12 @@
 
 This specification implements, hardens, and generalizes the product contract in `docs/orchestrate-feature-prd.md`. T-36 owns the initial outer skill, T-38 owns callback delivery and fork discipline, T-39 owns generic naming, role profiles, inner-lens extraction, compatibility, and migration, T-41 owns operator-only reviewer activation, and T-42 owns feature-owner delegation. The PRD controls product behavior; this document controls the bounded repository change. When they conflict, stop and correct the documents before implementation.
 
+## Task Messaging Boundary
+
+Model and effort are creation-profile fields for new tasks or native identities. Messages to existing tasks preserve the configured recipient settings and omit both `model` and `thinking` entirely, including null or presumed-current values; a sender profile is text metadata only when relevant. An existing-task settings change is a separate operation requiring explicit operator authorization naming the exact target and requested values. Creation profiles, inherited context, delegated instructions, and callback permission never authorize that operation.
+
+Native workers and reviewers communicate only with their immediate parent through native collaboration or result tools by default; they do not message ordinary tasks, siblings, or higher orchestrators. A route exception requires explicit operator authorization naming the sender, recipient, and purpose, and route authorization never includes settings changes. The feature owner alone owns the project-orchestrator callback and mediates internal native reports. Before an ordinary existing-task message, verify the recipient, route authority, and absence of both settings fields. If an override is supplied accidentally, report the exact target, supplied fields and values, and observed tool outcome without unauthorized restoration.
+
 ## Source Ownership
 
 Canonical Codex-only outer skill after T-39:
@@ -148,13 +154,13 @@ Accept only explicit, unambiguous natural-language overrides tied to the current
 - An omitted model or effort inherits that enabled role's default; it never inherits another role's override. Reviewer controls remain unresolved while review is disabled.
 - An override never waives a governing driver/project requirement for a particular role profile; conflict stops at readiness.
 
-Retain the complete map with `disabled`, `default`, or `operator override` provenance internally. Disclose it before dispatch only when an override, unresolved or unobservable control, degraded supervision, changed topology/authority/shared-state ownership or conflict, or other decision-bearing variation could change the launch. Feature-detect exact model, effort, route, and context controls only for enabled roles. If any selected exact value cannot be set or validated, stop. Never silently substitute, normalize to a different profile, raise/lower a selected profile, or claim post-creation readback when only request validation exists. Task size, importance, risk, ambiguity, missing oracles, cross-worker boundaries, agent judgment, reviewer availability, or a generic driver preference never activates review; a driver requirement without explicit operator authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance.
+Retain the complete map with `disabled`, `default`, or `operator override` provenance internally. Disclose it before dispatch only when an override, unresolved or unobservable control, degraded supervision, changed topology/authority/shared-state ownership or conflict, or other decision-bearing variation could change the launch. Feature-detect exact model, effort, route, and context controls only for enabled roles. If any selected exact value cannot be set or validated, stop. Never silently substitute, normalize to a different profile, raise/lower a selected profile, or claim post-creation readback when only request validation exists. Task size, importance, risk, ambiguity, missing oracles, cross-worker boundaries, agent judgment, reviewer availability, or a generic driver preference never activates review; a driver requirement without explicit operator authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance. The resolved model and effort are creation-profile fields; existing-task messages preserve them by omitting both `model` and `thinking`, including null or presumed-current values.
 
 ## New Feature Dispatch
 
 1. Resolve callback identity/action only when callback is selected; otherwise resolve the selected delivery mechanism and target without fabricating an origin route.
 2. Use native `create_thread` with fresh context, never a native subagent spawn or `fork_thread`.
-3. Select the exact resolved feature-owner model and effort rather than the old hard-coded owner profile.
+3. Select the exact resolved feature-owner model and effort as the new task's creation profile rather than the old hard-coded owner profile.
 4. Resolve saved project/environment and exact existing branch/ref or intended working-tree state under user/project policy. Personal OS-managed repos use the existing checkout without explicit worktree authority.
 5. Give the task a concise project-and-feature title.
 6. Send only the complete Feature Owner Launch Contract. Do not inherit or paste parent history.
@@ -191,7 +197,7 @@ For each shared mutable resource, name exactly one writer at a time—the owner 
 
 Feature-owner reuse requires an exact known idle identity plus compatible feature, project, repository/checkout/branch, trust, authority, role, feature-owner model/effort, inner-lens contract, and acceptance boundary. A different owner profile requires a new task; do not override an existing task on follow-up.
 
-Before reuse, inspect current state and revalidate all role profiles and delivery fields. Never send a reset or concurrent assignment to a running feature owner. Send an idle compatible owner a full reset with prior disposition, allowed carry-over facts, invalidated scope/authority/decisions/assumptions/evidence/claims, and complete new objective, interfaces, success, verification, stop, notification, role-map, context, and return contracts. Old origin identity, callback action, wait cursor, event set, or profiles never carry implicitly.
+Before reuse, inspect current state and revalidate all role profiles and delivery fields. Never send a reset or concurrent assignment to a running feature owner. Send an idle compatible owner a full reset with prior disposition, allowed carry-over facts, invalidated scope/authority/decisions/assumptions/evidence/claims, and complete new objective, interfaces, success, verification, stop, notification, role-map, context, and return contracts. Every existing-task message omits both `model` and `thinking` entirely and preserves the configured recipient profile. Old origin identity, callback action, wait cursor, event set, or profiles never carry implicitly.
 
 The generic inner lens keys worker/reviewer reuse by exact role, project, checkout, trust, authority, ownership, route, model, and effort. A profile change triggers a fresh identity under existing recycle rules. Reuse compatible idle identities with assignment resets; do not recycle for elapsed time, compaction, assignment count, or ordinary correction. Keep worker and reviewer identities separate.
 
@@ -204,7 +210,7 @@ Keep the generic behavioral body in `orchestrate-workers`, preserving and genera
 - Shared-checkout ownership, one Git/shared-state owner, and no worktree without operator approval.
 - No parent turns for new workers; exceptional bounded inherited-turn slice for one named undistillable fact; full-history prohibition.
 - Dispatch readiness, compact worker contract, worker verification/evidence rules, leaf-only topology, dependency routing, classification, assignment reset, reuse/recycle, and acceptance boundary.
-- Sparse blocker/final return to the current coordinator through native subagent results or exact callback for the separately requested ordinary task route.
+- Sparse blocker/final return to the current coordinator through the native immediate-parent result route, or through exact callback only for the separately requested ordinary task route.
 - Independent review disabled by default and activated only by an explicit operator request for the resolved task; no task characteristic, evidence gap, driver preference, or agent judgment supplies authorization.
 - Fresh reviewer context without history exception, separate reviewer identity, and generic reviewer protocol.
 
@@ -212,7 +218,7 @@ Defaults for direct `orchestrate-workers` invocation are native Luna/xhigh imple
 
 The current coordinator may use any product-exposed profile; the lens preserves it and does not infer that coordinator and workers/reviewer must share a model. The enabled reviewer profile constrains only the independent reviewer. Activation and independence remain behavioral contracts, not claims derived from a model name.
 
-The optional ordinary implementation-task route remains available only on a separate explicit operator request. It uses the resolved worker profile and requires the exact originating coordinator `threadId` and `hostId` when required plus the explicit native `send_message_to_thread` action. An accepted blocker/terminal send establishes delivery; rejection or unavailability remains local delivery failure. The route returns immediately without polling and never changes reviewer routing. `orchestrate-feature` forbids this inner route because its owner is already an ordinary task.
+The optional ordinary implementation-task route remains available only on a separate explicit operator request. It uses the resolved worker creation profile, verifies the exact recipient, authorized callback purpose, and absence of both `model` and `thinking`, and requires the exact originating coordinator `threadId` and `hostId` when required plus the explicit native `send_message_to_thread` action. An accepted blocker/terminal send establishes delivery; rejection or unavailability remains local delivery failure. The route returns immediately without polling and never changes reviewer routing. `orchestrate-feature` forbids this inner route because its owner is already an ordinary task.
 
 Keep the reviewer protocol at `orchestrate-workers/references/independent-reviewer-protocol.md` and load it only after explicit operator activation; preserve fresh context, read-only default, acceptance target, findings-first report, correction loop, and non-implementation boundary.
 
@@ -220,7 +226,7 @@ Keep the reviewer protocol at `orchestrate-workers/references/independent-review
 
 Preserve the reviewed T-38 route matrix in `orchestrate-feature`:
 
-- Callback default: exact origin plus native `send_message_to_thread`; accepted terminal send establishes delivery.
+- Callback default: the feature owner alone uses exact origin plus native `send_message_to_thread`; verify recipient, route authority, and absence of both `model` and `thinking` before sending. An accepted terminal send establishes delivery.
 - Practical bounded active waiting: native attention state for gates/blockers and terminal result for final handoff while attached; observation establishes delivery, timeout does not.
 - Product-validated replacement: named mechanism/target with the same event floor.
 - Explicit manual supervision: same native attention/terminal events for later inspection, no automatic-delivery claim, unobserved until inspection.
@@ -264,6 +270,7 @@ Focused tests must fail for these regressions:
 13. Each shared mutable resource has exactly one writer at a time within already-granted authority, retained by the owner or one worker; every other writer, including the owner, is serialized and the owner evaluates the resulting evidence.
 14. Substantial direct owner execution records a no-boundary reason in the in-task plan or worker-dispatch context and existing final handoff `decisions/divergence`, without a new file, ledger, side channel, or notification event; trivial glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed.
 15. The owner uses `orchestrate-workers` to create native leaf implementation workers, never a nested feature owner or ordinary implementation-task route; sequential assignments may reuse one compatible worker, while parallel workers require genuinely non-overlapping ownership lanes and tests do not require a worker count.
+16. Existing-task messages omit both `model` and `thinking` entirely, target-specific settings changes require explicit operator authorization, native workers and reviewers return only through their immediate parent by default, and any parent-bypass route exception names sender, recipient, and purpose without cross-task fallback after parent delivery failure.
 
 Assert both orchestration skills remain Codex-only, UI policies are explicit-only, no scripts/custom agents/Claude layer/controller/watcher/registry is added, and progressive-disclosure ceilings remain focused. Phrase/source assertions are appropriate because these shipped instruction assets are the contract, but tests should section-scope route/profile clauses so contradictory text cannot pass merely by coexisting.
 

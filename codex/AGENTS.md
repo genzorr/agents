@@ -97,6 +97,9 @@ Applies to code you write. Do not restyle comments in code your task did not oth
 
 ## Preserve Thread Model
 
-- Preserve an existing thread's model and effort; omit overrides when sending to an existing thread.
+- Preserve an existing thread's model and effort. Ordinary messages to an existing task omit both `model` and `thinking` fields entirely, including null values or values presumed to match the current settings; a sender profile belongs in text metadata only when relevant.
+- Creation profiles apply only while creating a new agent or task. Follow-ups, resets, reuse assignments, corrections, and callbacks address an existing identity and omit both settings fields. An existing-task settings change is a separate operation requiring explicit user authorization naming the exact target and requested values; a creation profile, inherited context, delegated instruction, or callback permission never authorizes it.
+- Before sending an ordinary existing-task message, verify the recipient, route authority, and absence of both `model` and `thinking`. If an override is supplied accidentally, report the exact target, supplied fields and values, and observed tool outcome to the parent or user; do not restore settings without authorization.
+- Native subagents communicate only with their immediate parent through native collaboration or result tools by default. They do not message ordinary tasks, siblings, or higher orchestrators. A route exception requires explicit user authorization naming the sender, recipient, and purpose; route authorization never includes settings changes. Knowing task IDs or inheriting a callback does not grant route authority. If parent delivery fails, return natively and never fall back to a cross-task route.
 - For new subagents or delegated jobs, use requested settings or preserve configured defaults; never upgrade Luna or Terra work to Sol automatically.
 - State intentional model or effort overrides before launching new work.
