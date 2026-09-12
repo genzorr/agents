@@ -2,7 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { esc, renderDefinitions, textUnits } from '../shared/utils.mjs';
 import { animateAttr, loadDiagram, writeDiagram, svgRootAttrs, svgAccessibleContent } from '../shared/cli.mjs';
-import { componentFill, arrowClassMap, rectsOverlap, asArray, isFinitePoint } from '../shared/geometry.mjs';
+import { componentFill, arrowClassMap, rectsOverlap, asArray, isFinitePoint, routePointsAttr } from '../shared/geometry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { diagram: sequence, template, outPath } = loadDiagram({
@@ -174,7 +174,7 @@ function renderActivation(activation) {
         <rect x="${x}" y="${activation.from}" width="10" height="${height}" rx="3" class="${fill}" stroke-width="1"/>`;
 }
 
-function messageLabel(message, x1, x2) {
+function messageLabel(message, x1, x2, index) {
   const center = (x1 + x2) / 2;
   const y = message.y - 10;
   const labelW = Math.max(34, textUnits(message.label) * 5.2 + 12);
@@ -186,7 +186,7 @@ function messageLabel(message, x1, x2) {
         ? 't-muted'
         : 't-backend';
   return `        <rect x="${center - labelW / 2}" y="${y - 10}" width="${labelW}" height="${layout.labelH}" rx="3" class="c-mask"/>
-        <text x="${center}" y="${y}" class="${accent}" font-size="9" text-anchor="middle">${esc(message.label)}</text>`;
+        <text x="${center}" y="${y}" class="${accent}" data-edge-label="${index}" font-size="9" text-anchor="middle">${esc(message.label)}</text>`;
 }
 
 function renderMessage(message, index) {
@@ -199,10 +199,11 @@ function renderMessage(message, index) {
   const strokeWidth = message.variant === 'emphasis' ? 1.8 : 1.4;
   const dash = message.variant === 'return' ? ' stroke-dasharray="3,5"' : '';
   const note = message.note
-    ? `\n        <text x="${Math.min(start, end) + 12}" y="${message.y + 18}" class="t-dim" font-size="7">${esc(message.note)}</text>`
+    ? `\n        <text x="${Math.min(start, end) + 12}" y="${message.y + 18}" class="t-dim" data-edge-label="${index}" font-size="7">${esc(message.note)}</text>`
     : '';
-  return `        <path d="M ${start} ${message.y} L ${end} ${message.y}" class="${cls}"${animateAttr(sequence.meta, 'edge', index)} stroke-width="${strokeWidth}"${dash} marker-end="url(#${marker})"/>
-${messageLabel(message, start, end)}${note}`;
+  const points = [[start, message.y], [end, message.y]];
+  return `        <path d="M ${start} ${message.y} L ${end} ${message.y}" class="${cls}" data-edge-index="${index}" data-route-points="${routePointsAttr(points)}"${animateAttr(sequence.meta, 'edge', index)} stroke-width="${strokeWidth}"${dash} marker-end="url(#${marker})"/>
+${messageLabel(message, start, end, index)}${note}`;
 }
 
 function renderLegend() {

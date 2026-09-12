@@ -65,6 +65,25 @@ if (svgMatches.length === 1) {
     diagonal.length === 0,
     diagonal.map((arrow) => `${arrow.kind} ${arrow.index}: ${arrow.raw}`),
   );
+  const diagramArrows = arrows.filter((arrow) => arrow.edgeIndex !== null && arrow.segments.length > 0);
+  const fanout = collectSharedEdgeFanout(diagramArrows);
+  addCheck(
+    'shared_edge_fanout',
+    fanout.length === 0,
+    fanout.map((hit) => `edges ${hit.left.edgeIndex} and ${hit.right.edgeIndex} share ${Math.round(hit.overlap)}px before diverging`),
+  );
+  const overlaps = collectEdgeOverlaps(diagramArrows);
+  addCheck(
+    'edge_overlap',
+    overlaps.length === 0,
+    overlaps.map((hit) => `edges ${hit.left.edgeIndex} and ${hit.right.edgeIndex} overlap by ${Math.round(hit.overlap)}px`),
+  );
+  const labelCollisions = collectLabelPathCollisions(collectEdgeLabels(beforeLegend), diagramArrows);
+  addCheck(
+    'label_path_clearance',
+    labelCollisions.length === 0,
+    labelCollisions.map((hit) => `edge ${hit.arrow.edgeIndex} crosses label "${hit.label.label}" for edge ${hit.label.edgeIndex}`),
+  );
 
   if (legendStart >= 0) {
     const legendFragment = svg.slice(legendStart);
@@ -93,13 +112,116 @@ function collectArrows(fragment) {
     if (!/\bclass="[^"]*\ba-(?:default|emphasis|security|dashed)\b/.test(raw)) continue;
     if (!/\bmarker-end=/.test(raw)) continue;
     const attrs = parseAttrs(raw);
-    const segments = tag[1].toLowerCase() === 'line'
-      ? lineSegments(attrs)
-      : pathSegments(attrs.d || '');
-    arrows.push({ kind: tag[1].toLowerCase(), index: index += 1, raw, segments });
+    const declaredSegments = routeSegments(attrs['data-route-points'] || '');
+    const segments = declaredSegments.length > 0
+      ? declaredSegments
+      : tag[1].toLowerCase() === 'line'
+        ? lineSegments(attrs)
+        : pathSegments(attrs.d || '');
+    arrows.push({
+      kind: tag[1].toLowerCase(),
+      index: index += 1,
+      edgeIndex: attrs['data-edge-index'] ?? null,
+      raw,
+      segments,
+    });
   }
 
   return arrows;
+}
+
+function routeSegments(value) {
+  const points = value.split(/\s+/).filter(Boolean).map((token) => token.split(',').map(Number));
+  if (points.length < 2 || points.some((point) => !isPoint(point))) return [];
+  const segments = [];
+  for (let index = 1; index < points.length; index += 1) {
+    segments.push({ start: points[index - 1], end: points[index] });
+  }
+  return segments;
+}
+
+function collectSharedEdgeFanout(arrows) {
+  const hits = [];
+  for (let leftIndex = 0; leftIndex < arrows.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < arrows.length; rightIndex += 1) {
+      const left = arrows[leftIndex];
+      const right = arrows[rightIndex];
+      const startsTogether = pointsEqual(left.segments[0].start, right.segments[0].start);
+      const endsTogether = pointsEqual(left.segments.at(-1).end, right.segments.at(-1).end);
+      const startOverlap = startsTogether ? collinearOverlapLength(left.segments[0], right.segments[0]) : 0;
+      const endOverlap = endsTogether ? collinearOverlapLength(left.segments.at(-1), right.segments.at(-1)) : 0;
+      const overlap = Math.max(startOverlap, endOverlap);
+      if (overlap > 0.5) hits.push({ left, right, overlap });
+    }
+  }
+  return hits;
+}
+
+function collectEdgeOverlaps(arrows) {
+  const hits = [];
+  for (let leftIndex = 0; leftIndex < arrows.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < arrows.length; rightIndex += 1) {
+      const left = arrows[leftIndex];
+      const right = arrows[rightIndex];
+      let longest = 0;
+      for (const leftSegment of left.segments) {
+        for (const rightSegment of right.segments) {
+          longest = Math.max(longest, collinearOverlapLength(leftSegment, rightSegment));
+        }
+      }
+      if (longest > 0.5) hits.push({ left, right, overlap: longest });
+    }
+  }
+  return hits;
+}
+
+function collectEdgeLabels(fragment) {
+  const labels = [];
+  for (const match of fragment.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/gi)) {
+    const attrs = parseAttrs(match[1]);
+    if (attrs['data-edge-label'] === undefined) continue;
+    const box = textBox(attrs, stripTags(match[2]).trim());
+    if (box) labels.push({ ...box, edgeIndex: attrs['data-edge-label'] });
+  }
+  return labels;
+}
+
+function collectLabelPathCollisions(labels, arrows) {
+  const hits = [];
+  for (const label of labels) {
+    for (const arrow of arrows) {
+      if (arrow.edgeIndex === label.edgeIndex) continue;
+      if (arrow.segments.some((segment) => segmentIntersectsBox(segment, padBox(label, 3)))) {
+        hits.push({ label, arrow });
+      }
+    }
+  }
+  return hits;
+}
+
+function collinearOverlapLength(left, right) {
+  const dx = left.end[0] - left.start[0];
+  const dy = left.end[1] - left.start[1];
+  const length = Math.hypot(dx, dy);
+  if (length < 1e-9) return 0;
+  if (Math.abs(cross(dx, dy, right.start[0] - left.start[0], right.start[1] - left.start[1])) > 1e-7) return 0;
+  if (Math.abs(cross(dx, dy, right.end[0] - left.start[0], right.end[1] - left.start[1])) > 1e-7) return 0;
+  const axis = Math.abs(dx) >= Math.abs(dy) ? 0 : 1;
+  const leftMin = Math.min(left.start[axis], left.end[axis]);
+  const leftMax = Math.max(left.start[axis], left.end[axis]);
+  const rightMin = Math.min(right.start[axis], right.end[axis]);
+  const rightMax = Math.max(right.start[axis], right.end[axis]);
+  const axisOverlap = Math.max(0, Math.min(leftMax, rightMax) - Math.max(leftMin, rightMin));
+  const axisLength = Math.abs(axis === 0 ? dx : dy);
+  return axisLength < 1e-9 ? 0 : axisOverlap * (length / axisLength);
+}
+
+function cross(ax, ay, bx, by) {
+  return ax * by - ay * bx;
+}
+
+function pointsEqual(left, right) {
+  return Math.abs(left[0] - right[0]) < 1e-7 && Math.abs(left[1] - right[1]) < 1e-7;
 }
 
 function lineSegments(attrs) {

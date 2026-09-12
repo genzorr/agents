@@ -35,6 +35,59 @@ test('cli: render writes a diagram html file', () => {
   assert.match(fs.readFileSync(out, 'utf8'), /Agent Tool Call Workflow/);
 });
 
+test('cli: editorial presentation is static, light, self-contained, and unbranded by default', () => {
+  const out = path.join(tmp, 'workflow-editorial.html');
+  const input = path.join(skillRoot, 'examples/agent-tool-call.workflow.json');
+  const result = run(['render', 'workflow', input, out]);
+  assert.equal(result.status, 0, result.stderr);
+  const html = fs.readFileSync(out, 'utf8');
+  assert.match(html, /data-theme="light" data-presentation="editorial"/);
+  assert.doesNotMatch(html, /<script\b|class="toolbar"|Built with Archify|fonts\.googleapis\.com/);
+  assert.match(html, /font-family: Georgia/);
+  assert.match(html, /--accent: #2f6f62/);
+  assert.match(html, /--grid: transparent/);
+});
+
+test('cli: interactive presentation keeps editorial styling and opt-in theme/export controls', () => {
+  const out = path.join(tmp, 'workflow-interactive.html');
+  const input = path.join(skillRoot, 'examples/agent-tool-call.workflow.json');
+  const result = run(['render', 'workflow', input, out, '--presentation', 'interactive']);
+  assert.equal(result.status, 0, result.stderr);
+  const html = fs.readFileSync(out, 'utf8');
+  assert.match(html, /data-presentation="interactive"/);
+  assert.match(html, /<script\b/);
+  assert.match(html, /class="toolbar"/);
+  assert.match(html, /Download SVG/);
+  assert.doesNotMatch(html, /Built with Archify|fonts\.googleapis\.com/);
+});
+
+test('cli: classic presentation preserves the prior viewer and branding', () => {
+  const out = path.join(tmp, 'workflow-classic.html');
+  const input = path.join(skillRoot, 'examples/agent-tool-call.workflow.json');
+  const result = run(['render', 'workflow', input, out, '--presentation', 'classic']);
+  assert.equal(result.status, 0, result.stderr);
+  const html = fs.readFileSync(out, 'utf8');
+  assert.match(html, /data-theme="dark" data-presentation="classic"/);
+  assert.match(html, /<script\b/);
+  assert.match(html, /class="toolbar"/);
+  assert.match(html, /Built with Archify/);
+  assert.match(html, /#020617/);
+  assert.match(html, /archify-classic-pulse/);
+  assert.match(html, /clone\.setAttribute\('data-presentation', presentation\)/);
+  assert.match(html, /svg\[data-presentation="classic"\]/);
+  assert.match(html, /html\[data-presentation="classic"\]\[data-theme="dark"\],[\s\S]*--text: #0f172a/);
+});
+
+test('cli: presentation selector is validated and applies only to HTML output', () => {
+  const input = path.join(skillRoot, 'examples/agent-tool-call.workflow.json');
+  const invalid = run(['render', 'workflow', input, '--presentation', 'noir']);
+  assert.notEqual(invalid.status, 0);
+  assert.match(invalid.stderr, /Unknown presentation "noir"/);
+  const d2Only = run(['render', 'workflow', input, '--format', 'd2', '--presentation', 'editorial']);
+  assert.notEqual(d2Only.status, 0);
+  assert.match(d2Only.stderr, /applies only to HTML output/);
+});
+
 test('cli: all five schemas accept meta.description and wire it into accessible SVG output', () => {
   const cases = [
     ['architecture', 'web-app.architecture.json'],
@@ -73,7 +126,7 @@ test('cli: validate emits structured json without keeping html output', () => {
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.ok, true);
   assert.equal(parsed.type, 'workflow');
-  assert.equal(parsed.checks.length, 5);
+  assert.equal(parsed.checks.length, 8);
   assert.deepEqual(new Set(fs.readdirSync(tmp)), before);
 });
 

@@ -15,7 +15,7 @@ const TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'life
 
 function usage() {
   return `Usage:
-  archify render <type> <input.json> [output.html] [--format html|d2|html+d2]
+  archify render <type> <input.json> [output.html] [--format html|d2|html+d2] [--presentation editorial|interactive|classic]
   archify validate <type> <input.json> [--json]
   archify check <output.html>
   archify examples
@@ -41,6 +41,7 @@ function runNode(args, options = {}) {
   return spawnSync(process.execPath, args, {
     cwd: options.cwd || process.cwd(),
     encoding: 'utf8',
+    env: options.env || process.env,
     stdio: options.stdio || 'inherit',
   });
 }
@@ -51,13 +52,37 @@ function exitFrom(result) {
 }
 
 function parseRenderArgs(args) {
-  const formatIndex = args.findIndex((arg) => arg === '--format');
-  const format = formatIndex >= 0 ? args[formatIndex + 1] : 'html';
-  const positional = args.filter((arg, index) => formatIndex < 0 || (index !== formatIndex && index !== formatIndex + 1));
+  let format = 'html';
+  let presentation = 'editorial';
+  let sawFormat = false;
+  let sawPresentation = false;
+  const positional = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '--format' || arg === '--presentation') {
+      const value = args[index + 1];
+      if (!value || value.startsWith('--')) fail(usage());
+      if (arg === '--format') {
+        if (sawFormat) fail(usage());
+        format = value;
+        sawFormat = true;
+      } else {
+        if (sawPresentation) fail(usage());
+        presentation = value;
+        sawPresentation = true;
+      }
+      index += 1;
+      continue;
+    }
+    if (arg.startsWith('--')) fail(`Unknown render option "${arg}".\n\n${usage()}`);
+    positional.push(arg);
+  }
   if (!['html', 'd2', 'html+d2'].includes(format)) fail(`Unknown format "${format}". Expected one of: html, d2, html+d2`);
+  if (!['editorial', 'interactive', 'classic'].includes(presentation)) fail(`Unknown presentation "${presentation}". Expected one of: editorial, interactive, classic`);
   const [type, input, output] = positional;
-  if (!type || !input || positional.length > 3 || (formatIndex >= 0 && !args[formatIndex + 1])) fail(usage());
-  return { type, input, output, format };
+  if (!type || !input || positional.length > 3) fail(usage());
+  if (format === 'd2' && sawPresentation) fail('The --presentation selector applies only to HTML output.');
+  return { type, input, output, format, presentation };
 }
 
 function artifactPaths(type, input, output, format) {
@@ -118,10 +143,11 @@ function publishFiles(files) {
 }
 
 function commandRender(args) {
-  const { type, input, output, format } = parseRenderArgs(args);
+  const { type, input, output, format, presentation } = parseRenderArgs(args);
   const paths = artifactPaths(type, input, output, format);
+  const renderEnv = { ...process.env, ARCHIFY_PRESENTATION: presentation };
   if (format === 'html') {
-    const result = runNode([rendererPath(type), input, paths.html]);
+    const result = runNode([rendererPath(type), input, paths.html], { env: renderEnv });
     if (result.status !== 0) exitFrom(result);
     return;
   }
@@ -139,7 +165,7 @@ function commandRender(args) {
     return;
   }
   const htmlTmp = path.join(os.tmpdir(), `archify-html-${process.pid}-${Math.random().toString(16).slice(2)}.html`);
-  const render = runNode([rendererPath(type), input, htmlTmp], { stdio: 'pipe' });
+  const render = runNode([rendererPath(type), input, htmlTmp], { stdio: 'pipe', env: renderEnv });
   if (render.status !== 0) {
     if (render.stderr) process.stderr.write(render.stderr);
     try { fs.unlinkSync(htmlTmp); } catch {}
