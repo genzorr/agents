@@ -71,6 +71,44 @@ test('render output check: rejects arrows crossing legend text', () => {
   assert.match(check.details[0], /Legend/);
 });
 
+test('render output check: rejects shared-edge fanout', () => {
+  const { code, result } = checkHtml('shared-fanout', `
+    <path d="M 20 20 L 100 20 L 100 60" class="a-default" data-edge-index="0" data-route-points="20,20 100,20 100,60" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+    <path d="M 20 20 L 100 20 L 140 20" class="a-default" data-edge-index="1" data-route-points="20,20 100,20 140,20" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+  `);
+  assert.notEqual(code, 0);
+  assert.equal(result.checks.find((item) => item.name === 'shared_edge_fanout').ok, false);
+});
+
+test('render output check: rejects overlapping edge segments without a shared endpoint', () => {
+  const { code, result } = checkHtml('edge-overlap', `
+    <path d="M 20 40 L 140 40" class="a-default" data-edge-index="0" data-route-points="20,40 140,40" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+    <path d="M 60 40 L 180 40" class="a-default" data-edge-index="1" data-route-points="60,40 180,40" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+  `);
+  assert.notEqual(code, 0);
+  assert.equal(result.checks.find((item) => item.name === 'shared_edge_fanout').ok, true);
+  assert.equal(result.checks.find((item) => item.name === 'edge_overlap').ok, false);
+});
+
+test('render output check: rejects another edge crossing a connector label', () => {
+  const { code, result } = checkHtml('label-path-clearance', `
+    <path d="M 20 40 L 140 40" class="a-default" data-edge-index="0" data-route-points="20,40 140,40" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+    <text x="80" y="30" class="t-muted" data-edge-label="0" font-size="9" text-anchor="middle">request</text>
+    <path d="M 80 5 L 80 75" class="a-default" data-edge-index="1" data-route-points="80,5 80,75" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+  `);
+  assert.notEqual(code, 0);
+  assert.equal(result.checks.find((item) => item.name === 'label_path_clearance').ok, false);
+});
+
+test('render output check: ignores the labelled edge behind its own mask', () => {
+  const { code, result } = checkHtml('own-label-mask', `
+    <path d="M 20 40 L 140 40" class="a-default" data-edge-index="0" data-route-points="20,40 140,40" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+    <text x="80" y="30" class="t-muted" data-edge-label="0" font-size="9" text-anchor="middle">request</text>
+  `);
+  assert.equal(code, 0);
+  assert.equal(result.checks.find((item) => item.name === 'label_path_clearance').ok, true);
+});
+
 test('render output check: ignores unmarked sequence lifelines near legend', () => {
   const { code, result } = checkHtml('lifeline-near-legend', `
     <path d="M 60 20 L 60 126" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>

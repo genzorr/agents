@@ -43,6 +43,8 @@ ${card.items.map((item) => `          <li>&bull; ${esc(item)}</li>`).join('\n')}
 
 const SVG_SLOT_RE = /      <!-- ARCHIFY:SVG_SLOT_START -->[\s\S]*?      <!-- ARCHIFY:SVG_SLOT_END -->/;
 const CARDS_SLOT_RE = /    <!-- ARCHIFY:CARDS_SLOT_START -->[\s\S]*?    <!-- ARCHIFY:CARDS_SLOT_END -->/;
+const INTERACTIVE_BLOCK_RE = /\s*<!-- ARCHIFY:INTERACTIVE_(?:HEAD|BODY|SCRIPT)_START -->[\s\S]*?<!-- ARCHIFY:INTERACTIVE_(?:HEAD|BODY|SCRIPT)_END -->\s*/g;
+const INTERACTIVE_MARKER_RE = /\s*<!-- ARCHIFY:INTERACTIVE_(?:HEAD|BODY|SCRIPT)_(?:START|END) -->\s*/g;
 
 const TEMPLATE_PLACEHOLDERS = [
   '<title>[PROJECT NAME] Architecture Diagram</title>',
@@ -50,6 +52,16 @@ const TEMPLATE_PLACEHOLDERS = [
   '<p class="subtitle">[Subtitle description]</p>',
   '[Project Name] &bull; [Additional metadata]',
 ];
+
+export function preparePresentation(template, presentation) {
+  const selected = presentation === 'editorial'
+    ? template.replace(INTERACTIVE_BLOCK_RE, '\n')
+    : template.replace(INTERACTIVE_MARKER_RE, '\n');
+  const themed = presentation === 'classic'
+    ? selected.replace('data-theme="light" data-presentation="editorial"', 'data-theme="dark" data-presentation="classic"')
+    : selected.replace('data-presentation="editorial"', `data-presentation="${presentation}"`);
+  return themed;
+}
 
 // `footer` is injected as raw HTML so callers can embed <kbd> hints;
 // pass only trusted strings here, never user input.

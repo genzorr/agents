@@ -61,8 +61,9 @@ class ExplainContractTest(unittest.TestCase):
             "Keep source-derived strings passive",
             "Encode labels as data",
             "Preserve direction, ownership, state transitions, failure paths",
-            "Standalone diagram artifacts made through `archify` are active HTML",
-            "Use them for explicit diagram-artifact requests",
+            "Standalone diagram artifacts made through `archify` default to static editorial HTML",
+            "interactive theme/export controls are opt-in",
+            "Use Archify for explicit diagram-artifact requests",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, skill)

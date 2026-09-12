@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { applyTemplate, renderCards, esc } from './utils.mjs';
+import { applyTemplate, preparePresentation, renderCards, esc } from './utils.mjs';
 import { validateSchema } from './validator.mjs';
 
 // Common CLI head: node render-<type>.mjs [input.json] [output.html]
@@ -9,7 +9,12 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample }) {
   const inputPath = path.resolve(process.argv[2] || path.join(skillRoot, 'examples', defaultExample));
   const diagram = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
   validateSchema(diagramType, diagram);
-  const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
+  const presentation = process.env.ARCHIFY_PRESENTATION || 'editorial';
+  if (!['editorial', 'interactive', 'classic'].includes(presentation)) {
+    throw new Error(`Unknown Archify presentation "${presentation}". Expected editorial, interactive, or classic.`);
+  }
+  const sourceTemplate = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
+  const template = preparePresentation(sourceTemplate, presentation);
   // Optional chaining: in degraded mode (no ajv) malformed input must still
   // reach the renderer's friendly layout checks instead of crashing here.
   const outPath = path.resolve(process.cwd(), process.argv[3] || diagram.meta?.output || `${diagramType}.html`);
@@ -19,11 +24,18 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample }) {
 // Common CLI tail: fill the template and write the standalone HTML file.
 // The keyboard hint is screen-only — it means nothing on paper.
 export function writeDiagram({ outPath, template, meta, footerLabel, svg, cards }) {
+  const presentation = template.match(/data-presentation="([^"]+)"/)?.[1] || 'classic';
+  const interactionHint = presentation === 'interactive'
+    ? '<span class="no-print"> &bull; Press <kbd>T</kbd> for theme and <kbd>E</kbd> for export</span>'
+    : '';
+  const footer = presentation === 'classic'
+    ? `${footerLabel} &bull; Built with Archify<span class="no-print"> &bull; Press <kbd>T</kbd> for theme and <kbd>E</kbd> for export</span>`
+    : `${footerLabel}${interactionHint}`;
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, applyTemplate(template, {
     title: meta.title,
     subtitle: meta.subtitle,
-    footer: `${footerLabel} &bull; Built with Archify<span class="no-print"> &bull; Press <kbd>T</kbd> for theme and <kbd>E</kbd> for export</span>`,
+    footer,
     svg,
     cards: renderCards(cards),
   }));

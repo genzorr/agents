@@ -12,6 +12,7 @@ import {
   defaultToSide,
   chosenSide,
   polylinePath,
+  routePointsAttr,
   labelPoint,
   componentFill,
   componentText,
@@ -407,20 +408,20 @@ function renderNode(node) {
         <text x="${node.cx}" y="${node.y + 38}" class="t-muted" font-size="8" text-anchor="middle">${esc(node.sublabel || '')}</text>${tag}`;
 }
 
-function renderEdgePath(edge) {
+function renderEdgePath(edge, index) {
   const [cls, marker] = arrowClassMap[edge.variant || 'default'] || arrowClassMap.default;
   const routed = pathFor(edge);
   const strokeWidth = edge.width || (edge.variant === 'emphasis' ? 1.8 : 1.4);
-  return `        <path d="${routed.d}" class="${cls}"${animateAttr(workflow.meta, 'edge', edgeSteps.get(edge))} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
+  return `        <path d="${routed.d}" class="${cls}" data-edge-index="${index}" data-route-points="${routePointsAttr(routed.points)}"${animateAttr(workflow.meta, 'edge', edgeSteps.get(edge))} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
 }
 
-function renderEdgeLabel(edge) {
+function renderEdgeLabel(edge, index) {
   if (!edge.label) return '';
   const routed = pathFor(edge);
   const [lx, ly] = labelPoint(edge, routed.points);
   const labelW = Math.max(30, textUnits(edge.label) * 4.8 + 10);
   return `        <rect x="${lx - labelW / 2}" y="${ly - 10}" width="${labelW}" height="14" rx="3" class="c-mask"/>
-        <text x="${lx}" y="${ly}" class="${variantAccent(edge.variant, { dashed: 't-database' })}" font-size="8" text-anchor="middle">${esc(edge.label)}</text>`;
+        <text x="${lx}" y="${ly}" class="${variantAccent(edge.variant, { dashed: 't-database' })}" data-edge-label="${index}" font-size="8" text-anchor="middle">${esc(edge.label)}</text>`;
 }
 
 function renderLegend() {

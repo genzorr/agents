@@ -17,6 +17,7 @@ import {
   defaultToSide,
   chosenSide,
   polylinePath,
+  routePointsAttr,
   roundedPath,
   labelPoint,
 } from '../renderers/shared/geometry.mjs';
@@ -102,6 +103,15 @@ test('chosenSide treats explicit "auto" as "use the geometric fallback"', () => 
 
 test('polylinePath emits M then L commands', () => {
   assert.equal(polylinePath([[0, 0], [10, 0], [10, 10]]), 'M 0 0 L 10 0 L 10 10');
+});
+
+test('routePointsAttr preserves the renderer route for output checks', () => {
+  assert.equal(routePointsAttr([[0, 0], [10.5, 0], [10.5, -4]]), '0,0 10.5,0 10.5,-4');
+});
+
+test('routePointsAttr rejects malformed route metadata', () => {
+  assert.throws(() => routePointsAttr([[0, 0], ['10', 0]]), /finite coordinate pairs/);
+  assert.throws(() => routePointsAttr([[0, 0]]), /finite coordinate pairs/);
 });
 
 test('roundedPath degrades to a polyline for <3 points or radius<=0', () => {

@@ -11,6 +11,7 @@ import {
   defaultToSide,
   chosenSide,
   polylinePath,
+  routePointsAttr,
   labelPoint,
   componentFill,
   componentText,
@@ -229,20 +230,20 @@ function renderFlowPath(flow, index) {
   const [cls, marker] = arrowClassMap[flow.variant || 'default'] || arrowClassMap.default;
   const routed = pathFor(flow);
   const strokeWidth = flow.width || (flow.variant === 'emphasis' ? 1.8 : 1.4);
-  return `        <path d="${routed.d}" class="${cls}"${animateAttr(dataflow.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
+  return `        <path d="${routed.d}" class="${cls}" data-edge-index="${index}" data-route-points="${routePointsAttr(routed.points)}"${animateAttr(dataflow.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
 }
 
-function renderFlowLabel(flow) {
+function renderFlowLabel(flow, index) {
   const routed = pathFor(flow);
   const [lx, ly] = labelPoint(flow, routed.points);
   const longestLine = Math.max(textUnits(flow.label), textUnits(flow.classification || ''));
   const labelW = Math.max(34, longestLine * 4.9 + 12);
   const classification = flow.classification
-    ? `\n        <text x="${lx}" y="${ly + 11}" class="t-dim" font-size="7" text-anchor="middle">${esc(flow.classification)}</text>`
+    ? `\n        <text x="${lx}" y="${ly + 11}" class="t-dim" data-edge-label="${index}" font-size="7" text-anchor="middle">${esc(flow.classification)}</text>`
     : '';
   const labelH = flow.classification ? 27 : layout.labelH;
   return `        <rect x="${lx - labelW / 2}" y="${ly - 11}" width="${labelW}" height="${labelH}" rx="4" class="c-mask"/>
-        <text x="${lx}" y="${ly}" class="${variantAccent(flow.variant)}" font-size="8" text-anchor="middle">${esc(flow.label)}</text>${classification}`;
+        <text x="${lx}" y="${ly}" class="${variantAccent(flow.variant)}" data-edge-label="${index}" font-size="8" text-anchor="middle">${esc(flow.label)}</text>${classification}`;
 }
 
 function renderLegend() {

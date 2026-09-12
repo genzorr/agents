@@ -11,6 +11,7 @@ import {
   defaultToSide,
   chosenSide,
   polylinePath,
+  routePointsAttr,
   roundedPath,
   labelPoint,
   componentFill,
@@ -230,15 +231,15 @@ function renderConnectionPath(conn, index) {
   const [cls, marker] = arrowClassMap[conn.variant || 'default'] || arrowClassMap.default;
   const routed = pathFor(conn);
   const strokeWidth = conn.width || (conn.variant === 'emphasis' ? 1.8 : 1.5);
-  return `        <path d="${routed.d}" class="${cls}"${animateAttr(arch.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
+  return `        <path d="${routed.d}" class="${cls}" data-edge-index="${index}" data-route-points="${routePointsAttr(routed.points)}"${animateAttr(arch.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
 }
 
-function renderConnectionLabel(conn) {
+function renderConnectionLabel(conn, index) {
   if (!conn.label) return '';
   const [lx, ly] = labelPoint(conn, pathFor(conn).points);
   const w = Math.max(30, textUnits(conn.label) * 4.8 + 10);
   return `        <rect x="${lx - w / 2}" y="${ly - 10}" width="${w}" height="14" rx="3" class="c-mask"/>
-        <text x="${lx}" y="${ly}" class="${variantAccent(conn.variant)}" font-size="8" text-anchor="middle">${esc(conn.label)}</text>`;
+        <text x="${lx}" y="${ly}" class="${variantAccent(conn.variant)}" data-edge-label="${index}" font-size="8" text-anchor="middle">${esc(conn.label)}</text>`;
 }
 
 function renderComponent(c) {

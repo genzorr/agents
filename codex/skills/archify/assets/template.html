@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" data-presentation="editorial">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.8.0">
   <title>[PROJECT NAME] Architecture Diagram</title>
+  <!-- ARCHIFY:INTERACTIVE_HEAD_START -->
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -25,154 +26,139 @@
       } catch (_) {}
     })();
   </script>
-  <!-- Async font load: a blackholed network must not block first paint.
-       The body font stack falls back to system monospace until it lands. -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-        rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </noscript>
+  <!-- ARCHIFY:INTERACTIVE_HEAD_END -->
   <style>
     /* ==========================================================
        THEME VARIABLES — switch by toggling [data-theme] on <html>
        ========================================================== */
     :root,
-    [data-theme="dark"] {
-      --bg: #020617;
-      --grid: #1e293b;
-      --text: #ffffff;
-      --text-muted: #94a3b8;
-      --text-dim: #475569;
-      /* UI chrome (menu hints, footer) needs more contrast than SVG .t-dim accents */
-      --text-faint: #7d8da1;
-
-      --panel: rgba(15, 23, 42, 0.5);
-      --panel-border: #1e293b;
-      --lane-fill: rgba(15, 23, 42, 0.22);
-      --lane-stroke: #334155;
-
-      --arrow: #64748b;
-      --arrow-emphasis: #34d399;
-
-      /* Opaque mask color used behind semi-transparent component fills
-         so the arrows drawn underneath are properly hidden. */
-      --mask: #0f172a;
-
-      --frontend-fill:    rgba(8, 51, 68, 0.4);
-      --frontend-stroke:  #22d3ee;
-      --backend-fill:     rgba(6, 78, 59, 0.4);
-      --backend-stroke:   #34d399;
-      --database-fill:    rgba(76, 29, 149, 0.4);
-      --database-stroke:  #a78bfa;
-      --cloud-fill:       rgba(120, 53, 15, 0.3);
-      --cloud-stroke:     #fbbf24;
-      --security-fill:    rgba(136, 19, 55, 0.4);
-      --security-stroke:  #fb7185;
-      --messagebus-fill:  rgba(251, 146, 60, 0.3);
-      --messagebus-stroke:#fb923c;
-      --external-fill:    rgba(30, 41, 59, 0.5);
-      --external-stroke:  #94a3b8;
-
-      --toolbar-bg:       rgba(15, 23, 42, 0.8);
-      --toolbar-border:   #334155;
-      --toolbar-text:     #e2e8f0;
-      --toolbar-hover:    rgba(15, 23, 42, 0.95);
-      --toolbar-menu-bg:  #0f172a;
+    [data-theme="light"] {
+      --bg: #f4f1ea;
+      --grid: transparent;
+      --text: #1e2723;
+      --text-muted: #667069;
+      --text-dim: #929b94;
+      --text-faint: #747d76;
+      --accent: #2f6f62;
+      --accent-soft: rgba(47, 111, 98, 0.09);
+      --panel: #fbfaf6;
+      --panel-border: #d8d4ca;
+      --lane-fill: rgba(255, 255, 255, 0.28);
+      --lane-stroke: #c4c2b9;
+      --arrow: #78817b;
+      --arrow-emphasis: var(--accent);
+      --mask: #fbfaf6;
+      --frontend-fill: var(--accent-soft);
+      --frontend-stroke: var(--accent);
+      --backend-fill: rgba(47, 111, 98, 0.055);
+      --backend-stroke: #476c63;
+      --database-fill: rgba(30, 39, 35, 0.045);
+      --database-stroke: #59635d;
+      --cloud-fill: rgba(47, 111, 98, 0.035);
+      --cloud-stroke: #6f7771;
+      --security-fill: rgba(30, 39, 35, 0.025);
+      --security-stroke: #4c5751;
+      --messagebus-fill: rgba(47, 111, 98, 0.065);
+      --messagebus-stroke: #3f7569;
+      --external-fill: rgba(30, 39, 35, 0.025);
+      --external-stroke: #858c87;
+      --toolbar-bg: rgba(251, 250, 246, 0.96);
+      --toolbar-border: #c7c4bb;
+      --toolbar-text: #3e4943;
+      --toolbar-hover: #ffffff;
+      --toolbar-menu-bg: #fbfaf6;
     }
 
-    [data-theme="light"] {
-      --bg: #f8fafc;
-      --grid: #e2e8f0;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --text-dim: #94a3b8;
-      --text-faint: #64748b;
-
-      --panel: #ffffff;
-      --panel-border: #e2e8f0;
-      --lane-fill: rgba(248, 250, 252, 0.65);
-      --lane-stroke: #cbd5e1;
-
-      --arrow: #94a3b8;
-      --arrow-emphasis: #059669;
-
-      --mask: #ffffff;
-
-      --frontend-fill:    rgba(34, 211, 238, 0.15);
-      --frontend-stroke:  #0891b2;
-      --backend-fill:     rgba(52, 211, 153, 0.18);
-      --backend-stroke:   #059669;
-      --database-fill:    rgba(167, 139, 250, 0.2);
-      --database-stroke:  #7c3aed;
-      --cloud-fill:       rgba(251, 191, 36, 0.18);
-      --cloud-stroke:     #d97706;
-      --security-fill:    rgba(251, 113, 133, 0.15);
-      --security-stroke:  #e11d48;
-      --messagebus-fill:  rgba(251, 146, 60, 0.15);
-      --messagebus-stroke:#ea580c;
-      --external-fill:    rgba(148, 163, 184, 0.18);
-      --external-stroke:  #64748b;
-
-      --toolbar-bg:       rgba(255, 255, 255, 0.92);
-      --toolbar-border:   #cbd5e1;
-      --toolbar-text:     #334155;
-      --toolbar-hover:    #ffffff;
-      --toolbar-menu-bg:  #ffffff;
+    [data-theme="dark"] {
+      --bg: #181d1a;
+      --grid: transparent;
+      --text: #edf1ed;
+      --text-muted: #a9b2ab;
+      --text-dim: #717a74;
+      --text-faint: #949d96;
+      --accent: #82b5a8;
+      --accent-soft: rgba(130, 181, 168, 0.11);
+      --panel: #202622;
+      --panel-border: #3c443f;
+      --lane-fill: rgba(255, 255, 255, 0.02);
+      --lane-stroke: #4a534d;
+      --arrow: #879089;
+      --arrow-emphasis: var(--accent);
+      --mask: #202622;
+      --frontend-fill: var(--accent-soft);
+      --frontend-stroke: var(--accent);
+      --backend-fill: rgba(130, 181, 168, 0.07);
+      --backend-stroke: #9abbb2;
+      --database-fill: rgba(237, 241, 237, 0.045);
+      --database-stroke: #9ea79f;
+      --cloud-fill: rgba(130, 181, 168, 0.04);
+      --cloud-stroke: #89958e;
+      --security-fill: rgba(237, 241, 237, 0.025);
+      --security-stroke: #b0b8b2;
+      --messagebus-fill: rgba(130, 181, 168, 0.075);
+      --messagebus-stroke: #8ebcaf;
+      --external-fill: rgba(237, 241, 237, 0.025);
+      --external-stroke: #737d76;
+      --toolbar-bg: rgba(32, 38, 34, 0.96);
+      --toolbar-border: #4a534d;
+      --toolbar-text: #dce2dd;
+      --toolbar-hover: #29312c;
+      --toolbar-menu-bg: #202622;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       min-height: 100vh;
-      padding: 2rem;
+      padding: 3rem 2rem;
       color: var(--text);
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1160px; margin: 0 auto; }
 
-    .header { margin-bottom: 2rem; }
+    .header {
+      max-width: 780px;
+      margin-bottom: 2.25rem;
+    }
 
     .header-row {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
+      gap: 0.875rem;
+      margin-bottom: 0.65rem;
     }
 
     .pulse-dot {
-      width: 12px;
-      height: 12px;
-      background: var(--frontend-stroke);
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      width: 3px;
+      height: 2.25rem;
+      background: var(--accent);
+      border-radius: 0;
+      flex: 0 0 auto;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.025em;
+      font-family: Georgia, Cambria, "Times New Roman", serif;
+      font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+      line-height: 1.02;
+      font-weight: 400;
+      letter-spacing: -0.035em;
     }
 
     .subtitle {
       color: var(--text-muted);
-      font-size: 0.875rem;
-      margin-left: 1.75rem;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      margin-left: 1rem;
     }
 
     .diagram-container {
-      background: var(--panel);
-      border-radius: 1rem;
-      border: 1px solid var(--panel-border);
-      padding: 1.5rem;
+      background: transparent;
+      border-radius: 0;
+      border: 0;
+      padding: 0;
       overflow-x: auto;
     }
 
@@ -180,20 +166,34 @@
       width: 100%;
       min-width: min(900px, 100%);
       display: block;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    svg text.t-muted,
+    svg text.t-dim,
+    svg text.t-frontend,
+    svg text.t-backend,
+    svg text.t-database,
+    svg text.t-cloud,
+    svg text.t-security,
+    svg text.t-messagebus,
+    svg text.t-external {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Noto Sans Mono CJK SC", monospace;
     }
 
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
     }
 
     .card {
       background: var(--panel);
-      border-radius: 0.75rem;
+      border-radius: 2px;
       border: 1px solid var(--panel-border);
-      padding: 1.25rem;
+      border-top: 2px solid var(--accent);
+      padding: 1rem 1.125rem;
     }
 
     .card-header {
@@ -228,10 +228,122 @@
     .card li { margin-bottom: 0.375rem; }
 
     .footer {
-      text-align: center;
+      text-align: left;
       margin-top: 1.5rem;
       color: var(--text-faint);
-      font-size: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    html[data-presentation="classic"][data-theme="dark"] {
+      --bg: #020617;
+      --grid: #1e293b;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --text-faint: #7d8da1;
+      --panel: rgba(15, 23, 42, 0.5);
+      --panel-border: #1e293b;
+      --lane-fill: rgba(15, 23, 42, 0.22);
+      --lane-stroke: #334155;
+      --arrow: #64748b;
+      --arrow-emphasis: #34d399;
+      --mask: #0f172a;
+      --frontend-fill: rgba(8, 51, 68, 0.4);
+      --frontend-stroke: #22d3ee;
+      --backend-fill: rgba(6, 78, 59, 0.4);
+      --backend-stroke: #34d399;
+      --database-fill: rgba(76, 29, 149, 0.4);
+      --database-stroke: #a78bfa;
+      --cloud-fill: rgba(120, 53, 15, 0.3);
+      --cloud-stroke: #fbbf24;
+      --security-fill: rgba(136, 19, 55, 0.4);
+      --security-stroke: #fb7185;
+      --messagebus-fill: rgba(251, 146, 60, 0.3);
+      --messagebus-stroke: #fb923c;
+      --external-fill: rgba(30, 41, 59, 0.5);
+      --external-stroke: #94a3b8;
+      --toolbar-bg: rgba(15, 23, 42, 0.8);
+      --toolbar-border: #334155;
+      --toolbar-text: #e2e8f0;
+      --toolbar-hover: rgba(15, 23, 42, 0.95);
+      --toolbar-menu-bg: #0f172a;
+    }
+
+    html[data-presentation="classic"][data-theme="light"] {
+      --bg: #f8fafc;
+      --grid: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+      --panel: #ffffff;
+      --panel-border: #e2e8f0;
+      --lane-fill: rgba(248, 250, 252, 0.65);
+      --lane-stroke: #cbd5e1;
+      --arrow: #94a3b8;
+      --arrow-emphasis: #059669;
+      --mask: #ffffff;
+      --frontend-fill: rgba(34, 211, 238, 0.15);
+      --frontend-stroke: #0891b2;
+      --backend-fill: rgba(52, 211, 153, 0.18);
+      --backend-stroke: #059669;
+      --database-fill: rgba(167, 139, 250, 0.2);
+      --database-stroke: #7c3aed;
+      --cloud-fill: rgba(251, 191, 36, 0.18);
+      --cloud-stroke: #d97706;
+      --security-fill: rgba(251, 113, 133, 0.15);
+      --security-stroke: #e11d48;
+      --messagebus-fill: rgba(251, 146, 60, 0.15);
+      --messagebus-stroke: #ea580c;
+      --external-fill: rgba(148, 163, 184, 0.18);
+      --external-stroke: #64748b;
+      --toolbar-bg: rgba(255, 255, 255, 0.92);
+      --toolbar-border: #cbd5e1;
+      --toolbar-text: #334155;
+      --toolbar-hover: #ffffff;
+      --toolbar-menu-bg: #ffffff;
+    }
+
+    html[data-presentation="classic"] body {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Noto Sans Mono CJK SC", monospace;
+      padding: 2rem;
+    }
+
+    html[data-presentation="classic"] .container { max-width: 1200px; }
+    html[data-presentation="classic"] .header { max-width: none; margin-bottom: 2rem; }
+    html[data-presentation="classic"] .header-row { gap: 1rem; margin-bottom: 0.5rem; }
+    html[data-presentation="classic"] .pulse-dot { width: 12px; height: 12px; border-radius: 50%; animation: archify-classic-pulse 2s infinite; }
+    html[data-presentation="classic"] h1 { font-family: inherit; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    html[data-presentation="classic"] .subtitle { font-size: 0.875rem; line-height: normal; margin-left: 1.75rem; }
+    html[data-presentation="classic"] .diagram-container { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 1rem; padding: 1.5rem; }
+    html[data-presentation="classic"] svg,
+    svg[data-presentation="classic"] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Noto Sans Mono CJK SC", monospace; }
+    html[data-presentation="classic"] .cards { gap: 1rem; margin-top: 2rem; }
+    html[data-presentation="classic"] .card { border: 1px solid var(--panel-border); border-radius: 0.75rem; padding: 1.25rem; }
+    html[data-presentation="classic"] .footer { text-align: center; font-family: inherit; font-size: 0.75rem; letter-spacing: normal; text-transform: none; }
+    html[data-presentation="classic"] .c-mask,
+    html[data-presentation="classic"] .c-frontend,
+    html[data-presentation="classic"] .c-backend,
+    html[data-presentation="classic"] .c-database,
+    html[data-presentation="classic"] .c-cloud,
+    html[data-presentation="classic"] .c-security,
+    html[data-presentation="classic"] .c-messagebus,
+    html[data-presentation="classic"] .c-external,
+    svg[data-presentation="classic"] .c-mask,
+    svg[data-presentation="classic"] .c-frontend,
+    svg[data-presentation="classic"] .c-backend,
+    svg[data-presentation="classic"] .c-database,
+    svg[data-presentation="classic"] .c-cloud,
+    svg[data-presentation="classic"] .c-security,
+    svg[data-presentation="classic"] .c-messagebus,
+    svg[data-presentation="classic"] .c-external { rx: 6px; }
+
+    @keyframes archify-classic-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     /* ==========================================================
@@ -249,6 +361,38 @@
       :root, [data-theme="dark"], [data-theme="light"] {
         --bg: #ffffff;
         --grid: transparent;
+        --panel: #fbfaf6;
+        --panel-border: #d8d4ca;
+        --text: #1e2723;
+        --text-muted: #5f6962;
+        --text-dim: #89928b;
+        --text-faint: #6d766f;
+        --accent: #2f6f62;
+        --accent-soft: rgba(47, 111, 98, 0.09);
+        --mask: #ffffff;
+        --lane-fill: rgba(255, 255, 255, 0.28);
+        --lane-stroke: #c4c2b9;
+        --arrow: #78817b;
+        --arrow-emphasis: var(--accent);
+        --frontend-fill: var(--accent-soft);
+        --frontend-stroke: var(--accent);
+        --backend-fill: rgba(47, 111, 98, 0.055);
+        --backend-stroke: #476c63;
+        --database-fill: rgba(30, 39, 35, 0.045);
+        --database-stroke: #59635d;
+        --cloud-fill: rgba(47, 111, 98, 0.035);
+        --cloud-stroke: #6f7771;
+        --security-fill: rgba(30, 39, 35, 0.025);
+        --security-stroke: #4c5751;
+        --messagebus-fill: rgba(47, 111, 98, 0.065);
+        --messagebus-stroke: #3f7569;
+        --external-fill: rgba(30, 39, 35, 0.025);
+        --external-stroke: #858c87;
+      }
+      html[data-presentation="classic"][data-theme="dark"],
+      html[data-presentation="classic"][data-theme="light"] {
+        --bg: #ffffff;
+        --grid: transparent;
         --panel: #ffffff;
         --panel-border: #e2e8f0;
         --text: #0f172a;
@@ -260,25 +404,25 @@
         --lane-stroke: #cbd5e1;
         --arrow: #94a3b8;
         --arrow-emphasis: #059669;
-        --frontend-fill:    rgba(34, 211, 238, 0.15);
-        --frontend-stroke:  #0891b2;
-        --backend-fill:     rgba(52, 211, 153, 0.18);
-        --backend-stroke:   #059669;
-        --database-fill:    rgba(167, 139, 250, 0.2);
-        --database-stroke:  #7c3aed;
-        --cloud-fill:       rgba(251, 191, 36, 0.18);
-        --cloud-stroke:     #d97706;
-        --security-fill:    rgba(251, 113, 133, 0.15);
-        --security-stroke:  #e11d48;
-        --messagebus-fill:  rgba(251, 146, 60, 0.15);
-        --messagebus-stroke:#ea580c;
-        --external-fill:    rgba(148, 163, 184, 0.18);
-        --external-stroke:  #64748b;
+        --frontend-fill: rgba(34, 211, 238, 0.15);
+        --frontend-stroke: #0891b2;
+        --backend-fill: rgba(52, 211, 153, 0.18);
+        --backend-stroke: #059669;
+        --database-fill: rgba(167, 139, 250, 0.2);
+        --database-stroke: #7c3aed;
+        --cloud-fill: rgba(251, 191, 36, 0.18);
+        --cloud-stroke: #d97706;
+        --security-fill: rgba(251, 113, 133, 0.15);
+        --security-stroke: #e11d48;
+        --messagebus-fill: rgba(251, 146, 60, 0.15);
+        --messagebus-stroke: #ea580c;
+        --external-fill: rgba(148, 163, 184, 0.18);
+        --external-stroke: #64748b;
       }
       body { background: #ffffff !important; padding: 0; }
       .container { max-width: none; }
       .toolbar, .archify-toast, .no-print { display: none !important; }
-      .diagram-container, .card { box-shadow: none; border-color: #e2e8f0; }
+      .diagram-container, .card { box-shadow: none; border-color: #d8d4ca; }
       .cards { grid-template-columns: 1fr 1fr; }
       /* Ensure elements break sensibly across pages */
       .card { break-inside: avoid; page-break-inside: avoid; }
@@ -302,7 +446,7 @@
       color: var(--toolbar-text);
       border: 1px solid var(--toolbar-border);
       padding: 0.5rem 0.875rem;
-      border-radius: 0.5rem;
+      border-radius: 2px;
       font-family: inherit;
       font-size: 0.75rem;
       font-weight: 500;
@@ -328,12 +472,12 @@
       right: 0;
       background: var(--toolbar-menu-bg);
       border: 1px solid var(--toolbar-border);
-      border-radius: 0.5rem;
+      border-radius: 2px;
       padding: 0.375rem;
       min-width: 160px;
       display: none;
       flex-direction: column;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      box-shadow: none;
     }
     .toolbar .export-menu.open { display: flex; }
     .toolbar .export-menu button {
@@ -368,14 +512,14 @@
       color: var(--text);
       border: 1px solid var(--toolbar-border);
       padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
+      border-radius: 2px;
       font-family: inherit;
       font-size: 0.75rem;
       opacity: 0;
       transition: opacity 0.2s, transform 0.2s;
       z-index: 200;
       pointer-events: none;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      box-shadow: none;
     }
     .archify-toast.show {
       opacity: 1;
@@ -403,10 +547,7 @@
         font-size: 0.8125rem;
         line-height: 1.55;
       }
-      .diagram-container {
-        padding: 0.75rem;
-        border-radius: 0.75rem;
-      }
+      .diagram-container { padding: 0; }
       .cards {
         grid-template-columns: 1fr;
         margin-top: 1rem;
@@ -418,6 +559,15 @@
        ========================================================== */
     .c-grid       { stroke: var(--grid); fill: none; }
     .c-mask       { fill: var(--mask); stroke: none; }
+
+    .c-mask,
+    .c-frontend,
+    .c-backend,
+    .c-database,
+    .c-cloud,
+    .c-security,
+    .c-messagebus,
+    .c-external { rx: 3px; }
 
     .c-frontend   { fill: var(--frontend-fill);   stroke: var(--frontend-stroke); }
     .c-backend    { fill: var(--backend-fill);    stroke: var(--backend-stroke); }
@@ -443,17 +593,17 @@
     .a-default   { stroke: var(--arrow); fill: none; }
     .a-emphasis  { stroke: var(--arrow-emphasis); fill: none; }
     .a-security  { stroke: var(--security-stroke); fill: none; stroke-dasharray: 5,5; }
-    .a-dashed    { stroke: var(--database-stroke); fill: none; stroke-dasharray: 4,4; }
+    .a-dashed    { stroke: var(--messagebus-stroke); fill: none; stroke-dasharray: 4,4; }
 
     /* Arrowhead markers reference these */
     .m-default   { fill: var(--arrow); }
     .m-emphasis  { fill: var(--arrow-emphasis); }
     .m-security  { fill: var(--security-stroke); }
-    .m-dashed    { fill: var(--database-stroke); }
+    .m-dashed    { fill: var(--messagebus-stroke); }
 
     /* Dashed boundary variants */
     .c-security-group { fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4,4; }
-    .c-region         { fill: rgba(251, 191, 36, 0.05); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
+    .c-region         { fill: var(--accent-soft); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
     .c-lane           { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6,6; }
 
     /* Optional trace animation, enabled only by meta.animation = "trace".
@@ -489,7 +639,8 @@
   </style>
 </head>
 <body>
-  <!-- Toolbar: theme toggle + export menu (present on every generated diagram)
+  <!-- ARCHIFY:INTERACTIVE_BODY_START -->
+  <!-- Optional toolbar: retained only for --presentation interactive
        Keyboard: T toggles theme, E opens export menu (when no input focused) -->
   <div class="toolbar" role="toolbar" aria-label="Diagram actions">
     <button id="btn-theme" type="button"
@@ -519,6 +670,7 @@
       </div>
     </div>
   </div>
+  <!-- ARCHIFY:INTERACTIVE_BODY_END -->
 
   <div class="container">
     <!-- Header -->
@@ -731,6 +883,7 @@
     </p>
   </div>
 
+  <!-- ARCHIFY:INTERACTIVE_SCRIPT_START -->
   <script>
     /* ============================================================
        Theme toggle — persists to localStorage, respects system pref
@@ -852,6 +1005,8 @@
 
         var svg = document.querySelector('.diagram-container svg');
         var clone = svg.cloneNode(true);
+        var presentation = document.documentElement.getAttribute('data-presentation') || 'interactive';
+        clone.setAttribute('data-presentation', presentation);
 
         var vb = svg.viewBox.baseVal;
         // Scale width/height so the browser rasterizes the vectors at target
@@ -894,20 +1049,21 @@
           return names;
         })();
 
-        // Resolve the full variable set for a given data-theme via an
-        // off-DOM probe, independent of what the viewer is currently set to.
+        // Resolve the full variable set against the document root so selectors
+        // that combine presentation and theme participate in the cascade.
+        // The synchronous mutation is restored before the browser can paint.
         function resolveVars(themeAttr) {
-          var probe = document.createElement('div');
-          probe.setAttribute('data-theme', themeAttr);
-          probe.style.cssText = 'position:absolute;width:0;height:0;visibility:hidden;';
-          document.body.appendChild(probe);
+          var root = document.documentElement;
+          var previousTheme = root.getAttribute('data-theme');
+          root.setAttribute('data-theme', themeAttr);
           try {
-            var c = getComputedStyle(probe);
+            var c = getComputedStyle(root);
             return varNames.map(function (n) {
               return n + ': ' + c.getPropertyValue(n).trim() + ';';
             }).join(' ');
           } finally {
-            document.body.removeChild(probe);
+            if (previousTheme === null) root.removeAttribute('data-theme');
+            else root.setAttribute('data-theme', previousTheme);
           }
         }
 
@@ -1257,5 +1413,6 @@
       }
     });
   </script>
+  <!-- ARCHIFY:INTERACTIVE_SCRIPT_END -->
 </body>
 </html>

@@ -10,6 +10,7 @@ import {
   defaultFromSide,
   defaultToSide,
   chosenSide,
+  routePointsAttr,
   roundedPath,
   labelPoint,
   arrowClassMap,
@@ -305,10 +306,10 @@ function renderTransitionPath(transition, index) {
   const [cls, marker] = arrowClassMap[transition.variant || 'default'] || arrowClassMap.default;
   const routed = pathFor(transition);
   const strokeWidth = transition.width || (transition.variant === 'emphasis' ? 2 : 1.1);
-  return `        <path d="${routed.d}" class="${cls}"${animateAttr(lifecycle.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
+  return `        <path d="${routed.d}" class="${cls}" data-edge-index="${index}" data-route-points="${routePointsAttr(routed.points)}"${animateAttr(lifecycle.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
 }
 
-function renderTransitionLabel(transition) {
+function renderTransitionLabel(transition, index) {
   if (!transition.label) return '';
   const routed = pathFor(transition);
   const [lx, ly] = labelPoint(transition, routed.points);
@@ -316,10 +317,10 @@ function renderTransitionLabel(transition) {
   const labelW = Math.max(32, longestLine * 4.9 + 12);
   const labelH = transition.note ? 27 : 16;
   const note = transition.note
-    ? `\n        <text x="${lx}" y="${ly + 11}" class="t-dim" font-size="7" text-anchor="middle">${esc(transition.note)}</text>`
+    ? `\n        <text x="${lx}" y="${ly + 11}" class="t-dim" data-edge-label="${index}" font-size="7" text-anchor="middle">${esc(transition.note)}</text>`
     : '';
   return `        <rect x="${lx - labelW / 2}" y="${ly - 11}" width="${labelW}" height="${labelH}" rx="4" class="c-mask"/>
-        <text x="${lx}" y="${ly}" class="${variantAccent(transition.variant)}" font-size="8" text-anchor="middle">${esc(transition.label)}</text>${note}`;
+        <text x="${lx}" y="${ly}" class="${variantAccent(transition.variant)}" data-edge-label="${index}" font-size="8" text-anchor="middle">${esc(transition.label)}</text>${note}`;
 }
 
 function renderLegend() {

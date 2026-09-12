@@ -107,6 +107,15 @@ export function polylinePath(points) {
   return points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
 }
 
+export function routePointsAttr(points) {
+  if (!Array.isArray(points) || points.length < 2 || points.some((point) => (
+    !Array.isArray(point) || point.length !== 2 || point.some((coordinate) => !Number.isFinite(coordinate))
+  ))) {
+    throw new Error('Route points must contain at least two finite coordinate pairs');
+  }
+  return points.map(([x, y]) => `${x},${y}`).join(' ');
+}
+
 export function roundedPath(points, radius) {
   if (points.length < 3 || radius <= 0) {
     return polylinePath(points);
