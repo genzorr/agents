@@ -18,6 +18,7 @@ If invoked without a resolved task and coherent delegation boundary, confirm pro
 - **Independent reviewer:** separate operator-requested native leaf; never a worker.
 - **Workstream:** coherent ownership lane. **Assignment:** one bounded worker contract. **Recycle:** stop reuse and create a fresh identity only on a named material boundary.
 - **Creation profile:** model and effort selected while creating a new worker or reviewer identity. **Existing-task message:** a follow-up, reset, reuse assignment, correction, or callback that preserves the recipient's settings and omits both `model` and `thinking` fields entirely, including null or presumed-current values; a sender profile belongs in text metadata only when relevant.
+- **Worker blocker:** a worker's stop/ask condition for its immediate coordinator; it is not automatically a driver or project blocker. **Task blocker:** a condition the coordinator cannot resolve within granted authority or whose consequence crosses the task boundary and therefore requires the governing driver or project orchestrator.
 
 | Role | Activation | Default route | Model | Effort |
 |---|---|---|---|---|
@@ -36,6 +37,7 @@ Preserve permissions, approval policy, scope, stop gates, and no-worktree-withou
 - Let workers own bounded implementation and implementation-depth verification: governing contracts, full owned diff/artifacts, plausible wrong implementations, proportionate failure/recovery paths, and uncertainty.
 - Perform a narrow coordinator gate over integrated state and decision-critical evidence. Reuse current scope-complete worker checks; run only missing, stale, contradicted, or decision-critical checks.
 - Keep the task open until every planned lane, launched identity, and required handoff is classified and acceptance finishes. Savings never weaken scope, verification, authority, or review quality.
+- Treat readiness or an accepted verdict as evidence, not a new approval gate, when the coordinator already has authority and the required checks and observable dependencies pass; neither grants authority. Preserve actual operator/driver gates, retry and launch limits, scientific or contract validity, and shared ownership, including any required acceptance step.
 
 ## Decompose And Route
 
@@ -56,7 +58,7 @@ Before every dispatch, internally resolve and validate the lane, workstream/assi
 2. After native subagent dispatch, continue useful coordinator work and wait through the native result surface. After an explicitly requested ordinary task launch, return immediately and never poll; inspect only on operator status request or missing-delivery report.
 3. Route dependencies through the coordinator. Launch a dependent lane only after upstream classification and validation of the smallest required handoff; provisional results satisfy no dependency.
 4. Send bounded corrections and compatible successive assignments to the same worker. Correct a bad coordinator contract without forcing a failed retry. Existing-task messages preserve the selected worker profile. Never change the selected worker profile without an explicit operator instruction and a separate authorized settings operation.
-5. On blocked/partial/failed work or invalidated assumptions, halt dependents and replan. Correct/stop natively when available; otherwise classify output invalid and redo under a corrected contract. Never replace a stalled/failed worker silently.
+5. On blocked/partial/failed work or invalidated assumptions, halt dependents and replan. If an upstream handoff or evidence is urgently invalidated, preserve the original and invalidating records, contain dependent lanes, and report the consequence; unaffected authorized lanes may continue. Correct/stop natively when available; otherwise classify output invalid and redo under a corrected contract. Routine diagnosis, acceptance correction, and an authorized same-purpose repair stay with the coordinator/owner. Escalate a worker blocker to the governing driver only when authority or recovery is exhausted, a contract/scientific decision must change, another task/shared resource/evidence is threatened, or the decision is irreducible. Never replace a stalled/failed worker silently.
 6. Classify every worker `complete`, `blocked`, `partial`, or `failed`; reconcile shared state and every planned lane/handoff.
 7. Reuse a compatible idle worker only when identity is reachable and role, project, checkout, trust, authority, ownership, route, model, and effort still fit. Profile change is incompatibility. Compaction does not justify recycling.
 8. Before reuse, resend the full contract with an assignment-reset overlay: prior assignment/disposition, allowed carry-over facts, invalid assumptions/scope/permissions/decisions/claims, interfaces, success, verification, return format, and stale-conflict reporting. Send it as an existing-task message. A bounded current-assignment correction needs only changed constraints and preserves recipient settings.
@@ -81,6 +83,8 @@ Send only applicable fields:
 
 Omit chain-of-thought, builder reasoning, long history, and failed-attempt narration. Return only a genuine blocker/stop or final report.
 
+For the separately authorized ordinary-task callback, keep the message compact: status/outcome, consequence or material caveat, next action or exact decision, and one durable artifact or handoff link. The linked existing record retains the complete decision-bearing evidence and final handoff; compactness never removes required blocker/terminal delivery or its evidence. If terminal callback delivery fails, preserve the payload, stable identity/state, and evidence link there; do not guess a route or retry under a different operation, and do not proceed past a blocked decision. Native result returns still use the complete Return format above.
+
 ## Worker Rules
 
 - Recover and cite governing contracts; do not substitute an internally consistent interpretation.
@@ -89,11 +93,12 @@ Omit chain-of-thought, builder reasoning, long history, and failed-attempt narra
 - Run consequence tests against plausible wrong implementations. Reject implementation-derived oracles unless exact shape is the documented contract.
 - Trace fail-closed, error, retry, and recovery behavior proportionately. Challenge nonclaims and report uncertainty/divergence.
 - Preserve sibling ownership and operator work. Escalate architecture/contract changes, unsafe rewrites, authority/infrastructure gaps, and dependency conflicts.
+- Use existing project resource tools and observable status/receipts for authorized waits, acquisition, and safe release; do not invent a manager, queue, daemon, polling loop, or force-unlock path. An explicit priority dependency is exceptional and must name and verify its predecessor; an unrelated idle resource does not satisfy it. Unknown cleanup or ownership fails closed and escalates. Keep frozen source, inputs, intervention, criteria, and protocol unchanged; changing them is new authorized work, and a valid negative is preserved rather than tuned into a rerun.
 - Never broaden authority, delegate, or claim success with missing evidence.
 
 ## Operator-Requested Independent Review
 
-The coordinator reviews and accepts by default. Only an explicit operator request for this task activates a reviewer. No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review. An unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review. Complete already-authorized implementation and verification first, then leave a concrete review handoff; do not claim independent acceptance or waive the driver’s review requirement. The native reviewer uses the immediate-parent route above and never falls back to a cross-task route.
+The coordinator reviews and accepts by default. Only an explicit operator request for this task activates a reviewer. No other signal—including task characteristics, evidence gaps, driver preference, or agent judgment—authorizes review. An unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review. Complete already-authorized implementation and verification first, then leave a concrete review handoff; do not claim independent acceptance or waive the driver’s review requirement. An acceptance verdict confirms the reviewed artifact and never grants authority or creates another permission round when the coordinator can take the next authorized action. The native reviewer uses the immediate-parent route above and never falls back to a cross-task route.
 
 Do not resolve or validate reviewer route/model/effort, read the reviewer protocol, or create/reuse a reviewer while disabled. When activated, record the operator request and exact acceptance target before dispatch. Reuse one compatible idle reviewer keyed by exact reviewer role, project, checkout, trust, authority, isolation, route, model, and effort. Create a fresh reviewer only when operator-requested review is active and no compatible identity is reachable. New reviewers always receive fresh context with no history exception. Independence comes from separate identity, fresh context, no implementation ownership, and protocol—not model name. The ordinary implementation route never changes reviewer activation or routing.
 
