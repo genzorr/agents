@@ -165,6 +165,25 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn('display_name: "Orchestrate Feature"', metadata)
         self.assertIn('short_description: "Launch feature owners with opt-in review"', metadata)
 
+    def test_orchestration_resolves_named_workstream_profiles_per_field(self) -> None:
+        feature = self.read("codex/skills/orchestrate-feature/SKILL.md")
+        workers = self.read("codex/skills/orchestrate-workers/SKILL.md")
+        prd = self.read("docs/orchestrate-feature-prd.md")
+        feature_profiles = feature.split("## Resolve Role Profiles\n", 1)[1].split("## Select New Or Reused Ownership", 1)[0]
+        worker_profiles = workers.split("## Terms And Profiles\n", 1)[1].split("## Operating Model", 1)[0]
+        for text, terms in (
+            (feature_profiles, ("role defaults", "general worker override", "named workstream")),
+            (worker_profiles, ("role default", "general worker override", "named-workstream override")),
+        ):
+            positions = [text.index(term) for term in terms]
+            self.assertEqual(positions, sorted(positions))
+            self.assertNotIn("named-workstream override, then an explicit general worker override", text)
+        self.assertIn("labels are routing inputs rather than a required decomposition", feature_profiles)
+        self.assertIn("Labels alone never require decomposition or dispatch", worker_profiles)
+        self.assertIn("never changes the coordinator, another workstream, or any other role", worker_profiles)
+        self.assertIn("main workstream: Sol/medium; additional workstreams: Luna/xhigh", prd)
+        self.assertIn("Require an Astra/medium reviewer", prd)
+
     def test_orchestrate_feature_preserves_immutable_orchestrator_and_authority(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
         readiness = text.split("## Activate And Resolve Readiness\n", 1)[1].split("## Resolve Role Profiles", 1)[0]
@@ -490,6 +509,23 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, lifecycle)
 
+    def test_orchestrate_workers_compacts_final_handoffs_without_losing_decisive_evidence(self) -> None:
+        text = self.read("codex/skills/orchestrate-workers/SKILL.md")
+        contract = text.split("## Compact Worker Contract\n", 1)[1].split("## Worker Rules", 1)[0]
+        for anchor in (
+            "status and outcome; changed scope; exact tested repository/artifact state",
+            "verification commands and results",
+            "material gaps, decisions, or constraints",
+            "only when they affect a decision, reuse, integration, or the next action",
+            "Reference existing accessible evidence for long output or inventories",
+            "Do not create an artifact solely to shorten the message",
+            "impose an arbitrary size cap",
+            "Preserve a failure with its condition and evidence",
+        ):
+            self.assertIn(anchor, contract)
+        self.assertIn("Before reuse, resend the full contract with an assignment-reset overlay", text)
+        self.assertIn("A bounded current-assignment correction needs only changed constraints", text)
+
     def test_orchestrate_workers_preserves_auditable_verification(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
         operating = text.split("## Operating Model\n", 1)[1].split("## Decompose And Route", 1)[0]
@@ -555,6 +591,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Reviewer activation is operator-only: only the current operator invocation or an authoritative operator decision explicitly scoped to this resolved feature can activate it;",
             "standing or global reviewer preferences never activate review.",
             "reviewer profile wording in an explicitly operator-authorized activation source activates review and changes only that profile.",
+            "For owner and enabled reviewer profiles, an omitted field inherits its enabled role's default, never another override;",
             "Never infer reviewer activation;",
             "never substitute or validate reviewer controls while disabled.",
             "- **Resolved role map, reviewer request, and inner route:** complete role map;",
@@ -729,6 +766,25 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, protocol)
         self.assertIn("isolated scratch state outside the reviewed checkout", protocol)
+
+    def test_independent_review_correction_rounds_preserve_complete_current_target_verdicts(self) -> None:
+        protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
+        correction = protocol.split("## Complete Target And Correction Rounds\n", 1)[1].split("## Isolation And Result", 1)[0]
+        for anchor in (
+            "first review of an acceptance target inspects the complete target",
+            "same compatible reviewer identity may reuse valid prior inspection coverage",
+            "exact previously reviewed baseline",
+            "complete subsequent delta, including uncommitted changes",
+            "affected interface, invariant, caller or consumer, unresolved finding, and new or changed verification",
+            "only when its target, assumptions, and evidence remain demonstrably applicable",
+            "Every implementation mutation invalidates the prior verdict",
+            "new verdict for the complete current target",
+            "which coverage was carried forward and which coverage was newly performed",
+            "prior baseline or coverage cannot be recovered",
+            "Compaction alone does not require restarting the review",
+        ):
+            self.assertIn(anchor, correction)
+        self.assertIn("explicit read-only, no-mutation, no-delegation instructions", protocol)
 
     def test_orchestration_narration_is_exception_driven_and_continuity_is_fail_safe(self) -> None:
         dispatch_scope = re.compile(

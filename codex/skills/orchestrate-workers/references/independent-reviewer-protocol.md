@@ -4,7 +4,7 @@ Read this reference only after the operator explicitly requests independent revi
 
 ## Prepare
 
-Dispatch only after implementation is integrated, the coordinator has inspected the accumulated diff, required verification is complete, and the checkout is quiescent. Keep it quiescent throughout review. Any implementation mutation invalidates the verdict and requires reintegration and verification before a new review.
+Dispatch only after implementation is integrated, the coordinator has inspected the accumulated diff, required verification is complete, and the checkout is quiescent. Keep it quiescent throughout review. Establish the exact target baseline, including the commit/ref and all uncommitted changes and decision-bearing generated or external artifacts. Any implementation mutation invalidates the verdict and requires reintegration and verification before a new review.
 
 Use a compatible idle reviewer identity. For a new reviewer, apply the skill's no-parent-history rule with no bounded-history exception. State new/reused identity, route, resolved reviewer model/effort, and profile provenance.
 
@@ -24,9 +24,15 @@ Send:
 
 The reviewer uses immediate-parent native route; no cross-task fallback. Existing-task review messages omit both `model` and `thinking` (including null/presumed-current values) and preserve settings. Settings changes require user authorization naming target and values; profiles, inherited context, delegated instructions, and callback permission never authorize them.
 
-For reuse, add prior review ID, disposition (`ship`, `fix-first`, `rethink`, `blocked`, `failed`, `voided`), and reviewed state. Invalidate the prior verdict; carry only confirmed project invariants and relevant findings.
+For reuse, add prior review ID, disposition (`ship`, `fix-first`, `rethink`, `blocked`, `failed`, `voided`), exact reviewed baseline, and reviewed state. Invalidate the prior verdict; carry only confirmed project invariants, demonstrably applicable coverage, and relevant findings.
 
-Require inspection of actual files, artifacts, and complete current diff before the coordinator's interpretation. Do not provide only fixes, summaries, or worker reports. Complete state-writing tests/builds/generation before dispatch; use isolated scratch state outside the reviewed checkout when reviewer execution is necessary and authorized.
+On the first or expanded full review, require inspection of actual files, artifacts, and the complete current diff before the coordinator's interpretation. On a correction round with valid carried coverage, require inspection of the complete delta and every affected surface under the rules below. Do not provide only fixes, summaries, or worker reports. Complete state-writing tests/builds/generation before dispatch; use isolated scratch state outside the reviewed checkout when reviewer execution is necessary and authorized.
+
+## Complete Target And Correction Rounds
+
+The first review of an acceptance target inspects the complete target. The same compatible reviewer identity may reuse valid prior inspection coverage on a correction round only after recovering the exact previously reviewed baseline and inspecting the complete subsequent delta, including uncommitted changes. Inspect every affected interface, invariant, caller or consumer, unresolved finding, and new or changed verification. Carry prior coverage only when its target, assumptions, and evidence remain demonstrably applicable.
+
+Every implementation mutation invalidates the prior verdict. Issue a new verdict for the complete current target and identify which coverage was carried forward and which coverage was newly performed. Expand to a complete fresh inspection when the prior baseline or coverage cannot be recovered, an assumption changed, or the consequences of the delta reach beyond the proven prior surface. Compaction alone does not require restarting the review when the exact baseline, coverage, findings, delta, and evidence remain sufficiently preserved.
 
 ## Isolation And Result
 
@@ -45,7 +51,7 @@ If mutation occurs, report it, recycle the reviewer, and restore state only with
 
 When review is operator-requested, withhold acceptance until the coordinator resolves the disposition and receives a valid verdict or the operator explicitly waives review. Re-dispatch failed review to the same compatible reviewer when reachable; otherwise recycle it. The verdict is evidence; the coordinator remains acceptance authority.
 
-Send `fix-first` corrections to the original implementation worker when resumable, then integrate and verify. `rethink` returns decisions to the coordinator. Any implementation change invalidates the verdict, not reviewer identity; while the operator's review request remains active, send a reset packet against new state.
+Send `fix-first` corrections to the original implementation worker when resumable, then integrate and verify. `rethink` returns decisions to the coordinator. Any implementation change invalidates the verdict, not reviewer identity; while the operator's review request remains active, send a reset packet with the exact prior baseline, complete current delta, unresolved findings, affected surfaces, and new verification against the new state.
 
 ## Reviewer Continuity
 

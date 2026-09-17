@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented initially under Agents Harness task T-36, hardened under T-38 after the first runtime handoff failure, and generalized under T-39. This document is the product contract for the Codex-only feature-orchestration skill family; it does not authorize a live skill installation or change Codex runtime configuration.
+Implemented initially under Agents Harness task T-36, hardened under T-38 after the first runtime handoff failure, generalized under T-39, and refined under T-51 for named-workstream profiles, compact evidence-preserving worker handoffs, and correction-round review continuity. This document is the product contract for the Codex-only feature-orchestration skill family; it does not authorize a live skill installation or change Codex runtime configuration.
 
 ## Problem
 
@@ -38,6 +38,7 @@ Remove `orchestrate-sol-feature` from the source and catalog rather than keeping
 - Give each substantial feature one coherent ordinary-task owner for detailed planning, implementation, integration, verification, and feature-level acceptance.
 - Move bounded implementation-depth work into reusable native leaf subagents without allowing workers or reviewers to delegate.
 - Resolve feature-owner and worker model/effort profiles independently; resolve a reviewer profile only after explicit operator activation, preserving Sol/high as the enabled reviewer default.
+- Resolve each actual worker per field from role defaults, an explicit general worker override, and an explicit named-workstream override, without turning assignment labels into mandatory roles or launches.
 - Treat the active project-orchestrator profile as immutable session state that the skill may validate but never change.
 - Launch feature owners and native subagents with fresh context by default; inherited-turn subagent forks remain rare, bounded, named exceptions and full-history forks remain prohibited.
 - Reuse compatible feature tasks and subagents without allowing stale scope, authority, assumptions, delivery contracts, profiles, or completion claims to carry silently.
@@ -52,6 +53,7 @@ Remove `orchestrate-sol-feature` from the source and catalog rather than keeping
 
 - Do not create a daemon, queue, scheduler, automation, task registry, context database, status ledger, custom agent configuration, or new task controller.
 - Do not infer a role profile from task size, cost, availability, a previous invocation, or another role's override.
+- Do not treat `main`, `additional`, or another named workstream as a required worker count, role, or launch.
 - Do not change the current project-orchestrator task's model or effort.
 - Do not make every feature use a separate task; contained interactive work remains in the current task when a separate owner would add more handoff cost than context protection.
 - Do not create feature owners by forking the project-orchestrator task or permit full-history subagent forks.
@@ -74,6 +76,12 @@ The operator may add natural-language role overrides for this feature, for examp
 
 ```text
 Use $orchestrate-feature for this feature. Feature owner: Terra/high. Workers: Sol/medium. Reviewer: Sol/high.
+```
+
+Named workstreams may override individual general worker fields. This explicit invocation resolves a Sol/medium owner, Sol/medium `main` worker, Luna/xhigh `additional` workers, and an operator-requested Astra/medium reviewer without changing any default outside this feature:
+
+```text
+Use $orchestrate-feature for this feature. Feature owner: Sol/medium. Workers: Luna/xhigh generally; main workstream: Sol/medium; additional workstreams: Luna/xhigh. Require an Astra/medium reviewer.
 ```
 
 Codex skills do not expose a typed parameter schema; the skill treats only explicit, unambiguous role-profile instructions in the current invocation or authoritative feature decision as overrides. Invocation authorizes creation or reuse of one resolved feature task. It is not standing authority for later features, unrelated work, model changes to the current task, or broader implementation/external writes.
@@ -123,9 +131,15 @@ The feature owner must not create another ordinary feature task, delegate projec
 
 Workers use the independently resolved worker profile as a creation profile and own bounded questions, files, components, tests, or evidence packets under the compact worker contract. They may perform substantial implementation, build, test, diagnostic, and inspection work rather than serving only as code-writing assistants. They receive no parent-turn history by default, cannot delegate, and return only blockers or a final classified report to the feature owner through the immediate native parent route. They do not receive the owner's cross-task callback contract. A bounded inherited-turn slice is exceptional and requires one named load-bearing fact with no durable source that cannot be accurately distilled without material loss, plus the reason and exact inherited slice. Full-history forks remain prohibited.
 
+The outer launch carries the resolved general worker profile plus every explicit named-workstream model/effort overlay and provenance. The feature owner resolves each actual worker immediately before creation, field by field in the order role default, general override, named override. Missing named fields retain the resolved general field. Assignment labels such as `main` and `additional` do not require decomposition or dispatch, and an overlay affects neither another workstream nor the owner or reviewer. An existing compatible identity retains its configured settings; a different resolved assignment profile requires a fresh identity under the existing reuse rules.
+
+Native worker final reports remain compact and self-contained on status/outcome, changed scope, exact tested state, verification results, and material gaps or decisions. Dependency and continuity details appear only when decision-bearing. Long output or inventories may use an existing accessible evidence reference, but decisive facts remain inline; compactness creates no artifact, arbitrary cap, or weaker evidence. Attempt chronology is omitted, while failures retain their conditions and evidence when they constrain the next action or prevent repeated work. Reassignment still requires a full reset, while a bounded correction on the same assignment carries only changed constraints.
+
 ### Independent reviewer
 
 The reviewer is a separate native leaf identity at the independently resolved reviewer profile. It is disabled by default and created or reused only after an explicit operator request for the resolved task. Reviewer profile wording itself activates review. Task size, importance, risk, ambiguity, missing oracles, cross-worker boundaries, agent judgment, reviewer availability, or a generic driver preference cannot activate it. A driver requirement without explicit operator authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance. When activated, reviewer independence comes from separate identity, fresh context, no implementation ownership, and the review protocol; changing its profile never permits reuse of an implementation worker as reviewer.
+
+An identity's first review covers the complete target. On correction rounds, the same compatible reviewer may carry demonstrably applicable prior coverage only after the exact reviewed baseline and complete subsequent delta, including uncommitted changes, are established. It inspects affected interfaces, invariants, callers or consumers, unresolved findings, and new verification. Every implementation mutation invalidates the verdict and requires a new verdict for the complete current target that identifies carried and new coverage. Missing baseline or coverage, changed assumptions, or broader consequences require expanded inspection; compaction alone does not force a restart when sufficient evidence survives.
 
 ## Role Profile Contract
 
@@ -135,10 +149,12 @@ Resolve this map before every new or reused dispatch:
 | --- | --- | --- |
 | Project orchestrator | Current task profile | Validate an explicit requirement; never mutate |
 | Feature owner | `gpt-5.6-sol` / medium | Explicit per-feature model and/or effort override |
-| Implementation worker | `gpt-5.6-luna` / xhigh | Explicit per-feature model and/or effort override |
+| Implementation worker | `gpt-5.6-luna` / xhigh | Explicit general and/or named-workstream model/effort override, resolved per actual assignment |
 | Independent reviewer | Disabled; when explicitly requested, `gpt-5.6-sol` / high | Explicit request activates review; optional per-feature model and/or effort override |
 
-An override affects only its named role. Missing fields inherit that enabled role's default, not another role's value. A reviewer override in the current invocation or an authoritative operator decision explicitly scoped to the resolved feature constitutes reviewer activation; a standing or global reviewer preference does not. Absent activation, no reviewer profile is resolved or validated. Never cascade a feature-owner override to workers or reviewer, never upgrade or downgrade a role silently, and never convert a model nickname into an unsupported identifier. An explicit override does not waive a governing driver or project requirement for a particular role profile; conflicting requirements stop at readiness. Retain the complete map internally and disclose it before dispatch only when an override, unresolved or unobservable control, degraded supervision, changed topology/authority/shared-state ownership or conflict, or other decision-bearing variation could change the launch.
+An override affects only its named role. Missing owner and enabled-reviewer fields inherit that role's default, not another role's value; worker fields follow the hierarchy below. A reviewer override in the current invocation or an authoritative operator decision explicitly scoped to the resolved feature constitutes reviewer activation; a standing or global reviewer preference does not. Absent activation, no reviewer profile is resolved or validated. Never cascade a feature-owner override to workers or reviewer, never upgrade or downgrade a role silently, and never convert a model nickname into an unsupported identifier. An explicit override does not waive a governing driver or project requirement for a particular role profile; conflicting requirements stop at readiness. Retain the complete map internally and disclose it before dispatch only when an override, unresolved or unobservable control, degraded supervision, changed topology/authority/shared-state ownership or conflict, or other decision-bearing variation could change the launch.
+
+Within the implementation-worker role, resolve model and effort separately in the order role default, explicit general worker override, explicit named-workstream override. A named field overrides only the corresponding general field for matching assignments; all other fields and workstreams retain their prior resolved values. `Main`, `additional`, and similar names are assignment labels rather than new roles. They neither require a worker nor authorize a launch. The outer launch carries the general profile, named overlays, and provenance; the feature owner matches them to actual workstreams and resolves each creation profile before dispatch.
 
 Use only model identifiers, effort values, routes, and context controls exposed by the current native product. If an explicit current-orchestrator requirement cannot be observed, stop rather than guess; without an explicit requirement, report the observability limitation and preserve the task. If another exact requested profile cannot be set or validated, stop and report the missing capability. A successful creation or spawn request is profile provenance; if the product lacks independent post-creation readback, state that limitation rather than inventing it.
 
@@ -152,7 +168,7 @@ Before creating or resuming a feature owner, resolve and communicate every appli
 - Local edit, validation, commit, push, pull-request, merge, lifecycle, external-write, and delegation authority exactly as granted.
 - Acceptance criteria, required artifacts, verification, decision-bearing evidence, and plausible wrong implementations when material.
 - Stop/ask gates for user-owned choices, architecture/contract changes, unsafe expansion, missing infrastructure/authority, dependency invalidation, and shared-resource conflicts.
-- Complete resolved role-profile map with default/override provenance and current-orchestrator precondition result.
+- Complete resolved role-profile map with default/override provenance, general worker profile, named-workstream overlays, and current-orchestrator precondition result.
 - Notification mode, route-specific mechanism/target/action, mandatory and extended events, message shape, parent supervision state, and truthful fallback.
 - Fresh ordinary feature task and fresh native subagents by default; any exceptional inherited-turn worker slice names its fact, reason, and exact extent.
 
@@ -176,7 +192,7 @@ Create new native workers and reviewers with no parent turns by default. Inherit
 
 ## Inner Lens
 
-`orchestrate-workers` is the canonical generic lens. The feature-owner launch contract explicitly invokes it for the resolved feature, passes the resolved worker profile and reviewer activation as `disabled` or `operator-requested`, and, only when review is requested, carries the exact operator-request provenance, acceptance target, and separate reviewer profile/provenance. It forbids the optional ordinary implementation-task route and preserves the feature owner as planner, integrator, default reviewer, and acceptance authority. The lens owns worker/reviewer decomposition, contracts, context, continuity, evidence, optional-review routing, and acceptance rules.
+`orchestrate-workers` is the canonical generic lens. The feature-owner launch contract explicitly invokes it for the resolved feature, passes the resolved general worker profile, every named-workstream overlay and provenance, and reviewer activation as `disabled` or `operator-requested`, and, only when review is requested, carries the exact operator-request provenance, acceptance target, and separate reviewer profile/provenance. It forbids the optional ordinary implementation-task route and preserves the feature owner as planner, integrator, default reviewer, and acceptance authority. The lens owns worker/reviewer decomposition, per-assignment profile resolution, contracts, context, continuity, evidence, optional-review routing, and acceptance rules.
 
 If the operator invokes both outer feature ownership and an ordinary implementation-task route for the same unresolved feature, stop and ask for one owner topology. `goal-prompt` remains the owner of durable autonomous goal handoffs; an existing goal artifact may be durable feature authority but does not replace native task/profile/delivery resolution.
 
@@ -215,6 +231,9 @@ T-39 authorizes the current branch, reviewed source implementation, commits, pus
 - No-override behavior preserves Sol/medium feature ownership, Luna/xhigh workers, feature-owner self-review, and no separate reviewer dispatch.
 - Non-Sol feature owners can use the generic inner lens truthfully without copied protocol or a Sol-only precondition.
 - Exact profile requests, validation, and readback limitations are reported truthfully; no override cascades or mutates the current orchestrator.
+- Mixed general and named-workstream overrides resolve independently per field and do not create workstreams by implication.
+- Native worker handoffs remain compact without losing decisive tested-state, verification, gap, failure-condition, or decision evidence.
+- Correction rounds preserve independent complete-target verdicts while reusing only recoverable and demonstrably applicable prior coverage.
 - Feature owners, workers, and reviewers reuse only compatible identities and receive complete resets.
 - Every feature lane preserves executable sparse delivery, bounded supervision, fresh context, leaf topology, authority, and acceptance boundaries.
 - The old outer installed asset has a tested managed prune path and no ambiguous source/catalog twin remains.
