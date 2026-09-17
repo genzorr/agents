@@ -173,7 +173,11 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         text = (REPO_ROOT / "tests" / "research_goal_alignment_conformance.md").read_text(encoding="utf-8")
         for case_id in ("faithful-baseline", "explicit-small-scout", "recommended-pivot"):
             self.assertIn(f"`{case_id}`", text)
-        self.assertIn("3/3 PASS", text)
+        self.assertIn("Fresh-context behavioral invocation", text)
+        self.assertEqual(text.count("**Observed output shape:**"), 3)
+        self.assertIn("without removing essential method components to fit existing hooks", text)
+        self.assertIn("a large experiment or baseline establishment", text)
+        self.assertIn("Do not record B as adopted or assign implementation work on that basis", text)
         self.assertIn("does not establish general model performance", text)
 
 

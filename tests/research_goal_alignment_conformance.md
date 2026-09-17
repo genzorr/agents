@@ -2,7 +2,7 @@
 
 ## Scope and claim boundary
 
-**Method:** Single same-agent manual conformance pass against the updated `ask-chatgpt-pro` and `integrate-research` contracts. Each case was evaluated for the handoff or integration behavior the instructions require.
+**Method:** Fresh-context behavioral invocation of the updated `ask-chatgpt-pro` and `integrate-research` skill interfaces with each request below. A GPT-6 Astra/high evaluator read the maintained skill sources, produced the actual external-research handoffs or integration disposition, and made no repository or external changes.
 
 This readout checks the observed goal-drift failure modes and the intended proportional exceptions. It does not establish general model performance, repeated-run stability, or the quality of an eventual external research report.
 
@@ -14,22 +14,22 @@ This readout checks the observed goal-drift failure modes and the intended propo
 
 **Request:** Find a strong literature-backed baseline to adopt, reproduce faithfully, and later improve within an existing research repository.
 
-**Required behavior:** The consultation identifies baseline selection as the current stage and establishment or faithful reproduction as the downstream stage. The decision is which baseline to adopt and what evidence would establish it credibly. The prompt asks for established candidates, essential method components, evaluation semantics, adaptation costs, and evidence needed for a faithful result. It does not require novelty or shrink the task to one loss, hook, or discriminator.
+**Observed output shape:** The generated handoff named the stage as “baseline selection, with baseline establishment and faithful reproduction requirements informing selection” and the downstream decision as “recommend a baseline and an establishment plan; distinguish the recommendation from the user's eventual selection.” It required primary papers, supplementary material, official implementations, benchmark protocols, essential components, evaluation semantics, and reproduction checks. It stated that novelty was not a selection requirement and instructed the researcher to “expose implementation mismatches without removing essential method components to fit existing hooks.”
 
-**Observed:** The research-stage contract rejects a narrower novel-mechanism substitute, protects essential components when current hooks are insufficient, and keeps the programme outcome in the success check.
+**Disposition:** The output preserved baseline selection and faithful establishment despite convenient code hooks; it did not substitute a small novel mechanism.
 
 ### `explicit-small-scout` — PASS
 
 **Request:** Run a small causal scout to determine whether a named failure is driven by one hypothesized mechanism before committing to a larger experiment.
 
-**Required behavior:** The consultation preserves diagnosis as the primary stage and the bounded discriminator as the requested deliverable. The decision is whether the hypothesis merits a larger test or should be rejected. It does not inflate the scout into baseline establishment or force an unrelated literature sweep.
+**Observed output shape:** The generated handoff named the stage as diagnosis and scoped the decision to “one scout whose result can support, weaken, or leave unresolved the depth-instability explanation and inform the next experiment.” It explicitly kept “a large experiment or baseline establishment” outside the deliverable and requested one intervention, comparator, controlled conditions, observable outcomes, validity checks, alternative predictions, confounds, and an inconclusive result when the discriminator cannot support a causal claim.
 
-**Observed:** The contract explicitly keeps causal scouts and small discriminators legitimate when they answer the stated decision without displacing the programme outcome.
+**Disposition:** The output preserved the explicitly requested causal scout rather than expanding or replacing it.
 
 ### `recommended-pivot` — PASS
 
 **Request:** Integrate a completed report that supplies useful evidence but recommends abandoning the selected baseline for a different method.
 
-**Required behavior:** Integration records supported evidence independently from the recommendation, identifies the proposed changes to the chosen baseline, method semantics, goal, or deliverable, and checks existing decision authority. If the user already delegated this choice and evidence is sufficient, the integrator may decide and record why. Otherwise it preserves the pivot as a proposal and does not turn it into project direction or a worker assignment until the next authorized action depends on resolving it.
+**Observed output shape:** The integration result kept “adopt and faithfully establish Method A as the baseline” as the durable direction. It classified component X's cost as evidence to record with measured conditions and limitations, updated establishment planning without declaring faithful reproduction infeasible, and retained “abandon A for B” as the report author's recommendation. It stated: “Do not record B as adopted or assign implementation work on that basis.” Because documentation integration was authorized but changing the baseline was not delegated, it deferred a user decision until an action depends on abandoning Method A.
 
-**Observed:** The integration contract permits authorized decisions without another approval loop while preventing a report's recommendation from becoming authority by itself.
+**Disposition:** The output integrated evidence within existing authorization without converting advice into project direction or adding an immediate approval loop.
