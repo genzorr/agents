@@ -16,6 +16,14 @@ Choose exactly one route from the evidence surface:
 
 Do not load Pro-only GitHub, connector, pinned-commit, report, or PDF requirements into plain external research. Do not use a plain prompt when the user needs a self-contained local bundle; use `ask-oracle` for that case.
 
+## Research Stage And Outcome
+
+For research consultations, preserve the user's current stage and the programme outcome it serves. **Baseline selection** chooses an established method; **baseline establishment** produces a credible reference result from the chosen method; **faithful reproduction** implements and evaluates the reference without intended semantic changes; **adaptation** changes it for the project context; **diagnosis** explains an observed gap; and **novel improvement** introduces an intended research contribution. Use a primary stage and mention a supporting stage only when it changes the requested work. State what decision the consultation should change or leave unresolved.
+
+Do not silently turn selection or establishment of a strong literature-backed baseline into invention of a small mechanism or discriminator. An established baseline does not need to be novel. Faithful reproduction preserves the method's essential components and evaluation semantics; if the current code hooks cannot support them, expose that mismatch and the resulting choice instead of stripping components to fit. Adaptation must identify its deltas from the reference method and the consequence for comparability. A causal scout or small discriminator remains legitimate when the user explicitly requests it or it answers the stated decision without displacing the programme outcome.
+
+Ask the researcher to challenge an unsound framing explicitly and with evidence. Treat that challenge or any recommendation as advice: it may inform a decision, but it does not itself change the user's goal, selected baseline, method semantics, requested deliverable, or implementation authority.
+
 ## Shared Context Authority
 
 Sort supplied context before writing either handoff:
@@ -32,4 +40,4 @@ Keep these categories distinct. Preserve hard requirements and selected decision
 
 ## Shared Invariants
 
-Both routes must identify the downstream decision or action, set an evidence standard, bound scope, state a proportional sufficiency bar, and preserve an explicit unresolved or stop condition. Neither route invents sources, constraints, repository facts, or authority to mutate external systems. Ask a question only when a blocking ambiguity cannot be handled by a reversible assumption; otherwise preserve uncertainty in the handoff.
+Both routes must identify the downstream decision or action, set an evidence standard, bound scope, state a proportional sufficiency bar, and preserve an explicit unresolved or stop condition. Neither route invents sources, constraints, repository facts, or authority to mutate external systems. Ask a question only when a blocking ambiguity cannot be handled by a reversible assumption; otherwise preserve uncertainty in the handoff. Before finalizing, ask: could the requested deliverable succeed while missing the user's intended outcome? If yes, correct the framing or surface the conflict rather than handing off a narrower substitute.

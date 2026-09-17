@@ -46,17 +46,18 @@ Apply the canonical [Shared Context Authority](../SKILL.md#shared-context-author
 
 1. Read the user's task for requested deliverable formats. Invoking this skill does not request a PDF; preserve an explicit request such as "do provide PDF along with other output" in the consult's Artifact Output instructions.
 2. Choose task type, one primary mode, and an optional secondary mode under the rules above. Do not default every consult to Discover merely because independent judgment is useful.
-3. Classify supplied context using the shared authority model. Preserve useful context instead of deleting it in the name of neutrality.
-4. Identify each GitHub repo and stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, and its role in the task. For a change review, record both base and head commits.
-5. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then inspect `git status --short` and the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
-6. Build a proportional source manifest. Name authoritative starting paths and add symbols, errors, or search strings only when they materially improve discovery. Do not turn a broad task into an exhaustive file checklist.
-7. Select only the sources needed to answer the task. Omit generated files, dependency directories, and unrelated modules. Include PR descriptions, review threads, issue commentary, or prior AI reports only when the user explicitly requests comparison or the selected mode needs that working synthesis; label them secondary framing.
-8. Classify missing inputs as blocking, material-but-nonblocking, or deferrable. If an input is blocking, stop before writing the consult, ask one pointed question, and do not apply the Final Output Rule until the user answers. Convert material-but-nonblocking gaps into explicit assumptions or early decision gates. Leave deferrable gaps unresolved when they cannot change the requested result.
-9. Verify every named manifest path at its pinned commit before writing the document. Use `git cat-file -e <sha>:<path>` when available locally, or an equivalent GitHub API/connector lookup. Remove unresolved paths or state the access limitation and use a search string instead.
-10. Include validation only when it materially changes the consultation. Record concise command results as secondary framing, not proof that overrides GitHub source.
-11. Choose report depth, sections, tables, and diagrams proportionally using the artifact policy below. Do not force one fixed report shape onto every task.
-12. Run the prompt self-review before writing `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact.
-13. When no blocking input remains, write the consult and apply the Final Output Rule.
+3. For research work, identify the current research stage and the exact decision this consultation should change or leave unresolved. Apply the research-stage contract from the entrypoint; do not substitute a narrower stage because it is easier to fit the current implementation.
+4. Classify supplied context using the shared authority model. Preserve useful context instead of deleting it in the name of neutrality.
+5. Identify each GitHub repo and stable ref. Record `owner/repo`, an exact commit SHA, its branch or PR URL, and its role in the task. For a change review, record both base and head commits.
+6. Check GitHub visibility. Use `gh repo view owner/repo` or `git remote -v` when needed, then inspect `git status --short` and the relevant diff. If local changes are evidence, commit and push them before preparing the document; respect repo stop/ask gates.
+7. Build a proportional source manifest. Name authoritative starting paths and add symbols, errors, or search strings only when they materially improve discovery. Do not turn a broad task into an exhaustive file checklist.
+8. Select only the sources needed to answer the task. Omit generated files, dependency directories, and unrelated modules. Include PR descriptions, review threads, issue commentary, or prior AI reports only when the user explicitly requests comparison or the selected mode needs that working synthesis; label them secondary framing.
+9. Classify missing inputs as blocking, material-but-nonblocking, or deferrable. If an input is blocking, stop before writing the consult, ask one pointed question, and do not apply the Final Output Rule until the user answers. Convert material-but-nonblocking gaps into explicit assumptions or early decision gates. Leave deferrable gaps unresolved when they cannot change the requested result.
+10. Verify every named manifest path at its pinned commit before writing the document. Use `git cat-file -e <sha>:<path>` when available locally, or an equivalent GitHub API/connector lookup. Remove unresolved paths or state the access limitation and use a search string instead.
+11. Include validation only when it materially changes the consultation. Record concise command results as secondary framing, not proof that overrides GitHub source.
+12. Choose report depth, sections, tables, and diagrams proportionally using the artifact policy below. Do not force one fixed report shape onto every task.
+13. Run the prompt self-review before writing `/tmp/chatgpt-pro-<topic>.md` unless the user requests a repo artifact.
+14. When no blocking input remains, write the consult and apply the Final Output Rule.
 
 ## Epistemic Neutrality And Evidence Rules
 
@@ -141,6 +142,10 @@ Pro may inspect additional repository paths when necessary to answer the task, b
 # Goal
 
 [Concrete result to provide.]
+
+# Research Stage
+
+[For research work: baseline selection | baseline establishment | faithful reproduction | adaptation | diagnosis | novel improvement. State the decision this consultation should change or leave unresolved and any essential method semantics that must remain intact. Omit for non-research work.]
 
 # Context Authority
 
@@ -255,6 +260,8 @@ Before writing the consult, check:
 - Is a secondary mode genuinely necessary, bounded, ordered after the primary result, and non-conflicting?
 - Did I accidentally present a hypothesis, synthesis, preference, or selected decision as repository fact?
 - Did I distinguish selected decisions from softer preferences and decision criteria?
+- For research work, did I preserve the user's stage, essential method semantics, and decision instead of substituting a smaller or more novel task?
+- Could the requested deliverable succeed while missing the user's intended outcome?
 - Did I delete useful constraints or decision history in the name of neutrality?
 - Am I asking Pro to redo work already completed without identifying a reason or new evidence?
 - Does any repeated requirement anchor the answer more strongly than the user intended?

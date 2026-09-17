@@ -24,6 +24,7 @@ Include only sections that contain useful information:
 [The decision-relevant problem.]
 
 ## Research Quality Contract
+- Research stage: [baseline selection | baseline establishment | faithful reproduction | adaptation | diagnosis | novel improvement; omit for non-research work]
 - Decision or downstream action: [what the result must enable, change, reject, or leave undecided]
 - Evidence standard: [primary sources, corroboration, recency, provenance, and direct-inspection requirements]
 - Scope boundaries: [systems, alternatives, timeframes, interfaces, constraints, and non-goals]
@@ -52,6 +53,8 @@ Include only sections that contain useful information:
 - Do not score research numerically. Keep the sufficiency bar qualitative and proportional to the downstream decision.
 - Keep facts, selected decisions, assumptions, hypotheses, contradictions, supported inferences, recommendations, and unresolved uncertainty distinct.
 - Tie comparisons, recommendations, implementation guidance, risks, and validation to the downstream decision.
+- Preserve the stated research stage and essential method semantics. Do not impose novelty on baseline work or replace an explicitly requested causal scout with baseline establishment.
+- Ask whether the deliverable could succeed while missing the user's intended outcome; if so, correct the framing or make the conflict explicit.
 - Require a final gap review. Request another targeted search only when it could materially close a decision-relevant gap; otherwise preserve the gap explicitly.
 - Permit an explicit no-decision result when the sufficiency bar is not met.
 - Do not invent sources, project facts, constraints, or file paths. Name only context and sources that exist or were supplied.
