@@ -91,6 +91,31 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
         self.assertIn("Preserve hard user requirements separately from soft preferences and decision criteria", text)
         self.assertIn("Treat selected decisions as constraints unless the user explicitly asks to reopen them", text)
 
+    def test_research_stage_preserves_baseline_fidelity_and_requested_scouts(self) -> None:
+        entrypoint = self.read("codex")
+        pro = self.read_pro()
+        plain = (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "references" / "plain-research.md").read_text(encoding="utf-8")
+        for stage in (
+            "baseline selection",
+            "baseline establishment",
+            "faithful reproduction",
+            "adaptation",
+            "diagnosis",
+            "novel improvement",
+        ):
+            self.assertIn(stage, entrypoint.lower())
+            self.assertIn(stage, plain.lower())
+        self.assertIn("An established baseline does not need to be novel", entrypoint)
+        self.assertIn("instead of stripping components to fit", entrypoint)
+        self.assertIn("A causal scout or small discriminator remains legitimate", entrypoint)
+        self.assertIn("# Research Stage", pro)
+        self.assertIn("Could the requested deliverable succeed while missing the user's intended outcome?", pro)
+
+    def test_research_recommendations_can_challenge_but_not_replace_user_authority(self) -> None:
+        entrypoint = self.read("codex")
+        self.assertIn("challenge an unsound framing explicitly and with evidence", entrypoint)
+        self.assertIn("does not itself change the user's goal, selected baseline, method semantics, requested deliverable, or implementation authority", entrypoint)
+
     def test_source_manifest_output_depth_and_artifacts_are_proportional(self) -> None:
         text = self.read_pro()
         artifact = text
@@ -142,6 +167,13 @@ class AskChatGPTProConsultationContractsTest(unittest.TestCase):
             self.assertIn(f"`{case_id}`", text)
         self.assertIn("Single same-agent manual conformance pass", text)
         self.assertIn("10/10 PASS", text)
+        self.assertIn("does not establish general model performance", text)
+
+    def test_research_goal_alignment_conformance_covers_observed_failure_modes(self) -> None:
+        text = (REPO_ROOT / "tests" / "research_goal_alignment_conformance.md").read_text(encoding="utf-8")
+        for case_id in ("faithful-baseline", "explicit-small-scout", "recommended-pivot"):
+            self.assertIn(f"`{case_id}`", text)
+        self.assertIn("3/3 PASS", text)
         self.assertIn("does not establish general model performance", text)
 
 

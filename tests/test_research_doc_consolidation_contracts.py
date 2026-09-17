@@ -68,6 +68,12 @@ class ResearchDocConsolidationContractsTest(unittest.TestCase):
             self.assertIn("Leave research source files", text)
             self.assertIn("distill-source", text)
             self.assertIn("preserve provenance, conflicts, and uncertainty", text.lower())
+            self.assertIn("evidence update", text)
+            self.assertIn("chosen baseline", text)
+            self.assertIn("method semantics or essential components", text)
+            self.assertIn("A recommendation is advice, not authority", text)
+            self.assertIn("resolve them under existing authorization", text)
+            self.assertIn("Do not silently promote a recommendation into settled project direction or a worker assignment", text)
             self.assertNotIn("## Optional findings artifact", text)
 
     def test_retired_source_entries_are_absent(self) -> None:
