@@ -2,7 +2,7 @@
 
 ## Authority And Scope
 
-This specification implements, hardens, and generalizes the product contract in `docs/orchestrate-feature-prd.md`. T-36 owns the initial outer skill, T-38 owns callback delivery and fork discipline, T-39 owns generic naming, role profiles, inner-lens extraction, compatibility, and migration, T-41 owns operator-only reviewer activation, T-42 owns feature-owner delegation, and T-51 owns named-workstream profile precedence, compact worker final handoffs, and correction-round review continuity. The PRD controls product behavior; this document controls the bounded repository change. When they conflict, stop and correct the documents before implementation.
+This specification implements, hardens, and generalizes the product contract in `docs/orchestrate-feature-prd.md`. T-36 owns the initial outer skill, T-38 owns callback delivery and fork discipline, T-39 owns generic naming, role profiles, worker-helper extraction, compatibility, and migration, T-41 owns operator-only reviewer activation, T-42 owns feature-owner delegation, T-51 owns named-workstream profile precedence and review continuity, and T-53 owns the ordinary-owner/native-worker boundary. The PRD controls product behavior; this document controls the bounded repository change. When they conflict, stop and correct the documents before implementation.
 
 ## Task Messaging Boundary
 
@@ -17,7 +17,7 @@ Canonical Codex-only outer skill after T-39:
 - `codex/skills/orchestrate-feature/SKILL.md`
 - `codex/skills/orchestrate-feature/agents/openai.yaml`
 
-Canonical Codex-only generic inner lens after T-39:
+Canonical Codex-only generic worker helper after T-39:
 
 - `codex/skills/orchestrate-workers/SKILL.md`
 - `codex/skills/orchestrate-workers/agents/openai.yaml`
@@ -71,7 +71,7 @@ policy:
   allow_implicit_invocation: false
 ```
 
-## Generic Inner Lens Metadata
+## Generic Worker Helper Metadata
 
 Frontmatter contains only `name` and `description`.
 
@@ -81,8 +81,8 @@ name: orchestrate-workers
 
 The description must state:
 
-- It is a generic current-task lens for profiled native implementation workers, optional explicitly requested ordinary implementation tasks, and an independent reviewer only when the operator explicitly requests one for the resolved task.
-- It owns decomposition, continuity, context, evidence, optional-review routing, and acceptance without changing the current coordinator's profile or lifecycle driver.
+- It is a generic current-task helper for profiled native implementation workers, optional directly and explicitly requested ordinary implementation tasks, and an independent reviewer only when the operator explicitly requests one for the resolved task.
+- It owns worker/reviewer decomposition, continuity, context, evidence, optional-review routing, and result handling without changing the current coordinator's profile, lifecycle driver, or acceptance authority.
 - Defaults are native Luna/xhigh implementation workers with coordinator self-review; an explicitly requested reviewer defaults to native Sol/high. Another exact enabled-role profile requires explicit operator instruction or an operator-authorized launch contract, while the ordinary implementation-task route always requires a separate explicit operator request.
 - It applies only after explicit invocation of `orchestrate-workers` or a relayed invocation in an operator-authorized feature launch.
 
@@ -100,8 +100,18 @@ policy:
 ## Composition Roles
 
 - `orchestrate-feature`: helper. The project-orchestrator driver retains program lifecycle, authority, priority, and completion ownership; the helper owns bounded launch readiness, profile/delivery resolution, feature-task dispatch/reuse, and handoff routing.
-- `orchestrate-workers`: lens. The current task driver retains lifecycle, success, and acceptance; the lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing.
+- `orchestrate-workers`: helper. The current task driver retains lifecycle, success, and acceptance; the helper owns bounded worker/reviewer decomposition, dispatch, continuity, evidence, and result routing without owning the coordinator's relationship to any ordinary parent.
+
 If a governing driver forbids task creation, delegation, or the proposed lifecycle change, stop rather than displacing it.
+
+## Topology Invariant
+
+- Only the current project orchestrator applies `orchestrate-feature` for one resolved feature lane.
+- It creates or reuses exactly one ordinary feature owner through the host/project-authorized ordinary-task mechanism; a native subagent or inherited task fork is never the feature owner.
+- The feature-owner launch packet is compiled output, not an instruction to load the outer helper. It activates `orchestrate-workers` and contains no operative reference to `orchestrate-feature`.
+- `orchestrate-workers` always treats the current task as coordinator. Do not add standalone/feature-owner modes; the outer launch changes only authority and the feature owner's reporting contract.
+- Native workers and the optional native feature reviewer are created, steered, and accepted only by that current coordinator. Their returns remain immediate-parent-only.
+- The feature owner's callback, blocker escalation, required gates, and terminal handoff to the project orchestrator remain exclusively in the outer launch contract and never become worker-helper behavior.
 
 ## Required Terms
 
@@ -117,7 +127,7 @@ Define compactly in the applicable skills:
 - `Launch contract`: authoritative context, scope, state, authority, role map, success, verification, stop, and notification packet sent to a feature owner.
 - `Notification contract`, `Supervision state`, `Bounded active wait`, `Fork`, `Reset`, and `Recycle`: preserve the reviewed T-38 meanings.
 
-Do not create a profile registry or new route taxonomy beyond the four delivery modes and the inner native/explicit ordinary implementation routes.
+Do not create a profile registry or new route taxonomy beyond the four outer delivery modes and the worker helper's native/default and directly requested ordinary implementation routes.
 
 ## Outer Activation And Readiness
 
@@ -162,13 +172,13 @@ Retain the complete map with `disabled`, `default`, or `operator override` prove
 ## New Feature Dispatch
 
 1. Resolve callback identity/action only when callback is selected; otherwise resolve the selected delivery mechanism and target without fabricating an origin route.
-2. Use native `create_thread` with fresh context, never a native subagent spawn or `fork_thread`.
+2. Use the host/project-authorized ordinary-task creation mechanism with fresh context, never a native subagent spawn or inherited task fork.
 3. Select the exact resolved feature-owner model and effort as the new task's creation profile rather than the old hard-coded owner profile.
 4. Resolve saved project/environment and exact existing branch/ref or intended working-tree state under user/project policy. Honor project requirements to use an existing checkout; parallel work does not authorize a worktree.
 5. Give the task a concise project-and-feature title.
 6. Send only the complete Feature Owner Launch Contract. Do not inherit or paste parent history.
 7. Treat creation validation as profile provenance, not independent metadata readback. Distinguish pending from ready identity.
-8. Retain ready feature identity, host, and latest wait cursor as parent-owned supervision state; perform one bounded `wait_threads` wait/snapshot for immediate completion/failure/attention.
+8. Retain ready feature identity, host, and latest supervision cursor as parent-owned state. Perform only host-required creation/progress confirmation unless bounded active waiting was selected; never imply persistent monitoring.
 9. Report identity, objective, requested owner profile, worker profile, reviewer activation and enabled profile if any, environment/context, delivery route, wait state, and fallback.
 
 One active durable writer per checkout remains the default. Concurrent work requires disjoint ownership plus one named owner for Git/shared mutable resources, or explicit separate-worktree authority.
@@ -183,7 +193,7 @@ Include every applicable field whose absence can change behavior or authority:
 - `Project, repository, checkout/worktree, branch/ref, and exact starting state`
 - `Scope, ownership, interfaces, dependencies, and shared mutable state`
 - `Authority` for edits, validation, commit, push, PR, merge, lifecycle, external writes, task creation, and delegation
-- `Driver and lens`: project workflow remains driver; explicitly invoke `orchestrate-workers` for this feature under the operator-authorized launch
+- `Driver and worker helper`: project workflow remains driver; the contract activates `orchestrate-workers` for this feature and never instructs or refers the owner to `orchestrate-feature`
 - `Resolved role map and reviewer request`: immutable orchestrator observation/requirement plus exact owner profile/provenance, resolved general worker profile, every explicit named-workstream overlay/provenance, and a requirement that the owner resolve each actual worker before creation; reviewer activation as `disabled` or `operator-requested`; when requested, exact operator-request provenance, acceptance target, and separate reviewer profile/provenance
 - `Inner route`: native leaf workers only; ordinary implementation-task route forbidden inside this topology
 - `Success criteria and artifacts`
@@ -198,17 +208,17 @@ For each shared mutable resource, name exactly one writer at a time—the owner 
 
 ## Feature-Task And Subagent Continuity
 
-Feature-owner reuse requires an exact known idle identity plus compatible feature, project, repository/checkout/branch, trust, authority, role, feature-owner model/effort, inner-lens contract, and acceptance boundary. A different owner profile requires a new task; do not override an existing task on follow-up.
+Feature-owner reuse requires an exact known idle identity plus compatible feature, project, repository/checkout/branch, trust, authority, role, feature-owner model/effort, worker-helper contract, and acceptance boundary. A different owner profile requires a new task; do not override an existing task on follow-up.
 
 Before reuse, inspect current state and revalidate all role profiles and delivery fields. Never send a reset or concurrent assignment to a running feature owner. Send an idle compatible owner a full reset with prior disposition, allowed carry-over facts, invalidated scope/authority/decisions/assumptions/evidence/claims, and complete new objective, interfaces, success, verification, stop, notification, role-map, context, and return contracts. Every existing-task message omits both `model` and `thinking` entirely and preserves the configured recipient profile. Old origin identity, callback action, wait cursor, event set, or profiles never carry implicitly.
 
-The generic inner lens keys worker/reviewer reuse by exact role, project, checkout, trust, authority, ownership, route, model, and effort. For an implementation worker, model and effort are the per-field result of default/general/named resolution for the actual assignment; the reviewer profile is resolved independently under its activation contract. A profile change triggers a fresh identity under existing recycle rules. Reuse compatible idle identities with assignment resets; do not recycle for elapsed time, compaction, assignment count, or ordinary correction. Keep worker and reviewer identities separate.
+The generic worker helper keys worker/reviewer reuse by exact role, project, checkout, trust, authority, ownership, route, model, and effort. For an implementation worker, model and effort are the per-field result of default/general/named resolution for the actual assignment; the reviewer profile is resolved independently under its activation contract. A profile change triggers a fresh identity under existing recycle rules. Reuse compatible idle identities with assignment resets; do not recycle for elapsed time, compaction, assignment count, or ordinary correction. Keep worker and reviewer identities separate.
 
-## Generic Inner Lens Contract
+## Generic Worker Helper Contract
 
 Keep the generic behavioral body in `orchestrate-workers`, preserving and generalizing:
 
-- Driver/lens separation and current-coordinator profile preservation.
+- Driver/helper separation and current-coordinator profile preservation.
 - One coherent worker by default; parallel workers only for independent ownership lanes and dependency-free frontier.
 - Shared-checkout ownership, one Git/shared-state owner, and no worktree without operator approval.
 - No parent turns for new workers; exceptional bounded inherited-turn slice for one named undistillable fact; full-history prohibition.
@@ -217,13 +227,13 @@ Keep the generic behavioral body in `orchestrate-workers`, preserving and genera
 - Independent review disabled by default and activated only by an explicit operator request for the resolved task; no task characteristic, evidence gap, driver preference, or agent judgment supplies authorization.
 - Fresh reviewer context without history exception, separate reviewer identity, and generic reviewer protocol.
 
-Defaults for direct `orchestrate-workers` invocation are native Luna/xhigh implementation workers and coordinator self-review. An explicitly requested reviewer defaults to native Sol/high. Another worker profile may come from explicit operator instruction or an operator-authorized launch contract; resolve each actual worker's model and effort separately from the role default, then explicit general override, then matching named-workstream override. A relayed feature launch carries the resolved general profile plus every explicit named overlay/provenance; a direct invocation derives any overrides from explicit operator instructions and otherwise uses the defaults. The lens resolves the creation profile immediately before dispatch. Named assignment labels never require decomposition or launch. A reviewer profile is resolved only after explicit operator activation, including profile wording or a launch contract carrying the originating operator request. The ordinary implementation-task route always requires a separate explicit operator request; a launch contract does not authorize that route by itself. Before each enabled-role dispatch, resolve the actual route, model, effort, context mode, and whether each value is default or override internally; disclose only consequential variation or exception. Do not resolve or validate reviewer controls while disabled. Stop when an enabled exact profile cannot be set/validated.
+Defaults for `orchestrate-workers` are native Luna/xhigh implementation workers and coordinator self-review. The helper always treats the current task as coordinator; feature ownership changes only the outer reporting contract, not worker behavior. An explicitly requested reviewer defaults to native Sol/high. Another worker profile may come from explicit operator instruction or an operator-authorized launch contract; resolve each actual worker's model and effort separately from the role default, then explicit general override, then matching named-workstream override. A relayed feature launch carries the resolved general profile plus every explicit named overlay/provenance; a direct invocation derives any overrides from explicit operator instructions and otherwise uses the defaults. The helper resolves the creation profile immediately before dispatch. Named assignment labels never require decomposition or launch. A reviewer profile is resolved only after explicit operator activation, including profile wording or a launch contract carrying the originating operator request. An ordinary implementation task requires a direct explicit operator request plus existing task-creation authority; no relayed feature launch supplies either. Before each enabled-role dispatch, resolve the actual route, model, effort, context mode, and whether each value is default or override internally; disclose only consequential variation or exception. Do not resolve or validate reviewer controls while disabled. Stop when an enabled exact profile cannot be set/validated.
 
 Native worker final handoffs require a compact self-contained status/outcome, changed scope, exact tested state, verification results, and material gaps or decisions. Include dependency and continuity details only when decision-bearing. Long output and inventories may reference existing accessible evidence while decisive facts remain inline; do not create artifacts only to shorten messages, impose an arbitrary cap, or weaken evidence. Omit attempt chronology but retain failures with conditions/evidence when they constrain the next action or prevent repeated work. Full reset remains mandatory on reassignment; bounded correction of the same assignment sends only changed constraints and preserves settings.
 
-The current coordinator may use any product-exposed profile; the lens preserves it and does not infer that coordinator and workers/reviewer must share a model. The enabled reviewer profile constrains only the independent reviewer. Activation and independence remain behavioral contracts, not claims derived from a model name.
+The current coordinator may use any product-exposed profile; the helper preserves it and does not infer that coordinator and workers/reviewer must share a model. The enabled reviewer profile constrains only the independent reviewer. Activation and independence remain behavioral contracts, not claims derived from a model name.
 
-The optional ordinary implementation-task route remains available only on a separate explicit operator request. It uses the resolved worker creation profile, verifies the exact recipient, authorized callback purpose, and absence of both `model` and `thinking`, and requires the exact originating coordinator `threadId` and `hostId` when required plus the explicit native `send_message_to_thread` action. An accepted blocker/terminal send establishes delivery; rejection or unavailability remains local delivery failure. The route returns immediately without polling and never changes reviewer routing. `orchestrate-feature` forbids this inner route because its owner is already an ordinary task.
+The optional ordinary implementation-task route remains available only when the operator directly invokes `orchestrate-workers`, explicitly requests an ordinary task, and grants or preserves the required task-creation authority. It uses the resolved worker creation profile, verifies the exact recipient, authorized callback purpose, and absence of both `model` and `thinking`, and requires the exact originating coordinator identity and executable callback action when the host requires them. An accepted blocker/terminal send establishes delivery; rejection or unavailability remains local delivery failure. The route returns immediately without polling and never changes reviewer routing. A feature-owner launch grants no ordinary-task-creation authority, so the route is unavailable without introducing a second, separately authorized topology.
 
 Keep the reviewer protocol at `orchestrate-workers/references/independent-reviewer-protocol.md` and load it only after explicit operator activation; preserve fresh context, read-only default, acceptance target, findings-first report, correction loop, and non-implementation boundary. The first review covers the complete target. The same compatible reviewer may carry demonstrably applicable coverage across a correction only after the exact prior baseline and complete subsequent delta, including uncommitted changes, are established and affected interfaces, invariants, callers or consumers, unresolved findings, and new verification are inspected. Every mutation invalidates the verdict and requires a new complete-current-target verdict identifying carried and new coverage. Missing baseline or coverage, changed assumptions, or wider consequences expand inspection; compaction alone does not force a restart when sufficient evidence survives.
 
@@ -248,13 +258,13 @@ If exact selected route/model/effort/context/delivery behavior is unavailable, s
 
 ## Catalog And Managed Migration
 
-Catalog changes:
+Historical T-39 catalog changes retained as invariants:
 
 - Replace outer ID `orchestrate-sol-feature` with `orchestrate-feature`, `kind: skill`, Codex-only, owner `agents`, source `codex/skills/orchestrate-feature`, install target `skills/orchestrate-feature`, tags `role:helper` and `domain:orchestration`.
-- Add `orchestrate-workers`, `kind: skill`, Codex-only, owner `agents`, source `codex/skills/orchestrate-workers`, install target `skills/orchestrate-workers`, tags `role:lens` and `domain:orchestration`.
+- Add `orchestrate-workers`, `kind: skill`, Codex-only, owner `agents`, source `codex/skills/orchestrate-workers`, install target `skills/orchestrate-workers`, tags `role:helper` and `domain:orchestration`.
 - Remove the `sol-luna-orchestration` ID, source path, and install target; no Claude entry exists.
 
-The repository and scratch installed output contain no `orchestrate-sol-feature` source after migration. Reuse `InstallerEngineTest.test_catalog_deleted_asset_prunes_and_uninstall_uses_history` as the public behavior proof that unchanged managed assets removed from the catalog are pruneable; do not duplicate the installer mechanism. Add branch-specific scratch-upgrade evidence: install exact `main` into an isolated Codex home, run the current branch installer with `--prune`, and prove the old managed outer directory is removed, both new canonical assets are present, the retained preset remains, and an injected unmanaged sentinel outside those targets is unchanged. Use a dry-run/diff first, then perform the scratch mutation to prove the postcondition.
+The repository and installed output must contain no `orchestrate-sol-feature` or `sol-luna-orchestration` source after migration. Reuse `InstallerEngineTest.test_catalog_deleted_asset_prunes_and_uninstall_uses_history` as the public behavior proof that unchanged managed assets removed from the catalog are pruneable; do not duplicate the installer mechanism or reconstruct the retired T-39 baseline from current `main`. T-53 scratch evidence installs the current branch into an isolated Codex home, proves both canonical orchestration skills and managed metadata match source, and proves an injected unmanaged sentinel remains unchanged.
 
 ## Static And Behavioral Contracts
 
@@ -274,7 +284,7 @@ Focused tests must fail for these regressions:
 12. The feature owner retains architecture/risk decisions, assignment contracts, feature-lane Git/shared-state writer assignment, integrated-state synthesis, integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo, acceptance, terminal reporting, and exactly the external-landing authority granted; primarily orchestrating remains active ownership.
 13. Each shared mutable resource has exactly one writer at a time within already-granted authority, retained by the owner or one worker; every other writer, including the owner, is serialized and the owner evaluates the resulting evidence.
 14. Substantial direct owner execution records a no-boundary reason in the in-task plan or worker-dispatch context and existing final handoff `decisions/divergence`, without a new file, ledger, side channel, or notification event; trivial glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed.
-15. The owner uses `orchestrate-workers` to create native leaf implementation workers, never a nested feature owner or ordinary implementation-task route; sequential assignments may reuse one compatible worker, while parallel workers require genuinely non-overlapping ownership lanes and tests do not require a worker count.
+15. The feature-owner launch packet never instructs or refers the owner to `orchestrate-feature`; it activates `orchestrate-workers`, grants no ordinary-task-creation authority, and leaves the outer callback exclusively in the launch contract. The owner uses the helper to create native leaf implementation workers, never a nested feature owner or ordinary implementation-task route; sequential assignments may reuse one compatible worker, while parallel workers require genuinely non-overlapping ownership lanes and tests do not require a worker count.
 16. Existing-task messages omit both `model` and `thinking` entirely, target-specific settings changes require explicit operator authorization, native workers and reviewers return only through their immediate parent by default, and any parent-bypass route exception names sender, recipient, and purpose without cross-task fallback after parent delivery failure.
 17. General and named-workstream worker overrides resolve model and effort independently in the order role default, general override, named override; no override changes the owner, reviewer, another workstream, or an existing identity, and assignment labels do not require launches.
 18. Native worker final handoffs stay compact and self-contained on changed scope, exact tested state, results, and material gaps/decisions; evidence references preserve decisive facts inline, and failure conditions that constrain the next action survive without attempt chronology.
@@ -299,30 +309,27 @@ harness check
 git diff --check main
 ```
 
-Exercise scratch homes only:
+Before publication, exercise scratch homes:
 
 ```text
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --dry-run --diff
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --dry-run --diff
-<install exact main into an isolated codex-upgrade home>
-CODEX_HOME="<isolated codex-upgrade home>" bash scripts/install-codex.sh --dry-run --diff --prune
-CODEX_HOME="<isolated codex-upgrade home>" bash scripts/install-codex.sh --prune
+CODEX_HOME="<isolated current-branch home>" bash scripts/install-codex.sh
+<verify canonical skill and metadata equality plus unmanaged-sentinel preservation>
 ```
 
-The upgrade fixture must contain the exact base-generated managed state and old outer asset rather than an unmanaged lookalike. Verify the three skill-directory postconditions and unmanaged sentinel directly. If the full suite has a pre-existing failure, reproduce it on exact base and do not weaken unrelated tests.
+Do not synthesize retired managed state from current `main`. If the full suite has a pre-existing failure, reproduce it on exact base and do not weaken unrelated tests. The separately authorized live Codex installation occurs only after squash merge and update of `main`; verify the installed canonical skills against that merged source.
 
 ## Review And Publication
 
-Required T-39 sequence:
+Required T-53 sequence:
 
-1. Codex authors and performs a read-only design review of the amended PRD/spec against T-39, the current catalog/installer, native schemas, and the accepted T-38 contracts. Resolve material design findings before implementation.
-2. Use a compatible `gpt-5.6-luna`/xhigh implementation leaf with a complete assignment reset. It may edit/validate only accepted paths and may not commit, push, open/merge a PR, install live, create a worktree, mutate Harness, or delegate.
-3. Codex reviews the integrated diff and routes bounded fixes to the same worker.
-4. A fresh independent read-only reviewer checks the exact combined branch against T-39 and all retained T-38 criteria. Resolve every material finding and re-review substantive fixes.
-5. Close T-39/S-27, commit reviewed checkpoints, push `codex/orchestrate-feature`, and open one pull request into `main` describing both callback hardening and generic-profile migration.
-
-Do not merge or install the live skill in this task.
+1. Codex authors the amended PRD/spec and sends that exact candidate to a fresh `gpt-6-astra`/medium read-only reviewer without builder rationale. Resolve material design findings and obtain an accepted design verdict before implementation.
+2. Use a fresh `gpt-5.6-luna`/xhigh implementation leaf with a complete assignment contract. It may edit and validate only the accepted skill, metadata, catalog, documentation, and test paths; it may not commit, push, open/merge a PR, install live, create a worktree, mutate Harness, or delegate.
+3. Codex reviews the complete integrated diff and verification evidence itself, routes bounded fixes to the same worker when needed, and reruns decision-bearing checks.
+4. After the exact substantive diff is ready to finalize, close T-53 truthfully, commit, push the feature branch, open a PR, and inspect required checks and merge readiness.
+5. When the PR is conceptually ready and checks permit, squash-merge it under the operator's explicit authority, remove local and remote feature branches, return to updated `main`, and run the project-owned live Codex installer. Verify that both installed orchestration skills match the merged source.
 
 ## Acceptance
 
-T-39 implementation was accepted under its recorded review and publication sequence. The T-41 amendment is acceptable when default coordinator/feature-owner self-review, explicit operator-only reviewer activation, disabled-path non-resolution/non-loading, enabled-reviewer independence, generic profile routing, and retained T-38/T-39 delivery/context/authority contracts pass focused tests and repository validation with no unrelated diff. The T-42 amendment is additionally acceptable when a code feature containing a Docker image build, focused tests, and a shared-host end-to-end test naturally yields coherent worker-owned implementation/build/test assignments (sequentially on one compatible worker unless lanes are genuinely non-overlapping), exactly one named shared-host writer at a time within authority, and owner-owned integration, integrated-diff/evidence inspection, verification-sufficiency judgment, retain-or-redo, and acceptance without creating another feature-owner task. The T-51 amendment is acceptable when mixed per-field worker overrides produce the requested creation profiles without implicit launches or settings mutations, native final reports preserve decisive evidence compactly, and reviewer correction rounds issue new complete-current-target verdicts from recoverable exact baselines and complete deltas or expand inspection when that evidence is insufficient.
+T-39 implementation was accepted under its recorded review and publication sequence. The T-41 amendment is acceptable when default coordinator/feature-owner self-review, explicit operator-only reviewer activation, disabled-path non-resolution/non-loading, enabled-reviewer independence, generic profile routing, and retained T-38/T-39 delivery/context/authority contracts pass focused tests and repository validation with no unrelated diff. The T-42 amendment is additionally acceptable when a code feature containing a Docker image build, focused tests, and a shared-host end-to-end test naturally yields coherent worker-owned implementation/build/test assignments (sequentially on one compatible worker unless lanes are genuinely non-overlapping), exactly one named shared-host writer at a time within authority, and owner-owned integration, integrated-diff/evidence inspection, verification-sufficiency judgment, retain-or-redo, and acceptance without creating another feature-owner task. The T-51 amendment is acceptable when mixed per-field worker overrides produce the requested creation profiles without implicit launches or settings mutations, native final reports preserve decisive evidence compactly, and reviewer correction rounds issue new complete-current-target verdicts from recoverable exact baselines and complete deltas or expand inspection when that evidence is insufficient. The T-53 amendment is acceptable when the feature-owner launch packet activates only `orchestrate-workers`, grants no ordinary-task-creation authority, retains the callback solely as an outer contract, and the worker helper has one uniform current-coordinator behavior with native workers by default and ordinary task creation only under a direct explicit operator request plus existing authority.

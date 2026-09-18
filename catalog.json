@@ -273,7 +273,7 @@
       "install_target": {
         "codex": "skills/orchestrate-workers"
       },
-      "tags": ["role:lens", "domain:orchestration"]
+      "tags": ["role:helper", "domain:orchestration"]
     },
     {
       "id": "prepare-dynamic-workflow",
