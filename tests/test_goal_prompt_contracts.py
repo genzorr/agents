@@ -119,7 +119,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         entries = {item["id"]: item for item in catalog["skills"]}
         expected = {
             "orchestrate-feature": ("codex/skills/orchestrate-feature", "skills/orchestrate-feature", "role:helper"),
-            "orchestrate-workers": ("codex/skills/orchestrate-workers", "skills/orchestrate-workers", "role:lens"),
+            "orchestrate-workers": ("codex/skills/orchestrate-workers", "skills/orchestrate-workers", "role:helper"),
         }
         self.assertNotIn("orchestrate-sol-feature", entries)
         self.assertFalse((REPO_ROOT / "codex/skills/orchestrate-sol-feature").exists())
@@ -140,6 +140,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         frontmatter = text.split("---\n", 2)[1]
         profiles = text.split("## Resolve Role Profiles\n", 1)[1].split("## Select New Or Reused Ownership", 1)[0]
         for anchor in (
+            "Dispatch or reuse one ordinary feature-owner task",
+            "relaying the profiles under which that owner uses orchestrate-workers for native leaf execution and review",
             "Use only after the operator invokes orchestrate-feature",
             "Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review",
             "requested reviewer Sol/high",
@@ -164,6 +166,54 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             self.assertIn(anchor, profiles)
         self.assertIn('display_name: "Orchestrate Feature"', metadata)
         self.assertIn('short_description: "Launch feature owners with opt-in review"', metadata)
+        self.assertNotIn("with reusable native workers", frontmatter)
+
+    def test_orchestration_topology_is_section_scoped_and_routes_are_separate(self) -> None:
+        feature = self.read("codex/skills/orchestrate-feature/SKILL.md")
+        topology = feature.split("## Topology Invariant\n", 1)[1].split("## Terms", 1)[0]
+        packet = feature.split("## Feature Owner Launch Contract\n", 1)[1].split("## Compose Worker Helper", 1)[0]
+        composition = feature.split("## Compose Worker Helper\n", 1)[1].split("## Supervise And Complete", 1)[0]
+        workers = self.read("codex/skills/orchestrate-workers/SKILL.md")
+        uniform = workers.split("## Uniform Coordinator Invariant\n", 1)[1].split("## Configure Only", 1)[0]
+        native_route = workers.split("- **Native subagent route:**", 1)[1].split("\n", 1)[0]
+        ordinary_route = workers.split("## Operator-Requested Ordinary Implementation Route\n", 1)[1].split("## Coordinator Depth Budget", 1)[0]
+
+        for anchor in (
+            "Only the current project orchestrator applies `orchestrate-feature`",
+            "exactly one ordinary feature owner",
+            "never use a native subagent or inherited task fork",
+            "never instructs, passes, or refers the owner to `orchestrate-feature`",
+            "no ordinary-task-creation authority",
+        ):
+            self.assertIn(anchor, topology)
+        self.assertIn("activate `orchestrate-workers`", packet)
+        self.assertNotIn("orchestrate-feature", packet)
+        self.assertIn("no ordinary-task-creation authority", packet)
+        self.assertIn("Do not duplicate the worker helper's lifecycle or reviewer protocol here", composition)
+        self.assertIn("outer helper alone owns the project-orchestrator callback", composition)
+
+        for anchor in (
+            "current task is always the coordinator",
+            "no standalone mode",
+            "no feature-owner mode",
+            "Native workers are the default route",
+            "direct explicit operator request and existing task-creation authority",
+        ):
+            self.assertIn(anchor, uniform)
+        self.assertNotIn("callback", native_route.lower())
+        for callback_handle in ("threadId", "hostId", "send_message_to_thread"):
+            self.assertNotIn(callback_handle, native_route)
+        for anchor in (
+            "direct explicit operator request",
+            "naming this ordinary implementation-task route",
+            "current coordinator already has task-creation authority",
+            "relayed feature launch always supplies neither the direct request nor the authority, so this route is unavailable there",
+        ):
+            self.assertIn(anchor, ordinary_route)
+
+        supervision = feature.split("## Supervise And Complete\n", 1)[1]
+        self.assertIn("**Callback, default:**", supervision)
+        self.assertIn("send_message_to_thread", supervision)
 
     def test_orchestration_resolves_named_workstream_profiles_per_field(self) -> None:
         feature = self.read("codex/skills/orchestrate-feature/SKILL.md")
@@ -187,7 +237,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
     def test_orchestrate_feature_preserves_immutable_orchestrator_and_authority(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
         readiness = text.split("## Activate And Resolve Readiness\n", 1)[1].split("## Resolve Role Profiles", 1)[0]
-        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Constrain Inner Delegation", 1)[0]
+        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Compose Worker Helper", 1)[0]
         for anchor in (
             "Preserve the current model and effort",
             "operator-specified orchestrator profile only as a precondition",
@@ -202,8 +252,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "**Project and starting state:**",
             "**Scope and shared state:**",
             "**Authority:**",
-            "**Driver and lens:**",
-            "**Resolved role map, reviewer request, and inner route:**",
+            "**Driver and worker helper:**",
+            "**Resolved role map, reviewer request, and worker-helper route:**",
             "**Success, artifacts, verification, and evidence:**",
             "**Stop/ask and reporting gates:**",
             "**Notification and return contract:**",
@@ -213,22 +263,22 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         for anchor in (
             "never broaden worktree, Git, live-install, or external-write authority",
             "native leaf workers only",
-            "forbid the optional ordinary implementation-task route",
+            "the optional ordinary implementation-task route is forbidden",
             "reviewer activation recorded as `disabled` or `operator-requested`",
             "exact operator-request provenance, acceptance target",
             "owns integration, default self-review, and feature acceptance",
             "cannot delegate authority or create an ordinary task",
         ):
             self.assertIn(anchor, contract)
-        self.assertIn("must not spawn or duplicate the feature owner's implementation workers or reviewer directly", text)
-        self.assertIn("All feature-lane child dispatch, correction, reuse, and aggregation stays with the feature owner", text)
+        self.assertIn("must not spawn or steer the feature owner's native workers or reviewer directly", text)
+        self.assertIn("All feature-lane child dispatch, correction, reuse, aggregation, and acceptance stay at the feature-owner coordinator boundary", text)
         self.assertIn("both requested for the same unresolved feature", readiness)
         self.assertIn("stop and ask the operator to choose one owner topology", readiness)
 
     def test_orchestrate_feature_binds_owner_depth_budget_and_boundaries(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
-        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Constrain Inner Delegation", 1)[0]
-        delegation = text.split("## Constrain Inner Delegation\n", 1)[1].split("## Supervise And Complete", 1)[0]
+        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Compose Worker Helper", 1)[0]
+        delegation = text.split("## Compose Worker Helper\n", 1)[1].split("## Supervise And Complete", 1)[0]
         for anchor in (
             "cannot delegate authority or create an ordinary task",
             "delegate coherent execution-depth work—broad investigation, implementation, implementation-depth diagnostics, builds, focused tests, and owned-diff inspection—to configurable native workers when a safe delegation boundary exists",
@@ -245,9 +295,10 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, contract)
         for anchor in (
-            "Owner must primarily orchestrate through synthesis, integration, integrated-diff inspection, evidence judgment, and retain-or-redo/acceptance.",
-            "It cannot create another feature task, use the ordinary task route, delegate authority, or treat profile names as proof; it must delegate execution-depth work at safe boundaries.",
-            "Sequential compatible-worker assignments remain valid; parallel workers require non-overlapping lanes.",
+            "launch contract activates `orchestrate-workers`",
+            "The contract grants no ordinary-task-creation authority.",
+            "Do not duplicate the worker helper's lifecycle or reviewer protocol here.",
+            "the outer helper alone owns the project-orchestrator callback, supervision, blocker escalation, and terminal handoff",
         ):
             self.assertIn(anchor, delegation)
 
@@ -300,7 +351,6 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
         reuse = text.split("## Select New Or Reused Ownership\n", 1)[1].split("## Launch A New Feature Owner", 1)[0]
         launch = text.split("## Launch A New Feature Owner\n", 1)[1].split("## Feature Owner Launch Contract", 1)[0]
-        delegation = text.split("## Constrain Inner Delegation\n", 1)[1].split("## Supervise And Complete", 1)[0]
         for anchor in (
             "one active durable writer per checkout",
             "Concurrent writers require disjoint paths and one named owner for Git state",
@@ -315,8 +365,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, reuse)
         for anchor in (
-            "native `create_thread` with fresh context",
-            "never a native subagent spawn or `fork_thread`",
+            "host/project-authorized ordinary-task creation mechanism with fresh context",
+            "never a native subagent spawn or inherited task fork",
             "never inherit or paste parent history",
             "Conversation history is context, not authority",
             "request validation from readback",
@@ -329,21 +379,14 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "not a task environment already assigned under this compliant outer policy",
         ):
             self.assertIn(anchor, launch)
-        for anchor in (
-            "no parent turns by default",
-            "inherited-turn fork is exceptional",
-            "one named load-bearing fact with no durable source",
-            "fact, reason, and exact slice",
-            "Independent reviewers receive fresh context with no exception",
-            "Full parent-history inheritance is prohibited",
-            "Keep every worker and reviewer a leaf",
-        ):
-            self.assertIn(anchor, delegation)
+        self.assertNotIn("## Worker Lifecycle And Continuity", text)
+        self.assertNotIn("## Compact Worker Contract", text)
+        self.assertIn("native worker/reviewer decomposition, contracts, context, continuity, evidence, review routing, and immediate-parent returns", text)
 
     def test_orchestrate_feature_preserves_route_scoped_sparse_delivery(self) -> None:
         text = self.read("codex/skills/orchestrate-feature/SKILL.md")
         launch = text.split("## Launch A New Feature Owner\n", 1)[1].split("## Feature Owner Launch Contract", 1)[0]
-        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Constrain Inner Delegation", 1)[0]
+        contract = text.split("## Feature Owner Launch Contract\n", 1)[1].split("## Compose Worker Helper", 1)[0]
         supervision = text.split("## Supervise And Complete\n", 1)[1]
         self.assertIn("Resolve callback identity/action only under callback", launch)
         for anchor in (
@@ -406,8 +449,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             self.assertIn(anchor, profiles)
         for anchor in (
             "Use another enabled-role profile only on explicit operator instruction",
-            "ordinary task route always requires a separate explicit request",
-            "the launch contract does not authorize it",
+            "ordinary task route requires a direct explicit operator request naming this route plus existing task-creation authority",
+            "a relayed feature launch supplies neither and does not authorize it",
         ):
             self.assertIn(anchor, profiles)
         self.assertNotIn("Require the current coordinator to run Sol", text)
@@ -488,7 +531,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             self.assertNotIn(callback_handle, native_route)
         for anchor in (
             "worker or reviewer returns only to its immediate parent through native collaboration/results",
-            "only after a separate explicit operator request",
+            "only after a direct explicit operator request naming this ordinary implementation-task route and existing task-creation authority",
             "Verify the exact recipient and authorized callback purpose",
             "exact originating coordinator `threadId` and `hostId` when required",
             "explicit native `send_message_to_thread` action",
@@ -584,7 +627,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "An unauthorized driver requirement is a stop-and-ask condition only when the next action requires independent review.",
             "Complete already-authorized implementation and verification first, then leave a concrete review handoff;",
             "do not claim independent acceptance or waive the driver’s review requirement.",
-            "description: Dispatch or reuse one profiled feature-owner task from a long-lived project orchestrator, with reusable native workers and an independent reviewer only when explicitly operator-requested.",
+            "description: Dispatch or reuse one ordinary feature-owner task from a long-lived project orchestrator, relaying the profiles under which that owner uses orchestrate-workers for native leaf execution and review.",
             "Defaults are Sol/medium owner, Luna/xhigh workers, feature-owner self-review, and requested reviewer Sol/high.",
             "- **Role map:** immutable current-orchestrator observation plus independently resolved owner and worker profiles, reviewer activation, and the reviewer profile only when operator-requested.",
             "| Independent reviewer | Disabled;",
@@ -594,23 +637,25 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "For owner and enabled reviewer profiles, an omitted field inherits its enabled role's default, never another override;",
             "Never infer reviewer activation;",
             "never substitute or validate reviewer controls while disabled.",
-            "- **Resolved role map, reviewer request, and inner route:** complete role map;",
+            "- **Resolved role map, reviewer request, and worker-helper route:** complete role map;",
             "reviewer activation recorded as `disabled` or `operator-requested`;",
             "when requested, exact operator-request provenance, acceptance target, and separate reviewer profile/provenance;",
             "State that the owner owns integration, default self-review, and feature acceptance;",
             "may create only native leaf workers and an operator-requested reviewer;",
-            "Pass the worker profile and reviewer activation as `disabled` or `operator-requested`;",
-            "only when requested, also pass the exact operator-request provenance, acceptance target, and reviewer profile/provenance.",
-            "The lens owns decomposition, contracts, context, continuity, evidence, review routing, and acceptance;",
-            "The project orchestrator must not spawn or duplicate the feature owner's implementation workers or reviewer directly.",
-            "Independent reviewers receive fresh context with no exception.",
-            "Keep every worker and reviewer a leaf and keep their identities separate.",
+            "Pass the resolved general worker profile, every explicit named-workstream overlay and provenance, and reviewer activation as `disabled` or `operator-requested`;",
+            "only when requested, pass the exact operator-request provenance, acceptance target, and reviewer profile/provenance.",
+            "The project orchestrator must not spawn or steer the feature owner's native workers or reviewer directly.",
+            "`orchestrate-workers` owns native worker/reviewer decomposition, contracts, context, continuity, evidence, review routing, and immediate-parent returns.",
+            "Do not duplicate the worker helper's lifecycle or reviewer protocol here.",
             "- **Creation profile:** model and effort selected while creating a new worker or reviewer identity.",
             "- **Native subagent route:** worker or reviewer returns only to its immediate parent through native collaboration/results;",
             "The native reviewer uses the immediate-parent route above and never falls back to a cross-task route.",
-            "description: Configure a current-task coordinator with profiled native implementation workers, an optional separately requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
+            "Preserve coordinator profile and driver while owning worker/reviewer decomposition, continuity, fresh context, evidence, routing, and result handling.",
+            "native worker/reviewer decomposition and returns remain with `orchestrate-workers`.",
+            "The coordinator's callback or reporting relationship to an ordinary parent belongs to that outer launch, not to this helper's native worker/reviewer route.",
+            "description: Configure the current task as a coordinator with profiled native implementation workers, an optional directly requested ordinary task, and an independent reviewer only when explicitly operator-requested.",
             "Defaults are native Luna/xhigh workers, coordinator self-review, and requested reviewer native Sol/high.",
-            "This lens changes decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",
+            "This helper owns worker/reviewer decomposition, delegation, context, evidence, and explicitly requested independent-review routing;",
             "it may use any product-exposed profile and remains planner, integrator, primary reviewer, and acceptance authority.",
             "- **Independent reviewer:** separate operator-requested native leaf;",
             "| Independent reviewer | Disabled unless explicitly operator-requested | Native subagent | `gpt-5.6-sol` | `high` |",
@@ -663,7 +708,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
         route = text.split("## Operator-Requested Ordinary Implementation Route\n", 1)[1].split("## Coordinator Depth Budget", 1)[0]
         for anchor in (
-            "separate explicit operator request",
+            "direct explicit operator request",
+            "current coordinator already has task-creation authority",
             "exact originating coordinator `threadId` and `hostId` when required",
             "explicit native `send_message_to_thread` action",
             "return the launch response immediately",
@@ -671,7 +717,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "genuine blocker or final handoff",
             "accepted blocker/terminal send establishes delivery",
             "rejection or unavailability remains local delivery failure",
-            "fresh lens invocation",
+            "fresh helper invocation",
         ):
             self.assertIn(anchor, route)
 
@@ -686,11 +732,13 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, readiness)
         for anchor in (
-            "one bounded `wait_threads` wait/snapshot",
             "latest wait cursor",
+            "only host-required creation/progress confirmation unless bounded active waiting was selected",
+            "Never imply persistent monitoring",
             "supports no later-notification claim",
         ):
             self.assertIn(anchor, launch)
+        self.assertNotIn("perform one bounded `wait_threads` wait/snapshot for immediate completion, failure, or attention", launch)
         for anchor in (
             "never a watcher/subscription",
             "Do not poll repeatedly",

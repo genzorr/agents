@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented initially under Agents Harness task T-36, hardened under T-38 after the first runtime handoff failure, generalized under T-39, and refined under T-51 for named-workstream profiles, compact evidence-preserving worker handoffs, and correction-round review continuity. This document is the product contract for the Codex-only feature-orchestration skill family; it does not authorize a live skill installation or change Codex runtime configuration.
+Implemented initially under Agents Harness task T-36, hardened under T-38 after the first runtime handoff failure, generalized under T-39, refined under T-51 for named-workstream profiles and review continuity, and clarified under T-53 for the ordinary-owner/native-worker boundary. This document is the product contract for the Codex-only feature-orchestration skill family; it does not authorize a live skill installation or change Codex runtime configuration.
 
 ## Problem
 
@@ -28,9 +28,9 @@ Native workers and reviewers return only to their immediate parent through nativ
 
 Make `orchestrate-feature` the only canonical outer entrypoint. It resolves one feature objective, one delivery contract, and an independent role-profile map, then creates or reuses one ordinary feature owner. The no-override behavior is feature owner `gpt-5.6-sol`/medium, implementation worker `gpt-5.6-luna`/xhigh, and feature-owner self-review. Independent review is disabled unless the operator explicitly requests it for the resolved feature; when requested without a profile override, the reviewer defaults to `gpt-5.6-sol`/high.
 
-Create one generic inner lens named `orchestrate-workers`. It owns worker decomposition, contracts, context, continuity, evidence, operator-requested reviewer routing, and acceptance rules for any product-exposed coordinator profile. Its defaults are Luna/xhigh implementation workers with coordinator self-review; explicit operator requests may select other enabled-role profiles or an independent reviewer. Do not duplicate the inner protocol in the outer skill.
+Create one generic worker helper named `orchestrate-workers`. It treats the current task uniformly as coordinator and owns worker decomposition, contracts, context, continuity, evidence, operator-requested reviewer routing, and worker-result handling for any product-exposed coordinator profile. Its defaults are native Luna/xhigh implementation workers with coordinator self-review; explicit operator requests may select other enabled-role profiles, an independent reviewer, or a separately requested ordinary implementation task when the current task has that creation authority. Do not duplicate the worker protocol in the outer skill.
 
-Remove `orchestrate-sol-feature` from the source and catalog rather than keeping two ambiguous outer entrypoints. Managed scratch-upgrade/prune evidence must show that the old installed asset is removed while the new canonical asset and generic lens are installed.
+Remove `orchestrate-sol-feature` from the source and catalog rather than keeping two ambiguous outer entrypoints. Managed scratch-upgrade/prune evidence must show that the old installed asset is removed while the new canonical asset and generic helper are installed.
 
 ## Goals
 
@@ -60,7 +60,7 @@ Remove `orchestrate-sol-feature` from the source and catalog rather than keeping
 - Do not make the project orchestrator a duplicate feature-level reviewer or require it to rerun all accepted child verification.
 - Do not create, resolve, validate, or load a separate reviewer unless the operator explicitly requests one for the resolved task; a driver requirement without that authorization stops at the review-dependent action, after authorized implementation and verification produce a concrete handoff; it never waives required independent acceptance.
 - Do not add routine progress chatter or describe bounded `wait_threads` as a background watcher, durable subscription, or later-notification guarantee.
-- Do not permit feature owners, workers, or reviewers to create nested ordinary tasks except the generic lens's separately operator-requested ordinary implementation route; `orchestrate-feature` explicitly forbids that route inside its feature owner.
+- Do not let an outer feature launch grant its owner ordinary-task creation. The generic worker helper may use an ordinary implementation task only when the operator directly and explicitly requests that route and the current coordinator already has task-creation authority.
 - Do not authorize pushes, pull requests, merges, branch deletion, destructive cleanup, live skill installation, external writes, or worktrees beyond existing user and project authority.
 - Do not add a Claude counterpart; ordinary Codex tasks, native subagents, model identifiers, and task-control surfaces are product-specific.
 
@@ -100,11 +100,22 @@ Use the ownership boundary, not task importance, to choose an entrypoint:
 
 Direct `orchestrate-workers` use is appropriate when the design is already resolved in the current task and implementation plus fresh review would help without creating another ownership layer. For example, the operator can say: `Use $orchestrate-workers to implement this caching change in the current task. Delegate implementation to Sol/medium and require independent Sol/high review before acceptance.` The current task decomposes the work, sends the compact contract, integrates and checks the result, routes corrections, and alone accepts the change.
 
+Native workers remain the default. An ordinary implementation task is available only when the same direct operator request explicitly asks for that route, for example: `Use $orchestrate-workers and create an ordinary Sol/high implementation task for this migration.` The helper never infers ordinary-task creation from task size or from a relayed feature launch.
+
 It is also appropriate when the current task owns a migration or similarly coherent task with genuinely non-overlapping implementation lanes, such as application changes and independent test-fixture changes. Prefer one coherent worker; add workers only when each owns a distinct output that changes or accelerates a named downstream decision. The current task integrates all lanes and retains one visible acceptance boundary.
 
 Invoking `orchestrate-workers` keeps review with the current coordinator. State `require independent review` when a separate reviewer must occur; reviewer profile wording also counts as an explicit request. No task characteristic or agent judgment activates review. New workers receive fresh context and a compact contract by default, every worker and requested reviewer remains a leaf, and one invocation applies to one resolved task. The skill changes no coordinator profile, permission, Git authority, worktree authority, or external-write authority.
 
-When the operator invokes `$orchestrate-feature`, no separate `$orchestrate-workers` invocation is necessary. The operator-authorized feature launch explicitly activates the inner lens in the feature-owner task and forbids its optional ordinary implementation-task route. Both public skills remain explicit-only; intentional outer invocation authorizes the composed owner-and-worker topology without adding a confirmation gate at every layer.
+When the operator invokes `$orchestrate-feature`, no separate `$orchestrate-workers` invocation is necessary. The launch contract activates the worker helper in the feature-owner task, grants no ordinary-task-creation authority, and contains no instruction or reference requiring the owner to read or apply `orchestrate-feature`. Both public skills remain explicit-only; intentional outer invocation authorizes the composed owner-and-worker topology without adding a confirmation gate at every layer.
+
+## Topology Invariant
+
+- Only the current project orchestrator applies `orchestrate-feature` for a feature lane.
+- The project orchestrator creates or reuses exactly one ordinary feature owner through the host/project-authorized ordinary-task mechanism, never through a native subagent or inherited task fork.
+- The feature-owner launch contract is the compiled output of the outer helper. It activates `orchestrate-workers` but never passes `orchestrate-feature` to the owner as an instruction, dependency, or operative provenance reference.
+- `orchestrate-workers` always treats its current task as coordinator. It does not need a feature-owner mode and does not own that task's reporting relationship to any ordinary parent.
+- The feature owner creates and steers its native workers and optional native feature reviewer. The project orchestrator does not create, steer, or duplicate those identities.
+- The feature owner alone integrates native results and reports feature blockers, required gates, and the terminal handoff to the project orchestrator under the outer launch contract.
 
 ## Operating Model
 
@@ -119,13 +130,13 @@ Long-lived project orchestrator — current immutable profile
 
 The project orchestrator owns priorities, requirements, cross-feature dependencies, shared-resource coordination, user decisions, material scope or architecture changes, task launch/reuse/stop decisions, external landing decisions, and program-level disposition. It preserves its current model and effort. An operator-specified orchestrator profile is a launch precondition to validate, never an instruction for this skill to mutate the current task.
 
-The orchestrator must not directly spawn the feature's implementation workers or reviewer. It retains the exact feature-task identity, resolved role map, notification contract, and parent-owned wait state, and may resolve ordinary blockers within existing authority by steering the same feature owner.
+The orchestrator must not directly spawn or steer the feature owner's implementation workers or feature reviewer. This prohibition is scoped to the feature-owner tree and does not define or govern separately authorized work after the terminal feature handoff. The orchestrator retains the exact feature-task identity, resolved role map, notification contract, and parent-owned supervision state, and may resolve ordinary blockers within existing authority by steering the same feature owner.
 
 ### Feature owner
 
-The ordinary task at the resolved feature-owner profile is primarily an active orchestrator. Its launch contract requires `orchestrate-workers` to delegate coherent execution-depth work whenever a safe delegation boundary exists; the owner retains architecture/risk decisions, assignment contracts, the feature-lane Git/shared-state writer assignment, integrated-state synthesis, integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo decisions, feature acceptance, terminal reporting, and exactly the external-landing authority granted. It uses the applicable project workflow as driver and `orchestrate-workers` as the delegation and review lens. Substantial direct execution is allowed only with a no-boundary reason recorded in the in-task plan or worker-dispatch context and existing final handoff; trivial integration glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed. Sequential assignments to one compatible worker are valid; parallel workers require genuinely non-overlapping ownership lanes.
+The ordinary task at the resolved feature-owner profile is primarily an active orchestrator. Its launch contract activates `orchestrate-workers` to delegate coherent execution-depth work whenever a safe delegation boundary exists; the owner retains architecture/risk decisions, assignment contracts, the feature-lane Git/shared-state writer assignment, integrated-state synthesis, integration, integrated-diff/evidence inspection, verification sufficiency, retain-or-redo decisions, feature acceptance, terminal reporting, and exactly the external-landing authority granted. It uses the applicable project workflow as driver and `orchestrate-workers` as the worker helper. It neither reads nor applies `orchestrate-feature`. Substantial direct execution is allowed only with a no-boundary reason recorded in the in-task plan or worker-dispatch context and existing final handoff; trivial integration glue, narrow corrections, decision-critical inspection, and work without a coherent delegation boundary remain allowed. Sequential assignments to one compatible worker are valid; parallel workers require genuinely non-overlapping ownership lanes.
 
-The feature owner must not create another ordinary feature task, delegate project-level authority, or treat a worker report as acceptance. It alone owns the project-orchestrator callback, mediates internal native worker and reviewer reports, and preserves recipient settings on existing-task messages. It delivers only the events required by the selected notification mode. A non-Sol feature owner is valid when the product can create and validate its exact profile and the generic inner lens can operate under that coordinator profile.
+The feature owner must not create another ordinary feature task, delegate project-level authority, or treat a worker report as acceptance. It alone owns the project-orchestrator callback, mediates internal native worker and reviewer reports, and preserves recipient settings on existing-task messages. It delivers only the events required by the selected notification mode. A non-Sol feature owner is valid when the product can create and validate its exact profile and the generic worker helper can operate under that coordinator profile.
 
 ### Implementation workers
 
@@ -176,7 +187,7 @@ Use existing durable authority when sufficient. For multi-phase or high-conseque
 
 ## New Versus Reused Ownership
 
-Reuse a feature owner only when its exact identity is known, it is idle, and the feature, project, repository, checkout/worktree, branch, trust boundary, authority envelope, lifecycle role, feature-owner profile, acceptance boundary, and selected inner-lens contract remain compatible. Native inspection establishes identity, reachability, and state; the orchestrator's accepted launch record establishes profile provenance when independent readback is unavailable. A title or unsupported recollection is never sufficient.
+Reuse a feature owner only when its exact identity is known, it is idle, and the feature, project, repository, checkout/worktree, branch, trust boundary, authority envelope, lifecycle role, feature-owner profile, acceptance boundary, and selected worker-helper contract remain compatible. Native inspection establishes identity, reachability, and state; the orchestrator's accepted launch record establishes profile provenance when independent readback is unavailable. A title or unsupported recollection is never sufficient.
 
 Before reuse, revalidate the complete role map and notification contract. Never send a reset or concurrent assignment to a running feature owner. Send an idle compatible owner a full reset that classifies the prior assignment, states allowed carry-over facts, invalidates stale scope/authority/assumptions/decisions/evidence/completion claims, and restates the objective, interfaces, success, verification, stop gates, notification mode, reporting events, context policy, role profiles, and return format. Preserve the configured feature-owner profile by omitting per-message overrides; if it differs, create a new owner rather than attempting to mutate the task.
 
@@ -186,13 +197,13 @@ Create or recycle only on the existing named material boundaries: different feat
 
 ## Context Boundary
 
-Create a new feature owner through native `create_thread` with fresh context, never `fork_thread`. Distill load-bearing chat-only decisions and point to durable project paths. Conversation history is context, never authority. An operator-requested task fork is a different topology and requires an explicit boundary decision.
+Create a new feature owner with fresh context through the host/project-authorized ordinary-task creation mechanism, never through a native subagent or inherited task fork. Distill load-bearing chat-only decisions and point to durable project paths. Conversation history is context, never authority. An operator-requested task fork is a different topology and requires an explicit boundary decision.
 
 Create new native workers and reviewers with no parent turns by default. Inherit only the smallest bounded recent slice for one named load-bearing fact with no durable source that cannot be accurately distilled without material loss; state the fact, reason, and extent before dispatch. Independent reviewers never receive inherited history. Full parent-history inheritance is prohibited.
 
-## Inner Lens
+## Worker Helper
 
-`orchestrate-workers` is the canonical generic lens. The feature-owner launch contract explicitly invokes it for the resolved feature, passes the resolved general worker profile, every named-workstream overlay and provenance, and reviewer activation as `disabled` or `operator-requested`, and, only when review is requested, carries the exact operator-request provenance, acceptance target, and separate reviewer profile/provenance. It forbids the optional ordinary implementation-task route and preserves the feature owner as planner, integrator, default reviewer, and acceptance authority. The lens owns worker/reviewer decomposition, per-assignment profile resolution, contracts, context, continuity, evidence, optional-review routing, and acceptance rules.
+`orchestrate-workers` is the canonical generic worker helper. It always treats its current task as coordinator and does not vary its worker lifecycle based on whether that coordinator is a feature owner. A feature-owner launch contract activates it for the resolved feature, passes the resolved general worker profile, every named-workstream overlay and provenance, and reviewer activation as `disabled` or `operator-requested`, and, only when review is requested, carries the exact operator-request provenance, acceptance target, and separate reviewer profile/provenance. The launch grants no ordinary-task-creation authority. The helper owns worker/reviewer decomposition, per-assignment profile resolution, contracts, context, continuity, evidence, optional-review routing, and immediate-parent returns; the outer contract alone owns the feature owner's callback and terminal reporting to the project orchestrator.
 
 If the operator invokes both outer feature ownership and an ordinary implementation-task route for the same unresolved feature, stop and ask for one owner topology. `goal-prompt` remains the owner of durable autonomous goal handoffs; an existing goal artifact may be durable feature authority but does not replace native task/profile/delivery resolution.
 
@@ -219,17 +230,17 @@ The final handoff includes outcome, exact repository/branch/commit/checkout stat
 
 ## Migration And Release Boundary
 
-Rename the canonical outer source, catalog ID, install target, metadata, docs, and tests from `orchestrate-sol-feature` to `orchestrate-feature`. Do not keep the old outer source or catalog entry. Keep `orchestrate-workers` as the Codex-only generic lens and remove the redundant `sol-luna-orchestration` source and catalog entry.
+T-39 renamed the canonical outer source, catalog ID, install target, metadata, docs, and tests from `orchestrate-sol-feature` to `orchestrate-feature`, kept `orchestrate-workers` as the Codex-only generic helper, and removed the redundant `sol-luna-orchestration` source and catalog entry. Those migration requirements are historical invariants; T-53 does not recreate the retired assets or their former installation baseline.
 
-Scratch migration validation must model an existing managed installation containing `skills/orchestrate-sol-feature`, run the Codex installer in dry-run/diff prune mode, and show removal of the old managed asset plus installation of `skills/orchestrate-feature` and `skills/orchestrate-workers` without touching foreign/unmanaged assets. The PR does not authorize live installation.
+T-53 scratch validation starts from the current canonical `main`, installs the current branch into an isolated Codex home, proves that both canonical orchestration skills and their managed metadata match source, and proves that an unmanaged sentinel remains untouched. The earlier deleted-asset behavior remains covered by the installer engine's existing prune-history test rather than by fabricating a retired-asset fixture from current `main`.
 
-T-39 authorizes the current branch, reviewed source implementation, commits, push, and pull request. Merge, live installation, branch deletion, and destructive cleanup remain outside this task.
+T-39 stopped before merge and live installation. For T-53, the operator separately authorizes commit, push, pull request, squash merge after conceptual and check readiness, local and remote feature-branch deletion, and live project installation from updated `main`.
 
 ## Success Measures
 
 - One memorable `orchestrate-feature` invocation produces the intended ownership topology with explicit, independently resolved role profiles.
 - No-override behavior preserves Sol/medium feature ownership, Luna/xhigh workers, feature-owner self-review, and no separate reviewer dispatch.
-- Non-Sol feature owners can use the generic inner lens truthfully without copied protocol or a Sol-only precondition.
+- Non-Sol feature owners can use the generic worker helper truthfully without copied protocol or a Sol-only precondition.
 - Exact profile requests, validation, and readback limitations are reported truthfully; no override cascades or mutates the current orchestrator.
 - Mixed general and named-workstream overrides resolve independently per field and do not create workstreams by implication.
 - Native worker handoffs remain compact without losing decisive tested-state, verification, gap, failure-condition, or decision evidence.
