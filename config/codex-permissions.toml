@@ -19,7 +19,7 @@ extends = ":workspace"
 ":slash_tmp" = "write"
 
 [permissions.agentic-local.filesystem.":workspace_roots"]
-# The workspace grant already covers repository metadata. Child selectors are fed back as new workspace roots by the desktop app and expand recursively across turns.
+# Keep this exact one-entry table: child selectors can be fed back as workspace roots and grow recursively across turns (https://github.com/openai/codex/issues/33479, https://github.com/openai/codex/issues/37632).
 "." = "write"
 
 [permissions.agentic-local.filesystem."~/.local/state/claude-headless/jobs"]

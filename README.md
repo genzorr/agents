@@ -56,7 +56,15 @@ The Claude installer merges its notification hooks while preserving unrelated se
 
 Browse the [Codex skills](codex/skills/) and [Claude skills](claude/skills/). Same-name skills can intentionally differ between platforms. The [catalog](catalog.json) lists everything each installer manages.
 
-Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. To configure the existing personal `codex-thread-bridge` MCP entry at the same time as the profile, run the permission installer with `--configure-thread-bridge`; see the [bridge configuration contract](docs/codex-thread-bridge.md).
+Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. The Codex installer validates its complete prospective config in an isolated temporary `CODEX_HOME` before writing, and `--dry-run` validates without creating a destination or backup.
+
+```bash
+CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py
+CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-thread-bridge
+CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-app-defaults
+```
+
+`--configure-thread-bridge` patches the existing bridge server's created-task defaults and approval mode. `--configure-app-defaults` is a separate opt-in that patches only `apps._default`; neither option changes unrelated app, tool, or MCP settings. See the [bridge and permission configuration contract](docs/codex-thread-bridge.md).
 
 ## Development
 
