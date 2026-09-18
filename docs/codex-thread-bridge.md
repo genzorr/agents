@@ -18,6 +18,8 @@ The command derives these values from `config/codex-permissions.toml` and writes
 
 The patch preserves the existing bridge `command`, `args`, socket, state directory, disabled tools, timeouts, other MCP environment variables, and unrelated Codex settings. It fails before writing when the exact `codex-thread-bridge` MCP entry is absent or appears more than once. Running it again is idempotent.
 
+After installation, request an MCP reload or start a fresh task, then verify the exposed schema and defaults against the [bridge README](https://github.com/genzorr/codex-thread-bridge#readme) and [default contract PR](https://github.com/genzorr/codex-thread-bridge/pull/1).
+
 The expected laptop entry after installation is:
 
 ```toml
