@@ -1,0 +1,13 @@
+model = "gpt-5.6-luna"
+approval_policy = "never"
+approvals_reviewer = "user"
+
+[mcp_servers.codex-thread-bridge]
+command = "/Users/genzorr/dev/tools/codex-thread-bridge/.venv/bin/codex-thread-bridge"
+args = ["--socket", "/Users/genzorr/.codex/app-server-control/app-server-control.sock", "--state-dir", "/Users/genzorr/.local/state/codex-thread-bridge"]
+disabled_tools = ["create_worktree_thread"]
+tool_timeout_sec = 60
+
+[mcp_servers.codex-thread-bridge.env]
+CODEX_THREAD_BRIDGE_DEFAULT_PERMISSIONS = "legacy-read-only"
+CODEX_THREAD_BRIDGE_MACHINE_LABEL = "laptop"

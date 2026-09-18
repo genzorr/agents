@@ -1,0 +1,14 @@
+model = "gpt-5.6-luna"
+
+[apps._default]
+destructive_enabled = false
+approvals_reviewer = "user"
+
+[apps.google_drive]
+default_tools_approval_mode = "approve"
+
+[apps.google_drive.tools."files/delete"]
+enabled = true
+
+[apps.other-app]
+open_world_enabled = false

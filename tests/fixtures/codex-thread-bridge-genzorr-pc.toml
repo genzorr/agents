@@ -1,0 +1,11 @@
+model = "gpt-5.6-luna"
+history = { persistence = "save-all" }
+
+[mcp_servers.codex-thread-bridge]
+command = "/home/genzorr/dev/tools/codex-thread-bridge/.venv/bin/codex-thread-bridge"
+args = ["--socket", "/home/genzorr/.codex/app-server-control/app-server-control.sock", "--state-dir", "/home/genzorr/.local/state/codex-thread-bridge"]
+disabled_tools = ["create_worktree_thread"]
+tool_timeout_sec = 60
+
+[mcp_servers.other-server]
+command = "other-mcp"
