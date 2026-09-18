@@ -1,0 +1,5 @@
+[mcp_servers.codex-thread-bridge]
+command = "first-bridge"
+
+[mcp_servers.codex-thread-bridge]
+command = "second-bridge"

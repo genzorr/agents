@@ -56,7 +56,7 @@ The Claude installer merges its notification hooks while preserving unrelated se
 
 Browse the [Codex skills](codex/skills/) and [Claude skills](claude/skills/). Same-name skills can intentionally differ between platforms. The [catalog](catalog.json) lists everything each installer manages.
 
-Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer.
+Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. To configure the existing personal `codex-thread-bridge` MCP entry at the same time as the profile, run the permission installer with `--configure-thread-bridge`; see the [bridge configuration contract](docs/codex-thread-bridge.md).
 
 ## Development
 
