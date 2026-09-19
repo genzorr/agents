@@ -1,33 +1,41 @@
-# Agents for Codex and Claude
+# Agents for Codex, Claude, and Devin
 
-Reusable skills, commands, subagents, global instructions, and notification hooks for Codex and Claude Code. The installers copy cataloged assets into your chosen home directory and preserve modified or unmanaged files.
+Reusable skills, commands, subagents, global instructions, configuration, and notification hooks for Codex, Claude Code, and Devin CLI. The installers copy cataloged assets into independent shared or provider homes and preserve modified or unmanaged files.
 
 ## Install
 
 Requires Python 3.9 or newer. The installer uses the Python standard library; no Python packages are required.
 
-Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements. The commands below install all assets for the selected platform.
+Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), [Devin instructions](devin/AGENTS.md), [Devin defaults](devin/config.json), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements.
+
+Portable skills have one managed runtime location at `~/.agents/skills`, which Codex and Devin discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill. Skills that require another runtime skill remain provider assets until their complete dependency chain is proven portable; for example, `babysit-pr` and `thermo-nuclear-code-quality-review` remain Codex/Claude assets because both require `review-change`.
 
 From a local checkout, preview the changes first:
 
 ```bash
 bash scripts/install-codex.sh --dry-run --diff
 bash scripts/install-claude.sh --dry-run --diff
+bash scripts/install-agents.sh --dry-run --diff
+bash scripts/install-devin.sh --dry-run --diff
 ```
 
 Then run the installer for the platform you use:
 
 ```bash
+bash scripts/install-agents.sh
 bash scripts/install-codex.sh
-# Or:
+bash scripts/install-devin.sh
+# Claude does not consume ~/.agents/skills, so its provider installer includes managed skill copies:
 bash scripts/install-claude.sh
 ```
 
-The default destinations are `~/.codex` and `~/.claude`. Set `CODEX_HOME` or `CLAUDE_HOME` to use another directory. For an isolated trial:
+The default destinations are `~/.agents`, `~/.codex`, `~/.claude`, and `${XDG_CONFIG_HOME:-~/.config}/devin` (or `%APPDATA%\devin` on Windows). Set `AGENTS_HOME`, `CODEX_HOME`, `CLAUDE_HOME`, or installer-specific `DEVIN_HOME` to use another directory. The shared installer is deliberately independent: provider install, prune, and uninstall commands never mutate `~/.agents`, so Codex and Devin can be installed or removed in either order without competing for shared state. For an isolated trial:
 
 ```bash
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh
+AGENTS_HOME="$PWD/.scratch-home/agents" bash scripts/install-agents.sh
+DEVIN_HOME="$PWD/.scratch-home/devin" bash scripts/install-devin.sh
 ```
 
 On native Windows, use the PowerShell entry points:
@@ -36,15 +44,18 @@ On native Windows, use the PowerShell entry points:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1 --dry-run --diff
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1
 # For Claude, use scripts\install-claude.ps1 instead.
+# The shared and Devin twins are scripts\install-agents.ps1 and scripts\install-devin.ps1.
 ```
 
-Set `$env:CODEX_HOME` or `$env:CLAUDE_HOME` to override the Windows destinations, which default to `%USERPROFILE%\.codex` and `%USERPROFILE%\.claude`.
+Set `$env:AGENTS_HOME`, `$env:CODEX_HOME`, `$env:CLAUDE_HOME`, or `$env:DEVIN_HOME` to override the corresponding Windows destination.
+
+When migrating an existing Codex installation, install the shared surface first, verify it, then preview and run `install-codex.sh --prune`. The explicit prune removes only unchanged skills that moved to the shared surface; `babysit-pr` and `thermo-nuclear-code-quality-review` remain desired Codex assets and are retained. Modified or foreign copies remain conflicts and are preserved. If an earlier consolidation preview removed either dependent skill from the Codex home, re-run the Codex installer before pruning the shared home so the provider copy is restored before its stale shared copy is removed.
 
 ## Update and remove
 
 Re-run the installer after updating your checkout. Install is copy-based and idempotent. Edit source files in this repository rather than installed copies; locally modified destinations are reported as conflicts and preserved.
 
-`--dry-run` and `--diff` are read-only. `--prune` removes unchanged, previously managed files no longer in the catalog. `--uninstall` removes unchanged managed assets and reconciles managed Claude hook settings. Both preserve modified and foreign files. Preview either operation before applying it:
+`--dry-run` and `--diff` are read-only. `--prune` removes unchanged, previously managed files no longer in that home's catalog. `--uninstall` removes unchanged managed assets and reconciles managed Claude hook settings or Devin config values. Both preserve modified and foreign files. Preview either operation before applying it:
 
 ```bash
 bash scripts/install-codex.sh --uninstall --dry-run --diff
@@ -54,7 +65,9 @@ The Claude installer merges its notification hooks while preserving unrelated se
 
 ## Skills and configuration
 
-Browse the [Codex skills](codex/skills/) and [Claude skills](claude/skills/). Same-name skills can intentionally differ between platforms. The [catalog](catalog.json) lists everything each installer manages.
+Browse the [shared skills](shared/skills/), [Codex skills](codex/skills/), and [Claude skills](claude/skills/). Same-name provider skills can intentionally differ. A catalog entry is shared only when its complete installed behavior is provider-neutral; tool names, frontmatter, permissions, invocation, model behavior, and runtime metadata are reasons to retain complete provider twins.
+
+The Devin installer copies a complete [Devin-specific global instruction layer](devin/AGENTS.md) to `AGENTS.md` in the Devin home (by default `~/.config/devin/AGENTS.md`); it is a provider twin, not a symlink or forced copy of the Codex or Claude source. Project `AGENTS.md` files remain the repository-specific instruction surface. The installer also leaf-merges [safe defaults](devin/config.json) into `config.json`: standard `AGENTS.md` project rules stay enabled, and foreign-tool imports are disabled to avoid duplicate rules, skills, hooks, and MCP configuration. Unrelated strict-JSON settings, including an operator-selected model or permission mode, are preserved. A differing unmanaged value, a modified managed value, invalid JSON, or JSON-with-comments is preserved as a conflict rather than reformatted or overwritten. Authentication and credentials are never managed. Model and permission selection belong to the invoking workflow rather than this global interoperability config.
 
 Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. The Codex installer validates its complete prospective config in an isolated temporary `CODEX_HOME` before writing, and `--dry-run` validates without creating a destination or backup.
 

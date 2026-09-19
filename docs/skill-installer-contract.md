@@ -1,10 +1,12 @@
 # Skill Installer Contract
 
-This contract defines how Agents installs, updates, prunes, and uninstalls its Codex and Claude assets. Each repository manages only the assets it owns.
+This contract defines how Agents installs, updates, prunes, and uninstalls shared Agents, Codex, Claude, and Devin assets. Each repository manages only the assets it owns, and each installer home has an independent ownership ledger.
 
 ## 1. Purpose and ownership
 
-Each repository manages only assets physically present in its own source tree. It never manages, prunes, or removes another repository's assets or a foreign/unknown installed asset such as `codex-primary-runtime`. Agents owns generic personal/global skills, commands, subagents, rules, Codex and Claude global instructions, Claude notification files, and explicitly cataloged traveling documents. Harness owns its `harness-*` assets and coupled Codex stop-gate files. session-harvester owns `skills/harvest-sessions/`.
+Each repository manages only assets physically present in its own source tree. It never manages, prunes, or removes another repository's assets or a foreign/unknown installed asset such as `codex-primary-runtime`. Agents owns generic personal/global skills, commands, subagents, rules, provider global instructions, the Devin default-config fragment, Claude notification files, and explicitly cataloged traveling documents. Harness owns its `harness-*` assets and coupled Codex stop-gate files. session-harvester owns `skills/harvest-sessions/`.
+
+The `agents` platform owns complete provider-neutral skills under `~/.agents/skills` (runtime-home). Codex and Devin discover that shared location natively but do not own its files or state; their provider installers never write, prune, or uninstall it. Claude receives cataloged copies under `~/.claude/skills` (runtime-home). A runtime must never receive a shared skill and a same-name provider-specific skill simultaneously because discovery does not merge them. Provider twins remain separate whenever tool names, frontmatter, invocation, permissions, model behavior, or support files differ materially.
 
 Agents uses `catalog.json` as the sole desired-state authority. The catalog loader, installer engine, and validators derive identity, platform, sources, source layers, targets, adapters, and traveling documents from that file; the compatibility shell wrappers contain no asset allowlists or copy/prune logic.
 
@@ -19,9 +21,9 @@ Agents uses `catalog.json` as the sole desired-state authority. The catalog load
 | `--prune` | yes | Remove only unchanged files recorded as Agents-owned that are absent from current desired state. |
 | `--uninstall` | yes | Reconcile every recorded Agents-owned file, including assets removed from the current catalog, then remove state after successful reconciliation. |
 
-Agents exposes the commands through `scripts/install-codex.sh` and `scripts/install-claude.sh`, which resolve the repository, resolve an interpreter through `scripts/lib/python.sh`, and `exec` `scripts/install-assets.py <platform>`. The interpreter is probed by execution rather than by `command -v`, because on Windows `python3` may be a Store alias stub that resolves and then exits without running; the probe also enforces the `requires-python` floor and fails closed with a single diagnostic when no candidate works. The engine is stdlib-only and uses `CODEX_HOME` or `CLAUDE_HOME`, defaulting to the real home only when an operator explicitly approves a live mutation.
+Agents exposes the commands through `scripts/install-agents.sh`, `scripts/install-codex.sh`, `scripts/install-claude.sh`, and `scripts/install-devin.sh`, which resolve the repository, resolve an interpreter through `scripts/lib/python.sh`, and `exec` `scripts/install-assets.py <platform>`. The interpreter is probed by execution rather than by `command -v`, because on Windows `python3` may be a Store alias stub that resolves and then exits without running; the probe also enforces the `requires-python` floor and fails closed with a single diagnostic when no candidate works. The engine is stdlib-only and uses `AGENTS_HOME`, `CODEX_HOME`, `CLAUDE_HOME`, or installer-specific `DEVIN_HOME`. Defaults are `~/.agents` (runtime-home), `~/.codex` (runtime-home), `~/.claude` (runtime-home), and the platform XDG/AppData Devin config directory.
 
-On a native Windows host the POSIX wrappers are not a supported entry point: the `bash` on PATH is WSL, so it reaches neither the Windows home nor `powershell.exe`. The supported commands there are `scripts\install-claude.ps1` and `scripts\install-codex.ps1`, which dot-source `scripts\lib\python.ps1`, resolve an interpreter the same way (probing `py -3`, then `python3`, then `python` by execution against the same `requires-python` floor, because the Windows launcher finds a real install even when the alias stub shadows `python3`), forward every engine option unchanged, and propagate the engine's exit code. Both entry points run the same engine with the same platform argument and read the same `CLAUDE_HOME`/`CODEX_HOME` variables, set as `$env:CLAUDE_HOME`/`$env:CODEX_HOME`; the default homes are `%USERPROFILE%\.claude` and `%USERPROFILE%\.codex`. The POSIX wrappers keep their behavior unchanged.
+On a native Windows host the POSIX wrappers are not a supported entry point: the `bash` on PATH is WSL, so it reaches neither the Windows home nor `powershell.exe`. The supported commands there are the four matching `scripts\install-<platform>.ps1` wrappers. They dot-source `scripts\lib\python.ps1`, resolve an interpreter the same way, forward every engine option unchanged, and propagate the engine's exit code.
 
 ```powershell
 $env:CLAUDE_HOME = "$PWD\.scratch-home\claude"
@@ -29,6 +31,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-claude.p
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-claude.ps1
 $env:CODEX_HOME = "$PWD\.scratch-home\codex"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1 --dry-run --diff
+$env:AGENTS_HOME = "$PWD\.scratch-home\agents"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-agents.ps1 --dry-run --diff
+$env:DEVIN_HOME = "$PWD\.scratch-home\devin"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-devin.ps1 --dry-run --diff
 ```
 
 ## 3. Ownership and prune invariant
@@ -39,7 +45,7 @@ The state requirement prevents current desired state from becoming historical ow
 
 ## 4. Scratch-home testing and live gate
 
-Every mutation-capable command must be exercised against isolated scratch homes before a live run. Fresh-home tests must prove that `--dry-run` and `--diff` leave the home path absent, then prove install, second-install idempotence, update, prune, and uninstall behavior.
+Every mutation-capable command must be exercised against isolated scratch homes before a live run. Fresh-home tests must prove that `--dry-run` and `--diff` leave the home path absent, then prove install, second-install idempotence, update, prune, and uninstall behavior. Shared-home tests must also prove that Codex and Devin provider installs in either order leave the `agents` state and files byte-for-byte unchanged.
 
 ```bash
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --dry-run --diff
@@ -48,13 +54,17 @@ CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh --prune -
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --dry-run --diff
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh --prune --dry-run
+AGENTS_HOME="$PWD/.scratch-home/agents" bash scripts/install-agents.sh --prune --dry-run
+DEVIN_HOME="$PWD/.scratch-home/devin" bash scripts/install-devin.sh --prune --dry-run
 ```
 
-Running install, update, prune, or uninstall against the real `~/.codex` (runtime-home) or `~/.claude` (runtime-home) requires an explicit operator approval every time. Repository validation and all prescribed verification use scratch homes and must not mutate live global state.
+Running install, update, prune, or uninstall against the real `~/.agents` (runtime-home), `~/.codex` (runtime-home), `~/.claude` (runtime-home), or Devin config home requires explicit operator approval every time. Repository validation and all prescribed verification use scratch homes and must not mutate live global state.
 
 ## 5. Platform adapter safety
 
-Codex writes global `AGENTS.md` and Claude writes global `CLAUDE.md` only when the destination is absent, empty, exactly matches the source and can be adopted, is recorded as unchanged, or has the exact platform header plus its managed ownership marker; other global instructions are preserved and reported. Codex permission-profile merging remains in `scripts/install-codex-permissions.py` and is not part of the generic engine.
+Codex and Devin write provider-specific global `AGENTS.md` files, and Claude writes global `CLAUDE.md`, only when the destination is absent, empty, exactly matches the source and can be adopted, is recorded as unchanged, or has the exact platform header plus its managed ownership marker; other global instructions are preserved and reported. These are separate runtime-specific installed artifacts, never shared-home files or symlinks. At project scope, `AGENTS.md` is the common baseline; a real Claude-only delta belongs in `CLAUDE.md` and must import `@AGENTS.md` because its presence suppresses Claude's fallback. The Devin global layer respects project `AGENTS.md` instructions and preserves the session's selected model and permission mode. Codex permission-profile merging remains in `scripts/install-codex-permissions.py` and is not part of the generic engine.
+
+The Devin config adapter merges cataloged leaf values into `config.json`, preserves unrelated strict-JSON values, and records exact managed paths and values for retry, prune, and uninstall. A differing unmanaged value, a modified or moved recorded value, a non-object root, invalid JSON, or JSON with comments is an unresolved conflict and is preserved byte-for-byte. The adapter does not manage authentication, credentials, MCP configuration, or permissions.
 
 Claude never overwrites `settings.json` wholesale. It merges the catalog hook fragment while preserving unrelated hook commands, and records the exact Agents commands and script target needed for later reconciliation. Invalid JSON, malformed adapter data, missing prerequisites, and modified historical Agents commands produce an unresolved conflict with non-success status; they do not authorize destructive cleanup. Uninstall removes only exact recorded or safely inferred Agents commands and preserves unrelated settings and hooks. Existing settings mode is preserved, and new settings use normal file-creation mode.
 
@@ -64,15 +74,15 @@ The settings-hooks adapter is per-host. Its catalog entry declares one `posix-sc
 
 ## 6. Desired catalog and source layers
 
-Each catalog entry declares `id`, `kind`, `platforms`, `owner`, `source`, `install_target`, and optional `handling`, `tags`, and `$comment`. Any other key is rejected rather than ignored, so prose belongs in `$comment` and a new field must earn loader support. A source may be a file or complete directory; directory sources include every nested file, support asset, template, script, metadata file, and source mode. Ordered source-layer objects take `path`, `target`, and `role`, and may give each layer an explicit non-colliding target or an adapter-only role such as Claude settings hooks.
+Each catalog entry declares `id`, `kind`, `platforms`, `owner`, `source`, `install_target`, and optional `handling`, `tags`, and `$comment`. Supported platforms are `agents`, `codex`, `claude`, and `devin`. Any other key is rejected rather than ignored, so prose belongs in `$comment` and a new field must earn loader support. A source may be a file or complete directory; directory sources include every nested file, support asset, template, script, metadata file, and source mode. Ordered source-layer objects take `path`, `target`, and `role`, and may give each layer an explicit non-colliding target or an adapter-only role such as Claude settings hooks or the Devin config fragment.
 
-Install targets are relative to the selected platform home and never repeat `~/.codex` (runtime-home) or `~/.claude` (runtime-home). The loader rejects path traversal, absolute paths, missing or escaping sources, symlinked source trees, duplicate ids, duplicate targets, source-layer collisions, invalid platform declarations, incomplete physical coverage, and reserved cross-repository ids.
+Install targets are relative to the selected platform home and never repeat the home prefix. The loader rejects path traversal, absolute paths, missing or escaping sources, symlinked source trees, duplicate ids, duplicate targets, source-layer collisions, invalid platform declarations, incomplete physical coverage, and reserved cross-repository ids.
 
 Document ownership follows the consumer that resolves the path. A skill-relative `docs/<name>.md` reference is an explicit source layer of that skill at `skills/<skill-id>/docs/<name>.md`, and its operative `docs/*.md` closure travels under the same skill root; a home-root copy does not satisfy that reference. A non-skill home-root consumer uses `kind: traveling_document` with an explicit platform target, as Claude's always-on model rule does for the model-and-effort document. Do not keep an additional home-root copy without a real home-root consumer. Runtime text scanning never decides what is installed. The transition reader accepts the old `.agents-doc-manifest` once, records its paths in historical state with a trusted-baseline marker, and removes the legacy file only after successful migration; an untrusted legacy baseline cannot authorize destructive removal.
 
 ## 7. Historical install state
 
-Each selected home may contain `.agents-install-state.json` with `schema_version`, `owner`, `platform`, a path-keyed `files` object, and historical `adapters`. Each file record contains catalog asset id and kind, last-installed SHA-256, mode, explicit owner, and whether its baseline is trusted; adapter records contain exact structural hook-leaf identities and targets needed for safe retry and uninstall. State is historical ownership evidence, not a second desired-state catalog, and malformed or foreign records are rejected before mutation.
+Each selected home may contain `.agents-install-state.json` with `schema_version`, `owner`, `platform`, a path-keyed `files` object, and historical `adapters`. Each file record contains catalog asset id and kind, last-installed SHA-256, mode, explicit owner, and whether its baseline is trusted; adapter records contain exact structural hook leaves or Devin config path/value identities needed for safe retry and uninstall. State is historical ownership evidence, not a second desired-state catalog, and malformed or foreign records are rejected before mutation. A state file is valid only for its own selected home platform, so a provider cannot adopt or prune the shared `agents` ledger.
 
 One identity migration is supported, because moving a notifier between catalog entries would otherwise leave a valid record that the identity check rejects before install, prune, or uninstall can reconcile it. A record adopts the current catalog identity only when the target is a settings-hooks adapter notifier, the record is intact Agents hook state with a trusted baseline and a non-foreign id, and its recorded signature equals the installed file or the current source byte for byte. Any other identity mismatch, an unprovable baseline, and a foreign id keep failing closed.
 

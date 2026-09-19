@@ -1673,7 +1673,7 @@ class WindowsEntryPointTest(unittest.TestCase):
         return (REPO_ROOT / f"scripts/install-{platform}.ps1").read_text(encoding="utf-8")
 
     def test_wrappers_resolve_an_interpreter_and_invoke_the_engine_per_platform(self) -> None:
-        for platform in ("claude", "codex"):
+        for platform in ("agents", "claude", "codex", "devin"):
             with self.subTest(platform=platform):
                 text = self.wrapper(platform)
                 self.assertIn("lib/python.ps1", text)
@@ -1683,7 +1683,7 @@ class WindowsEntryPointTest(unittest.TestCase):
                 self.assertIn("$ErrorActionPreference = 'Stop'", text)
 
     def test_powershell_and_posix_wrappers_target_the_same_engine_and_platform(self) -> None:
-        for platform in ("claude", "codex"):
+        for platform in ("agents", "claude", "codex", "devin"):
             with self.subTest(platform=platform):
                 posix = (REPO_ROOT / f"scripts/install-{platform}.sh").read_text(encoding="utf-8")
                 self.assertIn("install-assets.py", posix)

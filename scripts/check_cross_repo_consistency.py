@@ -14,9 +14,9 @@ import sys
 from pathlib import Path
 
 try:
-    from agent_catalog import CatalogError, catalog_named_ids, catalog_skill_ids, load_catalog
+    from agent_catalog import CatalogError, catalog_named_ids, load_catalog
 except ModuleNotFoundError:  # Imported as a module from repository tests.
-    from scripts.agent_catalog import CatalogError, catalog_named_ids, catalog_skill_ids, load_catalog
+    from scripts.agent_catalog import CatalogError, catalog_named_ids, load_catalog
 
 HARNESS_COMMANDS = {"execute.md"}
 HARNESS_AGENTS = {"harness-task-bootstrap.md", "task-verifier.md"}
@@ -40,7 +40,9 @@ def parse_frontmatter(text: str) -> dict[str, str]:
 
 
 def skill_dirs(repo: Path, platform: str) -> set[str]:
-    roots = (repo / platform / "skills", repo / "shared" / "skills")
+    roots = [repo / platform / "skills"]
+    if platform in {"agents", "claude"}:
+        roots.append(repo / "shared" / "skills")
     return {
         path.name
         for root in roots
@@ -81,20 +83,38 @@ def check_agents(agents: Path) -> list[str]:
         assets = load_catalog(agents)
     except CatalogError as exc:
         return [f"agents: invalid catalog: {exc}"]
-    physical_by_platform = {platform: skill_dirs(agents, platform) for platform in ("codex", "claude")}
-    catalog_by_platform = {platform: catalog_skill_ids(assets, platform) for platform in ("codex", "claude")}
-    physical = physical_by_platform["codex"] | physical_by_platform["claude"]
-    catalog = catalog_by_platform["codex"] | catalog_by_platform["claude"]
+    source_roots = ("shared", "codex", "claude")
+    physical_by_source = {
+        source: {
+            path.name
+            for path in (agents / source / "skills").iterdir()
+            if path.is_dir() and (path / "SKILL.md").is_file()
+        }
+        for source in source_roots
+    }
+    catalog_by_source = {source: set() for source in source_roots}
+    for asset in assets:
+        if asset.kind != "skill":
+            continue
+        for layers in asset.sources.values():
+            for layer in layers:
+                for source in source_roots:
+                    layer_path = agents / layer.path
+                    carries_skill = (layer_path.is_dir() and (layer_path / "SKILL.md").is_file()) or layer_path.name == "SKILL.md"
+                    if carries_skill and (layer.path == f"{source}/skills/{asset.id}" or layer.path.startswith(f"{source}/skills/{asset.id}/")):
+                        catalog_by_source[source].add(asset.id)
+    physical = set().union(*physical_by_source.values())
+    catalog = set().union(*catalog_by_source.values())
     boundary = {name for name in physical | catalog if name.startswith("harness-")}
     boundary |= (physical | catalog) & ({SESSION_SKILL} | FOREIGN_SKILLS)
     for name in sorted(boundary):
         errors.append(f"agents: boundary/foreign skill must not be owned here: {name}")
-    for platform in ("codex", "claude"):
-        if physical_by_platform[platform] != catalog_by_platform[platform]:
+    for source in source_roots:
+        if physical_by_source[source] != catalog_by_source[source]:
             errors.append(
-                f"agents: {platform} physical skill dirs and catalog ids differ "
-                f"(physical-only={sorted(physical_by_platform[platform] - catalog_by_platform[platform])}, "
-                f"catalog-only={sorted(catalog_by_platform[platform] - physical_by_platform[platform])})"
+                f"agents: {source} physical skill dirs and catalog sources differ "
+                f"(physical-only={sorted(physical_by_source[source] - catalog_by_source[source])}, "
+                f"catalog-only={sorted(catalog_by_source[source] - physical_by_source[source])})"
             )
 
     commands = md_names(agents / "claude" / "commands")

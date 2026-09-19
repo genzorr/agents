@@ -18,6 +18,7 @@ CATALOG_SECTIONS = (
     "subagents",
     "rules",
     "hooks",
+    "configs",
     "global_instructions",
     "traveling_documents",
 )
@@ -27,16 +28,18 @@ SECTION_KINDS = {
     "subagents": "subagent",
     "rules": "rule",
     "hooks": "hook",
+    "configs": "config",
     "global_instructions": "global_instructions",
     "traveling_documents": "traveling_document",
 }
-PLATFORMS = ("codex", "claude")
+PLATFORMS = ("agents", "codex", "claude", "devin")
 BOUNDARY_EXACT_IDS = {"harvest-sessions", "codex-primary-runtime"}
 BOUNDARY_PREFIX = "harness-"
-KNOWN_HANDLING = {"codex_global_instructions", "claude_settings_hooks"}
+KNOWN_HANDLING = {"codex_global_instructions", "claude_settings_hooks", "devin_config"}
 ASSET_KEYS = {"$comment", "id", "kind", "platforms", "owner", "source", "install_target", "handling", "tags"}
 SOURCE_LAYER_KEYS = {"path", "target", "role"}
 ADAPTER_FRAGMENT_ROLE = "settings-hooks"
+DEVIN_CONFIG_FRAGMENT_ROLE = "config-fragment"
 ADAPTER_POSIX_SCRIPT_ROLE = "posix-script"
 ADAPTER_WINDOWS_SCRIPT_ROLE = "windows-script"
 ADAPTER_SCRIPT_ROLES = (ADAPTER_POSIX_SCRIPT_ROLE, ADAPTER_WINDOWS_SCRIPT_ROLE)
@@ -47,8 +50,10 @@ RESERVED_ASSET_IDS = {"harvest-sessions", "codex-primary-runtime"}
 RESERVED_TARGET_ROOTS = {"skills/codex-primary-runtime", "skills/harvest-sessions"}
 RESERVED_TARGET_PREFIXES = ("skills/harness-",)
 RESERVED_TARGETS = {
+    "agents": set(),
     "codex": {"hooks.json", "hooks/stop.sh", "hooks/notifications.sh"},
     "claude": {"commands/execute.md", "agents/task-verifier.md", "agents/harness-task-bootstrap.md"},
+    "devin": set(),
 }
 DOC_REF_RE = re.compile(r"(?<!/)docs/[A-Za-z0-9/_.-]+\.md")
 TEMPLATED_DOC_MARKERS = ("RUN_ID", "YYYYMMDD")
@@ -158,6 +163,8 @@ def validate_asset_target(
         valid = target == f"rules/{asset_id}.md" or target.startswith(f"rules/{asset_id}/")
     elif kind == "hook":
         valid = target.startswith("hooks/")
+    elif kind == "config":
+        valid = platform == "devin" and target == "config.json"
     elif kind == "global_instructions":
         valid = target == ("CLAUDE.md" if platform == "claude" else "AGENTS.md")
     else:
@@ -212,7 +219,7 @@ def _parse_asset(section: str, entry: object) -> Asset:
         raise CatalogError(f"{section}/{asset_id}: kind must match its catalog section")
     platforms_raw = entry.get("platforms")
     if not isinstance(platforms_raw, list) or not platforms_raw or any(platform not in PLATFORMS for platform in platforms_raw):
-        raise CatalogError(f"{section}/{asset_id}: platforms must be a non-empty list of codex/claude")
+        raise CatalogError(f"{section}/{asset_id}: platforms must be a non-empty list drawn from {', '.join(PLATFORMS)}")
     platforms = tuple(platforms_raw)
     if len(set(platforms)) != len(platforms):
         raise CatalogError(f"{section}/{asset_id}: duplicate platform declaration")
@@ -228,6 +235,12 @@ def _parse_asset(section: str, entry: object) -> Asset:
     if not isinstance(source_map, dict) or set(source_map) != set(platforms):
         raise CatalogError(f"{section}/{asset_id}: source must cover exactly its platforms")
     sources = {platform: _source_layers(entry, platform) for platform in platforms}
+    if kind == "skill" and "agents" in platforms:
+        duplicate_runtimes = sorted(set(platforms) & {"codex", "devin"})
+        if duplicate_runtimes:
+            raise CatalogError(f"{section}/{asset_id}: shared skill would duplicate {', '.join(duplicate_runtimes)} discovery")
+        if "claude" in platforms and sources["agents"] != sources["claude"]:
+            raise CatalogError(f"{section}/{asset_id}: Claude copy of a shared skill must use the same complete source layers")
     handling_raw = entry.get("handling", {})
     if not isinstance(handling_raw, dict) or not set(handling_raw).issubset(platforms):
         raise CatalogError(f"{section}/{asset_id}: handling must name declared platforms")
@@ -243,7 +256,10 @@ def _parse_asset(section: str, entry: object) -> Asset:
         for index, layer in enumerate(sources[platform]):
             if layer.target is not None:
                 validate_asset_target(platform, asset_id, kind, layer.target, f"{section}/{asset_id} {platform} layer {index}")
-            elif not (kind == "hook" and platform == "claude" and handling.get(platform) == "claude_settings_hooks" and layer.role == ADAPTER_FRAGMENT_ROLE):
+            elif not (
+                (kind == "hook" and platform == "claude" and handling.get(platform) == "claude_settings_hooks" and layer.role == ADAPTER_FRAGMENT_ROLE)
+                or (kind == "config" and platform == "devin" and handling.get(platform) == "devin_config" and layer.role == DEVIN_CONFIG_FRAGMENT_ROLE)
+            ):
                 raise CatalogError(f"{section}/{asset_id} {platform} layer {index}: unconsumed target-null layer")
     return Asset(asset_id, kind, platforms, owner, sources, install_targets, handling, tuple(tags))
 
@@ -344,16 +360,33 @@ def settings_hook_layers(asset: Asset) -> tuple[dict[str, str], SourceLayer]:
     return scripts, fragments[0]
 
 
+def devin_config_layer(asset: Asset) -> SourceLayer:
+    """Return the one fragment consumed by the Devin config adapter."""
+    layers = asset.sources["devin"]
+    fragments = [layer for layer in layers if layer.role == DEVIN_CONFIG_FRAGMENT_ROLE and layer.target is None]
+    if len(layers) != 1 or len(fragments) != 1:
+        raise CatalogError(f"{asset.id}: Devin config adapter needs exactly one config-fragment source")
+    return fragments[0]
+
+
 def _validate_adapter_cardinality(assets: list[Asset]) -> None:
     adapters = [asset for asset in assets if asset.handling.get("claude") == "claude_settings_hooks"]
     if len(adapters) > 1:
         raise CatalogError("catalog: multiple Claude settings hook adapters")
-    if not adapters:
+    if adapters:
+        adapter = adapters[0]
+        if adapter.kind != "hook" or adapter.platforms != ("claude",):
+            raise CatalogError(f"{adapter.id}: Claude settings hook adapter must be a Claude hook")
+        settings_hook_layers(adapter)
+    devin_adapters = [asset for asset in assets if asset.handling.get("devin") == "devin_config"]
+    if len(devin_adapters) > 1:
+        raise CatalogError("catalog: multiple Devin config adapters")
+    if not devin_adapters:
         return
-    adapter = adapters[0]
-    if adapter.kind != "hook" or adapter.platforms != ("claude",):
-        raise CatalogError(f"{adapter.id}: Claude settings hook adapter must be a Claude hook")
-    settings_hook_layers(adapter)
+    devin_adapter = devin_adapters[0]
+    if devin_adapter.kind != "config" or devin_adapter.platforms != ("devin",):
+        raise CatalogError(f"{devin_adapter.id}: Devin config adapter must be a Devin config asset")
+    devin_config_layer(devin_adapter)
 
 
 def _validate_source_collisions(repo: Path, assets: list[Asset]) -> None:
@@ -390,7 +423,7 @@ def _physical_asset_paths(repo: Path) -> set[str]:
         root = repo / "claude" / category
         if root.is_dir():
             paths.update(path.relative_to(repo).as_posix() for path in root.iterdir() if path.is_file() and path.suffix == ".md")
-    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "CLAUDE.md", repo / "claude" / "hooks.json"):
+    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "CLAUDE.md", repo / "claude" / "hooks.json", repo / "devin" / "AGENTS.md", repo / "devin" / "config.json"):
         if path.is_file():
             paths.add(path.relative_to(repo).as_posix())
     hook_root = repo / "claude" / "hooks"

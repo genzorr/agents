@@ -83,7 +83,7 @@ A confirmatory or regression Protocol must not freeze while any applicable item 
    PY
    ```
 
-   This recipe is fixed on purpose: any agent (Codex or Claude) that fills in the same field values and runs this exact script produces the same `protocol_sha256`, which is what makes the two runtimes' Protocols interoperable.
+   This recipe is fixed on purpose: any supported agent runtime that fills in the same field values and runs this exact script produces the same `protocol_sha256`, which makes their Protocols interoperable.
 5. **Assign `protocol`.** Use `<kebab-slug>-<YYYYMMDD>-<first 8 hex chars of protocol_sha256>`. This is a convention, not a contract requirement, but it keeps the id human-readable and guarantees it changes whenever content changes even if a step is skipped.
 6. **Write the baseline manifest** from `templates/baseline-manifest.md` (before or alongside step 2's `baseline_ref`, whichever the user has ready first): what the baseline is, its source reference, the metrics measured at baseline, how to reproduce it, and known caveats.
 7. **Initialize the experiment ledger** from `templates/experiment-ledger.md`: one row per `run_set` entry (or a single `planned` placeholder row if `run_set` is still empty), recording `protocol` and `protocol_sha256`.
