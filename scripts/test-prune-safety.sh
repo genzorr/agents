@@ -90,6 +90,6 @@ require_absent "$DEVIN_HOME/AGENTS.md"
 
 require_absent "$CLAUDE_HOME/skills/review-change"
 require_absent "$CODEX_HOME/skills/review-change"
-require_absent "$AGENTS_HOME/skills/babysit-pr"
+require_absent "$AGENTS_HOME/skills/design-experiment"
 
 echo "OK - Agents prune/uninstall leaves legacy, foreign, and other-repo assets untouched"

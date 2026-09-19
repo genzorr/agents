@@ -61,14 +61,14 @@
     {
       "id": "babysit-pr",
       "kind": "skill",
-      "platforms": ["agents", "claude"],
+      "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "agents": "shared/skills/babysit-pr",
+        "codex": "shared/skills/babysit-pr",
         "claude": "shared/skills/babysit-pr"
       },
       "install_target": {
-        "agents": "skills/babysit-pr",
+        "codex": "skills/babysit-pr",
         "claude": "skills/babysit-pr"
       }
     },
@@ -449,14 +449,14 @@
     {
       "id": "thermo-nuclear-code-quality-review",
       "kind": "skill",
-      "platforms": ["agents", "claude"],
+      "platforms": ["codex", "claude"],
       "owner": "agents",
       "source": {
-        "agents": "shared/skills/thermo-nuclear-code-quality-review",
+        "codex": "shared/skills/thermo-nuclear-code-quality-review",
         "claude": "shared/skills/thermo-nuclear-code-quality-review"
       },
       "install_target": {
-        "agents": "skills/thermo-nuclear-code-quality-review",
+        "codex": "skills/thermo-nuclear-code-quality-review",
         "claude": "skills/thermo-nuclear-code-quality-review"
       },
       "tags": ["origin:cursor/plugins/cursor-team-kit"]

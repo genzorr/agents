@@ -808,7 +808,8 @@ def plan_devin_config(
 
     active_histories = histories if (prune or uninstall) else ({asset_id: histories[asset_id]} if asset_id in histories else {})
     destination = validate_home_target(home, "config.json", reject_leaf_symlink=True)
-    if not destination.exists():
+    destination_exists = destination.exists()
+    if not destination_exists:
         if uninstall:
             return None, None, {history_id: None for history_id in active_histories}
         settings: dict[str, Any] = {}
@@ -822,18 +823,20 @@ def plan_devin_config(
         if not isinstance(settings, dict):
             return None, "unresolved config.json adapter: config root is not an object; preserved", {}
 
-    historical_by_path: dict[tuple[str, ...], dict[str, Any]] = {}
-    for history in active_histories.values():
-        for value in history["managed_values"]:
-            key = tuple(value["path"])
-            prior = historical_by_path.get(key)
-            if prior is not None and not json_values_equal(prior["value"], value["value"]):
-                return None, f"unresolved config.json adapter: overlapping history differs at {'.'.join(key)}; preserved", {}
-            historical_by_path[key] = value
-    historical_values = list(historical_by_path.values())
-    cleaned, matched = remove_managed_values(settings, historical_values)
-    if not matched:
-        return None, "unresolved config.json adapter: recorded values were modified or moved; preserved", {}
+    cleaned = settings
+    if destination_exists:
+        historical_by_path: dict[tuple[str, ...], dict[str, Any]] = {}
+        for history in active_histories.values():
+            for value in history["managed_values"]:
+                key = tuple(value["path"])
+                prior = historical_by_path.get(key)
+                if prior is not None and not json_values_equal(prior["value"], value["value"]):
+                    return None, f"unresolved config.json adapter: overlapping history differs at {'.'.join(key)}; preserved", {}
+                historical_by_path[key] = value
+        historical_values = list(historical_by_path.values())
+        cleaned, matched = remove_managed_values(settings, historical_values)
+        if not matched:
+            return None, "unresolved config.json adapter: recorded values were modified or moved; preserved", {}
 
     merge = configured is not None and not uninstall
     if not merge:

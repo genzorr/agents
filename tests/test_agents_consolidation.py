@@ -57,13 +57,11 @@ class AgentsConsolidationTest(unittest.TestCase):
         assets = load_catalog(REPO_ROOT)
         by_id = {asset.id: asset for asset in assets if asset.kind == "skill"}
         portable = {
-            "babysit-pr",
             "design-experiment",
             "docker-optimize",
             "logging-optimize",
             "review-experiment",
             "skill-lifecycle",
-            "thermo-nuclear-code-quality-review",
         }
         for asset_id in portable:
             with self.subTest(asset_id=asset_id):
@@ -75,6 +73,10 @@ class AgentsConsolidationTest(unittest.TestCase):
             with self.subTest(provider_specific=asset_id):
                 self.assertIn("codex", by_id[asset_id].platforms)
                 self.assertNotIn("agents", by_id[asset_id].platforms)
+
+        for asset_id in {"babysit-pr", "thermo-nuclear-code-quality-review"}:
+            with self.subTest(dependent_skill=asset_id):
+                self.assertEqual(set(by_id[asset_id].platforms), {"codex", "claude"})
 
     def test_shared_state_is_order_independent_and_provider_installs_do_not_touch_it(self) -> None:
         for order in (("codex", "devin"), ("devin", "codex")):
@@ -118,8 +120,11 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertEqual(wrong_shared.returncode, 1, wrong_shared.stderr)
                 self.assertIn("expected schema 2 for agents", wrong_shared.stderr)
                 self.assertEqual(devin_state.read_bytes(), devin_before)
-                self.assertTrue((agents_home / "skills/babysit-pr/SKILL.md").is_file())
-                self.assertFalse((root / "codex/skills/babysit-pr").exists())
+                self.assertTrue((agents_home / "skills/design-experiment/SKILL.md").is_file())
+                self.assertFalse((agents_home / "skills/babysit-pr").exists())
+                self.assertFalse((agents_home / "skills/thermo-nuclear-code-quality-review").exists())
+                self.assertTrue((root / "codex/skills/babysit-pr/SKILL.md").is_file())
+                self.assertTrue((root / "codex/skills/thermo-nuclear-code-quality-review/SKILL.md").is_file())
                 self.assertFalse((root / "devin/skills/babysit-pr").exists())
                 self.assertTrue((root / "codex/skills/ask-oracle/SKILL.md").is_file())
 
@@ -132,17 +137,18 @@ class AgentsConsolidationTest(unittest.TestCase):
                 removed = run_installer("agents", agents_home, "--uninstall")
                 self.assertEqual(removed.returncode, 0, removed.stderr)
                 self.assertTrue(foreign.is_file())
-                self.assertFalse((agents_home / "skills/babysit-pr").exists())
+                self.assertFalse((agents_home / "skills/design-experiment").exists())
 
-    def test_claude_keeps_managed_copies_of_portable_skills(self) -> None:
+    def test_claude_keeps_managed_copies_of_portable_and_provider_skills(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             claude_home = Path(tmp) / "claude"
             result = run_installer("claude", claude_home)
             self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((claude_home / "skills/design-experiment/SKILL.md").is_file())
             self.assertTrue((claude_home / "skills/babysit-pr/SKILL.md").is_file())
             self.assertTrue((claude_home / "skills/ask-oracle/SKILL.md").is_file())
 
-    def test_codex_prune_retires_only_the_recorded_legacy_shared_copy(self) -> None:
+    def test_codex_prune_retires_only_portable_legacy_copy_and_retains_dependent_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             agents_home = root / "agents"
@@ -150,24 +156,37 @@ class AgentsConsolidationTest(unittest.TestCase):
             shared = run_installer("agents", agents_home)
             self.assertEqual(shared.returncode, 0, shared.stderr)
 
-            source = REPO_ROOT / "shared/skills/babysit-pr/SKILL.md"
-            legacy = codex_home / "skills/babysit-pr/SKILL.md"
+            source = REPO_ROOT / "shared/skills/design-experiment/SKILL.md"
+            legacy = codex_home / "skills/design-experiment/SKILL.md"
             legacy.parent.mkdir(parents=True)
             legacy.write_bytes(source.read_bytes())
             mode = stat.S_IMODE(legacy.stat().st_mode)
+            dependent_source = REPO_ROOT / "shared/skills/babysit-pr/SKILL.md"
+            dependent = codex_home / "skills/babysit-pr/SKILL.md"
+            dependent.parent.mkdir(parents=True)
+            dependent.write_bytes(dependent_source.read_bytes())
+            dependent_mode = stat.S_IMODE(dependent.stat().st_mode)
             state = {
                 "schema_version": 2,
                 "owner": "agents",
                 "platform": "codex",
                 "files": {
-                    "skills/babysit-pr/SKILL.md": {
+                    "skills/design-experiment/SKILL.md": {
                         "owner": "agents",
-                        "asset_id": "babysit-pr",
+                        "asset_id": "design-experiment",
                         "kind": "skill",
                         "sha256": hashlib.sha256(legacy.read_bytes()).hexdigest(),
                         "mode": format(mode, "04o"),
                         "baseline_known": True,
-                    }
+                    },
+                    "skills/babysit-pr/SKILL.md": {
+                        "owner": "agents",
+                        "asset_id": "babysit-pr",
+                        "kind": "skill",
+                        "sha256": hashlib.sha256(dependent.read_bytes()).hexdigest(),
+                        "mode": format(dependent_mode, "04o"),
+                        "baseline_known": True,
+                    },
                 },
                 "adapters": {},
             }
@@ -179,8 +198,32 @@ class AgentsConsolidationTest(unittest.TestCase):
             pruned = run_installer("codex", codex_home, "--prune")
             self.assertEqual(pruned.returncode, 0, pruned.stderr)
             self.assertFalse(legacy.exists())
+            self.assertTrue(dependent.is_file())
             self.assertTrue(foreign.is_file())
-            self.assertTrue((agents_home / "skills/babysit-pr/SKILL.md").is_file())
+            self.assertTrue((agents_home / "skills/design-experiment/SKILL.md").is_file())
+
+    def test_devin_recreates_deleted_managed_config_on_install_and_prune(self) -> None:
+        for operation in ((), ("--prune",)):
+            with self.subTest(operation=operation), tempfile.TemporaryDirectory() as tmp:
+                home = Path(tmp) / "devin"
+                installed = run_installer("devin", home)
+                self.assertEqual(installed.returncode, 0, installed.stderr)
+                config = home / "config.json"
+                expected = json.loads(config.read_text())
+                config.unlink()
+
+                recreated = run_installer("devin", home, *operation)
+
+                self.assertEqual(recreated.returncode, 0, recreated.stderr)
+                self.assertEqual(json.loads(config.read_text()), expected)
+                state = json.loads((home / ".agents-install-state.json").read_text())
+                self.assertIn("devin-defaults", state["adapters"])
+
+                config.write_text("{}\n", encoding="utf-8")
+                existing_empty = run_installer("devin", home, *operation)
+                self.assertEqual(existing_empty.returncode, 2, existing_empty.stderr)
+                self.assertIn("recorded values were modified", existing_empty.stderr)
+                self.assertEqual(config.read_text(encoding="utf-8"), "{}\n")
 
     def test_devin_config_merge_conflict_and_uninstall_are_leaf_bounded(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

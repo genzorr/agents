@@ -8,7 +8,7 @@ Requires Python 3.9 or newer. The installer uses the Python standard library; no
 
 Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), [Devin instructions](devin/AGENTS.md), [Devin defaults](devin/config.json), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements.
 
-Portable skills have one managed runtime location at `~/.agents/skills`, which Codex and Devin discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill.
+Portable skills have one managed runtime location at `~/.agents/skills`, which Codex and Devin discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill. Skills that require another runtime skill remain provider assets until their complete dependency chain is proven portable; for example, `babysit-pr` and `thermo-nuclear-code-quality-review` remain Codex/Claude assets because both require `review-change`.
 
 From a local checkout, preview the changes first:
 
@@ -49,7 +49,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps
 
 Set `$env:AGENTS_HOME`, `$env:CODEX_HOME`, `$env:CLAUDE_HOME`, or `$env:DEVIN_HOME` to override the corresponding Windows destination.
 
-When migrating an existing Codex installation, install the shared surface first, verify it, then preview and run `install-codex.sh --prune`. The explicit prune removes only unchanged shared-skill copies recorded as Agents-owned in the Codex state; modified or foreign copies remain conflicts and are preserved. This order avoids duplicate same-name discovery while retaining rollback evidence.
+When migrating an existing Codex installation, install the shared surface first, verify it, then preview and run `install-codex.sh --prune`. The explicit prune removes only unchanged skills that moved to the shared surface; `babysit-pr` and `thermo-nuclear-code-quality-review` remain desired Codex assets and are retained. Modified or foreign copies remain conflicts and are preserved. If an earlier consolidation preview removed either dependent skill from the Codex home, re-run the Codex installer before pruning the shared home so the provider copy is restored before its stale shared copy is removed.
 
 ## Update and remove
 
