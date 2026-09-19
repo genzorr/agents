@@ -25,6 +25,7 @@ from agent_catalog import (
     CatalogError,
     DesiredFile,
     SourceLayer,
+    devin_config_layer,
     desired_files,
     load_catalog,
     notifier_twin,
@@ -38,6 +39,11 @@ STATE_FILE = ".agents-install-state.json"
 LEGACY_DOC_MANIFEST = ".agents-doc-manifest"
 STATE_SCHEMA_VERSION = 2
 ADAPTER_KIND = "claude_settings_hooks"
+DEVIN_CONFIG_ADAPTER_KIND = "devin_config"
+DEVIN_CONFIG_ALLOWED_PATHS = {
+    ("read_config_from", provider)
+    for provider in ("agents_standard", "cursor", "windsurf", "claude", "copilot", "opencode", "zed")
+}
 HOST_IS_WINDOWS = os.name == "nt"
 WINDOWS_SCRIPT_SUFFIX = NOTIFIER_SUFFIXES[ADAPTER_WINDOWS_SCRIPT_ROLE]
 # The one fragment token: hook commands need the host-selected notifier invocation,
@@ -296,6 +302,122 @@ def adoptable_desired_leaves(current: Any, desired: Any) -> tuple[list[dict[str,
     return adopted, None
 
 
+_MISSING = object()
+
+
+def config_value_at(value: Any, path: list[str]) -> Any:
+    current = value
+    for part in path:
+        if not isinstance(current, dict) or part not in current:
+            return _MISSING
+        current = current[part]
+    return current
+
+
+def config_value_leaves(value: Any, path: tuple[str, ...] = ()) -> list[dict[str, Any]]:
+    """Flatten a JSON object into independently owned leaf values."""
+    if isinstance(value, dict):
+        result: list[dict[str, Any]] = []
+        for key, child in value.items():
+            if not isinstance(key, str) or not key:
+                raise CatalogError("Devin config fragment keys must be non-empty strings")
+            result.extend(config_value_leaves(child, (*path, key)))
+        return result
+    if not path:
+        raise CatalogError("Devin config fragment root must be an object")
+    return [{"path": list(path), "value": copy.deepcopy(value)}]
+
+
+def json_values_equal(left: Any, right: Any) -> bool:
+    try:
+        return json.dumps(left, sort_keys=True, separators=(",", ":"), allow_nan=False) == json.dumps(right, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError):
+        return False
+
+
+def validate_managed_values(asset_id: str, values: object) -> list[dict[str, Any]]:
+    if not isinstance(values, list):
+        raise CatalogError(f"invalid adapter state for {asset_id}: managed_values must be a list")
+    normalized: list[dict[str, Any]] = []
+    seen: set[tuple[str, ...]] = set()
+    for identity in values:
+        if not isinstance(identity, dict) or set(identity) != {"path", "value"} or not isinstance(identity["path"], list):
+            raise CatalogError(f"invalid adapter state for {asset_id}: managed_values must contain path/value identities")
+        path = identity["path"]
+        if not path or any(not isinstance(part, str) or not part for part in path):
+            raise CatalogError(f"invalid adapter state for {asset_id}: managed_values path is invalid")
+        key = tuple(path)
+        if key in seen:
+            raise CatalogError(f"invalid adapter state for {asset_id}: duplicate managed value path")
+        if key not in DEVIN_CONFIG_ALLOWED_PATHS:
+            raise CatalogError(f"invalid adapter state for {asset_id}: unmanaged config path {'.'.join(path)}")
+        try:
+            json.dumps(identity["value"], allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise CatalogError(f"invalid adapter state for {asset_id}: managed value is not JSON") from exc
+        if key[0] == "read_config_from" and not isinstance(identity["value"], bool):
+            raise CatalogError(f"invalid adapter state for {asset_id}: {'.'.join(path)} must be boolean")
+        seen.add(key)
+        normalized.append({"path": list(path), "value": copy.deepcopy(identity["value"])})
+    paths = list(seen)
+    if any(left != right and (left[: len(right)] == right or right[: len(left)] == left) for left in paths for right in paths):
+        raise CatalogError(f"invalid adapter state for {asset_id}: overlapping managed value paths")
+    return normalized
+
+
+def remove_managed_values(value: dict[str, Any], values: list[dict[str, Any]]) -> tuple[dict[str, Any], bool]:
+    """Remove exact recorded values and their now-empty object parents."""
+    for identity in values:
+        if not json_values_equal(config_value_at(value, identity["path"]), identity["value"]):
+            return value, False
+    result = copy.deepcopy(value)
+    for identity in sorted(values, key=lambda item: len(item["path"]), reverse=True):
+        parents: list[tuple[dict[str, Any], str]] = []
+        current: dict[str, Any] = result
+        for part in identity["path"][:-1]:
+            child = current[part]
+            if not isinstance(child, dict):
+                return value, False
+            parents.append((current, part))
+            current = child
+        del current[identity["path"][-1]]
+        for parent, key in reversed(parents):
+            child = parent.get(key)
+            if isinstance(child, dict) and not child:
+                del parent[key]
+            else:
+                break
+    return result, True
+
+
+def merge_config_values(existing: dict[str, Any], desired: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Merge desired leaves without overwriting an unowned differing value."""
+    leaves = config_value_leaves(desired)
+    if not leaves:
+        raise CatalogError("Devin config fragment must contain at least one leaf value")
+    leaves = validate_managed_values("Devin config fragment", leaves)
+    result = copy.deepcopy(existing)
+    for identity in leaves:
+        path = identity["path"]
+        current_value = config_value_at(result, path)
+        if current_value is not _MISSING and not json_values_equal(current_value, identity["value"]):
+            rendered = ".".join(path)
+            raise CatalogError(f"unresolved config.json adapter: unmanaged value differs at {rendered}; preserved")
+        current: dict[str, Any] = result
+        for part in path[:-1]:
+            if part not in current:
+                child = {}
+                current[part] = child
+            else:
+                child = current[part]
+            if not isinstance(child, dict):
+                rendered = ".".join(path)
+                raise CatalogError(f"unresolved config.json adapter: incompatible value at {rendered}; preserved")
+            current = child
+        current[path[-1]] = copy.deepcopy(identity["value"])
+    return result, leaves
+
+
 def adapter_script_targets(record: dict[str, Any]) -> list[str]:
     """Return the notifier scripts one adapter record may own, wired one first.
 
@@ -312,14 +434,24 @@ def adapter_script_targets(record: dict[str, Any]) -> list[str]:
 def _validate_adapter_record(home: Path, asset_id: str, record: object) -> None:
     if not isinstance(record, dict):
         raise CatalogError(f"invalid adapter state for {asset_id}")
-    required = {"owner", "asset_id", "kind", "platform", "target", "script_target", "managed_leaves"}
-    if not required.issubset(record):
-        raise CatalogError(f"invalid adapter state for {asset_id}: missing required field")
-    if record["owner"] != "agents" or record["asset_id"] != asset_id or record["kind"] != ADAPTER_KIND or record["platform"] != "claude" or record["target"] != "settings.json":
+    common = {"owner", "asset_id", "kind", "platform", "target"}
+    if not common.issubset(record) or record["owner"] != "agents" or record["asset_id"] != asset_id:
         raise CatalogError(f"invalid adapter state for {asset_id}: foreign or inconsistent identity")
-    for script_target in adapter_script_targets(record):
-        validate_asset_target("claude", asset_id, "hook", script_target, f"adapter state {asset_id}")
-    validate_managed_leaves(asset_id, record["managed_leaves"], notifier_invocation(home, record["script_target"]))
+    if record["kind"] == ADAPTER_KIND:
+        required = {"script_target", "managed_leaves"}
+        if not required.issubset(record) or record["platform"] != "claude" or record["target"] != "settings.json":
+            raise CatalogError(f"invalid adapter state for {asset_id}: foreign or inconsistent identity")
+        for script_target in adapter_script_targets(record):
+            validate_asset_target("claude", asset_id, "hook", script_target, f"adapter state {asset_id}")
+        validate_managed_leaves(asset_id, record["managed_leaves"], notifier_invocation(home, record["script_target"]))
+        return
+    if record["kind"] == DEVIN_CONFIG_ADAPTER_KIND:
+        if "managed_values" not in record or record["platform"] != "devin" or record["target"] != "config.json":
+            raise CatalogError(f"invalid adapter state for {asset_id}: foreign or inconsistent identity")
+        validate_asset_target("devin", asset_id, "config", "config.json", f"adapter state {asset_id}")
+        validate_managed_values(asset_id, record["managed_values"])
+        return
+    raise CatalogError(f"invalid adapter state for {asset_id}: unknown adapter kind")
 
 
 def load_state(
@@ -412,6 +544,7 @@ def migrate_legacy_entries(repo: Path, home: Path, state: dict[str, Any], desire
 GLOBAL_MANAGED_MARKERS = {
     "codex": "<!-- managed-by: genzorr/agents; asset: codex-agents-md -->",
     "claude": "<!-- managed-by: genzorr/agents; asset: claude-claude-md -->",
+    "devin": "<!-- managed-by: genzorr/agents; asset: devin-agents-md -->",
 }
 
 
@@ -430,6 +563,10 @@ def is_claude_managed_global(path: Path) -> bool:
     return is_managed_global(path, "# Global Claude Instructions", GLOBAL_MANAGED_MARKERS["claude"])
 
 
+def is_devin_managed_global(path: Path) -> bool:
+    return is_managed_global(path, "# Global Devin Instructions", GLOBAL_MANAGED_MARKERS["devin"])
+
+
 def source_text(layer: SourceLayer, repo: Path) -> str:
     return (repo / layer.path).read_text(encoding="utf-8")
 
@@ -440,6 +577,13 @@ def hook_asset(assets: tuple[Asset, ...], platform: str) -> tuple[Asset, dict[st
             continue
         scripts, fragment = settings_hook_layers(asset)
         return asset, scripts, fragment
+    return None
+
+
+def devin_config_asset(assets: tuple[Asset, ...]) -> tuple[Asset, SourceLayer] | None:
+    for asset in assets:
+        if asset.handling.get("devin") == DEVIN_CONFIG_ADAPTER_KIND:
+            return asset, devin_config_layer(asset)
     return None
 
 
@@ -628,6 +772,96 @@ def plan_claude_hooks(
     return AdapterAction(description, destination, "settings.json", before, after, mode), fragment_error, history_updates
 
 
+def plan_devin_config(
+    repo: Path,
+    home: Path,
+    assets: tuple[Asset, ...],
+    state: dict[str, Any],
+    *,
+    prune: bool,
+    uninstall: bool,
+) -> tuple[AdapterAction | None, str | None, dict[str, dict[str, Any] | None]]:
+    configured = devin_config_asset(assets)
+    histories = {
+        asset_id: record
+        for asset_id, record in state.get("adapters", {}).items()
+        if isinstance(record, dict) and record.get("kind") == DEVIN_CONFIG_ADAPTER_KIND and record.get("target") == "config.json"
+    }
+    if configured is None and not histories:
+        return None, None, {}
+    if uninstall and not histories:
+        return None, None, {}
+    if configured is None and not (prune or uninstall):
+        return None, None, {}
+
+    asset_id: str | None = None
+    desired_config: dict[str, Any] | None = None
+    if configured is not None and not uninstall:
+        asset, fragment = configured
+        asset_id = asset.id
+        try:
+            desired_config = json.loads(source_text(fragment, repo))
+        except (OSError, json.JSONDecodeError) as exc:
+            return None, f"unresolved config.json adapter: invalid managed fragment ({exc})", {}
+        if not isinstance(desired_config, dict):
+            return None, "unresolved config.json adapter: managed fragment root is not an object", {}
+
+    active_histories = histories if (prune or uninstall) else ({asset_id: histories[asset_id]} if asset_id in histories else {})
+    destination = validate_home_target(home, "config.json", reject_leaf_symlink=True)
+    if not destination.exists():
+        if uninstall:
+            return None, None, {history_id: None for history_id in active_histories}
+        settings: dict[str, Any] = {}
+        before = ""
+    else:
+        try:
+            before = destination.read_text(encoding="utf-8")
+            settings = json.loads(before)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            return None, f"unresolved config.json adapter: existing config is not strict JSON ({exc}); preserved", {}
+        if not isinstance(settings, dict):
+            return None, "unresolved config.json adapter: config root is not an object; preserved", {}
+
+    historical_by_path: dict[tuple[str, ...], dict[str, Any]] = {}
+    for history in active_histories.values():
+        for value in history["managed_values"]:
+            key = tuple(value["path"])
+            prior = historical_by_path.get(key)
+            if prior is not None and not json_values_equal(prior["value"], value["value"]):
+                return None, f"unresolved config.json adapter: overlapping history differs at {'.'.join(key)}; preserved", {}
+            historical_by_path[key] = value
+    historical_values = list(historical_by_path.values())
+    cleaned, matched = remove_managed_values(settings, historical_values)
+    if not matched:
+        return None, "unresolved config.json adapter: recorded values were modified or moved; preserved", {}
+
+    merge = configured is not None and not uninstall
+    if not merge:
+        updated = cleaned
+        description = "remove managed values from config.json"
+        history_updates = {history_id: None for history_id in active_histories}
+    else:
+        try:
+            updated, managed_values = merge_config_values(cleaned, desired_config or {})
+        except CatalogError as exc:
+            return None, str(exc), {}
+        description = "merge managed values into config.json"
+        history_updates = {history_id: None for history_id in active_histories if history_id != asset_id}
+        history_updates[asset_id] = {
+            "owner": "agents",
+            "asset_id": asset_id,
+            "kind": DEVIN_CONFIG_ADAPTER_KIND,
+            "platform": "devin",
+            "target": "config.json",
+            "managed_values": managed_values,
+        }
+    after = pretty_json(updated)
+    if before == after:
+        return None, None, history_updates
+    mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else creation_mode()
+    return AdapterAction(description, destination, "config.json", before, after, mode), None, history_updates
+
+
 def display_diff(target: str, before: str, after: str) -> None:
     if not before:
         print(f"NEW  {target}")
@@ -737,7 +971,7 @@ def apply_adapter_updates(next_state: dict[str, Any], adapter_updates: dict[str,
             next_state["adapters"][asset_id] = record
             continue
         existing = next_state["adapters"].get(asset_id)
-        if isinstance(existing, dict) and any(target in next_state["files"] for target in adapter_script_targets(existing)):
+        if isinstance(existing, dict) and existing.get("kind") == ADAPTER_KIND and any(target in next_state["files"] for target in adapter_script_targets(existing)):
             existing["managed_leaves"] = []
             continue
         next_state["adapters"].pop(asset_id, None)
@@ -803,6 +1037,7 @@ def plan_install(
         managed_global = item.asset.kind == "global_instructions" and (
             (platform == "codex" and is_codex_managed_global(destination))
             or (platform == "claude" and is_claude_managed_global(destination))
+            or (platform == "devin" and is_devin_managed_global(destination))
         )
         if managed_global:
             if current != desired_signature:
@@ -838,10 +1073,15 @@ def plan_install(
                 conflicts.append(f"{target}: modified stale destination; preserved")
 
     adapter_actions: list[AdapterAction] = []
-    adapter, adapter_error, adapter_updates = plan_claude_hooks(repo, home, assets, state, prune=prune, uninstall=False) if platform == "claude" else (None, None, {})
+    if platform == "claude":
+        adapter, adapter_error, adapter_updates = plan_claude_hooks(repo, home, assets, state, prune=prune, uninstall=False)
+    elif platform == "devin":
+        adapter, adapter_error, adapter_updates = plan_devin_config(repo, home, assets, state, prune=prune, uninstall=False)
+    else:
+        adapter, adapter_error, adapter_updates = None, None, {}
     if adapter_error:
         conflicts.append(adapter_error)
-        if prune:
+        if prune and platform == "claude":
             retain_hook_files_on_adapter_error(assets, desired, state, next_state, actions)
     if adapter is not None:
         adapter_actions.append(adapter)
@@ -886,10 +1126,16 @@ def plan_uninstall(
         else:
             conflicts.append(f"{target}: modified recorded destination; preserved")
     adapter_actions: list[AdapterAction] = []
-    adapter, adapter_error, adapter_updates = plan_claude_hooks(repo, home, assets, state, prune=True, uninstall=True) if platform == "claude" else (None, None, {})
+    if platform == "claude":
+        adapter, adapter_error, adapter_updates = plan_claude_hooks(repo, home, assets, state, prune=True, uninstall=True)
+    elif platform == "devin":
+        adapter, adapter_error, adapter_updates = plan_devin_config(repo, home, assets, state, prune=True, uninstall=True)
+    else:
+        adapter, adapter_error, adapter_updates = None, None, {}
     if adapter_error:
         conflicts.append(adapter_error)
-        retain_hook_files_on_adapter_error(assets, desired, state, next_state, actions)
+        if platform == "claude":
+            retain_hook_files_on_adapter_error(assets, desired, state, next_state, actions)
     if adapter is not None:
         adapter_actions.append(adapter)
     apply_adapter_updates(next_state, adapter_updates)
@@ -898,8 +1144,12 @@ def plan_uninstall(
 
 def run(args: argparse.Namespace) -> int:
     repo = Path(__file__).resolve().parents[1]
-    home_var = "CODEX_HOME" if args.platform == "codex" else "CLAUDE_HOME"
-    home = Path(os.environ.get(home_var, str(Path.home() / f".{args.platform}"))).expanduser().absolute()
+    home_vars = {"agents": "AGENTS_HOME", "codex": "CODEX_HOME", "claude": "CLAUDE_HOME", "devin": "DEVIN_HOME"}
+    if args.platform == "devin":
+        default_home = Path(os.environ.get("APPDATA", Path.home() / "AppData/Roaming")) / "devin" if os.name == "nt" else Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "devin"
+    else:
+        default_home = Path.home() / f".{args.platform}"
+    home = Path(os.environ.get(home_vars[args.platform], str(default_home))).expanduser().absolute()
     errors, warnings = validate_catalog(repo)
     if errors:
         for error in errors:
@@ -985,7 +1235,7 @@ def run(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("platform", choices=("codex", "claude"))
+    parser.add_argument("platform", choices=("agents", "codex", "claude", "devin"))
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--diff", dest="show_diff", action="store_true")
     parser.add_argument("--update", action="store_true", help="reconcile current catalog sources (same as install)")

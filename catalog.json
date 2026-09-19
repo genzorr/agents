@@ -1,5 +1,5 @@
 {
-  "$comment": "Authoritative catalog of Codex and Claude assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
+  "$comment": "Authoritative catalog of shared Agents, Codex, Claude, and Devin assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
   "skills": [
     {
       "id": "architecture-review",
@@ -61,14 +61,14 @@
     {
       "id": "babysit-pr",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/babysit-pr",
+        "agents": "shared/skills/babysit-pr",
         "claude": "shared/skills/babysit-pr"
       },
       "install_target": {
-        "codex": "skills/babysit-pr",
+        "agents": "skills/babysit-pr",
         "claude": "skills/babysit-pr"
       }
     },
@@ -87,14 +87,14 @@
     {
       "id": "design-experiment",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "shared/skills/design-experiment", "target": "skills/design-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/design-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/design-experiment/docs/experiment-protocol-readout-contract.md"}],
+        "agents": [{"path": "shared/skills/design-experiment", "target": "skills/design-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/design-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/design-experiment/docs/experiment-protocol-readout-contract.md"}],
         "claude": [{"path": "shared/skills/design-experiment", "target": "skills/design-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/design-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/design-experiment/docs/experiment-protocol-readout-contract.md"}]
       },
       "install_target": {
-        "codex": "skills/design-experiment",
+        "agents": "skills/design-experiment",
         "claude": "skills/design-experiment"
       },
       "tags": ["domain:experiment-workflow"]
@@ -138,14 +138,14 @@
     {
       "id": "docker-optimize",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/docker-optimize",
+        "agents": "shared/skills/docker-optimize",
         "claude": "shared/skills/docker-optimize"
       },
       "install_target": {
-        "codex": "skills/docker-optimize",
+        "agents": "skills/docker-optimize",
         "claude": "skills/docker-optimize"
       }
     },
@@ -238,14 +238,14 @@
     {
       "id": "logging-optimize",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/logging-optimize",
+        "agents": "shared/skills/logging-optimize",
         "claude": "shared/skills/logging-optimize"
       },
       "install_target": {
-        "codex": "skills/logging-optimize",
+        "agents": "skills/logging-optimize",
         "claude": "skills/logging-optimize"
       }
     },
@@ -320,14 +320,14 @@
     {
       "id": "review-experiment",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "shared/skills/review-experiment", "target": "skills/review-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/review-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-experiment/docs/experiment-protocol-readout-contract.md"}],
+        "agents": [{"path": "shared/skills/review-experiment", "target": "skills/review-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/review-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-experiment/docs/experiment-protocol-readout-contract.md"}],
         "claude": [{"path": "shared/skills/review-experiment", "target": "skills/review-experiment"}, {"path": "docs/claim-discipline.md", "target": "skills/review-experiment/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-experiment/docs/experiment-protocol-readout-contract.md"}]
       },
       "install_target": {
-        "codex": "skills/review-experiment",
+        "agents": "skills/review-experiment",
         "claude": "skills/review-experiment"
       },
       "tags": ["domain:experiment-workflow"]
@@ -349,10 +349,10 @@
     {
       "id": "skill-lifecycle",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": [
+        "agents": [
           {"path": "shared/skills/skill-lifecycle", "target": "skills/skill-lifecycle"},
           {"path": "docs/skill-lifecycle-policy.md", "target": "skills/skill-lifecycle/docs/skill-lifecycle-policy.md"},
           {"path": "docs/skill-authoring-principles.md", "target": "skills/skill-lifecycle/docs/skill-authoring-principles.md"},
@@ -370,7 +370,7 @@
         ]
       },
       "install_target": {
-        "codex": "skills/skill-lifecycle",
+        "agents": "skills/skill-lifecycle",
         "claude": "skills/skill-lifecycle"
       }
     },
@@ -449,14 +449,14 @@
     {
       "id": "thermo-nuclear-code-quality-review",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["agents", "claude"],
       "owner": "agents",
       "source": {
-        "codex": "shared/skills/thermo-nuclear-code-quality-review",
+        "agents": "shared/skills/thermo-nuclear-code-quality-review",
         "claude": "shared/skills/thermo-nuclear-code-quality-review"
       },
       "install_target": {
-        "codex": "skills/thermo-nuclear-code-quality-review",
+        "agents": "skills/thermo-nuclear-code-quality-review",
         "claude": "skills/thermo-nuclear-code-quality-review"
       },
       "tags": ["origin:cursor/plugins/cursor-team-kit"]
@@ -650,6 +650,26 @@
       }
     }
   ],
+  "configs": [
+    {
+      "id": "devin-defaults",
+      "kind": "config",
+      "platforms": ["devin"],
+      "owner": "agents",
+      "$comment": "Leaf-merged into Devin's config.json. The adapter preserves unrelated settings and refuses to overwrite differing unmanaged or modified managed values.",
+      "source": {
+        "devin": [
+          {"path": "devin/config.json", "target": null, "role": "config-fragment"}
+        ]
+      },
+      "install_target": {
+        "devin": "config.json"
+      },
+      "handling": {
+        "devin": "devin_config"
+      }
+    }
+  ],
   "global_instructions": [
     {
       "id": "codex-agents-md",
@@ -673,6 +693,18 @@
       },
       "install_target": {
         "claude": "CLAUDE.md"
+      }
+    },
+    {
+      "id": "devin-agents-md",
+      "kind": "global_instructions",
+      "platforms": ["devin"],
+      "owner": "agents",
+      "source": {
+        "devin": "devin/AGENTS.md"
+      },
+      "install_target": {
+        "devin": "AGENTS.md"
       }
     }
   ],
