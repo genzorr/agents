@@ -3,7 +3,13 @@ set -euo pipefail
 
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
 scratch_home="$(mktemp -d "${TMPDIR:-/tmp}/agents-codex-permissions.XXXXXX")"
-trap 'rm -rf "$scratch_home"' EXIT
+
+cleanup() {
+    local status=$?
+    rm -rf "$scratch_home"
+    exit "$status"
+}
+trap cleanup EXIT
 
 installer=(python3 "$repo_dir/scripts/install-codex-permissions.py")
 
@@ -26,6 +32,16 @@ run_install() {
 
 file_mode() {
     python3 -c 'import os, stat, sys; print(stat.S_IMODE(os.stat(sys.argv[1]).st_mode))' "$1"
+}
+
+table_text() {
+    local config_path=$1
+    local header="[$2]"
+    awk -v header="$header" '
+        $0 == header { active = 1 }
+        active && /^\[/ && $0 != header { exit }
+        active { print }
+    ' "$config_path"
 }
 
 insert_before() {
@@ -68,6 +84,7 @@ assert_workspace_selector "$scratch_home/base/config.toml"
 base_mode="$(file_mode "$scratch_home/base/config.toml")"
 [[ "$base_mode" == "$base_mode_before" ]]
 [[ "$(run_install "$scratch_home/base" --dry-run)" == *"already installed"* ]]
+! rg -n 'codex-app-tools|automation_update|create_thread|send_message_to_thread|fork_thread|handoff_thread' "$scratch_home/base/config.toml"
 
 dry_missing="$scratch_home/dry-missing"
 [[ ! -e "$dry_missing" ]]
@@ -117,7 +134,7 @@ for rejected in missing ambiguous-bridge inline-bridge malformed unknown quoted-
         duplicate-bridge-key) cp "$repo_dir/tests/fixtures/codex-thread-bridge-laptop.toml" "$rejected_home/config.toml"; insert_after "$rejected_home/config.toml" 'tool_timeout_sec = 60' $'default_tools_approval_mode = "auto"\ndefault_tools_approval_mode = "writes"'; args=(--configure-thread-bridge) ;;
     esac
     cp "$rejected_home/config.toml" "$rejected_home/original.toml"
-    if run_install "$rejected_home" "${args[@]}" 2>"$rejected_home/error.log"; then
+    if run_install "$rejected_home" ${args[@]+"${args[@]}"} 2>"$rejected_home/error.log"; then
         echo "$rejected unexpectedly succeeded" >&2
         exit 1
     fi
@@ -150,5 +167,32 @@ mkdir -p "$app_create_home"
 cp "$repo_dir/tests/fixtures/legacy-codex-config.toml" "$app_create_home/config.toml"
 run_install "$app_create_home" --configure-app-defaults
 rg -n '^\[apps\._default\]$|^approvals_reviewer = "auto_review"$|^default_tools_approval_mode = "writes"$' "$app_create_home/config.toml" >/dev/null
+
+codex_app_home="$scratch_home/codex-app-tools"
+mkdir -p "$codex_app_home"
+cp "$repo_dir/tests/fixtures/codex-app-tools.toml" "$codex_app_home/config.toml"
+bridge_server_before="$(table_text "$codex_app_home/config.toml" mcp_servers.codex-thread-bridge)"
+bridge_env_before="$(table_text "$codex_app_home/config.toml" mcp_servers.codex-thread-bridge.env)"
+run_install "$codex_app_home" --approve-codex-app-tools
+rg -F '[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app]' "$codex_app_home/config.toml" >/dev/null
+[[ "$(rg -c '^default_tools_approval_mode = "approve"$' "$codex_app_home/config.toml")" == "1" ]]
+for tool in automation_update create_thread send_message_to_thread fork_thread handoff_thread; do
+    rg -F "[plugins.\"codex-app-tools@openai-bundled\".mcp_servers.codex_app.tools.$tool]" "$codex_app_home/config.toml" >/dev/null
+done
+[[ "$(rg -c '^approval_mode = "approve"$' "$codex_app_home/config.toml")" == "5" ]]
+rg -F 'output_token_limit = 30000' "$codex_app_home/config.toml" >/dev/null
+rg -F '[plugins."other@test"]' "$codex_app_home/config.toml" >/dev/null
+[[ "$(table_text "$codex_app_home/config.toml" mcp_servers.codex-thread-bridge)" == "$bridge_server_before" ]]
+[[ "$(table_text "$codex_app_home/config.toml" mcp_servers.codex-thread-bridge.env)" == "$bridge_env_before" ]]
+cp "$codex_app_home/config.toml" "$codex_app_home/once.toml"
+run_install "$codex_app_home" --approve-codex-app-tools
+cmp "$codex_app_home/once.toml" "$codex_app_home/config.toml"
+
+codex_app_create_home="$scratch_home/codex-app-create"
+mkdir -p "$codex_app_create_home"
+cp "$repo_dir/tests/fixtures/legacy-codex-config.toml" "$codex_app_create_home/config.toml"
+run_install "$codex_app_create_home" --approve-codex-app-tools
+[[ "$(rg -c '^default_tools_approval_mode = "approve"$' "$codex_app_create_home/config.toml")" == "1" ]]
+[[ "$(rg -c '^approval_mode = "approve"$' "$codex_app_create_home/config.toml")" == "5" ]]
 
 echo "Codex Custom profile scratch test passed"

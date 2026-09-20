@@ -75,9 +75,10 @@ Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-thread-bridge
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-app-defaults
+CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --approve-codex-app-tools
 ```
 
-`--configure-thread-bridge` patches the existing bridge server's created-task defaults and approval mode. `--configure-app-defaults` is a separate opt-in that patches only `apps._default`; neither option changes unrelated app, tool, or MCP settings. See the [bridge and permission configuration contract](docs/codex-thread-bridge.md).
+`--configure-thread-bridge` patches the existing bridge server's created-task defaults and approval mode. `--configure-app-defaults` patches only `apps._default`. `--approve-codex-app-tools` approves the bundled Codex App MCP tools that otherwise prompt. Each option preserves unrelated app, tool, and MCP settings. See the [bridge and permission configuration contract](docs/codex-thread-bridge.md).
 
 ## Development
 

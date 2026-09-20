@@ -35,6 +35,14 @@ BRIDGE_OWNED_KEY = "default_tools_approval_mode"
 BRIDGE_OWNED_VALUE = "writes"
 APP_DEFAULT_TABLE = "apps._default"
 APP_DEFAULT_VALUES = {"approvals_reviewer": "auto_review", "default_tools_approval_mode": "writes"}
+CODEX_APP_SERVER_TABLE = 'plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app'
+CODEX_APP_TOOL_APPROVALS = (
+    "automation_update",
+    "create_thread",
+    "send_message_to_thread",
+    "fork_thread",
+    "handoff_thread",
+)
 VALIDATION_TIMEOUT_SECONDS = 15
 TABLE_RE = re.compile(r"^\s*\[\[?([^\]]+)\]\]?\s*(?:#.*)?$")
 ROOT_KEY_RE = re.compile(r"^\s*([A-Za-z0-9_-]+)\s*=")
@@ -217,11 +225,27 @@ def patch_app_defaults(existing: str) -> str:
     return patch_table_values(existing, table=APP_DEFAULT_TABLE, values=APP_DEFAULT_VALUES)
 
 
+def approve_codex_app_tools(existing: str) -> str:
+    patched = patch_table_values(
+        existing,
+        table=CODEX_APP_SERVER_TABLE,
+        values={"default_tools_approval_mode": "approve"},
+    )
+    for tool in CODEX_APP_TOOL_APPROVALS:
+        patched = patch_table_values(
+            patched,
+            table=f"{CODEX_APP_SERVER_TABLE}.tools.{tool}",
+            values={"approval_mode": "approve"},
+        )
+    return patched
+
+
 def render_config(
     existing: str,
     *,
     configure_thread_bridge: bool = False,
     configure_app_defaults: bool = False,
+    approve_codex_app_tools_enabled: bool = False,
 ) -> str:
     root_lines, body = profile_parts()
     lines = remove_root_keys(
@@ -243,6 +267,8 @@ def render_config(
         prefix = patch_bridge_defaults(prefix + "\n").rstrip("\n")
     if configure_app_defaults:
         prefix = patch_app_defaults(prefix + "\n").rstrip("\n")
+    if approve_codex_app_tools_enabled:
+        prefix = approve_codex_app_tools(prefix + "\n").rstrip("\n")
     rendered = "\n".join([prefix, "", body.rstrip(), ""])
     validate_rendered_config(rendered)
     return rendered
@@ -336,12 +362,14 @@ def install(
     dry_run: bool,
     configure_thread_bridge: bool,
     configure_app_defaults: bool,
+    approve_codex_app_tools_enabled: bool,
 ) -> int:
     existing = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
     rendered = render_config(
         existing,
         configure_thread_bridge=configure_thread_bridge,
         configure_app_defaults=configure_app_defaults,
+        approve_codex_app_tools_enabled=approve_codex_app_tools_enabled,
     )
     validate_with_codex(rendered)
     suffixes = []
@@ -349,6 +377,8 @@ def install(
         suffixes.append("codex-thread-bridge defaults")
     if configure_app_defaults:
         suffixes.append("app defaults")
+    if approve_codex_app_tools_enabled:
+        suffixes.append("Codex App tool approvals")
     suffix = f" and {', '.join(suffixes)}" if suffixes else ""
     if rendered == existing:
         print(f"Codex Custom profile{suffix} already installed: {PROFILE_NAME}")
@@ -371,6 +401,8 @@ def install(
         print(f"Configured MCP server approval mode and created-task defaults: {BRIDGE_SERVER_TABLE}")
     if configure_app_defaults:
         print(f"Configured native app default approval modes: {APP_DEFAULT_TABLE}")
+    if approve_codex_app_tools_enabled:
+        print(f"Approved Codex App MCP tools without prompts: {CODEX_APP_SERVER_TABLE}")
     if backup is not None:
         print(f"Rollback: {Path(__file__).name} --rollback {backup}")
     else:
@@ -404,6 +436,11 @@ def main() -> int:
         action="store_true",
         help=f"patch [{APP_DEFAULT_TABLE}] only",
     )
+    parser.add_argument(
+        "--approve-codex-app-tools",
+        action="store_true",
+        help="approve the bundled Codex App MCP tools that otherwise prompt",
+    )
     parser.add_argument("--rollback", type=Path)
     args = parser.parse_args()
     config_path = Path(args.codex_home).expanduser() / "config.toml"
@@ -415,6 +452,7 @@ def main() -> int:
             dry_run=args.dry_run,
             configure_thread_bridge=args.configure_thread_bridge,
             configure_app_defaults=args.configure_app_defaults,
+            approve_codex_app_tools_enabled=args.approve_codex_app_tools,
         )
     except (OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)

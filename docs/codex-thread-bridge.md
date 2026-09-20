@@ -1,11 +1,12 @@
 # Codex Permission and Thread Bridge Configuration
 
-The optional permission installer owns the `agentic-local` profile and can patch two narrowly scoped opt-ins. It never replaces a complete `config.toml`, owns no bridge command/source, and preserves unrelated MCP, app, and tool settings.
+The optional permission installer owns the `agentic-local` profile and can patch three narrowly scoped opt-ins. It never replaces a complete `config.toml`, owns no bridge command/source, and preserves unrelated MCP, app, and tool settings.
 
 ```bash
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-thread-bridge
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-app-defaults
+CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --approve-codex-app-tools
 ```
 
 Before an installation write, and also before reporting that a dry run would update a config, the installer strict-loads the full prospective config with `codex app-server --strict-config --listen off` in an isolated temporary `CODEX_HOME`. A missing/incompatible Codex, timeout, syntax error, unknown key, or unsupported representation leaves the target byte-identical and does not create a missing destination directory or backup. The installer prints a rollback command after a successful write, and `--rollback PATH` restores a recorded backup while preserving the current config as a new backup.
@@ -49,3 +50,29 @@ default_tools_approval_mode = "writes"
 ```
 
 It preserves unrelated default fields, per-app settings, and per-tool settings. It does not set or change `destructive_enabled` or `open_world_enabled`, blanket-approve writes, or add an `apps` table to `config/codex-permissions.toml`. To avoid semantic duplicates, the conservative line patcher rejects quoted, dotted, inline, duplicate-table, and quoted-owned-key representations that it cannot safely recognize. Running it again is byte-idempotent.
+
+## Codex App tools opt-in
+
+`--approve-codex-app-tools` is local-Desktop policy for the bundled `codex-app-tools@openai-bundled` plugin. It sets the `codex_app` MCP server default and each tool that the plugin manifest otherwise marks `prompt` to `approve`:
+
+```toml
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app]
+default_tools_approval_mode = "approve"
+
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app.tools.automation_update]
+approval_mode = "approve"
+
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app.tools.create_thread]
+approval_mode = "approve"
+
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app.tools.send_message_to_thread]
+approval_mode = "approve"
+
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app.tools.fork_thread]
+approval_mode = "approve"
+
+[plugins."codex-app-tools@openai-bundled".mcp_servers.codex_app.tools.handoff_thread]
+approval_mode = "approve"
+```
+
+This explicit opt-in allows task creation, cross-task messages, recurring automation changes, forks, and handoffs without an approval prompt. The server default deliberately also approves current or future tools that inherit the server policy; the five explicit tool entries override the plugin manifest's current `prompt` declarations. It does not grant shell or filesystem permissions, enable the plugin, or modify connector policy under `apps.*`. Use it only on a device where the bundled Codex App tools are available. The installer preserves unrelated plugin fields and tool settings and is byte-idempotent.
