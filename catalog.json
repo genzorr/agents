@@ -73,18 +73,6 @@
       }
     },
     {
-      "id": "codex-project-init",
-      "kind": "skill",
-      "platforms": ["codex"],
-      "owner": "agents",
-      "source": {
-        "codex": "codex/skills/codex-project-init"
-      },
-      "install_target": {
-        "codex": "skills/codex-project-init"
-      }
-    },
-    {
       "id": "design-experiment",
       "kind": "skill",
       "platforms": ["agents", "claude"],
