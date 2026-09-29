@@ -75,6 +75,8 @@ Apply these rules to code you write. Do not restyle comments in code the task do
 
 ## Think Before Coding
 
+- Only when creating or updating project instruction files, consult `docs/context-file-authoring.md` relative to the runtime home containing this global `AGENTS.md`, not the project's working directory. Its conditional references resolve from the same runtime home; do not load the guide for unrelated tasks.
+- For returned research, use `integrate-research` when available. Otherwise compare the answer with the original question and current project evidence, separate proposals from decisions, and update only authorized owners.
 - State load-bearing assumptions when they affect implementation scope, data shape, or API contracts.
 - For material claims and handoffs, distinguish observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns.
 - If new evidence invalidates the plan, stop for user-owned, high-impact, or difficult-to-reverse changes; otherwise choose a defensible reversible default, preserve the evidence and reason, continue, and disclose the deviation and remaining verification gaps.

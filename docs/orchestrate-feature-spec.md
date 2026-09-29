@@ -2,6 +2,8 @@
 
 ## Authority And Scope
 
+This remains the current technical contract for the living orchestration skill family. The initial file moves, retired-name migration, and T-53 review/publication sequence below are retained acceptance history for completed work, not instructions to repeat that migration or authority for a new publication or live installation. Current product behavior stays in the PRD; new work follows its own authorized task and verification scope.
+
 This specification implements, hardens, and generalizes the product contract in `docs/orchestrate-feature-prd.md`. T-36 owns the initial outer skill, T-38 owns callback delivery and fork discipline, T-39 owns generic naming, role profiles, worker-helper extraction, compatibility, and migration, T-41 owns operator-only reviewer activation, T-42 owns feature-owner delegation, T-51 owns named-workstream profile precedence and review continuity, and T-53 owns the ordinary-owner/native-worker boundary. The PRD controls product behavior; this document controls the bounded repository change. When they conflict, stop and correct the documents before implementation.
 
 ## Task Messaging Boundary

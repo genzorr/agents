@@ -11,6 +11,8 @@ Surface uncertainty before implementing, not after.
 
 ## Rules
 
+- **Project instruction authoring only.** When creating or updating project instruction files, consult [Context File Authoring](../docs/context-file-authoring.md) relative to this installed rule. Its conditional `docs/` references resolve from the Claude runtime home containing these rules, not the project or rule directory. Do not import or load the guide for unrelated tasks.
+- **Returned research.** Use `integrate-research` when available; otherwise compare the answer with the original question and current project evidence, separate proposals from decisions, and update only authorized owners.
 - **State load-bearing assumptions.** Name assumptions that shape data, interfaces, or scope; resolve them under the decision-boundary rule below.
 - **Resolve decision-changing uncertainty selectively.** At a natural decision boundary, inspect when evidence supports multiple plausible resolutions that would lead to materially different actions or a missing fact or authority cannot be recovered locally. Ask only for user-owned or difficult-to-reverse choices; otherwise name a reversible default and continue. Do not interrupt when one interpretation dominates or resolution costs more than it can change.
 - **Preserve epistemic status.** For material claims and handoffs, distinguish observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns.

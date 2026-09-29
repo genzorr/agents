@@ -13,7 +13,9 @@ This repository owns generic shared Agents, Codex, Claude, and Devin assets and 
 
 A skill installed under `~/.agents/skills` is a complete provider-neutral asset, not a base overlaid by a same-name provider skill. Never install a shared skill and a same-name runtime-specific skill for one runtime: discovery is not a merge operation. Same-name provider skills and global instructions remain **counterparts, not automatically identical assets**; preserve differences in tool names, frontmatter, invocation, permissions, model behavior, and runtime-specific support files.
 
-Repository `AGENTS.md` is the common project instruction baseline. Add a project `CLAUDE.md` only for a real Claude-specific delta; because its presence suppresses Claude's `AGENTS.md` fallback, it must explicitly import `@AGENTS.md` before the delta. This repository's tracked `CLAUDE.md` is a compatibility symlink to `AGENTS.md`, so it resolves to the baseline rather than defining a second instruction source. Provider global instructions remain separate installed artifacts.
+Repository `AGENTS.md` is the common project instruction baseline. A project `CLAUDE.md` may be an import-only compatibility wrapper or carry a real Claude-specific delta; in either case import `@AGENTS.md` before any delta. This repository uses a regular import-only wrapper so Windows checkouts do not depend on Git symlink support. Working symlinks remain appropriate where the supported environment preserves them. Provider global instructions remain separate installed artifacts.
+
+For diagnosis and investigation closure, follow README's [Diagnosis and recovery](README.md#diagnosis-and-recovery); it links the authoritative installer contract and existing work-record route. For new-project instructions, use [Context File Authoring](docs/context-file-authoring.md). For returned research, use `integrate-research` when available; otherwise compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
 
 ## Installer contract
 

@@ -697,6 +697,10 @@
     }
   ],
   "traveling_documents": [
+    {"id": "context-file-authoring-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md"}, "install_target": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md"}},
+    {"id": "skill-authoring-principles-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md"}, "install_target": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md"}},
+    {"id": "claim-discipline-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md"}, "install_target": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md"}},
+    {"id": "experiment-protocol-readout-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md"}, "install_target": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md"}},
     {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}}
   ],
   "boundary_notes": {

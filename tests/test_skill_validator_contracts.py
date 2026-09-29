@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -200,9 +201,26 @@ class SkillValidatorContractsTest(unittest.TestCase):
         self.assertEqual(examples, ["/Users/alice/example.md"])
         self.assertEqual(runtime_homes, ["~/.cache/tool"])
 
-    def test_only_real_home_root_document_consumer_remains(self) -> None:
-        catalog = json.loads((REPO_ROOT / "catalog.json").read_text(encoding="utf-8"))
-        self.assertEqual([entry["id"] for entry in catalog["traveling_documents"]], ["model-and-effort-doc"])
+    def test_home_root_documents_have_reachable_non_skill_consumers(self) -> None:
+        assets = load_catalog(REPO_ROOT)
+        references = re.compile(r"docs/[A-Za-z0-9/_.-]+\.md")
+        for platform in ("agents", "codex", "claude", "devin"):
+            with self.subTest(platform=platform):
+                files = desired_files(REPO_ROOT, assets, platform)
+                documents = {target for target, output in files.items() if output.asset.kind == "traveling_document"}
+                pending = []
+                for output in files.values():
+                    if output.asset.kind not in {"skill", "traveling_document"}:
+                        pending.extend(references.findall(output.source.read_text(encoding="utf-8")))
+                reachable = set()
+                while pending:
+                    target = pending.pop()
+                    if target in reachable:
+                        continue
+                    self.assertIn(target, documents, f"{platform}: missing home-root reference {target}")
+                    reachable.add(target)
+                    pending.extend(references.findall(files[target].source.read_text(encoding="utf-8")))
+                self.assertEqual(documents, reachable, f"{platform}: home-root docs without a consumer")
 
     def test_user_home_dependency_requires_path_local_classification(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -100,10 +100,13 @@ Does not belong:
 
 ## Dual Surface: CLAUDE.md And AGENTS.md
 
-`AGENTS.md` is the common project baseline. Claude can fall back to it when no `CLAUDE.md` is present; a project `CLAUDE.md` suppresses that fallback, so it must preserve access to the baseline. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
+`AGENTS.md` is the common project baseline. Claude's project-instruction selection can load it directly or use `CLAUDE.md`; a compatibility file must preserve access to the baseline. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
 
-- Content identical → make `CLAUDE.md` a **symlink** to `AGENTS.md`. Zero drift, zero maintenance.
+- Content identical → a regular `CLAUDE.md` containing only `@AGENTS.md` is a first-class compatibility option, including when there is no Claude-specific delta. Prefer this import-only wrapper for repositories supporting Windows.
+- A **symlink** from `CLAUDE.md` to `AGENTS.md` is also appropriate when every supported checkout preserves symlinks. Keep a working link in such an environment rather than changing it for symmetry.
 - A genuine Claude-only delta exists → `CLAUDE.md` holds `@AGENTS.md` plus only the delta.
+
+With Git symlink support disabled, Windows can check out a committed link as a regular file containing its target filename rather than the baseline instructions. A regular import wrapper avoids that failure. See Anthropic's [shared-file guidance](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools); wrapper contents and import-path resolution can be checked locally, while actual loading must be confirmed in the target provider session.
 
 A Claude-only delta is real when it concerns harness-specific behavior: background tasks, subagent delegation, tool semantics. It is not real when it is the same repo knowledge reworded.
 
