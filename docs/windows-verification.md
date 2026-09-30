@@ -1,8 +1,6 @@
 # Windows verification report
 
-State of the `windows` branch as verified on a real Windows host. Update it when the
-branch takes a new upstream merge or gains a platform guard; a claim here without a
-command behind it is worse than no claim.
+Historical Windows qualification from the Windows-support work (source commit `be9a521`, 2026-08-11). The host, commands, outcomes, and unresolved gaps below describe that tested state, not the current checkout or suite. Current installation routes belong to [README](../README.md) and the [installer contract](skill-installer-contract.md); retain this report as evidence rather than updating old measurements to imply new qualification.
 
 ## Host
 

@@ -65,6 +65,10 @@ The Claude installer merges its notification hooks while preserving unrelated se
 
 ## Skills and configuration
 
+To create or maintain project `AGENTS.md` and provider-specific context, use [Context File Authoring](docs/context-file-authoring.md). It covers inspecting the real project, verified commands, current documentation versus historical records, and maintaining guidance when behavior changes. The separate `codex-project-init` skill is retired in favor of this standalone route. Existing installed copies are reconciled by the normal Codex installer `--prune` ownership checks; modified or foreign copies are preserved for operator review.
+
+The Codex and Devin global instructions and Claude's implementation rule point to that guide only when authoring project instructions. Each provider installer delivers the guide and its conditional reference dependencies under that provider home's `docs/`; skill-relative copies keep their existing separate catalog ownership. The guide is read on demand, without an automatic startup import. For returned research, Codex and Claude retain `integrate-research`; when that skill is unavailable, compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
+
 Browse the [shared skills](shared/skills/), [Codex skills](codex/skills/), and [Claude skills](claude/skills/). Same-name provider skills can intentionally differ. A catalog entry is shared only when its complete installed behavior is provider-neutral; tool names, frontmatter, permissions, invocation, model behavior, and runtime metadata are reasons to retain complete provider twins.
 
 The Devin installer copies a complete [Devin-specific global instruction layer](devin/AGENTS.md) to `AGENTS.md` in the Devin home (by default `~/.config/devin/AGENTS.md`); it is a provider twin, not a symlink or forced copy of the Codex or Claude source. Project `AGENTS.md` files remain the repository-specific instruction surface. The installer also leaf-merges [safe defaults](devin/config.json) into `config.json`: standard `AGENTS.md` project rules stay enabled, and foreign-tool imports are disabled to avoid duplicate rules, skills, hooks, and MCP configuration. Unrelated strict-JSON settings, including an operator-selected model or permission mode, are preserved. A differing unmanaged value, a modified managed value, invalid JSON, or JSON-with-comments is preserved as a conflict rather than reformatted or overwritten. Authentication and credentials are never managed. Model and permission selection belong to the invoking workflow rather than this global interoperability config.
@@ -92,3 +96,11 @@ bash scripts/test-prune-safety.sh
 ```
 
 Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](AGENTS.md).
+
+### Diagnosis and recovery
+
+For catalog, missing-source, portability, or traveling-reference failures, run the validators above from this checkout; they report the affected asset/path. For an install conflict, select a scratch home with the relevant home variable and run that provider's installer with `--dry-run --diff` to inspect its planned actions without writing. A successful preview has no unresolved conflicts and exits zero; a conflict preserves the destination and reports a non-success result.
+
+Current desired assets come from `catalog.json`; each selected home's `.agents-install-state.json` records historical ownership and last-installed signatures. Use [the installer contract](docs/skill-installer-contract.md) to distinguish a modified owned file, an unmanaged destination, and an invalid ledger or adapter. Do not delete or rewrite state to bypass a conflict: it is the evidence prune/uninstall need for safe recovery. There is no force option. Restore a known-good source version and preview reconciliation, or have the operator resolve the conflicting destination explicitly. Live-home mutation still requires operator approval.
+
+Keep symptom, command/environment, decisive evidence, cause or remaining hypotheses, and outcome in the existing project work record. Local maintainers use ignored `docs/harness/` when present; public contributors can use the issue or PR record. Promote only verified reusable conclusions into current guidance, and update that guidance when a command or recovery boundary changes.

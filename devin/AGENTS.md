@@ -75,11 +75,15 @@ Apply these rules to code you write. Do not restyle comments in code the task do
 
 ## Think Before Coding
 
+- Only when creating or updating project instruction files, consult `docs/context-file-authoring.md` relative to the runtime home containing this global `AGENTS.md`, not the project's working directory. Its conditional references resolve from the same runtime home; do not load the guide for unrelated tasks.
+- For returned research, use `integrate-research` when available. Otherwise compare the answer with the original question and current project evidence, separate proposals from decisions, and update only authorized owners.
 - State load-bearing assumptions when they affect implementation scope, data shape, or API contracts.
 - For material claims and handoffs, distinguish observed evidence, user decisions, supported inferences, assumptions, and unresolved unknowns.
 - If new evidence invalidates the plan, stop for user-owned, high-impact, or difficult-to-reverse changes; otherwise choose a defensible reversible default, preserve the evidence and reason, continue, and disclose the deviation and remaining verification gaps.
 - If evidence supports multiple plausible interpretations that would lead to materially different actions, inspect locally answerable facts and ask one pointed question only for user-owned or difficult-to-reverse choices; otherwise name a reversible assumption and continue.
 - If there is a materially simpler approach than the one implied by the request, surface it briefly before implementing.
+- After a substantial change, check what assumptions, states, branches, wrappers, or repeated knowledge can be removed within scope while preserving required behavior. Judge the whole path: moving hidden rules into callers is not simplification. A no-change conclusion is valid; do not pursue reduction quotas or silently expand the task.
+- When changing a documented command, contract, ownership boundary, or workaround, update its current authoritative guidance in the same change. Preserve investigation history; remove obsolete workarounds. Promote a verified non-obvious surprise only where the next affected task needs it, rather than appending a lesson after every task.
 - Test consequences, not decisions. Each assertion needs a production defect it would catch and an observable behavior it protects. Do not pin changeable values or implementation details unless they are the artifact or contract under test.
 - Optimize for local reasoning and bounded failure. Localize repeated knowledge behind an existing or minimal interface, and apply safeguards in proportion to externally controlled input, irreversibility, and spread.
 - When changing shared state, retries, queues, caches, migrations, permissions, or cross-component control flow, inspect the end-to-end failure and recovery path; local component correctness is not sufficient.

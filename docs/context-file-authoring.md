@@ -4,6 +4,22 @@ Use this as the craft rubric when writing or slimming the always-on context laye
 
 Calibrated for the Claude 5 generation (Opus 5, Fable 5). Older models needed guardrails these files should no longer carry.
 
+## Create Or Update Project Instructions
+
+For a request to initialize or maintain project instructions, use this document directly; no initializer skill or personal context repository is required. Inspect the actual project before writing: existing instructions, README/development docs, package and environment configuration, supported entrypoints, and checks. Verify commands and prerequisites where feasible; label anything unverified rather than inventing a command or constraint.
+
+Keep `AGENTS.md` as the common project baseline. Preserve useful existing content and names, patch only the affected guidance, and add provider-specific files only for a requested or demonstrated runtime need. Capture purpose, consequential non-obvious constraints, ownership boundaries, and verified entry commands or links; do not enumerate the file tree or fill a template. Ask only when a load-bearing choice belongs to the operator and cannot be resolved from the project.
+
+Make diagnosis discoverable from existing development docs: how to reproduce or inspect the relevant component, prerequisites, useful output or state, expected success signals, and safe recovery limits. Prefer the existing CLI or runbook; add a helper only for a demonstrated recurring gap. Generic `diagnose` and `logging-optimize` skills supply methods, not the project's commands. Verify these routes when writing instructions rather than substituting “debug carefully.”
+
+## Current Guidance And Historical Records
+
+Root instructions are entrypoints; maintained project docs own current architecture, commands, contracts, setup, and debugging guidance. Put a subsystem rule near that subsystem only when it genuinely differs. Investigation evidence, past decisions, experiment records, and completed work belong in the project's existing history store, including Harness where used; do not add a parallel `records/` store. Active plans and tasks remain working state. Personal preferences stay in the operator's context source; reusable procedures stay with their source owner.
+
+When a change alters a documented command, contract, ownership boundary, or workaround, update its current authoritative guidance in the same change and link to it from other entrypoints. Preserve historical evidence; mark superseded guidance when it remains relevant to interpreting that history. A completed task or transient result is not automatically a new standing instruction.
+
+A verified surprise is a consequential constraint an agent reasonably missed because it was hard to discover. First remove the trap in code, configuration, or a check when feasible. Otherwise place the actionable explanation where the next affected task will encounter it and retain decisive evidence in the existing project record. Repeated costly rediscovery or one consequential non-obvious failure can justify an instruction; an obvious convention cannot. Remove the workaround when its cause disappears. Do not append automatic lesson lists or rewrite unrelated instructions.
+
 ## Core Test
 
 Context is loaded across every request, so it cannot be as specific as a prompt. The question is never "is this true?" but "does this change behavior on a run where I did not anticipate the task?"
@@ -19,7 +35,7 @@ The last two questions do most of the work. Contradiction costs reasoning budget
 
 ## Layers
 
-Place each instruction in exactly one layer. Duplication across layers is the most common defect.
+Place each instruction in exactly one layer. Duplication across layers is the most common defect. The table illustrates Claude's loading surfaces; for another provider, use its supported instruction and reference mechanisms rather than creating Claude files.
 
 | Layer | Holds | Cost |
 |---|---|---|
@@ -84,10 +100,13 @@ Does not belong:
 
 ## Dual Surface: CLAUDE.md And AGENTS.md
 
-Claude Code reads `CLAUDE.md` only — it does **not** read `AGENTS.md`. Codex reads `AGENTS.md`. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
+`AGENTS.md` is the common project baseline. Claude's project-instruction selection can load it directly or use `CLAUDE.md`; a compatibility file must preserve access to the baseline. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
 
-- Content identical → make `CLAUDE.md` a **symlink** to `AGENTS.md`. Zero drift, zero maintenance.
+- Content identical → a regular `CLAUDE.md` containing only `@AGENTS.md` is a first-class compatibility option, including when there is no Claude-specific delta. Prefer this import-only wrapper for repositories supporting Windows.
+- A **symlink** from `CLAUDE.md` to `AGENTS.md` is also appropriate when every supported checkout preserves symlinks. Keep a working link in such an environment rather than changing it for symmetry.
 - A genuine Claude-only delta exists → `CLAUDE.md` holds `@AGENTS.md` plus only the delta.
+
+With Git symlink support disabled, Windows can check out a committed link as a regular file containing its target filename rather than the baseline instructions. A regular import wrapper avoids that failure. See Anthropic's [shared-file guidance](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools); wrapper contents and import-path resolution can be checked locally, while actual loading must be confirmed in the target provider session.
 
 A Claude-only delta is real when it concerns harness-specific behavior: background tasks, subagent delegation, tool semantics. It is not real when it is the same repo knowledge reworded.
 
@@ -97,7 +116,7 @@ A Claude-only delta is real when it concerns harness-specific behavior: backgrou
 
 Always-on cost is paid on every session and every subagent, including runs where the content is irrelevant. Move conditional material out.
 
-Three mechanisms, in order of preference:
+Choose mechanisms supported by the target runtime. In Claude Code, these are three mechanisms in order of preference; the traveling-document pattern also applies to other providers without requiring Claude rules or files:
 
 1. **`paths:` frontmatter on a rule** — the rule loads only when the agent reads a matching file. Native and free. Use it when relevance tracks file location.
 2. **A traveling doc referenced from the skills that need it** — use when relevance tracks *task type* rather than file path, which `paths:` globs cannot express.
@@ -111,7 +130,9 @@ When a context-file proposal generalizes from observed behavior, conditionally o
 
 ## Environment Activation
 
-Not a context file, but the piece of project setup that is easiest to get wrong and least visible when it is missing. A project with a virtual environment needs its activation appended to `$CLAUDE_ENV_FILE` at session start, or every Bash call silently runs against the wrong interpreter:
+Inspect the project's actual execution path before adding activation. A virtual environment alone does not imply a session hook: commands such as `uv run`, an explicit environment interpreter, or an existing launcher can already select the correct environment. Preserve a working path and verify that supported commands use the intended interpreter and dependencies.
+
+For Claude Code only, when project commands depend on shell activation that is otherwise missing, a `SessionStart` hook can append the verified activation command to `$CLAUDE_ENV_FILE` for subsequent Bash calls. This is a conditional Claude configuration example, not a requirement for Codex or Devin projects:
 
 ```json
 "hooks": {
@@ -124,7 +145,7 @@ Not a context file, but the piece of project setup that is easiest to get wrong 
 }
 ```
 
-Do not document the activation command in `CLAUDE.md` as a step for the agent to remember. Make the environment correct instead.
+Prefer a reliable launcher or runtime-supported environment setup over a reminder to activate before every call. Document the supported execution command and prerequisites; do not add Claude hooks to a Codex/Devin-only project or replace a working explicit environment command merely because a virtual environment exists.
 
 ## References
 

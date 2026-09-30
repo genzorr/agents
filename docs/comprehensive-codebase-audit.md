@@ -20,7 +20,7 @@ Keep concurrent lanes bounded to the number the coordinator can actively manage,
 
 If the platform cannot create fresh independent read-only lanes, disclose that limitation in the ledger and final handoff and mark the audit `partial`; do not claim independently validated comprehensive completion.
 
-Lanes use the host's ordinary authorized fresh read-only subagents; scaled orchestration follows the host's existing route (`prepare-dynamic-workflow` on Claude when warranted and explicitly invoked Sol–Luna on Codex when applicable), and this reference grants no new mechanism or authority while the existing Sol-review escalation rule remains in force.
+Lanes use the host's ordinary authorized fresh read-only subagents; scaled orchestration follows the host's existing route (`prepare-dynamic-workflow` on Claude when warranted and `orchestrate-workers` on Codex when explicitly requested and applicable). The governing workflow owns resolved creation profiles, reviewer activation, and authority; this reference grants no new mechanism or permission.
 
 The lane contract is a fixed maximum of two material findings or `skip` per lane. Review up to two materially useful simplifications in data structures, state representation, control flow, algorithms, or ownership; it may return fewer than two. If nothing clears the Architecture Review threshold, return `skip`; do not fill a quota. If a row is too dense for this cap, split it into narrower inventory rows and review each in its own lane; never exceed the cap.
 
@@ -63,7 +63,7 @@ After all inventory rows are complete, run fresh independent read-only validatio
 - **Schema completeness:** check every accepted finding for stable identity, exact `Files`, `Problem`, `Proposed shape`, `Dependency shape`, `Why it helps`, `Risk`, `Verification`, finding-level `Verdict`, and `Confidence`.
 - **Dependency-aware ranking:** rank accepted findings by concrete impact, confidence, implementation effort, blast radius, and prerequisites; make dependencies and best first slices internally consistent.
 
-Under an explicitly invoked Sol–Luna task, these validation passes are fresh Luna lanes. They do not automatically escalate to a Sol reviewer; any Sol review still follows the governing Sol–Luna escalation rule and named acceptance-critical rationale.
+Under an explicitly invoked Codex worker workflow, these fresh validation lanes use its resolved worker profiles. They do not implicitly activate an independent reviewer; any reviewer follows the governing workflow's explicit operator request, resolved profile, and authority. A task that requires independent acceptance but lacks the required authority remains partial rather than silently enabling review.
 
 ## Completion and handoff
 

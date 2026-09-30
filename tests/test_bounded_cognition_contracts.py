@@ -295,8 +295,6 @@ class BoundedCognitionContractsTest(unittest.TestCase):
             "Materiality and over-abstraction",
             "Schema completeness",
             "Dependency-aware ranking",
-            "fresh Luna lanes",
-            "do not automatically escalate to a Sol reviewer",
             "Unchanged-repository completion",
             "repository must be unchanged by the audit",
             "each accepted finding as exactly one numbered entry under the normal `Candidates:` heading",
@@ -308,7 +306,8 @@ class BoundedCognitionContractsTest(unittest.TestCase):
         self.assertIn("If scratch writes are unavailable, keep the ledger in visible session state", reference)
         self.assertIn("first ledger entry declares the audited boundary", reference)
         self.assertIn("prepare-dynamic-workflow", reference)
-        self.assertIn("explicitly invoked Sol–Luna on Codex", reference)
+        self.assertIn("orchestrate-workers", reference)
+        self.assertNotIn("Sol–Luna", reference)
 
         for platform in ("codex", "claude"):
             text = self.read_skill(platform, "architecture-review")

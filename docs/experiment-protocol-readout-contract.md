@@ -11,10 +11,7 @@ T-7 through T-10 (this repo, slice S-3) and Harness T-126 through T-130
 (slice S-33) build against this contract instead of inventing per-repo
 templates or a second scientific authority.
 
-This contract follows the accepted product decision at
-`/tmp/agent-handoffs/os/20260720-readout-area-brief-rd-prd.md`: the durable
-chain is `Protocol → execution/artifacts → Readout → Area Brief impact
-decision → optional ADR`, and it is not renegotiated here.
+This contract follows the accepted product decision `20260720-readout-area-brief-rd-prd`: the durable chain is `Protocol → execution/artifacts → Readout → Area Brief impact decision → optional ADR`, and it is not renegotiated here. The original handoff is historical provenance, not an installed read dependency; implementation provenance remains in the task and slice references below.
 
 ## 1. Ownership: Agents versus Harness
 
@@ -186,6 +183,6 @@ or the import/freeze transition is **process success only**. On its own it:
 
 ## References
 
-- Product decision: `/tmp/agent-handoffs/os/20260720-readout-area-brief-rd-prd.md`
+- Product decision: `20260720-readout-area-brief-rd-prd`, reflected in this contract's durable chain and authority split.
 - This repo: slice `S-3`, tasks `T-7`–`T-11`
 - Harness: slice `S-33`, task `T-130` (contract-alignment counterpart to this document), and tasks `T-126`–`T-128`
