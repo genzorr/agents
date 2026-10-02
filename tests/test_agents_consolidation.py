@@ -24,7 +24,19 @@ HOME_VARIABLES = {
 
 
 def run_installer(platform: str, home: Path, *args: str) -> subprocess.CompletedProcess[str]:
-    env = {**os.environ, HOME_VARIABLES[platform]: str(home), "PYTHONDONTWRITEBYTECODE": "1"}
+    root = home.parent
+    env = {
+        **os.environ,
+        **{variable: str(root / name) for name, variable in HOME_VARIABLES.items()},
+        "HOME": str(root / "home"),
+        "USERPROFILE": str(root / "home"),
+        "XDG_CONFIG_HOME": str(root / "config"),
+        "XDG_CACHE_HOME": str(root / "cache"),
+        "APPDATA": str(root / "appdata"),
+        "LOCALAPPDATA": str(root / "localappdata"),
+        HOME_VARIABLES[platform]: str(home),
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
     return subprocess.run(
         ["bash", str(REPO_ROOT / "scripts" / f"install-{platform}.sh"), *args],
         text=True,
@@ -32,6 +44,21 @@ def run_installer(platform: str, home: Path, *args: str) -> subprocess.Completed
         env=env,
         check=False,
     )
+
+
+def home_inventory(home: Path) -> dict[str, tuple[int, int, bytes | str | None]]:
+    inventory = {}
+    for path in [home, *home.rglob("*")]:
+        info = path.lstat()
+        content = None
+        if stat.S_ISLNK(info.st_mode):
+            content = os.readlink(path)
+        elif stat.S_ISREG(info.st_mode):
+            content = path.read_bytes()
+        inventory[path.relative_to(home).as_posix()] = (
+            stat.S_IFMT(info.st_mode), stat.S_IMODE(info.st_mode), content
+        )
+    return inventory
 
 
 class AgentsConsolidationTest(unittest.TestCase):
@@ -47,11 +74,13 @@ class AgentsConsolidationTest(unittest.TestCase):
 
     def test_project_claude_surface_cannot_hide_the_common_agents_baseline(self) -> None:
         claude = REPO_ROOT / "CLAUDE.md"
-        if not claude.exists():
+        if not claude.exists() and not claude.is_symlink():
             return
-        imports_baseline = "@AGENTS.md" in claude.read_text(encoding="utf-8")
-        aliases_baseline = claude.is_symlink() and os.readlink(claude) == "AGENTS.md"
-        self.assertTrue(imports_baseline or aliases_baseline)
+        if claude.is_symlink():
+            self.assertTrue(claude.is_file())
+            self.assertEqual(claude.resolve(), (REPO_ROOT / "AGENTS.md").resolve())
+        else:
+            self.assertEqual(claude.read_text(encoding="utf-8").strip(), "@AGENTS.md")
 
     def test_portable_skills_have_one_runtime_location(self) -> None:
         assets = load_catalog(REPO_ROOT)
@@ -87,20 +116,28 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertEqual(installed.returncode, 0, installed.stderr)
                 shared_state = agents_home / ".agents-install-state.json"
                 before = shared_state.read_bytes()
+                shared_before = home_inventory(agents_home)
 
-                for platform in order:
+                for platform in (*order, "claude"):
                     result = run_installer(platform, root / platform)
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(shared_state.read_bytes(), before)
+                    self.assertEqual(home_inventory(agents_home), shared_before)
+
+                    repeated_provider = run_installer(platform, root / platform)
+                    self.assertEqual(repeated_provider.returncode, 0, repeated_provider.stderr)
+                    self.assertEqual(home_inventory(agents_home), shared_before)
 
                 repeated = run_installer("agents", agents_home)
                 self.assertEqual(repeated.returncode, 0, repeated.stderr)
                 self.assertEqual(shared_state.read_bytes(), before)
+                self.assertEqual(home_inventory(agents_home), shared_before)
 
                 wrong_home = run_installer("codex", agents_home)
                 self.assertEqual(wrong_home.returncode, 1, wrong_home.stderr)
                 self.assertIn("expected schema 2 for codex", wrong_home.stderr)
                 self.assertEqual(shared_state.read_bytes(), before)
+                self.assertEqual(home_inventory(agents_home), shared_before)
 
                 codex_state = root / "codex/.agents-install-state.json"
                 codex_before = codex_state.read_bytes()
@@ -108,11 +145,13 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertEqual(wrong_shared.returncode, 1, wrong_shared.stderr)
                 self.assertIn("expected schema 2 for agents", wrong_shared.stderr)
                 self.assertEqual(codex_state.read_bytes(), codex_before)
+                self.assertEqual(home_inventory(agents_home), shared_before)
 
                 wrong_devin = run_installer("devin", agents_home)
                 self.assertEqual(wrong_devin.returncode, 1, wrong_devin.stderr)
                 self.assertIn("expected schema 2 for devin", wrong_devin.stderr)
                 self.assertEqual(shared_state.read_bytes(), before)
+                self.assertEqual(home_inventory(agents_home), shared_before)
 
                 devin_state = root / "devin/.agents-install-state.json"
                 devin_before = devin_state.read_bytes()
@@ -120,6 +159,7 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertEqual(wrong_shared.returncode, 1, wrong_shared.stderr)
                 self.assertIn("expected schema 2 for agents", wrong_shared.stderr)
                 self.assertEqual(devin_state.read_bytes(), devin_before)
+                self.assertEqual(home_inventory(agents_home), shared_before)
                 self.assertTrue((agents_home / "skills/design-experiment/SKILL.md").is_file())
                 self.assertFalse((agents_home / "skills/babysit-pr").exists())
                 self.assertFalse((agents_home / "skills/thermo-nuclear-code-quality-review").exists())
@@ -127,6 +167,13 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertTrue((root / "codex/skills/thermo-nuclear-code-quality-review/SKILL.md").is_file())
                 self.assertFalse((root / "devin/skills/babysit-pr").exists())
                 self.assertTrue((root / "codex/skills/ask-oracle/SKILL.md").is_file())
+
+                for platform in (*order, "claude"):
+                    for operation in ("--prune", "--uninstall"):
+                        with self.subTest(platform=platform, operation=operation):
+                            result = run_installer(platform, root / platform, operation)
+                            self.assertEqual(result.returncode, 0, result.stderr)
+                            self.assertEqual(home_inventory(agents_home), shared_before)
 
                 foreign = agents_home / "skills/foreign/SKILL.md"
                 foreign.parent.mkdir(parents=True)
