@@ -43,6 +43,15 @@ Do not re-wrap or unwrap prose the task does not otherwise change; that is a dri
 
 Treat filenames, symbols, type names, headings, and test names as search handles. For new code and durable docs, prefer stable, domain-specific names and one canonical spelling per concept; put non-obvious invariants and provenance at the definition or canonical document. Do not rename working APIs or restructure files solely for agent discoverability; make that tradeoff explicit when the task or measured navigation friction justifies it.
 
+### Web Sources
+
+`web_search` results are leads, not evidence: they return titles, URLs, and query-selected excerpts cut mid-sentence, not the source.
+
+- Before a number, attribution, quotation, or comparative claim from the web enters a deliverable, open the primary source (paper, standard, or official documentation) with `webfetch` and read the passage that states it. An abstract supports only what it says itself; a figure that depends on a table or a baseline needs that table.
+- For survey or state-of-the-art research, open at least two primary sources for each question or problem the deliverable answers; when fewer exist, say so instead of filling the gap from search results.
+- In the handoff, mark which claims were checked against an opened source and which rest on search results only; do not state search-only claims as fact.
+- Before finalizing a research deliverable, run a separate verification pass that checks each cited claim against its opened primary source, not against intermediate notes or earlier drafts. The verifier needs page-fetch access: the built-in Explore subagent can search but cannot fetch URLs, so run this pass in the main agent or a subagent profile with `webfetch`.
+
 ## Surgical Changes
 
 Every changed line should trace to the user's request.
