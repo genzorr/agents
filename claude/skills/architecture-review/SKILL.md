@@ -50,6 +50,7 @@ Use these terms consistently in findings.
    - **True external**: inject a port for the third-party dependency and use a mock/test adapter.
 8. Keep only candidates with concrete friction and a change that earns its abstraction under the principles above. It is valid to return no candidates; do not fill a quota.
 9. Present ranked opportunities. For each, include files, current friction, proposed shape, why it improves locality/leverage/testability, dependency shape, risk, and suggested verification.
+   When a candidate consolidates rules or calculations, including internal duplication behind one entrypoint, compare material guards, defaults, units, rounding, clamps, failure behavior, and intentional variants before claiming equivalence. Distinguish structural preservation from an authorized correction with a named domain authority; leave unsupported semantic choices unresolved. Carry discriminating inputs and evidence into the candidate's existing Risk/Verification fields and the selected handoff's acceptance criteria; baseline equivalence alone does not establish scientific correctness.
 10. Stop for selection. Route one user-selected candidate at a time to `/grill-with-docs` to resolve its seam and acceptance contract before implementation; do not develop implementation detail for or schedule unselected candidates.
 
 ## Output
