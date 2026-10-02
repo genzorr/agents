@@ -73,6 +73,20 @@
       }
     },
     {
+      "id": "test-audit",
+      "kind": "skill",
+      "platforms": ["codex", "claude"],
+      "owner": "agents",
+      "source": {
+        "codex": "shared/skills/test-audit",
+        "claude": "shared/skills/test-audit"
+      },
+      "install_target": {
+        "codex": "skills/test-audit",
+        "claude": "skills/test-audit"
+      }
+    },
+    {
       "id": "design-experiment",
       "kind": "skill",
       "platforms": ["agents", "claude"],
