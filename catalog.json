@@ -278,6 +278,20 @@
       "tags": ["role:helper", "domain:orchestration"]
     },
     {
+      "id": "piecemeal-growth",
+      "kind": "skill",
+      "platforms": ["agents", "claude"],
+      "owner": "agents",
+      "source": {
+        "agents": "shared/skills/piecemeal-growth",
+        "claude": "shared/skills/piecemeal-growth"
+      },
+      "install_target": {
+        "agents": "skills/piecemeal-growth",
+        "claude": "skills/piecemeal-growth"
+      }
+    },
+    {
       "id": "prepare-dynamic-workflow",
       "kind": "skill",
       "platforms": ["codex", "claude"],
