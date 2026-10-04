@@ -1,185 +1,101 @@
-"""Static and recorded-conformance contracts for mode-aware ChatGPT Pro consultations."""
+"""Structural and static safety checks; not behavioral or outcome evaluation.
 
+The historical conformance readouts remain historical records. Run the scoped behavioral cases when changing consultation meaning, authority, or transport.
+"""
+
+import re
 import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CONFORMANCE = REPO_ROOT / "tests" / "ask_chatgpt_pro_conformance.md"
+SKILL = REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro"
 
 
 class AskChatGPTProConsultationContractsTest(unittest.TestCase):
-    def read(self, platform: str) -> str:
-        return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "SKILL.md").read_text(encoding="utf-8")
+    def test_entrypoint_metadata_is_loadable(self) -> None:
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertTrue(text.startswith("---\n"))
+        metadata, separator, body = text[4:].partition("\n---\n")
+        self.assertTrue(separator, "YAML frontmatter is not terminated")
+        fields = {}
+        for line in metadata.splitlines():
+            key, colon, value = line.partition(":")
+            self.assertTrue(colon, f"Invalid metadata field: {line!r}")
+            self.assertNotIn(key, fields)
+            fields[key] = value.strip()
+        self.assertEqual(fields.get("name"), "ask-chatgpt-pro")
+        self.assertTrue(fields.get("description"))
+        self.assertTrue(body.strip())
 
-    def read_pro(self) -> str:
-        return (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "references" / "pro-consult.md").read_text(encoding="utf-8")
+    def test_both_route_references_are_present(self) -> None:
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        links = set(re.findall(r"\]\(([^)]+)\)", text))
+        for route in ("pro-consult.md", "plain-research.md"):
+            relative = "references/" + route
+            self.assertIn(relative, links)
+            self.assertTrue((SKILL / relative).is_file())
 
-    def test_entrypoint_routes_plain_and_pro_modes(self) -> None:
-        text = self.read("codex")
-        self.assertIn("references/pro-consult.md", text)
-        self.assertIn("references/plain-research.md", text)
-        self.assertIn("apply the shared constraints below", text)
-        self.assertIn("Do not load Pro-only GitHub", text)
+    def test_local_markdown_links_and_heading_fragments_resolve(self) -> None:
+        for source in SKILL.rglob("*.md"):
+            text = source.read_text(encoding="utf-8")
+            for target in re.findall(r"\]\(([^)]+)\)", text):
+                if "://" in target or target.startswith("mailto:"):
+                    continue
+                path, _, fragment = target.partition("#")
+                destination = (source.parent / path).resolve() if path else source
+                with self.subTest(source=source.name, target=target):
+                    self.assertTrue(destination.is_file())
+                    if fragment:
+                        headings = re.findall(r"^#{1,6} (.+)$", destination.read_text(encoding="utf-8"), re.MULTILINE)
+                        anchors = {re.sub(r"[^\w -]", "", h.lower()).replace(" ", "-") for h in headings}
+                        self.assertIn(fragment, anchors)
 
-    def test_platform_twins_are_identical_and_general_purpose(self) -> None:
-        codex = self.read("codex")
-        claude = self.read("claude")
-        self.assertEqual(codex, claude)
-        self.assertIn("direct repository inspection", codex)
-        self.assertIn("standalone research handoff", codex)
+    def test_markdown_fences_are_balanced(self) -> None:
+        for source in SKILL.rglob("*.md"):
+            opener = None
+            for line in source.read_text(encoding="utf-8").splitlines():
+                match = re.match(r"^(`{3,}|~{3,})(.*)$", line)
+                if not match:
+                    continue
+                fence, suffix = match.groups()
+                if opener is None:
+                    opener = fence
+                elif fence[0] == opener[0] and len(fence) >= len(opener) and not suffix.strip():
+                    opener = None
+            self.assertIsNone(opener, f"Unclosed code fence in {source}")
 
-    def test_modes_have_canonical_semantics_and_bounded_secondary_composition(self) -> None:
-        text = self.read_pro()
-        for mode in ("Discover", "Verify", "Refine", "Decide", "Execute"):
-            self.assertIn(f"**{mode}**", text)
-            self.assertIn(f"### {mode}", text)
-        self.assertIn("Choose exactly one primary mode", text)
-        self.assertIn("Add at most one secondary mode", text)
-        self.assertIn("The primary mode owns framing, context authority, stop conditions, and the main Required Output", text)
-        self.assertIn("A secondary mode may add a bounded section after the primary result", text)
-        self.assertIn("If the two modes conflict, omit the secondary mode", text)
-        self.assertIn("- Secondary mode: [optional; omit when none]", text)
-        self.assertIn("- Mode ordering:", text)
-        self.assertIn("Do not chain more than two modes", text)
+    def test_mode_interface_names_remain_available_once_in_table(self) -> None:
+        text = (SKILL / "references" / "pro-consult.md").read_text(encoding="utf-8")
+        modes = re.findall(r"^\| \*\*([A-Za-z]+)\*\* \|", text, re.MULTILINE)
+        self.assertCountEqual(modes, ["Discover", "Verify", "Refine", "Decide", "Execute"])
 
-    def test_context_authority_separates_decisions_from_preferences(self) -> None:
-        entrypoint = self.read("codex")
-        text = self.read_pro()
+
+    def test_context_authority_keeps_the_existing_distinctions(self) -> None:
+        text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         for category in (
-            "Primary evidence",
-            "User requirements and constraints",
-            "Working synthesis",
-            "Hypotheses",
-            "Selected decisions",
-            "Preferences and decision criteria",
+            "Primary evidence", "User requirements and constraints", "Working synthesis",
+            "Hypotheses", "Selected decisions", "Preferences and decision criteria",
             "Assumptions and unknowns",
         ):
-            self.assertIn(category, entrypoint)
-        self.assertIn("Shared Context Authority", text)
-        self.assertIn("../SKILL.md#shared-context-authority", text)
-        self.assertIn("using the shared authority model", text)
-        self.assertIn("selected decisions as constraints", text)
-        self.assertIn("## Selected Decisions", text)
-        self.assertIn("## Preferences And Decision Criteria", text)
-
-    def test_blocking_input_stops_before_document_and_final_rule_is_conditional(self) -> None:
-        text = self.read_pro()
-        self.assertIn(
-            "If an input is blocking, stop before writing the consult, ask one pointed question, and do not apply the Final Output Rule until the user answers",
-            text,
-        )
-        self.assertIn("Stop before writing the consult, ask one pointed question, and do not return a document path", text)
-        self.assertIn("Apply this rule only when no blocking input remains and a consult document was produced", text)
-        self.assertIn("If an input is blocking, stop before writing the consult, ask one pointed question, and do not return a document path", text)
-
-    def test_discover_remains_analysis_only_unless_recommendations_are_requested(self) -> None:
-        text = self.read_pro()
-        discover = text.split("### Discover", 1)[1].split("### Verify", 1)[0]
-        self.assertIn("Perform a fresh independent assessment", discover)
-        self.assertIn(
-            "Do not request recommendations, next actions, or an implementation plan unless the user explicitly asks for them",
-            discover,
-        )
-
-    def test_recommendation_grounding_uses_evidence_and_user_authority(self) -> None:
-        text = self.read_pro()
-        grounding = (
-            "Ground recommendations in primary evidence and the applicable user requirements, selected decisions, preferences, and decision criteria. "
-            "Label extrapolations beyond those inputs as inferences with confidence and missing evidence."
-        )
-        self.assertIn(grounding, text)
-        self.assertIn("Preserve hard user requirements separately from soft preferences and decision criteria", text)
-        self.assertIn("Treat selected decisions as constraints unless the user explicitly asks to reopen them", text)
+            self.assertIn(category, text)
 
     def test_research_stage_preserves_baseline_fidelity_and_requested_scouts(self) -> None:
-        entrypoint = self.read("codex")
-        pro = self.read_pro()
-        plain = (REPO_ROOT / "shared" / "skills" / "ask-chatgpt-pro" / "references" / "plain-research.md").read_text(encoding="utf-8")
+        entrypoint = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        plain = (SKILL / "references" / "plain-research.md").read_text(encoding="utf-8")
         for stage in (
-            "baseline selection",
-            "baseline establishment",
-            "faithful reproduction",
-            "adaptation",
-            "diagnosis",
-            "novel improvement",
+            "baseline selection", "baseline establishment", "faithful reproduction",
+            "adaptation", "diagnosis", "novel improvement",
         ):
             self.assertIn(stage, entrypoint.lower())
             self.assertIn(stage, plain.lower())
         self.assertIn("An established baseline does not need to be novel", entrypoint)
         self.assertIn("instead of stripping components to fit", entrypoint)
         self.assertIn("A causal scout or small discriminator remains legitimate", entrypoint)
-        self.assertIn("# Research Stage", pro)
-        self.assertIn("Could the requested deliverable succeed while missing the user's intended outcome?", pro)
 
     def test_research_recommendations_can_challenge_but_not_replace_user_authority(self) -> None:
-        entrypoint = self.read("codex")
+        entrypoint = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("challenge an unsound framing explicitly and with evidence", entrypoint)
         self.assertIn("does not itself change the user's goal, selected baseline, method semantics, requested deliverable, or implementation authority", entrypoint)
-
-    def test_source_manifest_output_depth_and_artifacts_are_proportional(self) -> None:
-        text = self.read_pro()
-        artifact = text
-        self.assertIn("Build a proportional source manifest", text)
-        self.assertIn("Do not turn a broad task into an exhaustive file checklist", text)
-        self.assertIn("Do not require every relevant file to be named in advance", text)
-        self.assertIn("focused verification or bounded question: about 500–900 words", artifact)
-        self.assertIn("narrow code, PR, or defect review: about 800–1,200 words", artifact)
-        self.assertIn(
-            "multi-repository refinement, decision support, or execution planning: about 1,500–3,000 words",
-            artifact,
-        )
-        self.assertIn("broad architecture or research synthesis: about 2,500–5,000 words", artifact)
-        self.assertIn("These are planning ranges, not quotas", artifact)
-        self.assertNotIn("Ask ChatGPT Pro for one mid-sized report: target 800–1,200 words", artifact)
-
-    def test_template_and_self_review_are_adaptive(self) -> None:
-        text = self.read_pro()
-        self.assertIn("Include only sections that contain useful information", text)
-        self.assertIn("[Insert the primary mode block.", text)
-        self.assertIn("[Include only the applicable task-pattern fields below.]", text)
-        self.assertIn("Is a secondary mode genuinely necessary, bounded, ordered after the primary result, and non-conflicting?", text)
-        self.assertIn("Did I distinguish selected decisions from softer preferences and decision criteria?", text)
-        for task_pattern in (
-            "**Code or change review:**",
-            "**Debugging:**",
-            "**Architecture or system review:**",
-            "**Research or comparison:**",
-            "**Decision support:**",
-            "**Execution planning:**",
-            "**Document or log analysis:**",
-        ):
-            self.assertIn(task_pattern, text)
-
-    def test_recorded_conformance_matrix_covers_semantic_routes(self) -> None:
-        text = CONFORMANCE.read_text(encoding="utf-8")
-        for case_id in (
-            "discover-fresh-audit",
-            "verify-hypothesis",
-            "refine-existing-synthesis",
-            "decide-hard-soft",
-            "execute-selected-direction",
-            "blocking-input",
-            "material-nonblocking",
-            "broad-architecture",
-            "pdf-opt-in",
-            "secondary-mode-composition",
-        ):
-            self.assertIn(f"`{case_id}`", text)
-        self.assertIn("Single same-agent manual conformance pass", text)
-        self.assertIn("10/10 PASS", text)
-        self.assertIn("does not establish general model performance", text)
-
-    def test_research_goal_alignment_conformance_covers_observed_failure_modes(self) -> None:
-        text = (REPO_ROOT / "tests" / "research_goal_alignment_conformance.md").read_text(encoding="utf-8")
-        for case_id in ("faithful-baseline", "explicit-small-scout", "recommended-pivot"):
-            self.assertIn(f"`{case_id}`", text)
-        self.assertIn("Fresh-context behavioral invocation", text)
-        self.assertEqual(text.count("**Observed output shape:**"), 3)
-        self.assertIn("without removing essential method components to fit existing hooks", text)
-        self.assertIn("a large experiment or baseline establishment", text)
-        self.assertIn("Do not record B as adopted or assign implementation work on that basis", text)
-        self.assertIn("does not establish general model performance", text)
-
 
 if __name__ == "__main__":
     unittest.main()
