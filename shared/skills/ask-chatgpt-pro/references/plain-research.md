@@ -58,7 +58,7 @@ Include only sections that contain useful information:
 - Require a final gap review. Request another targeted search only when it could materially close a decision-relevant gap; otherwise preserve the gap explicitly.
 - Permit an explicit no-decision result when the sufficiency bar is not met.
 - Do not invent sources, project facts, constraints, or file paths. Name only context and sources that exist or were supplied.
-- Preserve user-requested output formats and deliverables; do not infer a PDF, saved file, or other artifact when the user did not request it.
+- Preserve user-requested output formats and deliverables; do not add an output format, saved file, or other artifact when the user did not request it.
 
 ## Boundary
 

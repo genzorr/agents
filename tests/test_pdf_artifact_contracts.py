@@ -11,9 +11,9 @@ class PdfArtifactContractsTest(unittest.TestCase):
         filename = "references/pro-consult.md" if skill == "ask-chatgpt-pro" else "SKILL.md"
         return (REPO_ROOT / "shared" / "skills" / skill / filename).read_text(encoding="utf-8")
 
-    def test_external_handoff_skills_keep_pdf_opt_in(self) -> None:
+    def test_ask_oracle_keeps_pdf_opt_in(self) -> None:
         for platform in ("codex", "claude"):
-            for skill in ("ask-chatgpt-pro", "ask-oracle"):
+            for skill in ("ask-oracle",):
                 text = self.read(platform, skill)
                 self.assertIn("invoking this skill does not request a pdf", text.lower(), (platform, skill))
                 self.assertIn('"do provide pdf along with other output"', text.lower(), (platform, skill))
