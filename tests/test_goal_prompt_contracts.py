@@ -491,7 +491,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
         preamble = text.split("## Dispatch Readiness\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
         for anchor in (
-            "Before every dispatch, internally resolve and validate the lane",
+            "For a new identity or assignment, internally resolve and validate the lane",
             "root work it substitutes for",
             "unique output",
             "downstream decision affected",
@@ -504,6 +504,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "changed topology/authority/shared-state ownership or conflict",
         ):
             self.assertIn(anchor, preamble)
+        self.assertIn("Do not dispatch with unknown required facts", preamble)
         self.assertNotIn("Before every dispatch, state lane", preamble)
 
     def test_orchestrate_workers_preserves_complete_handoffs_and_recovery(self) -> None:
@@ -566,8 +567,21 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "Preserve a failure with its condition and evidence",
         ):
             self.assertIn(anchor, contract)
-        self.assertIn("Before reuse, resend the full contract with an assignment-reset overlay", text)
-        self.assertIn("A bounded current-assignment correction needs only changed constraints", text)
+
+    def test_orchestrate_workers_same_assignment_followups_preserve_contracts_and_gates(self) -> None:
+        text = self.read("codex/skills/orchestrate-workers/SKILL.md")
+        readiness = text.split("## Dispatch Readiness\n", 1)[1].split("## Worker Lifecycle And Continuity", 1)[0]
+        self.assertIn("same-assignment follow-up sends only changed constraints, relevant findings, and new evidence", readiness)
+        self.assertIn("reuse the established contract, roles, authority, route, settings, and applicable verification", readiness)
+        self.assertIn("Revalidate affected facts when a material boundary changes or continuity is uncertain", readiness)
+        lifecycle = text.split("## Worker Lifecycle And Continuity\n", 1)[1].split("## Compact Worker Contract", 1)[0]
+        self.assertIn("For a new assignment or uncertain continuity, send the full contract with an assignment-reset overlay", lifecycle)
+        self.assertIn("within the current assignment and granted authority without a coordinator acknowledgment between repairs", lifecycle)
+        self.assertIn("changed ownership, dependencies, safety, or authority still trigger the applicable stop/ask gate", lifecycle)
+        self.assertIn("does not require a reset or new receipt solely because the worker returned, became idle, or completed a correction", lifecycle)
+        rules = text.split("## Worker Rules\n", 1)[1].split("## Operator-Requested Independent Review", 1)[0]
+        self.assertIn("self-review the changed artifacts and affected behavior; reuse applicable inspection and checks", rules)
+        self.assertIn("Expand inspection or verification for a relevant change, failure, insufficient evidence, or governing requirement", rules)
 
     def test_orchestrate_workers_preserves_auditable_verification(self) -> None:
         text = self.read("codex/skills/orchestrate-workers/SKILL.md")
@@ -664,6 +678,8 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "While disabled, do not resolve or validate reviewer controls, identity, or protocol.",
             "the same applies to any explicitly requested reviewer verdict.",
             "Savings never weaken scope, verification, authority, or review quality.",
+            "Workers may diagnose, repair, self-review, and run focused consequence tests within the current assignment and granted authority without a coordinator acknowledgment between repairs.",
+            "- After routine corrections, self-review the changed artifacts and affected behavior;",
             "Keep every worker and reviewer a leaf.",
             "For a reviewer, disclose the explicit operator request and exact acceptance target.",
             "Keep implementation and reviewer identities separate.",
@@ -800,7 +816,6 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             self.assertIn(anchor, review)
         protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
         for anchor in (
-            "checkout is quiescent",
             "read-only, no-mutation, no-delegation",
             "ship",
             "fix-first",
@@ -814,8 +829,36 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         ):
             self.assertIn(anchor, protocol)
         self.assertIn("isolated scratch state outside the reviewed checkout", protocol)
+        prepare = protocol.split("## Prepare\n", 1)[1].split("## Review Packet", 1)[0]
+        for anchor in (
+            "meaningful integration or delivery checkpoints",
+            "material safety, authority, durable-state, or public-contract risk",
+            "active review request does not require a new dispatch after each edit or suspend authorized development",
+            "review target and its decision-bearing dependencies and evidence stable",
+            "reviewer inspects that stable surface",
+            "Disjoint authorized work may continue",
+            "never claim a review of mixed or unseen bytes",
+            "do not repeatedly inventory or hash the whole workspace",
+            "without a relevant change, failure, insufficient evidence, or governing requirement",
+        ):
+            self.assertIn(anchor, prepare)
+        self.assertNotIn("Keep it quiescent throughout review", prepare)
+        packet = protocol.split("## Review Packet\n", 1)[1].split("## Complete Target And Correction Rounds", 1)[0]
+        self.assertIn("decision-bearing deltas referencing the prior packet", packet)
+        self.assertIn("Restore the full packet when continuity or required facts cannot be recovered", packet)
+        result = protocol.split("## Isolation And Result\n", 1)[1].split("## Reviewer Continuity", 1)[0]
+        for anchor in (
+            "mutation-sensitive shared or durable state in proportion to the credible blast radius",
+            "disclose residual risk and detection limits",
+            "unresolved attribution withholds affected acceptance",
+            "If reviewer mutation occurs",
+            "preserving other owners' authorized changes",
+            "Acceptance-critical findings require independent confirmation of closure before affected acceptance",
+            "never present owner-checked later edits as independently reviewed",
+        ):
+            self.assertIn(anchor, result)
 
-    def test_independent_review_correction_rounds_preserve_complete_current_target_verdicts(self) -> None:
+    def test_independent_review_correction_rounds_preserve_revision_bound_coverage(self) -> None:
         protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
         correction = protocol.split("## Complete Target And Correction Rounds\n", 1)[1].split("## Isolation And Result", 1)[0]
         for anchor in (
@@ -825,13 +868,18 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
             "complete subsequent delta, including uncommitted changes",
             "affected interface, invariant, caller or consumer, unresolved finding, and new or changed verification",
             "only when its target, assumptions, and evidence remain demonstrably applicable",
-            "Every implementation mutation invalidates the prior verdict",
-            "new verdict for the complete current target",
+            "A verdict describes the reviewed revision",
+            "Later edits do not erase applicable coverage or extend that verdict to unseen changes",
+            "self-reviews routine corrections, and verifies their consequences",
+            "before affected acceptance when material risk, acceptance-critical findings, or the operator/governing contract requires it",
+            "request for independent review of the final state requires a final delta review if the target changed after the last review; owner checks cannot replace it",
+            "When a correction-round review is required, issue a verdict for the complete current target",
             "which coverage was carried forward and which coverage was newly performed",
             "prior baseline or coverage cannot be recovered",
             "Compaction alone does not require restarting the review",
         ):
             self.assertIn(anchor, correction)
+        self.assertNotIn("Every implementation mutation invalidates the prior verdict", correction)
         self.assertIn("explicit read-only, no-mutation, no-delegation instructions", protocol)
 
     def test_orchestration_narration_is_exception_driven_and_continuity_is_fail_safe(self) -> None:
