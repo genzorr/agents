@@ -1,8 +1,6 @@
 # Context File Authoring
 
-Use this as the craft rubric when writing or slimming the always-on context layer: `CLAUDE.md`, `AGENTS.md`, `.claude/rules/`, and `@` references. `docs/skill-authoring-principles.md` is the sibling rubric for skills; this document covers everything that loads *before* the agent knows the task.
-
-Calibrated for the Claude 5 generation (Opus 5, Fable 5). Older models needed guardrails these files should no longer carry.
+Use this portable craft rubric when writing or revising standing instruction files and their conditional references. It covers wording, maintained ownership and provider loading; use the project's own setup policy and existing documentation owners for its procedures. No personal context repository is required. `docs/skill-authoring-principles.md` is the sibling rubric for skills.
 
 ## Create Or Update Project Instructions
 
@@ -22,36 +20,38 @@ A verified surprise is a consequential constraint an agent reasonably missed bec
 
 ## Core Test
 
-Context is loaded across every request, so it cannot be as specific as a prompt. The question is never "is this true?" but "does this change behavior on a run where I did not anticipate the task?"
+Standing instructions serve varied tasks; conditional references can be task-specific. Check both accuracy and operational value: what supported task changes because this instruction is present, and what would fail without it?
 
 Ask of each line:
 
 - Would the agent do something different without this line?
-- Is this already implied by the harness system prompt, the file tree, or the code itself?
+- Does an existing artifact already supply this information, and will the supported reader find it before acting?
 - Does this contradict anything else the agent will load in the same session?
 - Is it needed on *every* run, or only on some?
 
-The last two questions do most of the work. Contradiction costs reasoning budget, not just tokens: an agent holding "leave documentation as appropriate" and "DO NOT add comments" must resolve the conflict before it can act.
+Resolve conflicting instructions at their maintained owner rather than expecting the agent to guess an exception. Use task-triggered routes for detailed guidance; an ordinary Markdown link does not itself load its target.
 
 ## Layers
 
-Place each instruction in exactly one layer. Duplication across layers is the most common defect. The table illustrates Claude's loading surfaces; for another provider, use its supported instruction and reference mechanisms rather than creating Claude files.
+Give each fact one maintained owner. A root may retain a short boundary or routing reminder when contributors cannot be assumed to load that owner. Remove duplicate procedures, conflicting copies and reminders with no distinct audience or trigger. Before deleting a project rule because a global file repeats it, verify the supported contributors' loading paths; essential standalone boundaries must remain reachable before the relevant action.
 
-| Layer | Holds | Cost |
+The table illustrates Claude's loading surfaces; for another provider, use its supported instruction and reference mechanisms rather than creating Claude files. Provider selection and exclusions matter; see [Loading notes](#loading-notes).
+
+| Layer | Holds | Loading |
 |---|---|---|
 | Harness system prompt | Product behavior. Not yours to edit. | — |
-| Global `~/.claude/CLAUDE.md` (runtime-home) | Cross-project Claude controls without a narrower rule file. | Always-on, every session and subagent |
-| `~/.claude/rules` (runtime-home) | Cross-project personal standards. | Always-on, every session **and every subagent** |
-| Project `CLAUDE.md` | What this repo is; its gotchas. | Always-on in this repo and all descendants |
+| Global `~/.claude/CLAUDE.md` (runtime-home) | Cross-project Claude controls without a narrower rule file. | User instruction surface; actual selection depends on runtime configuration and agent type |
+| `~/.claude/rules` (runtime-home) | Cross-project personal standards. | User rules; actual selection depends on runtime configuration and agent type |
+| Project `CLAUDE.md` or selected `AGENTS.md` | Project purpose, essential boundaries and task routes. | Ancestor instructions at launch; nested instructions on demand, subject to selection and exclusions |
 | Traveling docs (`~/.claude/docs` (runtime-home)) | Contracts and rubrics consulted mid-task. | Only when referenced |
-| Skills | Opinionated procedures. | Description always-on; body on invocation |
-| `@` references | Specs, mockups, test suites, code to port. | Inlined at launch when imported |
+| Skills | Opinionated procedures. | Metadata and body loading depend on runtime and invocation policy |
+| `@` references | Specs, mockups, test suites, code to port. | Expanded with the importing instructions; imported text consumes context |
 
 Push an instruction to the narrowest layer that still reaches the run that needs it.
 
 ## Judgement Over Rules
 
-Write the principle, not the prohibition. A hard rule is wrong for some subset of prompts, and the agent cannot tell which subset it is in.
+Use principles for choices that legitimately depend on context. Use explicit requirements for safety, authority and operational invariants; state their scope and exceptions. A prohibition with a concrete consequence can be clearer than an abstract principle.
 
 Prefer:
 
@@ -61,27 +61,27 @@ Avoid:
 
 - "Default to writing no comments. Never write multi-line comment blocks — one short line max."
 
-Reserve absolute rules for cases where the worst outcome is unacceptable and judgement genuinely cannot substitute: destructive commands, credential handling, external-effect gates, hard operational invariants. Those stay explicit. Style preferences do not.
+Keep destructive-command, credential-handling, external-effect and hard operational boundaries explicit. Style guidance should reflect the project's real contract rather than an arbitrary restriction.
 
-A rule stated as an absolute that the agent will correctly violate teaches it to discount the whole file.
+An absolute that conflicts with legitimate tasks creates ambiguity; narrow its scope instead of expecting the agent to guess the exception.
 
-## Retired Practices
+## Patterns To Reconsider
 
-These were correct for earlier models and are now defects.
+Reconsider these patterns when they add irrelevant context or duplicate an existing interface; they are not universally obsolete.
 
-| Retired | Current |
+| Pattern | Alternative when applicable |
 |---|---|
-| Enumerate rules for every case | State the principle; let the model judge |
-| Give examples of tool/format usage | Design expressive interfaces; examples narrow the exploration space |
-| Put everything upfront so it is never missed | Progressive disclosure — a tree of files loaded when relevant |
-| Repeat key instructions in several places | One home per meaning; put tool guidance in the tool description |
-| Size the file by project LOC | Size by how many real gotchas exist |
+| Enumerate rules for every case | State a scoped principle while retaining consequential requirements |
+| Give examples of tool/format usage | Keep examples that disambiguate a non-obvious command, format or boundary; omit ones that duplicate a clear interface |
+| Put everything upfront so it is never missed | Keep essential boundaries at entry; route detailed guidance by task |
+| Repeat key instructions in several places | One maintained owner, with boundary reminders where audience or loading requires them |
+| Size the file by project LOC | Include what supported tasks need, without line or word quotas |
 | Ship a template to fill in | Write the specific repo's actual constraints |
-| `CLAUDE.md` as durable memory | Memory, artifacts, and skills — or an explicit capture surface |
+| Instruction files as an investigation log | Retain standing guidance here; keep evidence and results in the existing record store |
 
-## What Belongs In A Project CLAUDE.md
+## What Belongs In Root Project Instructions
 
-Briefly say what the repo is for, then spend the tokens on **gotchas**: the things that are costly to discover and not visible from the file tree.
+Briefly say what the repo is for. Keep essential boundaries and consequential shared constraints, then route tasks to their detailed owners. A pure index can hide a boundary until after an action violates it.
 
 Belongs:
 
@@ -89,13 +89,13 @@ Belongs:
 - Commands that are not guessable, and the ones that are expensive to get wrong.
 - Traps with consequences ("killing the local orchestrator does not stop the remote run").
 - Layout choices an agent would otherwise violate ("all types in one file, nowhere else").
-- Verification that must run, when it is not discoverable from CI config.
+- Required checks, their triggers and limits, or a direct route to their maintained commands.
 
 Does not belong:
 
-- Anything readable from the file tree, `pyproject.toml`, or the lockfile.
-- Restating the harness system prompt or a global rule.
-- Architecture prose that will drift out of date. Point at code instead.
+- Inventories and explanations that add no operational value beyond existing artifacts. A concise supported command or consequential constraint can still establish the project contract.
+- Duplicate procedures or reminders with no distinct audience or trigger. Do not depend on an operator's private globals for essential project boundaries.
+- Detailed architecture prose already owned by maintained project docs. Link its owner; do not substitute today's implementation for an intended contract.
 - Volatile status. Derive it from the project's own tracking state.
 
 ## Dual Surface: CLAUDE.md And AGENTS.md
@@ -110,19 +110,26 @@ With Git symlink support disabled, Windows can check out a committed link as a r
 
 A Claude-only delta is real when it concerns harness-specific behavior: background tasks, subagent delegation, tool semantics. It is not real when it is the same repo knowledge reworded.
 
-`@` imports **do not save tokens** — the imported file is inlined at launch, at the same cost as pasting it. Import for one-source-of-truth, never for context savings. Savings come only from deleting content. Imports nest to 4 hops.
+Claude `@` imports keep one maintained source. Imported text expands with the importing instructions and consumes context; a startup import is not progressive disclosure. Resolve paths relative to the importing file, not the working directory; nesting is limited to four hops. Remove unnecessary text or defer genuinely conditional material instead of moving it into an unconditional import.
 
 ## Progressive Disclosure
 
-Always-on cost is paid on every session and every subagent, including runs where the content is irrelevant. Move conditional material out.
+Move genuinely conditional material out of the always-loaded layer; check the actual loading chain. Choose by trigger, not a universal ranking:
 
-Choose mechanisms supported by the target runtime. In Claude Code, these are three mechanisms in order of preference; the traveling-document pattern also applies to other providers without requiring Claude rules or files:
+- **Task-directed link:** name when to open a maintained document. Use it when relevance follows a task rather than a path. This rubric's [Claim breadth](#claim-breadth) route names when to open `docs/claim-discipline.md`, the maintained owner for generalizing observations into reusable guidance.
+- **Runtime import:** loads the target with the importing instructions. Use it to preserve a common baseline, not to defer unrelated procedures.
+- **Path-scoped or nested instructions:** use a real subsystem boundary and the target provider's supported discovery behavior. A filename's location alone does not establish that every runtime discovers it before an action.
 
-1. **`paths:` frontmatter on a rule** — the rule loads only when the agent reads a matching file. Native and free. Use it when relevance tracks file location.
-2. **A traveling doc referenced from the skills that need it** — use when relevance tracks *task type* rather than file path, which `paths:` globs cannot express.
-3. **Nested `CLAUDE.md` in a subdirectory** — loads on demand when the agent reads there. Good for per-package conventions in a monorepo.
+Keep routes reachable before the relevant action. Avoid reading loops and blanket instructions to read every linked guide. Do not externalize material needed on every run just to shorten a file.
 
-Do not externalize material needed on every run just to shorten a file. That trades one always-on cost for an always-on cost plus a round-trip.
+## Loading Notes
+
+These notes follow current official documentation checked on 2026-10-07; they describe supported mechanics, not proof of loading in a local session.
+
+- **Codex:** [startup discovery](https://learn.chatgpt.com/docs/agent-configuration/agents-md) builds the instruction chain once per run. It selects the first non-empty global `AGENTS.override.md` or `AGENTS.md`, then at most one instruction file per directory from the project root to the starting working directory, with overrides and configured fallback names. Do not assume arbitrary nested files open automatically during a task or that Claude's `@` semantics apply.
+- **Claude Code:** [project selection](https://code.claude.com/docs/en/memory#agentsmd) can read `AGENTS.md` natively from v2.1.277, subject to version/session support and the Project instructions setting. By default, a `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` in the working directory or above selects Claude files instead; an import wrapper preserves the shared baseline in that case. Ancestor instructions load at launch; nested project instructions load on demand. [Path-scoped rules](https://code.claude.com/docs/en/memory#path-specific-rules) trigger on matching Read, Write or Edit access, not every tool use. Subagents may skip project instructions. Consult the official documentation for settings and exclusions rather than assuming every session or agent loads the same chain.
+
+For other providers, check their supported discovery and reference mechanisms before choosing a surface. This guide does not establish Devin's automatic loading behavior.
 
 ## Claim breadth
 
@@ -149,24 +156,17 @@ Prefer a reliable launcher or runtime-supported environment setup over a reminde
 
 ## References
 
-Prefer references in code. A language the model already knows carries higher fidelity than prose about it.
-
-- An HTML mockup beats a description of a design or a screenshot of one.
-- A test suite is a better spec than a spec document.
-- A function in another codebase is the clearest instruction for porting.
-- A rubric lets a verifier agent check taste that prose cannot pin down.
-
-Reach for prose only for intent and constraints that no artifact encodes.
+Prefer the artifact that answers the question: code for implemented behavior, tests for checked outcomes, specifications for intended contracts, and prose for purpose, rationale and constraints. Mockups, porting examples and rubrics can make an ambiguous target concrete. Link maintained owners rather than copying them; no artifact type universally outranks the others.
 
 ## Pruning
 
-Duplication, sediment, no-op, and sprawl are defined in `docs/skill-authoring-principles.md` §Pruning and apply here unchanged. Two failure modes are specific to context files:
+Use the duplication, sediment, no-op and sprawl questions in `docs/skill-authoring-principles.md` §Pruning, with the ownership and reach qualifications in [Layers](#layers). Two failure modes need particular care in context files:
 
-- **Cross-layer duplication** — the same meaning in a global rule and a project file, or in a file and the system prompt. Delete the broader copy; keep the one closest to where it applies.
-- **Stale authority** — a context file that confidently describes an architecture the code has since moved past. It outranks the code in the agent's attention and produces confidently wrong work. Prefer pointing at code over describing it.
+- **Cross-layer duplication** — remove competing procedures and copies without a distinct consumer; preserve essential standalone boundary reminders. Verify supported loading paths before deleting a broader or narrower copy.
+- **Stale authority** — resolve disagreement between current guidance, accepted contracts and implementation at the affected owner. Code shows implemented behavior; it does not automatically override an intended contract or safety boundary. Mark proposals and superseded guidance explicitly.
 
-When cutting, verify what actually loaded with `/context` rather than assuming.
+Inspect the full affected diff, links, wrapper targets and distributed reference closure. Walk representative tasks from entry to the affected owner, retaining boundaries, prerequisites, checks and recovery limits without unrelated loading. Use existing proportional checks; do not add tests that merely freeze prose. Verify actual loading in a fresh target-provider session when runtime behavior changes: Claude's `/context` lists memory files. Static link and packaging checks are not live loading evidence; protected runtime files and transcripts retain their applicable read gates.
 
 ## Attribution
 
-The retired-practices framing and the judgement-over-rules examples are adapted from Anthropic's "The new rules of context engineering for Claude 5 generation models" (Thariq Shihipar, July 2026).
+The reconsideration framing and judgement-over-rules examples are adapted from Thariq Shihipar's [“The new rules of context engineering for Claude 5 generation models”](https://claude.dev/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models/), published 2026-07-24. It reports prompt reduction on particular Claude models and coding evaluations; it does not establish that every example, prohibition or repeated boundary is defective, or measure this repository's guidance. No effectiveness improvement follows merely from a shorter file.
