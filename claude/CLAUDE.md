@@ -17,6 +17,8 @@ Cross-project standards that already have rule files live in `~/.claude/rules` (
 
 ## Preserve Thread Model
 
+- Create or invoke other agents only when the user explicitly requests delegation; skill workflows and bundled agent profiles do not grant that authorization.
+
 - Preserve an existing session or thread's model and effort; omit overrides when sending to an existing thread.
 - For new subagents or delegated jobs, use requested settings or preserve configured defaults; never upgrade Luna or Terra work to Sol automatically.
 - State intentional model or effort overrides before launching new work.
@@ -25,3 +27,7 @@ Cross-project standards that already have rule files live in `~/.claude/rules` (
 
 - Distinguish an explicit user refusal, an automatic approval denial, a sandbox restriction, and an application failure from the tool’s reported reason; do not attribute every denial to the user.
 - Honor explicit refusals and approval denials. Do not retry, broaden, or route around a denied action. For an authorized action blocked only by the sandbox, follow the runtime’s supported escalation procedure; existing authorization is not permission to bypass a denial.
+
+## Interface Design
+
+For substantial UI design or redesign, use the managed `impeccable` skill; preserve the project's design system, components, accessibility and product constraints unless the requested redesign authorizes changing them.

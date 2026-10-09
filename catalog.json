@@ -2,6 +2,27 @@
   "$comment": "Authoritative catalog of shared Agents, Codex, Claude, and Devin assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
   "skills": [
     {
+      "id": "impeccable",
+      "kind": "skill",
+      "platforms": [
+        "codex",
+        "claude"
+      ],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/impeccable",
+        "claude": "claude/skills/impeccable"
+      },
+      "install_target": {
+        "codex": "skills/impeccable",
+        "claude": "skills/impeccable"
+      },
+      "tags": [
+        "domain:design",
+        "origin:pbakaus/impeccable"
+      ]
+    },
+    {
       "id": "architecture-review",
       "kind": "skill",
       "platforms": ["codex", "claude"],
@@ -533,6 +554,62 @@
     }
   ],
   "subagents": [
+    {
+      "id": "impeccable-asset-producer",
+      "kind": "subagent",
+      "platforms": [
+        "claude"
+      ],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/impeccable-asset-producer.md"
+      },
+      "install_target": {
+        "claude": "agents/impeccable-asset-producer.md"
+      }
+    },
+    {
+      "id": "impeccable-documenter",
+      "kind": "subagent",
+      "platforms": [
+        "claude"
+      ],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/impeccable-documenter.md"
+      },
+      "install_target": {
+        "claude": "agents/impeccable-documenter.md"
+      }
+    },
+    {
+      "id": "impeccable-finish-reviewer",
+      "kind": "subagent",
+      "platforms": [
+        "claude"
+      ],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/impeccable-finish-reviewer.md"
+      },
+      "install_target": {
+        "claude": "agents/impeccable-finish-reviewer.md"
+      }
+    },
+    {
+      "id": "impeccable-manual-edit-applier",
+      "kind": "subagent",
+      "platforms": [
+        "claude"
+      ],
+      "owner": "agents",
+      "source": {
+        "claude": "claude/agents/impeccable-manual-edit-applier.md"
+      },
+      "install_target": {
+        "claude": "agents/impeccable-manual-edit-applier.md"
+      }
+    },
     {
       "id": "code-reviewer",
       "kind": "subagent",

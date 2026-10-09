@@ -88,6 +88,10 @@ CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --approve
 
 `--configure-thread-bridge` patches the existing bridge server's created-task defaults and approval mode. `--configure-app-defaults` patches only `apps._default`. `--approve-codex-app-tools` approves the bundled Codex App MCP tools that otherwise prompt. Each option preserves unrelated app, tool, and MCP settings. See the [bridge and permission configuration contract](docs/codex-thread-bridge.md).
 
+## Impeccable
+
+The managed Codex and Claude packages provide upstream Impeccable design workflows with explicit-user-only delegation and disabled engine provider jobs. Project design systems remain authoritative. See [Impeccable integration](docs/impeccable.md) for the pinned source, local patches, engine behavior, supported limits and update procedure.
+
 ## Development
 
 Read [AGENTS.md](AGENTS.md) before changing the repository. Validate source changes with:
