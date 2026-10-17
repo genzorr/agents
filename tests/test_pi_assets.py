@@ -20,6 +20,7 @@ from unittest.mock import patch
 from scripts.agent_catalog import CatalogError, load_catalog, validate_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
+HARNESS_PI_REPO = Path(os.environ.get("HARNESS_PI_REPO", str(ROOT.parent / "harness-pi-support")))
 
 
 def inventory(home):
@@ -245,6 +246,81 @@ class PiAssetsTest(unittest.TestCase):
         for name in ("auth.json", "accounts/pool.json", ".agents-pi-setup.json", "extensions/foreign.ts"):
             self.assertEqual(final[name], initial[name])
         self.assertFalse(self.codex.exists())
+
+    def harness(self, *args, expected=0):
+        result = subprocess.run([sys.executable, str(HARNESS_PI_REPO / "scripts/install_pi.py"), *args], env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+        return result
+
+    def install_composed_assets(self):
+        settings = self.provisional()
+        initial = inventory(self.home)
+        self.migrate()
+        self.install(real=True)
+        self.harness()
+        return settings, initial
+
+    @unittest.skipUnless((HARNESS_PI_REPO / "scripts/install_pi.py").is_file(), "Set HARNESS_PI_REPO to qualify composed rollback with the owning Harness installer")
+    def test_composed_owner_uninstall_then_migration_rollback_preserves_unrelated_state(self):
+        original_settings, initial = self.install_composed_assets()
+        for name in ("harness-pi-runtime.md", "harness-risk-envelope.md"):
+            self.assertTrue((self.home / "docs" / name).is_file())
+        self.install("--uninstall", real=True)
+        self.assertEqual({path.name for path in (self.home / "docs").iterdir()}, {"harness-pi-runtime.md", "harness-risk-envelope.md"})
+        before = inventory(self.home)
+        self.migrate("--rollback", expected=1)
+        self.assertEqual(inventory(self.home), before)
+        self.install(real=True)
+        settings = json.loads((self.home / "settings.json").read_text())
+        settings["defaultModel"] = "operator-changed-after-install"
+        settings["extensions"].append("operator-extension-after-install")
+        self.write(self.home / "settings.json", json.dumps(settings))
+        before = inventory(self.home)
+        self.harness("--uninstall", "--dry-run")
+        self.assertEqual(inventory(self.home), before)
+        self.harness("--uninstall")
+        before = inventory(self.home)
+        self.install("--uninstall", "--dry-run", real=True)
+        self.assertEqual(inventory(self.home), before)
+        self.install("--uninstall", real=True)
+        self.assertFalse((self.home / "docs").exists())
+        before = inventory(self.home)
+        self.migrate("--rollback", "--dry-run")
+        self.assertEqual(inventory(self.home), before)
+        self.migrate("--rollback")
+        final = inventory(self.home)
+        for name in ("AGENTS.md", "docs", "auth.json", "accounts/pool.json", ".agents-pi-setup.json", "sessions/synthetic.jsonl", "extensions/foreign.ts"):
+            self.assertEqual(final[name], initial[name])
+        restored = json.loads((self.home / "settings.json").read_text())
+        self.assertEqual(restored["skills"], original_settings["skills"])
+        self.assertEqual(restored["defaultModel"], "operator-changed-after-install")
+        self.assertIn("operator-extension-after-install", restored["extensions"])
+        self.assertFalse((self.home / ".agents-pi-migration.json").exists())
+        self.assertFalse(self.codex.exists())
+
+    @unittest.skipUnless((HARNESS_PI_REPO / "scripts/install_pi.py").is_file(), "Set HARNESS_PI_REPO to qualify composed rollback with the owning Harness installer")
+    def test_composed_rollback_refuses_modified_harness_document_without_changes(self):
+        self.install_composed_assets()
+        path = self.write(self.home / "docs/harness-risk-envelope.md", "operator-modified Harness document\n")
+        before = inventory(self.home)
+        self.harness("--uninstall", expected=1)
+        self.assertEqual(inventory(self.home), before)
+        self.migrate("--rollback", expected=1)
+        self.assertEqual(inventory(self.home), before)
+        self.assertEqual(path.read_text(), "operator-modified Harness document\n")
+        self.assertTrue((self.home / ".agents-pi-migration.json").exists())
+
+    @unittest.skipUnless((HARNESS_PI_REPO / "scripts/install_pi.py").is_file(), "Set HARNESS_PI_REPO to qualify composed rollback with the owning Harness installer")
+    def test_composed_rollback_refuses_foreign_document_after_both_owner_uninstalls(self):
+        self.install_composed_assets()
+        path = self.write(self.home / "docs/operator-foreign.md", "unrelated operator document\n")
+        self.harness("--uninstall")
+        self.install("--uninstall", real=True)
+        before = inventory(self.home)
+        self.migrate("--rollback", expected=1)
+        self.assertEqual(inventory(self.home), before)
+        self.assertEqual(path.read_text(), "unrelated operator document\n")
+        self.assertTrue((self.home / ".agents-pi-migration.json").exists())
 
     def test_migration_foreign_link_or_malformed_settings_make_no_changes(self):
         self.provisional()

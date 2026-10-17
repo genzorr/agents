@@ -67,6 +67,69 @@ test("real Pi file tools deny relative symlink targets whose traversal escapes a
   } finally { rmSync(scratch, { recursive: true, force: true }); }
 });
 
+test("native Pi 1.3 qualification: permission load failures leave an outside write available", { skip: !available || JSON.parse(readFileSync(path.join(sdk, "package.json"), "utf8")).version !== "1.3.0" }, async () => {
+  const scratch = mkdtempSync(path.join(os.tmpdir(), "pi-parent-load-qualification-"));
+  const previousAgent = process.env.PI_CODING_AGENT_DIR;
+  const previousOffline = process.env.PI_OFFLINE;
+  process.env.PI_OFFLINE = "1";
+  try {
+    const pi = await import(pathToFileURL(path.join(sdk, "dist/index.js")));
+    const { AuthStorage } = await import(pathToFileURL(path.join(sdk, "dist/core/auth-storage.js")));
+    for (const fault of ["good", "missing", "factory", "reload"]) {
+      const root = path.join(scratch, fault);
+      const agentDir = path.join(root, "agent");
+      const installed = path.join(root, "permissions");
+      const allowed = path.join(root, "allowed");
+      mkdirSync(agentDir, { recursive: true });
+      mkdirSync(allowed);
+      cpSync(new URL("../../pi/permissions", import.meta.url), installed, { recursive: true });
+      writeFileSync(path.join(installed, "profile.json"), JSON.stringify({ name: "agentic-local", writeRoots: [allowed] }));
+      const entry = path.join(installed, "index.ts");
+      if (fault === "missing") rmSync(installed, { recursive: true });
+      if (fault === "factory") writeFileSync(entry, 'export default () => { throw new Error("synthetic permission init failure"); };');
+      process.env.PI_CODING_AGENT_DIR = agentDir;
+      const settingsManager = pi.SettingsManager.inMemory({ extensions: [entry] });
+      const loader = new pi.DefaultResourceLoader({ cwd: root, agentDir, settingsManager, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true });
+      await loader.reload();
+      const modelRuntime = await pi.ModelRuntime.create({ credentials: AuthStorage.inMemory(), modelsPath: null, refreshOnCreate: false, allowModelNetwork: false });
+      for (const method of ["getAuth", "checkAuth", "stream", "streamSimple", "complete", "completeSimple", "getAvailable", "login", "logout", "refresh"]) {
+        modelRuntime[method] = () => { throw new Error(`Forbidden provider/auth operation: ${method}`); };
+      }
+      const model = modelRuntime.getModel("openai", "gpt-5");
+      assert.ok(model, "Static native test model is available");
+      const { session } = await pi.createAgentSession({ cwd: root, agentDir, settingsManager, resourceLoader: loader, sessionManager: pi.SessionManager.inMemory(root), modelRuntime, model });
+      try {
+        await session.bindExtensions({ mode: "print" });
+        if (fault === "reload") {
+          writeFileSync(entry, 'export default () => { throw new Error("synthetic permission reload failure"); };');
+          await session.reload();
+        }
+        const target = path.join(root, "outside-allowed-root.txt");
+        const write = session.agent.state.tools.find((tool) => tool.name === "write");
+        assert.ok(write);
+        if (fault === "good") {
+          await assert.rejects(write.execute("qualification", { path: target, content: "synthetic outside write" }), /Outside-scope file write denied/);
+          assert.equal(existsSync(target), false);
+        } else {
+          // This records the host qualification gap; it does not authorize a fallback.
+          assert.equal(session.getAllTools().find((tool) => tool.name === "write").sourceInfo.source, "builtin");
+          await write.execute("qualification", { path: target, content: "synthetic outside write" });
+          assert.equal(readFileSync(target, "utf8"), "synthetic outside write");
+        }
+      } finally {
+        await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+        session.dispose();
+      }
+    }
+  } finally {
+    if (previousAgent === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previousAgent;
+    if (previousOffline === undefined) delete process.env.PI_OFFLINE;
+    else process.env.PI_OFFLINE = previousOffline;
+    rmSync(scratch, { recursive: true, force: true });
+  }
+});
+
 test("real Pi RPC emits confirmation, honors denial, and allows one fresh manual exception", { skip: !available, timeout: 30_000 }, async () => {
   const scratch = mkdtempSync(path.join(os.tmpdir(), "pi-permission-rpc-"));
   let child;

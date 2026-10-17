@@ -1,53 +1,66 @@
-# Optional Linux Pi permission setup
+# Pi setup
 
-This installer owns the `agentic-local` permission extension and its exact Pi settings entry. Account management is an independent [pi-accounts package](https://github.com/genzorr/pi-accounts); Agents no longer installs its CLI, modules or maintenance units. The catalog instruction/skill installer remains separate. Install Pi first; the permission extension requires Linux, `bwrap`, and `bash`, with no additional npm dependencies or `socat`.
+Install Pi first. This checkout manages instructions, skills and an optional Linux permission extension. [pi-accounts](https://github.com/genzorr/pi-accounts#readme) independently owns account login, selection, quota checks and hourly token maintenance. Its README owns installation, compatibility and `pi-accounts update`.
 
-## Preview, install and remove permissions
+Close Pi/T3 processes that may save settings before changing an installation, review each preview, then start a fresh backend afterward. Use an isolated `PI_CODING_AGENT_DIR` to try asset commands without changing the real home. Permissions, native packages and accounts have separate owners; none of these asset commands migrates credentials.
+
+## Instructions and skills
+
+From this checkout:
+
+```bash
+PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh --dry-run --diff
+PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh
+```
+
+For an update, preview and apply `--update`. Add `--prune` only when removing unchanged stale owned outputs is intended. For removal, preview `--uninstall --dry-run`, then apply `--uninstall`. Modified or foreign files remain conflicts; keep the ownership record rather than forcing deletion. The [installer contract](skill-installer-contract.md) owns recovery details.
+
+[catalog.json](../catalog.json) is the membership and source authority. The installer copies complete skills and their references, global `AGENTS.md` and guidance documents; it preserves the normal system prompt. Pi also discovers the separately managed shared Agents home: update it with `scripts/install-agents.sh`, reviewing that separate preview because other runtimes discover it too. Harness workflows use the [Harness owner's installer](https://github.com/genzorr/harness/tree/main/pi), never the Agents installer.
+
+A fresh Pi process should list the installed skills. `/skill:name` explicitly invokes one; model-facing metadata does not override a skill's trigger or authority. Each skill owns its prerequisites and conditional external capabilities. Project `AGENTS.md` needs no conversion; project skill discovery depends on Pi's project trust setting. For old Codex links or historical account files, use [legacy migration and recovery](pi-distribution.md).
+
+## Linux permissions
+
+Requires `/bin/bash`, `/usr/bin/bwrap` and working unprivileged namespaces. This extension does not support macOS or Windows. Current CLI/T3 activation is best effort: missing or failed extension loading can leave built-in tools available. Mandatory enforcement requires a host activation gate before startup and registry replacement/reload; unmodified hosts are not qualified.
 
 ```bash
 python3 scripts/install-pi.py --dry-run
 python3 scripts/install-pi.py
-python3 scripts/install-pi.py --uninstall --dry-run
-python3 scripts/install-pi.py --uninstall
 ```
 
-Use `--home /tmp/pi-permission-trial` for a scratch installation. `--agent-dir` selects the Pi agent directory, defaulting to `PI_CODING_AGENT_DIR` or `<home>/.pi/agent`; explicitly set it when your shell exports a different home. Paths support `~`, `~/...`, relative paths and local file URLs with percent-encoded spaces. Tilde means the process home, independently of `--home`. Remote URL hosts, encoded slashes, malformed escapes and backslashes in file URLs are rejected. The installer does not require Node to retire historical files or uninstall permissions.
+Use the same commands to update unchanged owned files. To remove, preview `--uninstall --dry-run`, then apply `--uninstall`. `--home /tmp/pi-permission-trial` selects a scratch task home; explicitly pass `--agent-dir` if the shell already exports another `PI_CODING_AGENT_DIR`. Tilde expansion always uses the process home. Both installers accept relative paths, `~/...` and local file URLs; remote hosts and unsafe URL spellings are rejected.
 
-The installer writes only the permission directory `~/.local/lib/pi-agentic-local/permissions/{index.ts,policy.mjs,profile.json,child-inheritance.mjs}`, one absolute directory string in Pi `settings.json` `extensions`, and its private `.agents-pi-setup.json` ownership record and temporary recovery journal. It preserves unrelated settings, including skills, packages, providers, model and effort. It never owns or reads `auth.json`, `accounts/pool.json`, sessions or standalone npm package files.
+The permission installer owns only `~/.local/lib/pi-agentic-local/permissions`, its exact settings extension entry, and `.agents-pi-setup.json` plus a temporary recovery journal. It preserves unrelated settings and never reads auth, account pools or sessions. Modified files, symlinks and duplicate entries are conflicts. It recovers interrupted transactions before replanning and refuses externally changed recovery destinations; retain the journal for resolution. For source rollback, uninstall with the current version before installing a known-good permission version. Older all-in-one installers must not recreate retired account tooling.
 
-Existing unmanaged permission files, modified owned files, duplicate extension entries and symlink destinations are conflicts. Reinstallation updates unchanged owned permission outputs. Uninstall removes unchanged owned permissions and only the exact managed extension entry; it leaves unrelated settings and empty directories intact. Start a fresh idle Pi/T3 process to load an extension update. See [permission boundaries](pi-permissions.md) and [required child-extension qualification](pi-child-inheritance.md); this is tool enforcement rather than whole-process confinement or Codex's AI approval reviewer.
+After restart, run `/agentic-local` to inspect current writable roots and test bash availability. This status is not a persistent host activation guarantee. Read the [permission contract](pi-permissions.md) before relying on enforcement or approving exceptions.
 
-## Historical account outputs and explicit migration
+## Optional automatic updates for unprofiled hosts
 
-Earlier Agents setup versions owned `~/.local/bin/pi-accounts`, three modules under `~/.local/lib/pi-accounts`, and `pi-accounts-refresh.service` / `.timer`. A normal permission install/update/uninstall preserves these historical outputs and their ownership records, including modified files. It does not silently interrupt a user testing accounts. `--retire-accounts` explicitly removes only unchanged historical outputs recorded in this installer's state; differing files, changed modes or symlinks cause a conflict before applying any planned change. Unrecorded files and standalone npm files are never adopted or removed.
+Automatic runtime self-update is unqualified when `agentic-local` is mandatory. Do not use the following setup as an assembled mandatory-permission configuration; it requires host-level activation/reload gating first. The native option below applies to unprofiled hosts, including macOS.
 
-The following migration requires explicit operator authorization. Finish human OAuth/switch operations and idle Pi/T3 first. Pause only the timer, then let any active oneshot refresh finish: stopping a refresh during provider token rotation can lose credentials. Do not run `systemctl stop pi-accounts-refresh.service`.
+[pi-auto-update](https://github.com/eiei114/pi-auto-update) runs `pi update --extensions`, then `pi update` at startup. It does not update Agents/Harness assets or pi-accounts.
+
+Before installing it, merge this child policy into existing Pi settings, using actual absolute paths and retaining every existing child extension capability except the updater:
+
+```json
+{
+  "subagents": {
+    "defaultExtensions": [
+      "/absolute/agent-home/npm/node_modules/pi-subagents/index.js"
+    ]
+  }
+}
+```
+
+Preserve any other required child extensions in this list; adding a permission entry does not qualify mandatory enforcement. `defaultExtensions` disables ambient child extensions; `defaultSubagentOnlyExtensions` does not. Explicit agent `extensions` overrides the default. Built-in MCP selection is separate. Include future child capabilities explicitly instead of silently dropping them.
 
 ```bash
-systemctl --user disable --now pi-accounts-refresh.timer
-systemctl --user show pi-accounts-refresh.service --property=ActiveState --property=Result --property=ExecMainStatus
-# Wait for ActiveState=inactive or failed and no running refresh before continuing.
-python3 scripts/install-pi.py --retire-accounts --dry-run
-python3 scripts/install-pi.py --retire-accounts
-systemctl --user daemon-reload
-npm install --global --prefix "$HOME/.local" https://github.com/genzorr/pi-accounts/releases/download/v0.2.0/pi-accounts-0.2.0.tgz
-pi-accounts status
-pi-accounts maintenance install --dry-run
-pi-accounts maintenance install
-pi-accounts maintenance enable
-pi-accounts maintenance status
+pi install 'npm:pi-subagents@0.78.0 || 0.79.0'
+pi install npm:pi-auto-update@0.1.6
 ```
 
-The retirement updates permissions in the same reviewed transaction and retains the existing Pi agent home, native credentials, pool and selected account. No re-login is required solely to change distribution. The standalone maintenance installer uses new dedicated service names and does not overwrite unowned legacy `pi-accounts-refresh` units. Review its package README for supported Pi versions and macOS maintenance; Linux permission enforcement is not a Mac sandbox.
+For an existing subagents installation, replace only its old source entry with that bounded range, preserving other packages. An exact version pin is skipped by native updates. Pi self-update follows upstream latest; a future release may require compatibility requalification. Native npm Pi preserves its installation prefix; no managed-layout migration is needed.
 
-Do not install the npm command over a still-owned Agents wrapper before retirement. If another tool has already replaced that wrapper, retirement reports a conflict and preserves it; resolve the exact historical ownership boundary explicitly rather than removing state or forcing overwrite. Once retirement succeeds, subsequent Agents permission updates/uninstalls ignore standalone CLI/module/unit paths.
+Restart Pi to load the updater. `/auto-update-now` runs explicitly. `PI_AUTO_UPDATE=0` or `PI_OFFLINE=1` skips automatic startup only; the manual command bypasses those flags. Concurrent requests deduplicate within one extension instance, not across processes or children. Reload/new/resume/fork skip automatic runs. The child allowlist prevents ordinary child startups from loading the updater.
 
-## Recovery and rollback
-
-The permission installer preflights all planned changes, serializes invocations for the same home with an advisory directory lock, and records original/intended bytes and modes in a private journal before writing. Ordinary write failure rolls back its transaction. After process interruption, the next non-dry run rolls back a pending journal before replanning; dry-run reports it without writing. Recovery refuses to overwrite destinations changed outside the transaction. Keep the journal for explicit conflict resolution. The lock does not coordinate Pi settings saves; close other settings writers during changes. This is process-interruption recovery, not a disk-corruption guarantee.
-
-A source-version rollback uses the currently installed permission version to uninstall its unchanged owned outputs before installing a known-good version; older installers may reject newer file identities. After accounts have moved to the standalone package, do not run an older all-in-one Agents installer: it would try to recreate the retired external tool. Keep permissions and standalone accounts on their independent update/rollback paths. To remove standalone scheduling safely, use `pi-accounts maintenance disable`, wait for its runner to finish, then `pi-accounts maintenance uninstall` before `npm uninstall --global --prefix "$HOME/.local" pi-accounts`. Those commands preserve credentials and the pool.
-
-This optional permission installer is Linux-only and its suite skips before importing Linux dependencies on other platforms. The separate [catalog distribution](pi-distribution.md) owns global instructions and skills and does not apply permission updates or account migration.
-
-Native Pi/package automation is separate from this permission installer; see [Pi automatic updates](pi-auto-update.md). The standalone account package updates through `pi-accounts update`, preserving its maintenance intent and installation prefix.
+To remove, prevent new starts, let active updates finish, then run `pi remove npm:pi-auto-update@0.1.6`. Restore only the package/allowlist entries deliberately changed. Removal does not undo completed updates; restore known-good versions through their owning package managers when needed.

@@ -1,77 +1,48 @@
-# Pi instruction and skill distribution
+# Legacy Pi migration and recovery
 
-Pi assets use the existing catalog engine and its `.agents-install-state.json` ownership record. The asset entrypoint is `scripts/install-pi-assets.sh`; the separate `scripts/install-pi.py` owns optional permission setup and explicit retirement of historical account outputs. The standalone [pi-accounts](https://github.com/genzorr/pi-accounts) repository owns account tooling and maintenance. Each installer retains its own ownership boundary. Catalog install, prune and uninstall do not read or modify Pi settings, credentials, accounts, sessions, permission extensions, maintenance units, or the optional setup's ownership record.
+Ordinary installation and updates belong in [Pi setup](pi-setup.md). Use this reference only for provisional Codex links, historical Agents-owned account outputs or recovery of those migrations. Close Pi/T3 and other settings writers first; preview each operation and apply only within operator-authorized scope.
 
-## Managed assets and discovery
+## Provisional Codex references
 
-The operator's usage-selected initial manifest contains ten Pi-home skills plus six independently managed shared-home discoveries. The source selection is finalized for this initial set; live migration and installation require explicit operator authorization.
-
-The Pi home defaults to `~/.pi/agent`; `PI_CODING_AGENT_DIR` selects another home. Supported Linux path spellings include `~`, `~/...`, paths relative to the current directory, and local `file:///...` URLs with percent-encoded spaces. Tilde expansion uses the process home. Symlinks are not followed during normalization. Unsupported remote hosts, encoded slashes, malformed escapes and backslashes in file URLs are rejected. This migration and its native verification target Linux; native Windows and Mac setup have not been qualified.
-
-The catalog installs Pi's own `AGENTS.md`, four home guidance documents, and ten complete skills under `skills/`. It preserves Pi's normal system prompt and does not write `SYSTEM.md`.
-
-| Pi skill | Source reused without transformation |
-|---|---|
-| `diagnose`, `archify` | Existing complete Codex source directories; Archify retains all renderer resources and MIT license |
-| `review-change`, `integrate-research`, `distill-source`, `architecture-review` | Existing complete Codex source layers, including their traveling documents |
-| `explain`, `ask-chatgpt-pro`, `text-prune` | Existing complete Claude source layers, using shared bodies and references without Codex metadata overlays |
-| `surface-unknowns` | Existing shared body with native explicit-only frontmatter; no Codex metadata overlay |
-
-Archify ships its full renderer source and lockfile but no installed `node_modules` or D2 executable. For a scratch qualification, run `npm ci --ignore-scripts` from that scratch home's `skills/archify` directory before rendering and validating. Use the same prerequisite only in an explicitly authorized live skill directory. Without AJV, the native renderer warns and skips schema validation even when CLI validation returns success; do not report that as full validation. A local D2 executable is required for D2 or combined output. See the [qualification limits](pi-assets.md#invocation-and-unsupported-routes) for tested versions and browser coverage.
-
-The home guidance consists of `docs/context-file-authoring.md`, `docs/skill-authoring-principles.md`, `docs/claim-discipline.md`, and the conditional `docs/experiment-protocol-readout-contract.md`. Skill-local guidance stays under the skill that consumes it. `catalog.json` is the exact source and target authority.
-
-Pi natively discovers the separately managed `~/.agents/skills` home. Its six cataloged skills are `design-experiment`, `docker-optimize`, `logging-optimize`, `piecemeal-growth`, `review-experiment`, and `skill-lifecycle`; install/update them through `scripts/install-agents.sh`. The Pi installer does not copy or prune them. Catalog validation rejects an asset declared in both the shared-home and Pi skill sets, because discovery selects complete skills rather than merging overlays. A skill's physical shared source directory does not imply that it belongs in the shared installed home.
-
-`tdd` and `ask-oracle` are deferred Pi additions; their existing source and other-provider distributions remain intact. Workers, an ordinary Pi session route followed by feature orchestration, and later Impeccable UI integration remain scoped backlog. The four core Harness workflows are user-required and implemented/reviewed separately in their owning repository; they are not supplied or qualified by this Agents manifest. Other skills, plugins, Harness assets and Codex-only orchestration remain outside this distribution. See the [compatibility and deferred-scope assessment](pi-assets.md) for the selected distillation workflow's conditional limits. Cross-references to optional workflows do not promise that those workflows or their external executables are installed. See the [Pi global instructions](../pi/AGENTS.md) for invocation, authorization, source ownership and child boundaries. Project `AGENTS.md` files load through Pi's native context discovery and do not need conversion. Global skills and project resources have different trust requirements; approve only the intended project through Pi's normal trust interaction rather than globally trusting arbitrary repositories.
-
-## Scratch installation and updates
-
-Preview against isolated homes first:
-
-```bash
-PI_CODING_AGENT_DIR=/tmp/pi-asset-trial bash scripts/install-pi-assets.sh --dry-run --diff
-PI_CODING_AGENT_DIR=/tmp/pi-asset-trial bash scripts/install-pi-assets.sh
-PI_CODING_AGENT_DIR=/tmp/pi-asset-trial bash scripts/install-pi-assets.sh
-PI_CODING_AGENT_DIR=/tmp/pi-asset-trial bash scripts/install-pi-assets.sh --uninstall --dry-run
-PI_CODING_AGENT_DIR=/tmp/pi-asset-trial bash scripts/install-pi-assets.sh --uninstall
-```
-
-Updating an unchanged home from the earlier selected nine-Pi-skill snapshot adds `text-prune` without retiring another skill. Preview with `--update --dry-run --diff`, then apply `--update` to the reviewed home. Its complete shared body, five mode references and four traveling documents reuse the existing Claude catalog layers without a Codex metadata overlay. Pi retains native model-facing metadata visibility and explicit `/skill:text-prune` invocation; the trigger remains requested text pruning, excluding lifecycle decisions and installed-asset pruning. Additions do not authorize removing foreign files or changing the separately managed shared home. Surface-unknowns remains explicitly invokable but is excluded from the model-facing skill metadata prompt.
-
-The existing engine adopts exact source matches, updates unchanged recorded files, and preserves modified or unmanaged files as conflicts. A foreign or mismatched-platform ownership record is rejected. `--diff` implies a read-only dry run and does not create a fresh home. `--prune` removes unchanged stale owned files; `--uninstall` removes unchanged recorded assets. Both preserve foreign files and modified owned files, retaining ownership evidence for unresolved conflicts. For source-version rollback, rerun from a known-good source revision with the same selected home and ownership record.
-
-## Explicit migration of provisional Codex references
-
-The optional migration command exits before accessing homes on unsupported platforms and handles only the known provisional Linux Pi arrangement: `AGENTS.md` symlinked to an explicitly supplied Codex home's `AGENTS.md`, `docs` symlinked to that home's `docs`, and one exact absolute Codex `skills` string in Pi `settings.json`. It compares link text lexically and never reads the Codex destinations. Relative symlink text is supported when it resolves lexically to the exact expected destination. Missing links or entries are allowed. Foreign links/files, malformed settings, duplicate matching entries, and an existing asset ledger cause a conflict before changes.
-
-Close Pi/T3 sessions that could save these settings. For a synthetic trial, create these provisional surfaces in scratch homes and substitute those homes below. After explicit approval for live migration, the concrete commands are:
+The Linux migration handles only `AGENTS.md` and `docs` symlinks pointing lexically to the explicitly supplied Codex home, plus one exact absolute Codex skills entry in Pi settings. It never reads those Codex destinations. Foreign files/links, malformed settings, duplicate entries or an existing Agents asset ledger are conflicts.
 
 ```bash
 python3 scripts/migrate-pi-assets.py --pi-home "$HOME/.pi/agent" --codex-home "$HOME/.codex" --dry-run
 python3 scripts/migrate-pi-assets.py --pi-home "$HOME/.pi/agent" --codex-home "$HOME/.codex"
-PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh --dry-run --diff
-PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh
-AGENTS_HOME="$HOME/.agents" bash scripts/install-agents.sh --dry-run --diff
-# Apply a shared-home update only after reviewing that separate preview:
-AGENTS_HOME="$HOME/.agents" bash scripts/install-agents.sh
 ```
 
-Apply these commands only within explicitly authorized live setup. Review the separate shared-home preview because an update can affect other runtimes that discover that home. Start a fresh Pi process to load the installed instructions and skill set, then verify the global/project context and the native skill picker. No OAuth, model inference, account selection or timer changes are part of this migration.
-
-Before detaching anything, migration writes a private `.agents-pi-migration.json` record inside the selected Pi home. It records only the expected home identities, original link text, the removed skill entry's position, and transaction stage. It does not back up credentials or the entire settings file. Successful repeated migration is a no-op. An interrupted migration leaves a prepared record; use the explicit rollback below before retrying. Do not delete or rewrite the record to bypass a conflict.
+Install current assets through their owning repositories afterward. Migration records original link text and the removed entry's position in `.agents-pi-migration.json` before effects. Repeated completion is a no-op. An interrupted prepared transaction requires explicit rollback before retrying; preserve its record.
 
 ## Narrow migration rollback
 
-Remove the catalog-owned outputs first; the rollback refuses to overwrite installed instruction files, documentation directories, or foreign replacements:
+A composed installation has two asset owners. Harness leaves its own documents in `docs/`, so remove its unchanged outputs first, then Agents outputs, before restoring the old docs symlink. Substitute the actual Harness checkout for `HARNESS_REPO`:
 
 ```bash
+PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash "$HARNESS_REPO/scripts/install-pi.sh" --uninstall --dry-run
+PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash "$HARNESS_REPO/scripts/install-pi.sh" --uninstall
 PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh --uninstall --dry-run
 PI_CODING_AGENT_DIR="$HOME/.pi/agent" bash scripts/install-pi-assets.sh --uninstall
 python3 scripts/migrate-pi-assets.py --pi-home "$HOME/.pi/agent" --codex-home "$HOME/.codex" --rollback --dry-run
 python3 scripts/migrate-pi-assets.py --pi-home "$HOME/.pi/agent" --codex-home "$HOME/.codex" --rollback
 ```
 
-Rollback restores only the recorded symlinks if their destinations remain absent or already match the original link text. It reinserts only the recorded Codex skills entry and preserves unrelated settings edits, including the optional permission extension, selected model/effort, packages and other skill paths. If `settings.skills` was removed or changed to an invalid shape, rollback stops for explicit resolution. Foreign or modified content causes a conflict and leaves the migration record available for recovery. It never recursively deletes directories or overwrites a foreign ownership record. A partial rollback can be retried: already-restored exact links and the exact skill entry are accepted. After successful restoration, the migration record is removed.
+Stop at an unresolved owner conflict; never delete foreign/modified files or rewrite ownership records to clear the directory. If Harness was never installed, omit its two commands. Rollback restores only recorded links into absent or already-matching destinations and reinserts only the recorded skills entry, preserving unrelated settings. A foreign document still occupying `docs/` blocks restoration even after both uninstallers run. Changed/invalid `settings.skills` also blocks it. Partial restoration is retryable; successful rollback removes the migration record.
 
-Migration records are written before effects and files are replaced atomically. An ordinary failure can leave a partially detached arrangement with a recoverable record; it does not automatically rerun or invoke the asset installer. Run asset installation, migration and rollback sequentially; concurrent setup invocations are not coordinated. Keep Pi closed while migrating or rolling back. Migration does not coordinate concurrent external settings writers; it rechecks the original settings bytes before replacement and fails if they changed. These are process-failure recovery bounds, not disk-corruption guarantees. If the generic asset installer itself fails before its ownership-state commit, rerun it to adopt unchanged exact outputs before attempting uninstall; preserve conflicts rather than deleting state or forcing removal.
+Installers, migration and rollback run sequentially, without coordination with external settings writers. Generic asset failure before ledger commit may leave exact outputs: rerun to adopt unchanged matches before uninstalling. Permission setup has its own journal and recovery in [Pi setup](pi-setup.md#linux-permissions). These are process-interruption bounds, not disk-corruption guarantees.
+
+## Historical account outputs
+
+Earlier Agents setup owned `~/.local/bin/pi-accounts`, three `~/.local/lib/pi-accounts` modules and `pi-accounts-refresh.service`/`.timer`. Normal permission updates/uninstalls retain them. Explicit retirement removes only unchanged recorded outputs; foreign, modified or symlink replacements conflict. It preserves auth, pool, selection, sessions and unrelated settings.
+
+Finish OAuth/switch activity. Pause the timer and let any running refresh finish; never stop the refresh service during token rotation:
+
+```bash
+systemctl --user disable --now pi-accounts-refresh.timer
+systemctl --user show pi-accounts-refresh.service --property=ActiveState --property=Result --property=ExecMainStatus
+# Continue only when no refresh is running.
+python3 scripts/install-pi.py --retire-accounts --dry-run
+python3 scripts/install-pi.py --retire-accounts
+systemctl --user daemon-reload
+```
+
+Retirement also reconciles permissions in the reviewed transaction. Then install the standalone [pi-accounts package](https://github.com/genzorr/pi-accounts#readme) and its maintenance service using that owner's instructions. Do not overwrite a still-owned legacy wrapper with npm or run an older all-in-one Agents installer afterward. No re-login is required solely to change distribution. The standalone package owns its update, safe maintenance disable/uninstall and rollback procedures.
