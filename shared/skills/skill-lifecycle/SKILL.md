@@ -1,6 +1,6 @@
 ---
 name: skill-lifecycle
-description: Audit repo-managed skills and instruction assets for overlap, staleness, portability, or bloat and propose lifecycle decisions. Use when asked to prune skills, check for skill overlap, review process sediment, or decide whether a new skill should exist. Proposal-only: it never edits, merges, deprecates, or removes an asset.
+description: "Audit repo-managed skills and instruction assets for overlap, staleness, portability, or bloat and propose lifecycle decisions. Use when asked to prune skills, check for skill overlap, review process sediment, or decide whether a new skill should exist. Proposal-only: it never edits, merges, deprecates, or removes an asset."
 ---
 
 # Skill Lifecycle

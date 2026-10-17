@@ -1,6 +1,7 @@
 ---
 name: surface-unknowns
 description: Surface consequential unknowns in a problem or active task, build enough orientation to distinguish what is known, assumed, missing, and decision-relevant, and route each material gap to the cheapest reliable resolution. Use only when the user explicitly invokes this skill or asks to identify unknowns or blind spots. Ordinary work keeps its active driver's normal evidence checking and uncertainty handling without starting a separate surface-unknowns pass.
+disable-model-invocation: true
 ---
 
 # Surface Unknowns

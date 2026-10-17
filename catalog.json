@@ -1,32 +1,36 @@
 {
-  "$comment": "Authoritative catalog of shared Agents, Codex, Claude, and Devin assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
+  "$comment": "Authoritative catalog of shared Agents, Codex, Claude, Devin, and Pi assets physically present in this repository. See scripts/validate_catalog.py for structural checks and docs/skill-installer-contract.md for the installer contract this catalog feeds.",
   "skills": [
     {
       "id": "architecture-review",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "codex/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}],
-        "claude": [{"path": "claude/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}]
+        "claude": [{"path": "claude/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}],
+        "pi": [{"path": "codex/skills/architecture-review", "target": "skills/architecture-review"}, {"path": "docs/multi-entrypoint-capability-review.md", "target": "skills/architecture-review/docs/multi-entrypoint-capability-review.md"}, {"path": "docs/whole-system-review.md", "target": "skills/architecture-review/docs/whole-system-review.md"}, {"path": "docs/comprehensive-codebase-audit.md", "target": "skills/architecture-review/docs/comprehensive-codebase-audit.md"}]
       },
       "install_target": {
         "codex": "skills/architecture-review",
-        "claude": "skills/architecture-review"
+        "claude": "skills/architecture-review",
+        "pi": "skills/architecture-review"
       }
     },
     {
       "id": "archify",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": "codex/skills/archify",
-        "claude": "claude/skills/archify"
+        "claude": "claude/skills/archify",
+        "pi": "codex/skills/archify"
       },
       "install_target": {
         "codex": "skills/archify",
-        "claude": "skills/archify"
+        "claude": "skills/archify",
+        "pi": "skills/archify"
       },
       "tags": ["domain:diagrams", "origin:tt-a1i/archify"]
     },
@@ -47,15 +51,17 @@
     {
       "id": "ask-chatgpt-pro",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "shared/skills/ask-chatgpt-pro", "target": "skills/ask-chatgpt-pro"}, {"path": "codex/skills/ask-chatgpt-pro/agents", "target": "skills/ask-chatgpt-pro/agents"}],
-        "claude": "shared/skills/ask-chatgpt-pro"
+        "claude": "shared/skills/ask-chatgpt-pro",
+        "pi": "shared/skills/ask-chatgpt-pro"
       },
       "install_target": {
         "codex": "skills/ask-chatgpt-pro",
-        "claude": "skills/ask-chatgpt-pro"
+        "claude": "skills/ask-chatgpt-pro",
+        "pi": "skills/ask-chatgpt-pro"
       }
     },
     {
@@ -104,21 +110,23 @@
     {
       "id": "diagnose",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": "codex/skills/diagnose",
-        "claude": "claude/skills/diagnose"
+        "claude": "claude/skills/diagnose",
+        "pi": "codex/skills/diagnose"
       },
       "install_target": {
         "codex": "skills/diagnose",
-        "claude": "skills/diagnose"
+        "claude": "skills/diagnose",
+        "pi": "skills/diagnose"
       }
     },
     {
       "id": "distill-source",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [
@@ -130,11 +138,17 @@
           {"path": "claude/skills/distill-source", "target": "skills/distill-source"},
           {"path": "docs/distill-source-contract.md", "target": "skills/distill-source/docs/distill-source-contract.md"},
           {"path": "docs/claim-discipline.md", "target": "skills/distill-source/docs/claim-discipline.md"}
+        ],
+        "pi": [
+          {"path": "codex/skills/distill-source", "target": "skills/distill-source"},
+          {"path": "docs/distill-source-contract.md", "target": "skills/distill-source/docs/distill-source-contract.md"},
+          {"path": "docs/claim-discipline.md", "target": "skills/distill-source/docs/claim-discipline.md"}
         ]
       },
       "install_target": {
         "codex": "skills/distill-source",
-        "claude": "skills/distill-source"
+        "claude": "skills/distill-source",
+        "pi": "skills/distill-source"
       }
     },
     {
@@ -154,15 +168,17 @@
     {
       "id": "explain",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "shared/skills/explain", "target": "skills/explain"}, {"path": "codex/skills/explain/agents", "target": "skills/explain/agents"}],
-        "claude": "shared/skills/explain"
+        "claude": "shared/skills/explain",
+        "pi": "shared/skills/explain"
       },
       "install_target": {
         "codex": "skills/explain",
-        "claude": "skills/explain"
+        "claude": "skills/explain",
+        "pi": "skills/explain"
       },
       "tags": ["domain:technical-learning", "role:driver"]
     },
@@ -226,15 +242,17 @@
     {
       "id": "integrate-research",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "codex/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}],
-        "claude": [{"path": "claude/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}]
+        "claude": [{"path": "claude/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}],
+        "pi": [{"path": "codex/skills/integrate-research", "target": "skills/integrate-research"}, {"path": "docs/claim-discipline.md", "target": "skills/integrate-research/docs/claim-discipline.md"}]
       },
       "install_target": {
         "codex": "skills/integrate-research",
-        "claude": "skills/integrate-research"
+        "claude": "skills/integrate-research",
+        "pi": "skills/integrate-research"
       }
     },
     {
@@ -322,15 +340,17 @@
     {
       "id": "review-change",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "codex/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}],
-        "claude": [{"path": "claude/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}]
+        "claude": [{"path": "claude/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}],
+        "pi": [{"path": "codex/skills/review-change", "target": "skills/review-change"}, {"path": "docs/context-file-authoring.md", "target": "skills/review-change/docs/context-file-authoring.md"}, {"path": "docs/skill-authoring-principles.md", "target": "skills/review-change/docs/skill-authoring-principles.md"}, {"path": "docs/claim-discipline.md", "target": "skills/review-change/docs/claim-discipline.md"}, {"path": "docs/experiment-protocol-readout-contract.md", "target": "skills/review-change/docs/experiment-protocol-readout-contract.md"}, {"path": "docs/whole-system-review.md", "target": "skills/review-change/docs/whole-system-review.md"}]
       },
       "install_target": {
         "codex": "skills/review-change",
-        "claude": "skills/review-change"
+        "claude": "skills/review-change",
+        "pi": "skills/review-change"
       }
     },
     {
@@ -422,15 +442,17 @@
     {
       "id": "surface-unknowns",
       "kind": "skill",
-      "platforms": ["codex", "claude"],
+      "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
         "codex": [{"path": "shared/skills/surface-unknowns", "target": "skills/surface-unknowns"}, {"path": "codex/skills/surface-unknowns/agents", "target": "skills/surface-unknowns/agents"}],
-        "claude": "shared/skills/surface-unknowns"
+        "claude": "shared/skills/surface-unknowns",
+        "pi": "shared/skills/surface-unknowns"
       },
       "install_target": {
         "codex": "skills/surface-unknowns",
-        "claude": "skills/surface-unknowns"
+        "claude": "skills/surface-unknowns",
+        "pi": "skills/surface-unknowns"
       },
       "tags": ["domain:uncertainty-management"]
     },
@@ -688,6 +710,14 @@
   ],
   "global_instructions": [
     {
+      "id": "pi-agents-md",
+      "kind": "global_instructions",
+      "platforms": ["pi"],
+      "owner": "agents",
+      "source": {"pi": "pi/AGENTS.md"},
+      "install_target": {"pi": "AGENTS.md"}
+    },
+    {
       "id": "codex-agents-md",
       "kind": "global_instructions",
       "platforms": ["codex"],
@@ -725,10 +755,10 @@
     }
   ],
   "traveling_documents": [
-    {"id": "context-file-authoring-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md"}, "install_target": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md"}},
-    {"id": "skill-authoring-principles-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md"}, "install_target": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md"}},
-    {"id": "claim-discipline-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md"}, "install_target": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md"}},
-    {"id": "experiment-protocol-readout-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin"], "owner": "agents", "source": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md"}, "install_target": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md"}},
+    {"id": "context-file-authoring-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin", "pi"], "owner": "agents", "source": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md", "pi": "docs/context-file-authoring.md"}, "install_target": {"codex": "docs/context-file-authoring.md", "claude": "docs/context-file-authoring.md", "devin": "docs/context-file-authoring.md", "pi": "docs/context-file-authoring.md"}},
+    {"id": "skill-authoring-principles-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin", "pi"], "owner": "agents", "source": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md", "pi": "docs/skill-authoring-principles.md"}, "install_target": {"codex": "docs/skill-authoring-principles.md", "claude": "docs/skill-authoring-principles.md", "devin": "docs/skill-authoring-principles.md", "pi": "docs/skill-authoring-principles.md"}},
+    {"id": "claim-discipline-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin", "pi"], "owner": "agents", "source": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md", "pi": "docs/claim-discipline.md"}, "install_target": {"codex": "docs/claim-discipline.md", "claude": "docs/claim-discipline.md", "devin": "docs/claim-discipline.md", "pi": "docs/claim-discipline.md"}},
+    {"id": "experiment-protocol-readout-contract-doc", "kind": "traveling_document", "platforms": ["codex", "claude", "devin", "pi"], "owner": "agents", "source": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md", "pi": "docs/experiment-protocol-readout-contract.md"}, "install_target": {"codex": "docs/experiment-protocol-readout-contract.md", "claude": "docs/experiment-protocol-readout-contract.md", "devin": "docs/experiment-protocol-readout-contract.md", "pi": "docs/experiment-protocol-readout-contract.md"}},
     {"id": "model-and-effort-doc", "kind": "traveling_document", "platforms": ["claude"], "owner": "agents", "source": {"claude": "docs/model-and-effort.md"}, "install_target": {"claude": "docs/model-and-effort.md"}}
   ],
   "boundary_notes": {
