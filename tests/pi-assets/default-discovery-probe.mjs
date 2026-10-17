@@ -24,4 +24,19 @@ async function snapshot() {
 const untrusted = await snapshot();
 settingsManager.setProjectTrusted(true);
 const trusted = await snapshot();
-console.log(JSON.stringify({ untrusted, trusted }));
+const { createAgentSession } = await import(pathToFileURL(join(root, 'dist/core/sdk.js')));
+const { SessionManager } = await import(pathToFileURL(join(root, 'dist/core/session-manager.js')));
+const { ModelRuntime } = await import(pathToFileURL(join(root, 'dist/core/model-runtime.js')));
+const { AuthStorage } = await import(pathToFileURL(join(root, 'dist/core/auth-storage.js')));
+const modelRuntime = await ModelRuntime.create({ credentials: AuthStorage.inMemory(), modelsPath: null, refreshOnCreate: false, allowModelNetwork: false });
+const model = modelRuntime.getModel('openai', 'gpt-5');
+if (!model) throw new Error('Static native test model is unavailable');
+const { session } = await createAgentSession({ cwd: project, agentDir, modelRuntime, model, resourceLoader: loader, settingsManager, sessionManager: SessionManager.inMemory(project), tools: [] });
+try {
+  // Public queue expansion does not start a turn or request provider credentials.
+  await session.steer('/skill:text-prune Tighten the supplied synthetic paragraph.');
+  const [textPruneExpansion] = session.getSteeringMessages();
+  console.log(JSON.stringify({ untrusted, trusted, textPruneExpansion }));
+} finally {
+  session.dispose();
+}

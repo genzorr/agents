@@ -11,7 +11,7 @@ const root = process.env.PI_SDK_ROOT || join(homedir(), '.local/lib/node_modules
 const { loadSkills, formatSkillsForPrompt } = await import(pathToFileURL(join(root, 'dist/core/skills.js')));
 const { loadProjectContextFiles } = await import(pathToFileURL(join(root, 'dist/core/resource-loader.js')));
 const sharedIds = ['design-experiment', 'docker-optimize', 'logging-optimize', 'piecemeal-growth', 'review-experiment', 'skill-lifecycle'];
-const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'review-change', 'surface-unknowns'];
+const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'review-change', 'surface-unknowns', 'text-prune'];
 
 async function materialize(t) {
   const scratch = await mkdtemp(join(tmpdir(), 'pi-assets-native-'));
@@ -53,6 +53,7 @@ test('all admitted catalog skills parse natively with one complete implementatio
   }
   const prompt = formatSkillsForPrompt(skills);
   for (const skill of skills) assert.equal(prompt.includes(`<name>${skill.name}</name>`), skill.name !== 'surface-unknowns');
+  assert.match(skills.find(s => s.name === 'text-prune').description, /Use when text pruning is the requested task;.*not.*skill lifecycle.*installed-asset pruning/);
   // Native metadata visibility does not relax piecemeal-growth's user-only trigger.
   assert.match(skills.find(s => s.name === 'piecemeal-growth').description, /only when the user names this skill or explicitly requests/);
 });
@@ -107,7 +108,7 @@ test('Pi frontmatter preserves explicit-only invocation while retaining the expl
 });
 
 
-test('native default discovery finds both homes and project trust gates skills while retaining context', async t => {
+test('native default discovery, project trust and explicit text-prune command expansion work without inference', async t => {
   const fixture = await materialize(t);
   await rename(fixture.sharedDir, join(fixture.scratch, '.agents'));
   await copyFile(join(repo, 'AGENTS.md'), join(fixture.project, 'AGENTS.md'));
@@ -119,9 +120,11 @@ test('native default discovery finds both homes and project trust gates skills w
   const probe = fileURLToPath(new URL('./default-discovery-probe.mjs', import.meta.url));
   const result = JSON.parse(execFileSync(process.execPath, [probe, fixture.agentDir, fixture.project], {
     cwd: fixture.project,
-    env: { ...process.env, HOME: fixture.scratch, PI_CODING_AGENT_DIR: fixture.agentDir, PI_SDK_ROOT: root, XDG_CONFIG_HOME: join(fixture.scratch, 'config'), XDG_CACHE_HOME: join(fixture.scratch, 'cache') },
+    env: { ...process.env, HOME: fixture.scratch, PI_CODING_AGENT_DIR: fixture.agentDir, PI_SDK_ROOT: root, PI_OFFLINE: '1', XDG_CONFIG_HOME: join(fixture.scratch, 'config'), XDG_CACHE_HOME: join(fixture.scratch, 'cache') },
     encoding: 'utf8',
   }));
+  const body = (await readFile(join(repo, 'shared/skills/text-prune/SKILL.md'), 'utf8')).replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+  assert.equal(result.textPruneExpansion, `<skill name="text-prune" location="${join(fixture.agentDir, 'skills/text-prune/SKILL.md')}">\nReferences are relative to ${join(fixture.agentDir, 'skills/text-prune')}.\n\n${body}\n</skill>\n\nTighten the supplied synthetic paragraph.`);
   assert.deepEqual(result.untrusted.names, [...sharedIds, ...piIds].sort());
   assert.deepEqual(result.trusted.names, [...sharedIds, ...piIds, 'synthetic-pi-project', 'synthetic-agents-project'].sort());
   for (const state of [result.untrusted, result.trusted]) {

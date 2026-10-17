@@ -344,22 +344,39 @@ class PiAssetsTest(unittest.TestCase):
         self.assertEqual(inventory(shared), before)
 
     def test_actual_catalog_installs_complete_pi_assets_without_shared_duplicates(self):
-        self.install(real=True)
+        with migration_module(ROOT) as module:
+            engine = module.ENGINE
+            desired_files = engine.desired_files
+            def previous_selection(*args):
+                return {target: item for target, item in desired_files(*args).items() if item.asset.id != "text-prune"}
+            with patch.object(engine, "desired_files", side_effect=previous_selection), patch.dict(os.environ, self.env), patch.object(sys, "argv", ["install-assets.py", "pi"]), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(engine.main(), 0)
+        previous = inventory(self.home)
+        self.assertFalse((self.home / "skills/text-prune").exists())
+        self.install("--update", real=True)
+        updated = inventory(self.home)
+        for target, value in previous.items():
+            if target != ".agents-install-state.json":
+                self.assertEqual(updated[target], value)
         assets = load_catalog(ROOT)
         pi_ids = {a.id for a in assets if a.kind == "skill" and "pi" in a.platforms}
         shared_ids = {a.id for a in assets if a.kind == "skill" and "agents" in a.platforms}
-        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify"})
+        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune"})
         self.assertFalse(pi_ids & shared_ids)
         self.assertEqual({p.parent.name for p in (self.home / "skills").glob("*/SKILL.md")}, pi_ids)
         self.assertEqual((self.home / "skills/distill-source/SKILL.md").read_bytes(), (ROOT / "codex/skills/distill-source/SKILL.md").read_bytes())
-        for identity, source in (("architecture-review", "codex/skills/architecture-review"), ("archify", "codex/skills/archify"), ("surface-unknowns", "shared/skills/surface-unknowns")):
+        for identity, source in (("architecture-review", "codex/skills/architecture-review"), ("archify", "codex/skills/archify"), ("surface-unknowns", "shared/skills/surface-unknowns"), ("text-prune", "shared/skills/text-prune")):
             expected = inventory(ROOT / source)
             if identity == "architecture-review":
                 for name in ("multi-entrypoint-capability-review", "whole-system-review", "comprehensive-codebase-audit"):
                     path = ROOT / "docs" / f"{name}.md"
                     expected[f"docs/{name}.md"] = (stat.S_IMODE(path.stat().st_mode), path.read_bytes())
+            if identity == "text-prune":
+                for name in ("skill-authoring-principles", "context-file-authoring", "claim-discipline", "experiment-protocol-readout-contract"):
+                    path = ROOT / "docs" / f"{name}.md"
+                    expected[f"docs/{name}.md"] = (stat.S_IMODE(path.stat().st_mode), path.read_bytes())
             self.assertEqual(inventory(self.home / "skills" / identity), expected)
-        for deferred in ("tdd", "text-prune", "ask-oracle"):
+        for deferred in ("tdd", "ask-oracle"):
             self.assertFalse((self.home / "skills" / deferred).exists())
         self.assertTrue((self.home / "AGENTS.md").is_file())
         self.assertTrue((self.home / "docs/context-file-authoring.md").is_file())
