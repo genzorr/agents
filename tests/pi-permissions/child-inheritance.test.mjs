@@ -181,6 +181,27 @@ test("unattended native controls require qualified provenance, a current registr
   assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, launch), false);
 }));
 
+test("native read-only subagent discovery needs no approval and cannot authorize execution or configuration", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  const native = { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } };
+  const queries = [{ action: "list" }, { action: "get", agent: "delegate" }, { action: "models", agent: "delegate" }, { action: "models", agentScope: "both" }, { action: "guide", options: { topic: "tool-reference" } }];
+  assert.equal(inheritance.allowsNativeTool("discovery-session", native, queries[0]), false);
+  await inheritance.start("discovery-session");
+  try {
+    for (const input of queries) {
+      assert.equal(inheritance.allowsNativeTool("discovery-session", native, input), true, JSON.stringify(input));
+      assert.equal(inheritance.allowsNativeTool("other-session", native, input), false);
+      assert.equal(inheritance.allowsNativeTool("discovery-session", { ...native, sourceInfo: { path: f.entry } }, input), false);
+      for (const extra of [{ workflow: "./run.js" }, { task: "Run a task" }, { config: { name: "changed" } }, { options: { command: "touch /outside" } }, { cwd: "/outside" }]) {
+        assert.equal(inheritance.allowsNativeTool("discovery-session", native, { ...input, ...extra }), false);
+      }
+    }
+    for (const input of [{ action: "list", capabilities: true }, { action: "create", agent: "delegate" }, { action: "update", agent: "delegate" }, { action: "models", agentScope: "invalid" }, { action: "models", agent: {} }]) {
+      assert.equal(inheritance.allowsNativeTool("discovery-session", native, input), false);
+    }
+  } finally { inheritance.dispose(); }
+}));
+
 test("new unattended launches require explicit fresh context despite native configured fork preference", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
   const { resolveSubagentLaunchContext, canPreferFork, loadConfig, getConfigPath, flattenSubagentToolOptions } = await sourceExports(f, [
     { relative: "src/shared/fork-context.js", names: ["resolveSubagentLaunchContext", "canPreferFork"] },
@@ -372,6 +393,9 @@ test("required agentic-local permits native child delegation and bound parent co
       assert.equal(typeof session.agent.beforeToolCall, "function");
       const ownerSession = session;
       const call = (name, args) => ownerSession.agent.beforeToolCall({ toolCall: { type: "toolCall", id: `synthetic-${name}`, name, arguments: args }, args });
+      for (const args of [{ action: "models", agent: "delegate" }, { action: "list" }, { action: "get", agent: "delegate" }, { action: "guide", options: { topic: "tool-reference" } }]) {
+        assert.equal((await call("subagent", args))?.block, undefined, JSON.stringify(args));
+      }
       for (const [name, args, source] of [["subagent", { agent: "synthetic-leaf", task: "Synthetic task", async: false, options: { context: "fresh", timeoutMs: 5_000 } }, "<inline:pi-subagents:fanout-child>"], ["contact_supervisor", { reason: "progress_update", message: "Synthetic parent-channel message" }, "<inline:pi-subagents:prompt-runtime>"]]) {
         const tool = session.agent.state.tools.find((item) => item.name === name);
         assert.ok(tool, `${name} is registered and active`);

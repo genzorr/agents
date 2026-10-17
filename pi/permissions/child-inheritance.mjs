@@ -10,6 +10,12 @@ function unattendedSubagentInput(sessionId, input, branch) {
   const options = input.options ?? {};
   if (!options || typeof options !== "object" || Array.isArray(options)) return false;
   if (input.action !== undefined) {
+    if (["list", "get", "models"].includes(input.action)) {
+      return Object.keys(input).every((key) => ["action", "agent", "agentScope", "options"].includes(key)) && Object.keys(options).length === 0 && (input.agent === undefined || typeof input.agent === "string") && (input.agentScope === undefined || ["user", "project", "both"].includes(input.agentScope));
+    }
+    if (input.action === "guide") {
+      return Object.keys(input).every((key) => ["action", "options"].includes(key)) && Object.keys(options).every((key) => key === "topic") && (options.topic === undefined || typeof options.topic === "string");
+    }
     if (!["status", "steer", "interrupt", "resume", "stop"].includes(input.action) || !ownedWorkerReceipt(sessionId, input.id, branch)) return false;
     const permitted = input.action === "status" ? ["view", "lines"] : input.action === "steer" ? ["mode", "ackTimeoutMs"] : [];
     return Object.keys(input).every((key) => ["action", "id", "message", "options"].includes(key)) && Object.keys(options).every((key) => permitted.includes(key)) && (options.view === undefined || options.view === "transcript") && (options.mode === undefined || ["steer", "follow_up", "auto"].includes(options.mode));
