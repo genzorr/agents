@@ -37,7 +37,7 @@ try {
   await session.steer('/skill:text-prune Tighten the supplied synthetic paragraph.');
   const [textPruneExpansion] = session.getSteeringMessages();
   const orchestrationExpansions = {};
-  for (const name of ['orchestrate-workers']) {
+  for (const name of ['orchestrate-feature', 'orchestrate-workers']) {
     await session.steer(`/skill:${name} Inspect the supplied synthetic contract only.`);
     orchestrationExpansions[name] = session.getSteeringMessages().at(-1);
   }

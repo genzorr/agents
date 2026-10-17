@@ -19,13 +19,15 @@ For an update, preview and apply `--update`. Add `--prune` only when removing un
 
 A fresh Pi process should list the installed skills. `/skill:name` explicitly invokes one; model-facing metadata does not override a skill's trigger or authority. Each skill owns its prerequisites and conditional external capabilities. Project `AGENTS.md` needs no conversion; project skill discovery depends on Pi's project trust setting. For old Codex links or historical account files, use [legacy migration and recovery](pi-distribution.md).
 
-The source qualifies explicit-only `orchestrate-workers` for the current ordinary interactive Pi/T3 coordinator, using pi-subagents 0.79.0 and the reviewed permission update. It launches bounded workers, retains visible native run IDs and prefers completion notifications, with exact owned blocking waits when needed. Independent review requires an operator request. `orchestrate-feature` is not admitted: T3 source exposes ordinary thread controls, but no runtime test created an ordinary conversation and automatic bound owner return is unqualified. Workers remain usable from the current ordinary conversation; a retained child is not a substitute owner. See the [permission and delivery boundary](pi-permissions.md#children-and-inherited-context). Source qualification does not install the update or establish human UI behavior.
+The explicit-only `orchestrate-feature` helper uses exposed T3 tools to create or reuse a separate ordinary owner conversation; that owner uses `orchestrate-workers` for native leaves and handles routine iterations locally. Blockers, decisions and final handoffs return through per-call-approved `t3_thread_send` to the fixed main conversation. Denied/unavailable approval leaves manual open/read recovery, not an automatic notification. Ordinary creation and messaging retry keys are caller-session scoped, not restart-global.
+
+The worker route uses pi-subagents 0.79.0 and the source permission update: fresh launches, exact owned lifecycle receipts, completion notifications and blocking waits when needed. Independent review requires an operator request. Native source-consumer/adapter tests qualify these interfaces separately; installed authenticated T3 exposure, an ordinary Pi owner running its leaves, and human UI/model behavior remain unqualified. See the [permission and delivery boundary](pi-permissions.md#children-and-inherited-context). Source qualification does not install either helper.
 
 After review, preview and reconcile assets with the commands above and permissions with their separate installer below, then restart an idle Pi/T3 backend. Before rollback/removal, finish owned runs; use the owning installers and preserve modified/foreign files and ownership records. Older permission source may again block unattended lifecycle operations. The helper preserves the coordinator's profile and external-write authority and creates no watcher.
 
 ## Linux permissions
 
-Requires `/bin/bash`, `/usr/bin/bwrap` and working unprivileged namespaces. This extension does not support macOS or Windows. Current CLI/T3 activation is best effort: missing or failed extension loading can leave built-in tools available. Mandatory enforcement requires a host activation gate before startup and registry replacement/reload; unmodified hosts are not qualified.
+Requires `/bin/bash`, `/usr/bin/bwrap` and working unprivileged namespaces. This extension does not support macOS or Windows. Default installation uses Pi’s normal extension loading. This is the selected best-effort scope: missing or failed startup/reload can leave built-in tools available. Strong mandatory host enforcement is not provided.
 
 ```bash
 python3 scripts/install-pi.py --dry-run
@@ -40,7 +42,7 @@ After restart, run `/agentic-local` to inspect current writable roots and test b
 
 ## Optional automatic updates for unprofiled hosts
 
-Automatic runtime self-update is unqualified when `agentic-local` is mandatory. Do not use the following setup as an assembled mandatory-permission configuration; it requires host-level activation/reload gating first. The native option below applies to unprofiled hosts, including macOS.
+Automatic runtime self-update has not been qualified with `agentic-local`; this source setup does not certify an enabled live updater. The native option below applies to unprofiled hosts, including macOS.
 
 [pi-auto-update](https://github.com/eiei114/pi-auto-update) runs `pi update --extensions`, then `pi update` at startup. It does not update Agents/Harness assets or pi-accounts.
 

@@ -142,14 +142,25 @@ test("unattended native controls require qualified provenance, a current registr
   try {
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, launch), true);
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } }, launch), true);
-    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) {
-      assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action, id: "synthetic-run", message: "Synthetic correction" }), true);
-    }
-    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "children.list" }), true);
-    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "status" }), true);
     const wait = { name: "bg_wait", sourceInfo: { source: "inline", path: "<inline:pi-subagents:prompt-runtime>" } };
     const receipt = { type: "message", message: { role: "toolResult", toolName: "subagent", toolCallId: "synthetic-resume", isError: false, details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "synthetic-policy" } } } };
     const branch = [receipt];
+    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) {
+      const input = { action, id: "owned-run", message: "Synthetic correction" };
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input, branch), true);
+      for (const entries of [[], [{ ...receipt, message: { ...receipt.message, isError: true } }], [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run" } } }], [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "foreign-owner" } } } }]]) {
+        assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input, entries), false);
+      }
+      for (const id of ["foreign-run", "owned", "synthetic-resume"]) assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { ...input, id }, branch), false);
+      for (const options of [{ index: 0 }, { childId: "foreign-child" }, { view: "fleet" }]) assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { ...input, options }, branch), false);
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { ...input, runId: "foreign-run" }, branch), false);
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", { ...native, sourceInfo: { path: f.entry } }, input, branch), false);
+      assert.equal(inheritance.allowsNativeTool("different-session", native, input, branch), false);
+    }
+    for (const input of [{ action: "children.list" }, { action: "status" }, { action: "status", options: { view: "fleet" } }]) assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input, branch), false);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "status", id: "owned-run", options: { view: "transcript", lines: 10 } }, branch), true);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "steer", id: "owned-run", message: "Synthetic correction", options: { mode: "follow_up", ackTimeoutMs: 100 } }, branch), true);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "steer", id: "owned-run", options: { mode: "plan" } }, branch), false);
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", wait, { id: "owned-run", timeoutMs: 1_000 }, branch), true);
     for (const [input, entries] of [[{ id: "owned-run" }, []], [{ id: "foreign-run" }, branch], [{ id: "owned-run", nonBlocking: true }, branch], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run" } } }]], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, isError: true } }]], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "foreign-owner" } } } }]]]) {
       assert.equal(inheritance.allowsNativeTool("synthetic-policy", wait, input, entries), false);
@@ -205,7 +216,8 @@ test("new unattended launches require explicit fresh context despite native conf
       assert.throws(() => flattenSubagentToolOptions(input), /different values/);
       assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, input), false);
     }
-    assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, { action: "resume", id: "retained-worker" }), true);
+    const receipt = { type: "message", message: { role: "toolResult", toolName: "subagent", isError: false, details: { asyncId: "retained-worker", "agentic-local": { ownerSessionId: manager.getSessionId() } } } };
+    assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, { action: "resume", id: "retained-worker" }, [receipt]), true);
   } finally { inheritance.dispose(); }
 }));
 
@@ -530,6 +542,45 @@ export default pi => { const f = fauxProvider({provider:"local-qualification",ap
     assert.ok(retainedId, JSON.stringify(initial.details));
     assert.equal(initial.details["agentic-local"].ownerSessionId, manager.getSessionId());
     await invoke("bg_wait", { id: retainedId, timeoutMs: 15_000 });
+    const refusedControl = async (args) => {
+      const result = await session.agent.beforeToolCall({ toolCall: { type: "toolCall", id: "synthetic-control-refusal", name: "subagent", arguments: args }, args });
+      assert.equal(result.block, true, JSON.stringify(args));
+    };
+    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) {
+      for (const id of ["foreign-run", retainedId.slice(0, 8), "synthetic-call-1"]) await refusedControl({ action, id });
+      for (const options of [{ index: 0 }, { childId: "foreign-child" }, { view: "fleet" }]) await refusedControl({ action, id: retainedId, options });
+    }
+    await refusedControl({ action: "status" });
+    await refusedControl({ action: "children.list" });
+    manager.appendMessage({ role: "toolResult", toolCallId: "synthetic-legacy-workflow", toolName: "subagent", content: [{ type: "text", text: "Synthetic legacy workflow receipt" }], details: { asyncId: "legacy-workflow" }, isError: false, timestamp: Date.now() });
+    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) await refusedControl({ action, id: "legacy-workflow" });
+    const previousUI = session.extensionRunner.getUIContext();
+    let confirmations = 0;
+    try {
+      session.extensionRunner.setUIContext({ ...previousUI, confirm: async () => { confirmations++; return true; } });
+      for (const args of [{ action: "resume", id: "foreign-run" }, { action: "resume", id: "legacy-workflow" }, { workflow: true }]) {
+        const call = { type: "toolCall", id: `synthetic-manual-${++serial}`, name: "subagent", arguments: args };
+        const admitted = await session.agent.beforeToolCall({ toolCall: call, args });
+        assert.equal(admitted?.block, undefined);
+        // Inject only the successful result: a per-call manual approval must not mint future unattended authority.
+        const result = { content: [{ type: "text", text: "Synthetic manually approved native result" }], details: { asyncId: `unqualified-${serial}` } };
+        const finalized = await session.agent.afterToolCall({ toolCall: call, args, result, isError: false });
+        const consumed = { ...result, ...finalized };
+        assert.equal(consumed.details["agentic-local"], undefined);
+        manager.appendMessage({ role: "toolResult", toolCallId: call.id, toolName: "subagent", ...consumed, isError: false, timestamp: Date.now() });
+      }
+      assert.equal(confirmations, 3);
+    } finally { session.extensionRunner.setUIContext(previousUI); }
+    const unqualifiedReceipts = manager.getBranch().filter((entry) => entry.type === "message" && entry.message.details?.asyncId?.startsWith("unqualified-"));
+    assert.equal(unqualifiedReceipts.length, 3);
+    for (const entry of unqualifiedReceipts) {
+      await refusedControl({ action: "resume", id: entry.message.details.asyncId });
+      const args = { id: entry.message.details.asyncId };
+      const denied = await session.agent.beforeToolCall({ toolCall: { type: "toolCall", id: "synthetic-laundered-wait", name: "bg_wait", arguments: args }, args });
+      assert.equal(denied.block, true);
+    }
+    const ownStatus = await invoke("subagent", { action: "status", id: retainedId });
+    assert.equal(ownStatus.isError, undefined);
     const resumed = await invoke("subagent", { action: "resume", id: retainedId, message: "Continue the synthetic leaf" });
     const asyncId = resumed.content.map((item) => item.text ?? "").join("\n").match(/Revived run: ([^\s]+)/)?.[1];
     assert.ok(asyncId, JSON.stringify(resumed.details));
@@ -559,6 +610,7 @@ export default pi => { const f = fauxProvider({provider:"local-qualification",ap
     session = await open(fork);
     assert.notEqual(session.sessionManager.getSessionId(), ownerId);
     await refused({ id: asyncId });
+    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) await refusedControl({ action, id: asyncId });
   } finally {
     if (session) { await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" }); session.dispose(); }
     for (const [name, value] of previous) {

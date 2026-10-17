@@ -122,6 +122,36 @@ class PiAssetsTest(unittest.TestCase):
             self.write(self.home / name, "synthetic foreign fixture\n")
         return settings
 
+    def test_file_uri_literal_ascii_suffix_refuses_before_destination_creation(self):
+        target = self.root / "refused-agent"
+        for code in range(1, 33):
+            with self.subTest(code=code):
+                self.env["PI_CODING_AGENT_DIR"] = target.as_uri() + chr(code)
+                result = self.install(expected=1)
+                self.assertIn("must be percent-encoded", result.stderr)
+                self.assertFalse(target.exists())
+                self.assertFalse(any(self.root.glob("refused-agent*")))
+        with migration_module(self.repo) as module:
+            with self.assertRaises(ValueError):
+                module.ENGINE.resolve_pi_home(target.as_uri() + "\0")
+        self.assertFalse(target.exists())
+
+    @unittest.skipUnless(sys.platform == "linux" and shutil.which("node"), "Linux and Node are required for native file-URL parity")
+    def test_encoded_trailing_space_installs_into_native_file_url_destination(self):
+        target = self.root / "encoded-agent "
+        uri = target.as_uri()
+        native = subprocess.run([shutil.which("node"), "--input-type=module", "-e", "import {fileURLToPath} from 'node:url'; console.log(JSON.stringify(fileURLToPath(process.argv[1])))", uri], capture_output=True, text=True, check=True)
+        self.assertEqual(Path(json.loads(native.stdout)), target)
+        self.env["PI_CODING_AGENT_DIR"] = uri
+        self.install()
+        self.assertTrue((target / ".agents-install-state.json").is_file())
+        self.assertTrue((target / "skills/sample/SKILL.md").is_file())
+        installed = inventory(target)
+        self.env["PI_CODING_AGENT_DIR"] = str(target)
+        self.install()
+        self.assertEqual(inventory(target), installed)
+        self.assertFalse(target.with_name(target.name.rstrip()).exists())
+
     def test_fresh_preview_and_diff_create_nothing(self):
         for args in (("--dry-run",), ("--diff",)):
             self.install(*args)
@@ -424,11 +454,11 @@ class PiAssetsTest(unittest.TestCase):
             engine = module.ENGINE
             desired_files = engine.desired_files
             def previous_selection(*args):
-                return {target: item for target, item in desired_files(*args).items() if item.asset.id not in {"orchestrate-workers"}}
+                return {target: item for target, item in desired_files(*args).items() if item.asset.id not in {"orchestrate-feature"}}
             with patch.object(engine, "desired_files", side_effect=previous_selection), patch.dict(os.environ, self.env), patch.object(sys, "argv", ["install-assets.py", "pi"]), contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(engine.main(), 0)
         previous = inventory(self.home)
-        self.assertFalse((self.home / "skills/orchestrate-workers").exists())
+        self.assertFalse((self.home / "skills/orchestrate-feature").exists())
         self.install("--update", real=True)
         updated = inventory(self.home)
         for target, value in previous.items():
@@ -437,7 +467,7 @@ class PiAssetsTest(unittest.TestCase):
         assets = load_catalog(ROOT)
         pi_ids = {a.id for a in assets if a.kind == "skill" and "pi" in a.platforms}
         shared_ids = {a.id for a in assets if a.kind == "skill" and "agents" in a.platforms}
-        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune", "orchestrate-workers"})
+        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune", "orchestrate-feature", "orchestrate-workers"})
         self.assertFalse(pi_ids & shared_ids)
         self.assertEqual({p.parent.name for p in (self.home / "skills").glob("*/SKILL.md")}, pi_ids)
         self.assertEqual((self.home / "skills/distill-source/SKILL.md").read_bytes(), (ROOT / "codex/skills/distill-source/SKILL.md").read_bytes())

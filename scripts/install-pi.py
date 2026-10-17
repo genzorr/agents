@@ -29,6 +29,8 @@ def resolve_install_path(value):
     elif raw.startswith("~/"):
         raw = str(Path.home()) + raw[1:]
     elif raw.startswith("file://"):
+        if re.search(r"[\x00-\x20]$", raw):
+            raise ValueError("file URI trailing whitespace/control characters must be percent-encoded")
         parsed = urlsplit(raw)
         if parsed.netloc.lower() not in {"", "localhost"} or "\\" in raw or re.search(r"%(?![0-9a-fA-F]{2})|%2f", parsed.path, re.IGNORECASE):
             raise ValueError("unsupported file URI; use a local absolute path or file:/// URI without encoded slashes")

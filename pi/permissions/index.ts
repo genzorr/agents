@@ -50,7 +50,7 @@ export default function agenticLocal(pi: ExtensionAPI) {
     if (builtins.has(event.toolName)) return;
     if (["subagent", "contact_supervisor", "bg_wait"].includes(event.toolName) && childInheritance.active(ctx.sessionManager.getSessionId())) {
       const tool = pi.getAllTools().find((item) => item.name === event.toolName);
-      if (childInheritance.allowsNativeTool(ctx.sessionManager.getSessionId(), tool, event.input, event.toolName === "bg_wait" ? ctx.sessionManager.getBranch() : [])) return;
+      if (childInheritance.allowsNativeTool(ctx.sessionManager.getSessionId(), tool, event.input, ctx.sessionManager.getBranch())) return;
     }
     if (!(await approve(ctx, "agentic-local: allow extension tool?", `Tool: ${event.toolName}\nArguments: ${JSON.stringify(event.input)}\nExtension/MCP tools run outside this filesystem sandbox. Allow this invocation?`))) {
       return { block: true, reason: "Extension tool denied or approval unavailable" };
@@ -63,7 +63,7 @@ export default function agenticLocal(pi: ExtensionAPI) {
     const sessionId = ctx.sessionManager.getSessionId();
     if (!childInheritance.active(sessionId)) return;
     const tool = pi.getAllTools().find((item) => item.name === "subagent");
-    if (!childInheritance.allowsNativeTool(sessionId, tool, input)) return;
+    if (!childInheritance.allowsNativeTool(sessionId, tool, input, ctx.sessionManager.getBranch())) return;
     return { details: { ...details, "agentic-local": { ownerSessionId: sessionId } } };
   });
   pi.on("user_bash", async () => ({ operations: sandbox }));
@@ -76,7 +76,7 @@ export default function agenticLocal(pi: ExtensionAPI) {
   });
   pi.on("session_shutdown", async () => childInheritance.dispose());
   pi.on("before_agent_start", async (event) => ({
-    systemPrompt: `${event.systemPrompt}\n\nagentic-local is active. Read access follows the host user's permissions. Bash writes are restricted to these existing roots: ${roots.join(", ")}. Network and local binding are enabled. File write/edit operations outside those roots require manual approval. For a necessary outside-scope bash operation, request bash_unrestricted, which asks the human for one unsandboxed execution. A failed command is never an approval. With pi-subagents 0.79.0, qualified native subagent direct launches with explicit fresh context and lifecycle controls may run unattended while required-child inheritance is active; external and remote runners are rejected by native admission. Native child contact_supervisor may use its bound immediate-parent channel. Native bg_wait may block on an exact async run id only when this session retains a successful launch/resume receipt stamped with its own identity; use id and optional timeoutMs, without nonBlocking, subscriptions or all. Workflows, configuration changes, host acceptance/output options, and other extension/MCP tools require manual approval and are not filesystem-confined.`,
+    systemPrompt: `${event.systemPrompt}\n\nagentic-local is active. Read access follows the host user's permissions. Bash writes are restricted to these existing roots: ${roots.join(", ")}. Network and local binding are enabled. File write/edit operations outside those roots require manual approval. For a necessary outside-scope bash operation, request bash_unrestricted, which asks the human for one unsandboxed execution. A failed command is never an approval. With pi-subagents 0.79.0, qualified native subagent direct launches with explicit fresh context may run unattended while required-child inheritance is active; named status, steer, interrupt, resume and stop also require an exact admitted-worker receipt stamped with this session identity, without alternate child selectors or fleet views; external and remote runners are rejected by native admission. Native child contact_supervisor may use its bound immediate-parent channel. Native bg_wait may block on an exact async run id only when this session retains a successful launch/resume receipt stamped with its own identity; use id and optional timeoutMs, without nonBlocking, subscriptions or all. Workflows, configuration changes, host acceptance/output options, and other extension/MCP tools require manual approval and are not filesystem-confined.`,
   }));
   pi.registerCommand("agentic-local", {
     description: "Show agentic-local boundaries and dependency probe",

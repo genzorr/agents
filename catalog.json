@@ -272,13 +272,15 @@
     {
       "id": "orchestrate-feature",
       "kind": "skill",
-      "platforms": ["codex"],
+      "platforms": ["codex", "pi"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/orchestrate-feature"
+        "codex": "codex/skills/orchestrate-feature",
+        "pi": "pi/skills/orchestrate-feature"
       },
       "install_target": {
-        "codex": "skills/orchestrate-feature"
+        "codex": "skills/orchestrate-feature",
+        "pi": "skills/orchestrate-feature"
       },
       "tags": ["role:helper", "domain:orchestration"]
     },

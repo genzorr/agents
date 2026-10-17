@@ -7,6 +7,8 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -104,6 +106,51 @@ class PiSetupTests(unittest.TestCase):
                     setup.main()
             self.assertEqual(result.exception.code, 2)
             self.assertFalse(self.home.exists())
+
+    def test_file_uri_literal_ascii_suffix_refuses_before_any_install_writes(self):
+        target = self.root / "refused-agent"
+        env = dict(os.environ, HOME=str(self.root / "process home"))
+        for code in range(1, 33):
+            for option in ("--home", "--agent-dir", "environment"):
+                with self.subTest(code=code, option=option):
+                    uri = target.as_uri() + chr(code)
+                    args = [sys.executable, str(ROOT / "scripts/install-pi.py"), "--home", str(self.home)]
+                    env["PI_CODING_AGENT_DIR"] = uri if option == "environment" else str(self.agent)
+                    if option == "--home":
+                        args[-1] = uri
+                    elif option == "--agent-dir":
+                        args.extend([option, uri])
+                    result = subprocess.run(args, env=env, capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertIn("must be percent-encoded", result.stderr)
+                    self.assertFalse(self.home.exists())
+                    self.assertFalse(any(self.root.glob("refused-agent*")))
+        with self.assertRaises(ValueError):
+            setup.resolve_install_path(target.as_uri() + "\0")
+
+    @unittest.skipUnless(sys.platform == "linux" and shutil.which("node"), "Linux and Node are required for native file-URL parity")
+    def test_encoded_trailing_space_installs_into_native_file_url_destination(self):
+        self.home = self.root / "encoded-home "
+        target = self.root / "encoded-agent "
+        uri = target.as_uri()
+        native = subprocess.run([shutil.which("node"), "--input-type=module", "-e", "import {fileURLToPath} from 'node:url'; console.log(JSON.stringify(fileURLToPath(process.argv[1])))", uri], capture_output=True, text=True, check=True)
+        self.assertEqual(Path(json.loads(native.stdout)), target)
+        env = dict(os.environ, PI_CODING_AGENT_DIR=uri, HOME=str(self.root / "process home"))
+        args = [sys.executable, str(ROOT / "scripts/install-pi.py"), "--home", self.home.as_uri()]
+        result = subprocess.run(args, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((target / ".agents-pi-setup.json").is_file())
+        extension = json.loads((target / "settings.json").read_text())["extensions"]
+        self.assertEqual(extension, [str(self.home / ".local/lib/pi-agentic-local/permissions")])
+        installed = self.tree()
+        agent_files = {str(path.relative_to(target)): path.read_bytes() for path in target.rglob("*") if path.is_file()}
+        env["PI_CODING_AGENT_DIR"] = str(target)
+        result = subprocess.run(args, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.tree(), installed)
+        self.assertEqual({str(path.relative_to(target)): path.read_bytes() for path in target.rglob("*") if path.is_file()}, agent_files)
+        self.assertFalse(self.home.with_name(self.home.name.rstrip()).exists())
+        self.assertFalse(target.with_name(target.name.rstrip()).exists())
 
     def test_fresh_dry_run_creates_nothing(self):
         self.install.recover(True)

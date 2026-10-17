@@ -1154,6 +1154,8 @@ def resolve_pi_home(value: str) -> Path:
     elif value.startswith("~/"):
         value = str(Path.home()) + value[1:]
     elif value.startswith("file://"):
+        if re.search(r"[\x00-\x20]$", value):
+            raise ValueError("file URI trailing whitespace/control characters must be percent-encoded")
         parsed = urlsplit(value)
         if parsed.netloc.lower() not in {"", "localhost"} or "\\" in value or re.search(r"%(?![0-9a-fA-F]{2})|%2f", parsed.path, re.IGNORECASE):
             raise ValueError("unsupported Pi home file URI; use a local absolute path")

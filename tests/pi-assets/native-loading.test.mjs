@@ -11,8 +11,8 @@ const root = process.env.PI_SDK_ROOT || join(homedir(), '.local/lib/node_modules
 const { loadSkills, formatSkillsForPrompt } = await import(pathToFileURL(join(root, 'dist/core/skills.js')));
 const { loadProjectContextFiles } = await import(pathToFileURL(join(root, 'dist/core/resource-loader.js')));
 const sharedIds = ['design-experiment', 'docker-optimize', 'logging-optimize', 'piecemeal-growth', 'review-experiment', 'skill-lifecycle'];
-const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'orchestrate-workers', 'review-change', 'surface-unknowns', 'text-prune'];
-const explicitOnly = ['orchestrate-workers', 'surface-unknowns'];
+const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'orchestrate-feature', 'orchestrate-workers', 'review-change', 'surface-unknowns', 'text-prune'];
+const explicitOnly = ['orchestrate-feature', 'orchestrate-workers', 'surface-unknowns'];
 
 async function materialize(t) {
   const scratch = await mkdtemp(join(tmpdir(), 'pi-assets-native-'));
@@ -126,7 +126,7 @@ test('native default discovery, project trust and explicit text-prune command ex
   }));
   const body = (await readFile(join(repo, 'shared/skills/text-prune/SKILL.md'), 'utf8')).replace(/^---\n[\s\S]*?\n---\n/, '').trim();
   assert.equal(result.textPruneExpansion, `<skill name="text-prune" location="${join(fixture.agentDir, 'skills/text-prune/SKILL.md')}">\nReferences are relative to ${join(fixture.agentDir, 'skills/text-prune')}.\n\n${body}\n</skill>\n\nTighten the supplied synthetic paragraph.`);
-  for (const name of ['orchestrate-workers']) {
+  for (const name of ['orchestrate-feature', 'orchestrate-workers']) {
     const body = (await readFile(join(repo, 'pi/skills', name, 'SKILL.md'), 'utf8')).replace(/^---\n[\s\S]*?\n---\n/, '').trim();
     assert.equal(result.orchestrationExpansions[name], `<skill name="${name}" location="${join(fixture.agentDir, 'skills', name, 'SKILL.md')}">\nReferences are relative to ${join(fixture.agentDir, 'skills', name)}.\n\n${body}\n</skill>\n\nInspect the supplied synthetic contract only.`);
   }
