@@ -280,16 +280,17 @@ test("native mission bookkeeping runs without approval while execution and goal 
     { action: "mission.list", options: { missionScope: "global" } },
     { action: "mission.show", options: { missionId } },
     { action: "mission.update", options: { missionId, missionUpdate: { summary: "Synthetic progress", artifacts: [{ kind: "note", path: "notes.md" }], status: "active" } } },
-    { action: "mission.resolve-decision", options: { missionId, id: "decision", summary: "Synthetic resolution" } },
-    { action: "mission.attach-run", options: { missionId, id: "synthetic-run", runMode: "single" } },
+    { action: "mission.resolve-decision", id: "decision", options: { missionId, summary: "Synthetic resolution" } },
+    { action: "mission.attach-run", id: "synthetic-run", options: { missionId, runMode: "single" } },
     { action: "mission.close", options: { missionId, missionStatus: "completed", summary: "Synthetic completion" } },
   ];
   assert.equal(inheritance.allowsNativeTool("mission-session", native, queries.at(-1)), false);
   await inheritance.start("mission-session");
   try {
+    const { flattenSubagentToolOptions } = await sourceExports(f, "src/extension/subagent-options.js", ["flattenSubagentToolOptions"]);
     for (const input of queries) {
       assert.equal(inheritance.allowsNativeTool("mission-session", native, input), true, JSON.stringify(input));
-      assert.equal(inheritance.allowsNativeTool("mission-session", native, { action: input.action, ...input.options }), true);
+      assert.equal(inheritance.allowsNativeTool("mission-session", native, flattenSubagentToolOptions(input)), true);
       assert.equal(inheritance.allowsNativeTool("other-session", native, input), false);
       assert.equal(inheritance.allowsNativeTool("mission-session", { ...native, sourceInfo: { path: f.entry } }, input), false);
       for (const extra of [{ workflow: "./run.js" }, { cwd: "/outside" }, { options: { ...input.options, command: "touch /outside" } }, { options: { ...input.options, machine: "remote" } }]) {
@@ -305,7 +306,6 @@ test("native mission bookkeeping runs without approval while execution and goal 
     ]) assert.equal(inheritance.allowsNativeTool("mission-session", native, input), false, JSON.stringify(input));
 
     const { handleMissionAction } = await sourceExports(f, "src/missions/actions.js", ["handleMissionAction"]);
-    const { flattenSubagentToolOptions } = await sourceExports(f, "src/extension/subagent-options.js", ["flattenSubagentToolOptions"]);
     const ctx = { cwd: f.root, agentDir: f.agent, currentSessionId: "mission-session" };
     const invoke = (input) => {
       assert.equal(inheritance.allowsNativeTool("mission-session", native, input), true);
