@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This repository owns generic shared Agents, Codex, Claude, and Devin assets and their install, uninstall, and validation tools.
+This repository owns generic shared Agents, Codex, Claude, Devin, and Pi assets and their install, uninstall, and validation tools.
 
 ## Boundary
 
@@ -26,6 +26,7 @@ Follow the [installer contract](docs/skill-installer-contract.md). `catalog.json
 Ask the operator before:
 
 - live mutation of the real `~/.agents`, `~/.codex`, `~/.claude`, or `~/.config/devin` (install/update/prune outside scratch homes);
+- live Pi asset migration or installation under `~/.pi/agent` and updates to the separate Pi account/permission setup outside scratch homes;
 - GitHub repo creation or any remote push;
 - deleting branches;
 - reading app-private settings/auth/cache files, raw session logs, or private transcripts;
@@ -45,6 +46,7 @@ CLAUDE_HOME=... bash scripts/install-claude.sh --dry-run --diff   # scratch-home
 CODEX_HOME=...  bash scripts/install-codex.sh  --dry-run --diff
 AGENTS_HOME=... bash scripts/install-agents.sh --dry-run --diff
 DEVIN_HOME=...  bash scripts/install-devin.sh  --dry-run --diff
+PI_CODING_AGENT_DIR=... bash scripts/install-pi-assets.sh --dry-run --diff
 ```
 
 `uv` is available for consistent tooling (`uv run python ...`), but the validation scripts remain

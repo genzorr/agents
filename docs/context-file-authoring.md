@@ -35,6 +35,8 @@ Resolve conflicting instructions at their maintained owner rather than expecting
 
 Give each fact one maintained owner. A root may retain a short boundary or routing reminder when contributors cannot be assumed to load that owner. Remove duplicate procedures, conflicting copies and reminders with no distinct audience or trigger. Before deleting a project rule because a global file repeats it, verify the supported contributors' loading paths; essential standalone boundaries must remain reachable before the relevant action.
 
+For repository-managed distribution, reuse portable skill bodies through the catalog rather than maintain separate source forks for each runtime output. Shared-home skills are discovered once as complete implementations; they are not bases for same-name provider overlays. A provider global instruction file can remain a deliberate counterpart when its tools, approvals or child behavior differ, as Pi's global `AGENTS.md` does. Edit the owning source and reconcile its installed outputs through the owning installer.
+
 The table illustrates Claude's loading surfaces; for another provider, use its supported instruction and reference mechanisms rather than creating Claude files. Provider selection and exclusions matter; see [Loading notes](#loading-notes).
 
 | Layer | Holds | Loading |
@@ -124,10 +126,12 @@ Keep routes reachable before the relevant action. Avoid reading loops and blanke
 
 ## Loading Notes
 
-These notes follow current official documentation checked on 2026-10-07; they describe supported mechanics, not proof of loading in a local session.
+The Codex and Claude notes follow official documentation checked on 2026-10-07; they describe supported mechanics, not proof of loading in a local session. The Pi entry records separately version-qualified installed-source and native-loader evidence.
 
 - **Codex:** [startup discovery](https://learn.chatgpt.com/docs/agent-configuration/agents-md) builds the instruction chain once per run. It selects the first non-empty global `AGENTS.override.md` or `AGENTS.md`, then at most one instruction file per directory from the project root to the starting working directory, with overrides and configured fallback names. Do not assume arbitrary nested files open automatically during a task or that Claude's `@` semantics apply.
 - **Claude Code:** [project selection](https://code.claude.com/docs/en/memory#agentsmd) can read `AGENTS.md` natively from v2.1.277, subject to version/session support and the Project instructions setting. By default, a `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md` in the working directory or above selects Claude files instead; an import wrapper preserves the shared baseline in that case. Ancestor instructions load at launch; nested project instructions load on demand. [Path-scoped rules](https://code.claude.com/docs/en/memory#path-specific-rules) trigger on matching Read, Write or Edit access, not every tool use. Subagents may skip project instructions. Consult the official documentation for settings and exclusions rather than assuming every session or agent loads the same chain.
+
+- **Pi:** installed Pi 1.3.0 source and native loader checks verified on 2026-10-17 load global context from the selected agent home (`PI_CODING_AGENT_DIR`, default `~/.pi/agent` (runtime-home)) and project context from the working directory's ancestors. Pi selects one recognized context filename per directory (`AGENTS.override.md`, `AGENTS.md`, `AGENTS.MD`, `CLAUDE.md`, or `CLAUDE.MD`); existing project `AGENTS.md` files need no conversion. Reading a descendant file does not prove that its directory's instructions were loaded, so inspect applicable narrower instructions before editing. Do not assume Claude `@` imports work in Pi context files or replace Pi's normal `SYSTEM.md` for ordinary instructions. Child global/project instruction and skill inheritance depends separately on the installed subagent extension and agent settings; parent loading does not establish child loading. Project resource trust and context loading are separate mechanisms.
 
 For other providers, check their supported discovery and reference mechanisms before choosing a surface. This guide does not establish Devin's automatic loading behavior.
 

@@ -114,7 +114,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("including any deadline and stop gates it defines", claude)
         self.assertNotIn("Set a compact Codex goal", claude)
 
-    def test_orchestration_family_is_canonical_explicit_and_codex_only(self) -> None:
+    def test_orchestration_family_preserves_codex_and_admits_pi_counterparts(self) -> None:
         catalog = json.loads(self.read("catalog.json"))
         entries = {item["id"]: item for item in catalog["skills"]}
         expected = {
@@ -127,9 +127,12 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertFalse((REPO_ROOT / "codex/skills/sol-luna-orchestration").exists())
         for skill_id, (source, target, role) in expected.items():
             entry = entries[skill_id]
-            self.assertEqual(entry["platforms"], ["codex"])
-            self.assertEqual(entry["source"], {"codex": source})
-            self.assertEqual(entry["install_target"], {"codex": target})
+            platforms = ["codex", "pi"]
+            self.assertEqual(entry["platforms"], platforms)
+            self.assertEqual(entry["source"]["codex"], source)
+            self.assertEqual(entry["install_target"]["codex"], target)
+            self.assertEqual(set(entry["source"]), set(platforms))
+            self.assertEqual(set(entry["install_target"]), set(platforms))
             self.assertEqual(entry["tags"], [role, "domain:orchestration"])
             self.assertFalse((REPO_ROOT / f"claude/skills/{skill_id}").exists())
             self.assertIn("allow_implicit_invocation: false", self.read(f"{source}/agents/openai.yaml"))

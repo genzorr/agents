@@ -1,14 +1,14 @@
-# Agents for Codex, Claude, and Devin
+# Agents for Codex, Claude, Devin, and Pi
 
-Reusable skills, commands, subagents, global instructions, configuration, and notification hooks for Codex, Claude Code, and Devin CLI. The installers copy cataloged assets into independent shared or provider homes and preserve modified or unmanaged files.
+Reusable skills, commands, subagents, global instructions, configuration, and notification hooks for Codex, Claude Code, Devin CLI, and Pi. The installers copy cataloged assets into independent shared or provider homes and preserve modified or unmanaged files.
 
 ## Install
 
 Requires Python 3.9 or newer. The installer uses the Python standard library; no Python packages are required.
 
-Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), [Devin instructions](devin/AGENTS.md), [Devin defaults](devin/config.json), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements.
+Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), [Devin instructions](devin/AGENTS.md), [Devin defaults](devin/config.json), [Pi instructions](pi/AGENTS.md), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements.
 
-Portable skills have one managed runtime location at `~/.agents/skills`, which Codex and Devin discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill. Skills that require another runtime skill remain provider assets until their complete dependency chain is proven portable; for example, `babysit-pr` and `thermo-nuclear-code-quality-review` remain Codex/Claude assets because both require `review-change`.
+Portable skills have one managed runtime location at `~/.agents/skills`, which Codex, Devin and Pi discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill. Skills that require another runtime skill remain provider assets until their complete dependency chain is proven portable; for example, `babysit-pr` and `thermo-nuclear-code-quality-review` remain Codex/Claude assets because both require `review-change`.
 
 From a local checkout, preview the changes first:
 
@@ -17,6 +17,7 @@ bash scripts/install-codex.sh --dry-run --diff
 bash scripts/install-claude.sh --dry-run --diff
 bash scripts/install-agents.sh --dry-run --diff
 bash scripts/install-devin.sh --dry-run --diff
+bash scripts/install-pi-assets.sh --dry-run --diff
 ```
 
 Then run the installer for the platform you use:
@@ -25,20 +26,22 @@ Then run the installer for the platform you use:
 bash scripts/install-agents.sh
 bash scripts/install-codex.sh
 bash scripts/install-devin.sh
+bash scripts/install-pi-assets.sh
 # Claude does not consume ~/.agents/skills, so its provider installer includes managed skill copies:
 bash scripts/install-claude.sh
 ```
 
-The default destinations are `~/.agents`, `~/.codex`, `~/.claude`, and `${XDG_CONFIG_HOME:-~/.config}/devin` (or `%APPDATA%\devin` on Windows). Set `AGENTS_HOME`, `CODEX_HOME`, `CLAUDE_HOME`, or installer-specific `DEVIN_HOME` to use another directory. The shared installer is deliberately independent: provider install, prune, and uninstall commands never mutate `~/.agents`, so Codex and Devin can be installed or removed in either order without competing for shared state. For an isolated trial:
+The default destinations are `~/.agents`, `~/.codex`, `~/.claude`, `${XDG_CONFIG_HOME:-~/.config}/devin` (or `%APPDATA%\devin` on Windows), and `~/.pi/agent`. Set `AGENTS_HOME`, `CODEX_HOME`, `CLAUDE_HOME`, installer-specific `DEVIN_HOME`, or `PI_CODING_AGENT_DIR` to use another directory. The shared installer is deliberately independent: provider install, prune, and uninstall commands never mutate `~/.agents`, so provider homes can be installed or removed in either order without competing for shared state. For an isolated trial:
 
 ```bash
 CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
 CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh
 AGENTS_HOME="$PWD/.scratch-home/agents" bash scripts/install-agents.sh
 DEVIN_HOME="$PWD/.scratch-home/devin" bash scripts/install-devin.sh
+PI_CODING_AGENT_DIR="$PWD/.scratch-home/pi" bash scripts/install-pi-assets.sh
 ```
 
-On native Windows, use the PowerShell entry points:
+Pi asset setup uses the POSIX entrypoint; native Windows Pi setup is unsupported. For the other providers on native Windows, use the PowerShell entry points:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1 --dry-run --diff
@@ -78,6 +81,8 @@ The Devin installer copies a complete [Devin-specific global instruction layer](
 Invoke [piecemeal-growth](shared/skills/piecemeal-growth/SKILL.md) by name or explicitly request “piecemeal growth”, “piecemeal mode”, or “piecemeal mentality” as the approach to design, implementation, refactoring, or review. This task-scoped lens grounds complexity in present requirements and credible failures while preserving the full contract; the current workflow stays in charge. Concept discussion and ordinary coding requests do not activate it. It installs in the shared Agents home for Codex and Devin discovery and as a Claude copy.
 
 Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. The Codex installer validates its complete prospective config in an isolated temporary `CODEX_HOME` before writing, and `--dry-run` validates without creating a destination or backup.
+
+[Pi setup](docs/pi-setup.md) covers catalog assets, optional Linux permissions and native automatic updates. [catalog.json](catalog.json) defines skill membership; skills own their prerequisites. Harness assets remain with their owning repository. The separate [pi-accounts package](https://github.com/genzorr/pi-accounts#readme) owns accounts and hourly maintenance. See the [permission contract](docs/pi-permissions.md) before relying on enforcement and [legacy migration/recovery](docs/pi-distribution.md) only for earlier layouts. Live changes require operator authorization.
 
 ```bash
 CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py

@@ -32,7 +32,7 @@ SECTION_KINDS = {
     "global_instructions": "global_instructions",
     "traveling_documents": "traveling_document",
 }
-PLATFORMS = ("agents", "codex", "claude", "devin")
+PLATFORMS = ("agents", "codex", "claude", "devin", "pi")
 BOUNDARY_EXACT_IDS = {"harvest-sessions", "codex-primary-runtime"}
 BOUNDARY_PREFIX = "harness-"
 KNOWN_HANDLING = {"codex_global_instructions", "claude_settings_hooks", "devin_config"}
@@ -54,6 +54,7 @@ RESERVED_TARGETS = {
     "codex": {"hooks.json", "hooks/stop.sh", "hooks/notifications.sh"},
     "claude": {"commands/execute.md", "agents/task-verifier.md", "agents/harness-task-bootstrap.md"},
     "devin": set(),
+    "pi": {"settings.json", "auth.json", ".agents-pi-setup.json", ".agents-pi-setup-journal.json", ".agents-pi-migration.json"},
 }
 DOC_REF_RE = re.compile(r"(?<!/)docs/[A-Za-z0-9/_.-]+\.md")
 TEMPLATED_DOC_MARKERS = ("RUN_ID", "YYYYMMDD")
@@ -150,7 +151,7 @@ def validate_asset_target(
     if target in RESERVED_TARGETS[platform] or any(target == root or target.startswith(root + "/") for root in RESERVED_TARGET_ROOTS) or any(target.startswith(prefix) for prefix in RESERVED_TARGET_PREFIXES):
         raise CatalogError(f"{label}: reserved or foreign target")
     if asset_id.startswith("legacy-document:"):
-        if kind != "traveling_document" or asset_id.removeprefix("legacy-document:") != target:
+        if kind != "traveling_document" or not target.startswith("docs/") or asset_id.removeprefix("legacy-document:") != target:
             raise CatalogError(f"{label}: legacy identity does not match target")
         return target
     if kind == "skill":
@@ -236,7 +237,7 @@ def _parse_asset(section: str, entry: object) -> Asset:
         raise CatalogError(f"{section}/{asset_id}: source must cover exactly its platforms")
     sources = {platform: _source_layers(entry, platform) for platform in platforms}
     if kind == "skill" and "agents" in platforms:
-        duplicate_runtimes = sorted(set(platforms) & {"codex", "devin"})
+        duplicate_runtimes = sorted(set(platforms) & {"codex", "devin", "pi"})
         if duplicate_runtimes:
             raise CatalogError(f"{section}/{asset_id}: shared skill would duplicate {', '.join(duplicate_runtimes)} discovery")
         if "claude" in platforms and sources["agents"] != sources["claude"]:
@@ -423,7 +424,7 @@ def _physical_asset_paths(repo: Path) -> set[str]:
         root = repo / "claude" / category
         if root.is_dir():
             paths.update(path.relative_to(repo).as_posix() for path in root.iterdir() if path.is_file() and path.suffix == ".md")
-    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "CLAUDE.md", repo / "claude" / "hooks.json", repo / "devin" / "AGENTS.md", repo / "devin" / "config.json"):
+    for path in (repo / "codex" / "AGENTS.md", repo / "claude" / "CLAUDE.md", repo / "claude" / "hooks.json", repo / "devin" / "AGENTS.md", repo / "devin" / "config.json", repo / "pi" / "AGENTS.md"):
         if path.is_file():
             paths.add(path.relative_to(repo).as_posix())
     hook_root = repo / "claude" / "hooks"

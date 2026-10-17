@@ -1,0 +1,50 @@
+---
+name: orchestrate-workers
+description: Coordinate bounded Pi leaf workers and explicitly requested independent review for the current resolved task. Use only after operator invocation or explicit delegation authorization; keep the current interactive coordinator's profile, authority and acceptance responsibility.
+disable-model-invocation: true
+---
+
+# Orchestrate Workers
+
+A helper for the current ordinary interactive Pi/T3 coordinator, which may be an ordinary owner conversation opened by the operator. Keep its governing workflow as driver. The coordinator owns architecture, assignment contracts, shared-state allocation, integration, verification sufficiency and acceptance; workers own coherent execution and implementation-depth checks. This helper grants no additional authority and does not create or connect an ordinary owner conversation. A retained child is a worker, not a substitute for that conversation.
+
+## Resolve the task and profiles
+
+With no resolved task or useful delegation boundary, return without launching. Otherwise establish scope, durable references, interfaces, permissions, dependencies, success criteria, stop conditions and the actual immediate-parent route. Require qualified pi-subagents 0.79.0 unattended controls and use its native `subagent` guide for uncertain syntax. Only direct native child/lifecycle calls are admitted here; raw workflow scripts, host commands, external runners and alternate coordination channels are not substitutes.
+
+Preserve the coordinator's model/effort. Resolve each worker's exact available provider/model and thinking independently from the operator's role defaults, then general worker overrides, then matching workstream overrides. An omitted field inherits that role's resolved value, never another role's override. Resolve unspecified roles from observable configured defaults; keep the role map with the coordinator and send each leaf only its own resolved profile. Disclose a required control that cannot be verified. Native dispatch thinking uses the documented `model` suffix; do not send an ignored standalone `thinking` dispatch field. Accepted creation is not independent profile readback. Follow-ups, corrections and resumes preserve the established profile rather than reasserting or changing it.
+
+Review stays with the coordinator unless the operator explicitly requests an independent reviewer for this task. A general preference, tool availability or difficulty does not activate review. While disabled, do not resolve reviewer profiles or load its protocol. When requested, resolve that role separately and read [references/independent-reviewer-protocol.md](references/independent-reviewer-protocol.md).
+
+## Decompose and dispatch
+
+Use the installed native `worker` and, only when requested, `reviewer` roles; verify their actual capabilities rather than creating persistent agent definitions. Prefer one coherent worker. Launch with explicit `async: true` to receive a model-visible run ID and continue independent work. Reuse compatible workers across bounded assignments; use a separate reviewer only when requested. Prefer native completion notifications in the running coordinator; use an exact owned blocking wait only when needed to collect a dependency. This route needs no workflow/parallel framework or extra observer. Assign one writer for Git, formatters, generated files, builds, test databases, ports and other shared resources, including the coordinator's own work. Serialize contention; parallelism does not authorize worktrees.
+
+Every new leaf launch must explicitly pass `options: { context: "fresh" }`; do not rely on configured defaults or fork the parent transcript. Retained resumes continue their existing persisted contract instead of creating fresh context. Send only:
+
+- Objective, governing references, starting state and owned paths/interfaces.
+- Allowed edits, validation and external effects; explicit non-goals and no delegation.
+- Exact resolved profile, required permission profile, and actual context/inheritance choices.
+- Inputs, dependencies, success criteria and proportionate checks, including relevant failure/recovery paths.
+- Stop conditions and immediate-parent return: report blocked/partial/final in the normal result; do not park questions in `contact_supervisor`.
+- Return contract: outcome/status, exact changed/tested state, artifacts, checks/results, uncertainty and next action.
+
+Do not infer that fresh context inherits global/project instructions, skills, trust or extensions. Verify the installed controls and explicitly carry needed source references. Required permissions must survive the child route. Never strip the profile, broaden tools or use a different route to avoid denial. Keep workers and reviewers leaves with no nested delegation or sibling/main contact. Only this coordinator mediates their dependencies and handoffs.
+
+## Iterate, retain and verify
+
+Collect each asynchronous leaf's terminal native status/result before dispatching its dependent correction or review. Routine quiet work needs no progress report or observer. For ordinary steering corrections, include `steeringRecovery: false` in `options` so a missed acknowledgment cannot silently revive a replacement run. A returned native completion is a handoff, not proof that the leaf's reported objective succeeded. Workers may diagnose, repair, self-review and run focused tests within their contracts without an acknowledgment after each correction. The coordinator handles routine integration, build failures and reviewer corrections inside the feature boundary, escalating only an irreducible decision, exhausted authority/recovery or threatened shared state.
+
+Resolve each exact run ID from model-visible asynchronous launch text or the resume receipt's `Revived run:` text. Status and lifecycle controls require the exact admitted-worker receipt for this session; untargeted/fleet status, child selectors, aliases and prefixes require manual approval. Native session-scoped `children.list` is available for metadata, but its workflow-only inventory is not exhaustive and does not supply receipt authority for controls. Never read hidden tool metadata/private session files or guess the latest run; an absent or ambiguous ID blocks continuation. Foreground launches are unsupported for this retained loop because their IDs are not model-visible. Reuse a compatible idle leaf only after exact status/eligibility inspection. Direct retained `resume` always returns an asynchronous receipt; it does not await completion. Keep the persisted model/effort/tool contract rather than rereading a changed agent definition as authority to mutate it. Record the latest returned run ID and lineage in the existing task record/native receipt; direct resume does not automatically add that ID to a mission. A native steering-recovery replacement is not automatically receipt-qualified; do not assume its new ID permits unattended control or waiting.
+
+Use native completion notifications while the coordinator is running, then inspect the exact native status/result before dependent work. When blocking collection is needed, use `bg_wait({ id: latestRunId, timeoutMs: waitTimeoutMs })` and inspect the same exact result. Require verified native tool provenance, the required permission profile and ownership of the target descendant. Pass the exact ID and a timeout within the admitted native limits; explicit `nonBlocking: false` and `all: false` are equivalent to omission. No prefixes, foreign targets, all-work waits, nonblocking waits/subscriptions, polling or raw workflows. If a necessary wait is unavailable, stop that dependent work; timeout, attention or user input is not terminal success. Native session leases may reject duplicate revival: preserve ownership and inspect the existing run rather than force-unlocking or spawning a replacement. No crash-safe exactly-once or post-restart auto-wake is promised; lost continuity must be classified before any replacement writer starts.
+
+Send a complete reset for a new assignment: prior disposition, allowed carry-over, invalid scope/authority/claims and the new contract. Same-assignment corrections send only decision-bearing deltas. Do not recycle for compaction, ordinary correction, elapsed time or assignment count; explain an actual identity/profile/authority incompatibility or lost continuity.
+
+Treat reports and reviewer verdicts as evidence. Inspect the integrated diff and decision-bearing artifacts; reuse applicable worker checks and run only missing, stale, contradicted or integration-critical verification. Preserve failed evidence and halt dependents when its assumptions fail. A passed check never expands authority, and an already-authorized next action needs no invented approval gate.
+
+## Return at the owning boundary
+
+Leaves return blocked, partial or final outcomes normally to the immediate coordinator, without supervisor questions or cross-task delivery. They cannot approve their own denied outside-scope operations; return the exact blocked action instead of retrying through another tool. Routine progress and recoverable friction stay local. The ordinary coordinator reports decisions and final outcomes through its existing conversation/workflow. Child `contact_supervisor` is not a cross-session return route to another ordinary main conversation. Do not relay unrelated parent routes to leaves or add an observer.
+
+Classify every launched lane complete, blocked, partial or failed. Return the integrated outcome, exact tested state, decisive evidence, material caveats, unresolved decisions and next action. The running coordinator receives its direct worker completion notifications and collects exact native status/results, using an owned blocking wait when needed. Recovery is not a restart notification guarantee: recover native status/session state after interruption and distinguish accepted, queued and consumed messages from model compliance. Do not claim completion while a required lane, review or delivery remains unresolved.

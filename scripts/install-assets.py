@@ -16,11 +16,13 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 from agent_catalog import (
     ADAPTER_POSIX_SCRIPT_ROLE,
     ADAPTER_WINDOWS_SCRIPT_ROLE,
     NOTIFIER_SUFFIXES,
+    PLATFORMS,
     Asset,
     CatalogError,
     DesiredFile,
@@ -1000,12 +1002,12 @@ def plan_install(
         validate_home_target(home, target)
         destination = home / target
         record = state["files"].get(target)
+        if destination.is_symlink():
+            conflicts.append(f"{target}: symlink destination is unmanaged; preserved")
+            continue
         if not destination.exists():
             actions.append(FileAction("create", target, item))
             next_state["files"][target] = state_record(item)
-            continue
-        if destination.is_symlink():
-            conflicts.append(f"{target}: symlink destination is unmanaged; preserved")
             continue
         current = file_signature(destination) if destination.is_file() else None
         desired_signature = file_signature(item.source)
@@ -1145,14 +1147,39 @@ def plan_uninstall(
     return actions, adapter_actions, next_state, conflicts
 
 
+def resolve_pi_home(value: str) -> Path:
+    """Resolve supported native Pi agent-home spellings without following symlinks."""
+    if value == "~":
+        value = str(Path.home())
+    elif value.startswith("~/"):
+        value = str(Path.home()) + value[1:]
+    elif value.startswith("file://"):
+        if re.search(r"[\x00-\x20]$", value):
+            raise ValueError("file URI trailing whitespace/control characters must be percent-encoded")
+        parsed = urlsplit(value)
+        if parsed.netloc.lower() not in {"", "localhost"} or "\\" in value or re.search(r"%(?![0-9a-fA-F]{2})|%2f", parsed.path, re.IGNORECASE):
+            raise ValueError("unsupported Pi home file URI; use a local absolute path")
+        value = unquote(parsed.path or "/", errors="strict")
+    if "\0" in value:
+        raise ValueError("Pi home cannot contain null bytes")
+    return Path(os.path.abspath(value))
+
+
 def run(args: argparse.Namespace) -> int:
     repo = Path(__file__).resolve().parents[1]
-    home_vars = {"agents": "AGENTS_HOME", "codex": "CODEX_HOME", "claude": "CLAUDE_HOME", "devin": "DEVIN_HOME"}
+    home_vars = {"agents": "AGENTS_HOME", "codex": "CODEX_HOME", "claude": "CLAUDE_HOME", "devin": "DEVIN_HOME", "pi": "PI_CODING_AGENT_DIR"}
     if args.platform == "devin":
         default_home = Path(os.environ.get("APPDATA", Path.home() / "AppData/Roaming")) / "devin" if os.name == "nt" else Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "devin"
+    elif args.platform == "pi":
+        default_home = Path.home() / ".pi" / "agent"
     else:
         default_home = Path.home() / f".{args.platform}"
-    home = Path(os.environ.get(home_vars[args.platform], str(default_home))).expanduser().absolute()
+    try:
+        selected_home = os.environ.get(home_vars[args.platform], str(default_home))
+        home = resolve_pi_home(selected_home or str(default_home)) if args.platform == "pi" else Path(selected_home).expanduser().absolute()
+    except ValueError as exc:
+        print(f"FAIL  {exc}", file=os.sys.stderr)
+        return 1
     errors, warnings = validate_catalog(repo)
     if errors:
         for error in errors:
@@ -1238,7 +1265,7 @@ def run(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("platform", choices=("agents", "codex", "claude", "devin"))
+    parser.add_argument("platform", choices=PLATFORMS)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--diff", dest="show_diff", action="store_true")
     parser.add_argument("--update", action="store_true", help="reconcile current catalog sources (same as install)")
