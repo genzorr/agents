@@ -285,13 +285,15 @@
     {
       "id": "orchestrate-workers",
       "kind": "skill",
-      "platforms": ["codex"],
+      "platforms": ["codex", "pi"],
       "owner": "agents",
       "source": {
-        "codex": "codex/skills/orchestrate-workers"
+        "codex": "codex/skills/orchestrate-workers",
+        "pi": "pi/skills/orchestrate-workers"
       },
       "install_target": {
-        "codex": "skills/orchestrate-workers"
+        "codex": "skills/orchestrate-workers",
+        "pi": "skills/orchestrate-workers"
       },
       "tags": ["role:helper", "domain:orchestration"]
     },

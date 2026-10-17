@@ -11,7 +11,8 @@ const root = process.env.PI_SDK_ROOT || join(homedir(), '.local/lib/node_modules
 const { loadSkills, formatSkillsForPrompt } = await import(pathToFileURL(join(root, 'dist/core/skills.js')));
 const { loadProjectContextFiles } = await import(pathToFileURL(join(root, 'dist/core/resource-loader.js')));
 const sharedIds = ['design-experiment', 'docker-optimize', 'logging-optimize', 'piecemeal-growth', 'review-experiment', 'skill-lifecycle'];
-const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'review-change', 'surface-unknowns', 'text-prune'];
+const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'orchestrate-workers', 'review-change', 'surface-unknowns', 'text-prune'];
+const explicitOnly = ['orchestrate-workers', 'surface-unknowns'];
 
 async function materialize(t) {
   const scratch = await mkdtemp(join(tmpdir(), 'pi-assets-native-'));
@@ -49,10 +50,10 @@ test('all admitted catalog skills parse natively with one complete implementatio
   for (const skill of skills) {
     const home = sharedIds.includes(skill.name) ? fixture.sharedDir : fixture.agentDir;
     assert.equal(skill.filePath, join(home, 'skills', skill.name, 'SKILL.md'));
-    assert.equal(skill.disableModelInvocation, skill.name === 'surface-unknowns');
+    assert.equal(skill.disableModelInvocation, explicitOnly.includes(skill.name));
   }
   const prompt = formatSkillsForPrompt(skills);
-  for (const skill of skills) assert.equal(prompt.includes(`<name>${skill.name}</name>`), skill.name !== 'surface-unknowns');
+  for (const skill of skills) assert.equal(prompt.includes(`<name>${skill.name}</name>`), !explicitOnly.includes(skill.name));
   assert.match(skills.find(s => s.name === 'text-prune').description, /Use when text pruning is the requested task;.*not.*skill lifecycle.*installed-asset pruning/);
   // Native metadata visibility does not relax piecemeal-growth's user-only trigger.
   assert.match(skills.find(s => s.name === 'piecemeal-growth').description, /only when the user names this skill or explicitly requests/);
@@ -125,11 +126,15 @@ test('native default discovery, project trust and explicit text-prune command ex
   }));
   const body = (await readFile(join(repo, 'shared/skills/text-prune/SKILL.md'), 'utf8')).replace(/^---\n[\s\S]*?\n---\n/, '').trim();
   assert.equal(result.textPruneExpansion, `<skill name="text-prune" location="${join(fixture.agentDir, 'skills/text-prune/SKILL.md')}">\nReferences are relative to ${join(fixture.agentDir, 'skills/text-prune')}.\n\n${body}\n</skill>\n\nTighten the supplied synthetic paragraph.`);
+  for (const name of ['orchestrate-workers']) {
+    const body = (await readFile(join(repo, 'pi/skills', name, 'SKILL.md'), 'utf8')).replace(/^---\n[\s\S]*?\n---\n/, '').trim();
+    assert.equal(result.orchestrationExpansions[name], `<skill name="${name}" location="${join(fixture.agentDir, 'skills', name, 'SKILL.md')}">\nReferences are relative to ${join(fixture.agentDir, 'skills', name)}.\n\n${body}\n</skill>\n\nInspect the supplied synthetic contract only.`);
+  }
   assert.deepEqual(result.untrusted.names, [...sharedIds, ...piIds].sort());
   assert.deepEqual(result.trusted.names, [...sharedIds, ...piIds, 'synthetic-pi-project', 'synthetic-agents-project'].sort());
   for (const state of [result.untrusted, result.trusted]) {
     assert.deepEqual(state.diagnostics, []);
-    assert.deepEqual(state.explicitOnly, ['surface-unknowns']);
+    assert.deepEqual(state.explicitOnly, explicitOnly);
     assert.equal(state.prompt.includes('<name>surface-unknowns</name>'), false);
     assert.equal(state.globalContext, true);
     assert.equal(state.projectContext, true);

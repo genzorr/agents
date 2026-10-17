@@ -424,11 +424,11 @@ class PiAssetsTest(unittest.TestCase):
             engine = module.ENGINE
             desired_files = engine.desired_files
             def previous_selection(*args):
-                return {target: item for target, item in desired_files(*args).items() if item.asset.id != "text-prune"}
+                return {target: item for target, item in desired_files(*args).items() if item.asset.id not in {"orchestrate-workers"}}
             with patch.object(engine, "desired_files", side_effect=previous_selection), patch.dict(os.environ, self.env), patch.object(sys, "argv", ["install-assets.py", "pi"]), contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(engine.main(), 0)
         previous = inventory(self.home)
-        self.assertFalse((self.home / "skills/text-prune").exists())
+        self.assertFalse((self.home / "skills/orchestrate-workers").exists())
         self.install("--update", real=True)
         updated = inventory(self.home)
         for target, value in previous.items():
@@ -437,7 +437,7 @@ class PiAssetsTest(unittest.TestCase):
         assets = load_catalog(ROOT)
         pi_ids = {a.id for a in assets if a.kind == "skill" and "pi" in a.platforms}
         shared_ids = {a.id for a in assets if a.kind == "skill" and "agents" in a.platforms}
-        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune"})
+        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune", "orchestrate-workers"})
         self.assertFalse(pi_ids & shared_ids)
         self.assertEqual({p.parent.name for p in (self.home / "skills").glob("*/SKILL.md")}, pi_ids)
         self.assertEqual((self.home / "skills/distill-source/SKILL.md").read_bytes(), (ROOT / "codex/skills/distill-source/SKILL.md").read_bytes())

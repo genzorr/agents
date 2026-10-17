@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -9,6 +9,7 @@ import { ChildInheritance, loadRequiredChildApi } from "../../pi/permissions/chi
 const sdk = process.env.PI_SDK_ROOT ?? path.join(os.homedir(), ".local/lib/node_modules/@earendil-works/pi-coding-agent");
 const plugin = process.env.PI_SUBAGENTS_ROOT ?? path.join(os.homedir(), ".pi/agent/npm/node_modules/pi-subagents");
 const available = existsSync(path.join(plugin, "src/shared/required-child-extensions.js")) && existsSync(path.join(sdk, "dist/index.js"));
+const unattendedAvailable = available && JSON.parse(readFileSync(path.join(plugin, "package.json"), "utf8")).version === "0.79.0";
 
 function fixture() {
   const root = mkdtempSync(path.join(os.tmpdir(), "pi-child-inheritance-"));
@@ -23,7 +24,9 @@ function fixture() {
 
 async function sourceExports(f, relative, names, packageRoot = plugin) {
   const probe = path.join(f.root, "source-probe.ts");
-  writeFileSync(probe, `import { ${names.join(", ")} } from ${JSON.stringify(path.join(packageRoot, relative))};
+  const sources = Array.isArray(relative) ? relative : [{ relative, names }];
+  names = sources.flatMap((source) => source.names);
+  writeFileSync(probe, `${sources.map((source) => `import { ${source.names.join(", ")} } from ${JSON.stringify(path.join(packageRoot, source.relative))};`).join("\n")}
 export default (pi) => pi.registerCommand("source-probe", {description:"Synthetic source probe",handler:(_,ctx)=>ctx.capture({${names.map((name) => name.split(" as ").at(-1)).join(", ")}})});`);
   const { loadExtensions } = await import(pathToFileURL(path.join(sdk, "dist/core/extensions/loader.js")));
   const loaded = await loadExtensions([probe], f.root);
@@ -104,6 +107,7 @@ test("required child API resolves from Pi npm layout without npm/package.json; r
   const inheritance = new ChildInheritance(f.agent, f.entry);
   await inheritance.start("synthetic-first");
   assert.equal(inheritance.active("synthetic-first"), true);
+  if (!unattendedAvailable) assert.equal(inheritance.allowsNativeTool("synthetic-first", { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } }, { agent: "worker", task: "Synthetic task", context: "fresh" }), false);
   assert.equal(inheritance.active("other-session"), false);
   assert.equal(api.resolveRequiredChildExtensions("synthetic-first")[0].path, f.entry);
   await inheritance.start("synthetic-second");
@@ -128,6 +132,82 @@ test("missing required-child API leaves inheritance unavailable", async () => {
     assert.match(inheritance.problem, /Cannot find module/);
   } finally { rmSync(scratch, { recursive: true, force: true }); }
 });
+
+test("unattended native controls require qualified provenance, a current registration and restricted inputs", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  const native = { name: "subagent", sourceInfo: { source: "inline", path: "<inline:pi-subagents:fanout-child>" } };
+  const launch = { agent: "worker", task: "Synthetic task", async: false, model: "openai/gpt-5:high", cwd: f.root, options: { context: "fresh", timeoutMs: 5_000, toolBudget: { hard: 20 } } };
+  assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, launch), false);
+  await inheritance.start("synthetic-policy");
+  try {
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, launch), true);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } }, launch), true);
+    for (const action of ["status", "steer", "interrupt", "resume", "stop"]) {
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action, id: "synthetic-run", message: "Synthetic correction" }), true);
+    }
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "children.list" }), true);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "status" }), true);
+    const wait = { name: "bg_wait", sourceInfo: { source: "inline", path: "<inline:pi-subagents:prompt-runtime>" } };
+    const receipt = { type: "message", message: { role: "toolResult", toolName: "subagent", toolCallId: "synthetic-resume", isError: false, details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "synthetic-policy" } } } };
+    const branch = [receipt];
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", wait, { id: "owned-run", timeoutMs: 1_000 }, branch), true);
+    for (const [input, entries] of [[{ id: "owned-run" }, []], [{ id: "foreign-run" }, branch], [{ id: "owned-run", nonBlocking: true }, branch], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run" } } }]], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, isError: true } }]], [{ id: "owned-run" }, [{ ...receipt, message: { ...receipt.message, details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "foreign-owner" } } } }]]]) {
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", wait, input, entries), false);
+    }
+    assert.equal(inheritance.allowsNativeTool("different-session", wait, { id: "owned-run" }, branch), false);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", { ...wait, sourceInfo: { path: f.entry } }, { id: "owned-run" }, branch), false);
+    assert.equal(inheritance.allowsNativeTool("different-session", native, launch), false);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", { name: "subagent", sourceInfo: { path: f.entry } }, launch), false);
+    assert.equal(inheritance.allowsNativeTool("synthetic-policy", { name: "contact_supervisor", sourceInfo: { path: path.join(plugin, "index.js") } }, {}), false);
+    const { topLevelSupervisorTool } = await sourceExports(f, "src/intercom/native-supervisor-channel.js", ["topLevelSupervisorTool"]);
+    const topLevelContact = await topLevelSupervisorTool().execute("synthetic-top-level", { reason: "progress_update", message: "Must not send" });
+    assert.equal(topLevelContact.isError, true);
+    assert.match(topLevelContact.content[0].text, /no supervisor/);
+    for (const input of [{ workflow: true }, { workflow: "./workflow.js" }, { agent: "worker", context: "fresh", worktree: true }, { agent: "worker", context: "fresh", options: { acceptance: { level: "verified", verify: [{ command: "exit 99" }] } } }, { action: "resume", id: "synthetic-run", options: { model: "override" } }]) {
+      assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input), false);
+    }
+  } finally { inheritance.dispose(); }
+  assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, launch), false);
+}));
+
+test("new unattended launches require explicit fresh context despite native configured fork preference", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const { resolveSubagentLaunchContext, canPreferFork, loadConfig, getConfigPath, flattenSubagentToolOptions } = await sourceExports(f, [
+    { relative: "src/shared/fork-context.js", names: ["resolveSubagentLaunchContext", "canPreferFork"] },
+    { relative: "src/extension/config.js", names: ["loadConfig", "getConfigPath"] },
+    { relative: "src/extension/subagent-options.js", names: ["flattenSubagentToolOptions"] },
+  ]);
+  mkdirSync(path.dirname(getConfigPath()), { recursive: true });
+  writeFileSync(getConfigPath(), JSON.stringify({ defaultSubagentContext: "fork" }));
+  const { SessionManager } = await import(pathToFileURL(path.join(sdk, "dist/index.js")));
+  const manager = SessionManager.create(f.root, path.join(f.root, "sessions"));
+  manager.appendMessage({ role: "user", content: "Synthetic parent context that must not be forked implicitly", timestamp: Date.now() });
+  assert.equal(canPreferFork(manager), true);
+  const preference = { defaultSubagentContext: loadConfig().defaultSubagentContext, agentDefaultContext: "fresh", canUseImplicitFork: canPreferFork(manager) };
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  const native = { name: "subagent", sourceInfo: { source: "inline", path: "<inline:pi-subagents:fanout-child>" } };
+  await inheritance.start(manager.getSessionId());
+  try {
+    for (const [contextInput, resolved, admitted] of [
+      [{}, "fork", false],
+      [{ context: "fresh" }, "fresh", true],
+      [{ options: { context: "fresh" } }, "fresh", true],
+      [{ context: "fresh", options: { context: "fresh" } }, "fresh", true],
+      [{ context: "fork" }, "fork", false],
+      [{ options: { context: "fork" } }, "fork", false],
+    ]) {
+      const input = { agent: "worker", task: "Synthetic task", ...contextInput };
+      const flattened = flattenSubagentToolOptions(input);
+      assert.equal(resolveSubagentLaunchContext({ ...preference, explicitContext: flattened.context }), resolved);
+      assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, input), admitted);
+    }
+    for (const contextInput of [{ context: "fresh", options: { context: "fork" } }, { context: "fork", options: { context: "fresh" } }]) {
+      const input = { agent: "worker", task: "Synthetic task", ...contextInput };
+      assert.throws(() => flattenSubagentToolOptions(input), /different values/);
+      assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, input), false);
+    }
+    assert.equal(inheritance.allowsNativeTool(manager.getSessionId(), native, { action: "resume", id: "retained-worker" }), true);
+  } finally { inheritance.dispose(); }
+}));
 
 for (const version of ["0.77.0", "0.79.1", "0.80.0", "0.79.0-rc.1"]) test(`unqualified pi-subagents ${version} leaves delegation inheritance unavailable`, async () => {
   const root = mkdtempSync(path.join(os.tmpdir(), "pi-child-api-version-"));
@@ -224,6 +304,267 @@ test("the released native child session factory binds required permissions and r
     inheritance.dispose();
     if (offline === undefined) delete process.env.PI_OFFLINE;
     else process.env.PI_OFFLINE = offline;
+  }
+}));
+
+test("required agentic-local permits native child delegation and bound parent contact while preserving manual boundaries", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const names = ["HOME", "TMPDIR", "PI_OFFLINE", "npm_config_cache"];
+  const previous = new Map(names.map((name) => [name, process.env[name]]));
+  process.env.HOME = f.root;
+  process.env.TMPDIR = path.join(f.root, "tmp");
+  process.env.PI_OFFLINE = "1";
+  process.env.npm_config_cache = path.join(f.root, "npm-cache");
+  mkdirSync(process.env.TMPDIR);
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  let factory;
+  let resetFactory;
+  let supervisorDir;
+  try {
+    const parentId = `synthetic-headless-${path.basename(f.root)}`;
+    const runId = `${parentId}-run`;
+    await inheritance.start(parentId);
+    assert.equal(inheritance.active(parentId), true);
+    const api = await import(pathToFileURL(path.join(plugin, "src/shared/required-child-extensions.js")));
+    const { buildInProcessChildLaunch, createDefaultChildSessionFactory, setChildSessionFactory, createNativeSupervisorChannel, createChildSafeState } = await sourceExports(f, [
+      { relative: "src/runs/shared/child-launch.js", names: ["buildInProcessChildLaunch"] },
+      { relative: "src/runs/shared/child-session.js", names: ["createDefaultChildSessionFactory", "setChildSessionFactory"] },
+      { relative: "src/intercom/native-supervisor-channel.js", names: ["createNativeSupervisorChannel"] },
+      { relative: "src/extension/fanout-child.js", names: ["createChildSafeState"] },
+    ]);
+    const pi = await import(pathToFileURL(path.join(sdk, "dist/index.js")));
+    const { AuthStorage } = await import(pathToFileURL(path.join(sdk, "dist/core/auth-storage.js")));
+    const modelRuntime = await pi.ModelRuntime.create({ credentials: AuthStorage.inMemory(), modelsPath: null, refreshOnCreate: false, allowModelNetwork: false });
+    let providerCalls = 0;
+    for (const method of ["getAuth", "checkAuth", "stream", "streamSimple", "complete", "completeSimple", "getAvailable", "login", "logout", "refresh"]) {
+      modelRuntime[method] = () => { providerCalls++; throw new Error(`Forbidden provider/auth operation: ${method}`); };
+    }
+    const model = modelRuntime.getModel("openai", "gpt-5");
+    assert.ok(model);
+    const allowed = path.join(f.root, "allowed");
+    mkdirSync(allowed);
+    writeFileSync(path.join(f.installed, "profile.json"), JSON.stringify({ name: "agentic-local", writeRoots: [allowed] }));
+    mkdirSync(path.join(f.agent, "agents"));
+    writeFileSync(path.join(f.agent, "agents/synthetic-leaf.md"), "---\nname: synthetic-leaf\ndescription: Synthetic native leaf.\ntools: read,write,edit,bash\nextensions: []\n---\nDo no work.\n");
+    let session;
+    factory = createDefaultChildSessionFactory({ loadPiCodingAgent: async () => ({ ...pi, ModelRuntime: { create: async () => modelRuntime }, createAgentSession: async (options) => {
+      const created = await pi.createAgentSession({ ...options, modelRuntime, model });
+      session = created.session;
+      return created;
+    } }) });
+    const launch = buildInProcessChildLaunch({ host: "parent", runId, orchestratorIntercomTarget: "synthetic-owner", cwd: f.root, parentSessionId: parentId, childAgentName: "synthetic-owner", childIndex: 0, extensions: [], tools: ["read", "write", "edit", "bash", "bash_unrestricted", "subagent", "contact_supervisor"], inheritProjectContext: false, inheritGlobalContext: false, inheritSkills: false });
+    supervisorDir = launch.session.runtime.supervisorChannelDir;
+    const child = await factory.create(launch.session);
+    try {
+      assert.equal(session.extensionRunner.hasUI(), false);
+      assert.equal(api.resolveRequiredChildExtensions(child.sessionId)[0].path, f.entry);
+      assert.equal(typeof session.agent.beforeToolCall, "function");
+      const ownerSession = session;
+      const call = (name, args) => ownerSession.agent.beforeToolCall({ toolCall: { type: "toolCall", id: `synthetic-${name}`, name, arguments: args }, args });
+      for (const [name, args, source] of [["subagent", { agent: "synthetic-leaf", task: "Synthetic task", async: false, options: { context: "fresh", timeoutMs: 5_000 } }, "<inline:pi-subagents:fanout-child>"], ["contact_supervisor", { reason: "progress_update", message: "Synthetic parent-channel message" }, "<inline:pi-subagents:prompt-runtime>"]]) {
+        const tool = session.agent.state.tools.find((item) => item.name === name);
+        assert.ok(tool, `${name} is registered and active`);
+        assert.equal(session.getAllTools().find((item) => item.name === name).sourceInfo.path, source);
+        assert.equal((await call(name, args))?.block, undefined);
+      }
+      resetFactory = () => setChildSessionFactory(undefined);
+      let descendants = 0;
+      setChildSessionFactory({ async create(input) {
+        const descendant = await factory.create(input);
+        descendants++;
+        assert.equal(api.resolveRequiredChildExtensions(descendant.sessionId)[0].path, f.entry);
+        assert.ok(session.getAllTools().find((tool) => tool.name === "write").sourceInfo.path.endsWith("permissions/index.ts"));
+        const write = session.agent.state.tools.find((tool) => tool.name === "write");
+        const target = path.join(allowed, "descendant-write");
+        await write.execute("synthetic-allowed", { path: target, content: "Synthetic descendant write" });
+        assert.equal(readFileSync(target, "utf8"), "Synthetic descendant write");
+        await assert.rejects(write.execute("synthetic-outside", { path: path.join(f.root, "descendant-outside"), content: "denied" }), /Outside-scope file write denied/);
+        // Replace only inference: discovery, native admission, child creation and permission startup are real.
+        const listeners = new Set();
+        const subscribe = descendant.subscribe.bind(descendant);
+        descendant.subscribe = (listener) => {
+          listeners.add(listener);
+          const unsubscribe = subscribe(listener);
+          return () => { listeners.delete(listener); unsubscribe(); };
+        };
+        descendant.prompt = async () => {
+          const message = { role: "assistant", content: [{ type: "text", text: "Synthetic leaf result" }], stopReason: "stop", api: model.api, provider: model.provider, model: model.id, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }, timestamp: Date.now() };
+          for (const listener of listeners) listener({ type: "message_end", message });
+        };
+        return descendant;
+      }, async dispose() {} });
+      const delegation = await ownerSession.agent.state.tools.find((tool) => tool.name === "subagent").execute("synthetic-delegation", { agent: "synthetic-leaf", task: "Synthetic task", async: false, options: { context: "fresh", timeoutMs: 5_000 } });
+      assert.equal(delegation.isError, undefined, JSON.stringify(delegation));
+      assert.ok(delegation.content.some((item) => item.text?.includes("Synthetic leaf result")));
+      assert.equal(descendants, 1);
+      const contact = await ownerSession.agent.state.tools.find((tool) => tool.name === "contact_supervisor").execute("synthetic-contact", { reason: "progress_update", message: "Synthetic parent-channel message" });
+      assert.equal(contact.details.delivered, true);
+      const request = JSON.parse(readFileSync(path.join(supervisorDir, "requests", readdirSync(path.join(supervisorDir, "requests"))[0]), "utf8"));
+      assert.equal(request.orchestratorSessionId, parentId);
+      assert.equal(request.runId, runId);
+      assert.equal(request.orchestratorTarget, "synthetic-owner");
+      assert.equal(request.message, "Synthetic parent-channel message");
+      await assert.rejects(ownerSession.agent.state.tools.find((tool) => tool.name === "contact_supervisor").execute("synthetic-unanswered", { reason: "need_decision", message: "Synthetic decision without a parent listener" }, AbortSignal.timeout(50)), /cancel/i);
+      assert.equal(readdirSync(path.join(supervisorDir, "requests")).length, 1);
+      const parentTools = new Map();
+      const parentApi = { events: pi.createEventBus(), getAllTools: () => [...parentTools.values()], registerTool: (tool) => parentTools.set(tool.name, tool), on: () => () => {}, sendMessage: () => true };
+      const parentState = createChildSafeState();
+      parentState.currentSessionId = parentId;
+      parentState.supervisorOwnerSessionId = parentId;
+      const parentChannel = createNativeSupervisorChannel(parentApi, parentState, { getChannelDirs: () => ({ dirs: [supervisorDir], retire() {} }) });
+      parentChannel.registerTools();
+      const foreignTools = new Map();
+      const foreignState = createChildSafeState();
+      foreignState.currentSessionId = `${parentId}-foreign`;
+      foreignState.supervisorOwnerSessionId = foreignState.currentSessionId;
+      const foreignChannel = createNativeSupervisorChannel({ ...parentApi, getAllTools: () => [...foreignTools.values()], registerTool: (tool) => foreignTools.set(tool.name, tool) }, foreignState, { getChannelDirs: () => ({ dirs: [supervisorDir], retire() {} }) });
+      foreignChannel.registerTools();
+      const decisionAbort = new AbortController();
+      const decision = ownerSession.agent.state.tools.find((tool) => tool.name === "contact_supervisor").execute("synthetic-decision", { reason: "need_decision", message: "Synthetic decision for the immediate parent" }, AbortSignal.any([decisionAbort.signal, AbortSignal.timeout(2_000)]));
+      decision.catch(() => {});
+      const previousUI = ownerSession.extensionRunner.getUIContext();
+      try {
+        const foreignPending = await foreignTools.get("subagent_supervisor").execute("synthetic-foreign", { action: "pending" });
+        assert.deepEqual(foreignPending.details.pending, []);
+        const parentTool = parentTools.get("subagent_supervisor");
+        const pending = await parentTool.execute("synthetic-pending", { action: "pending" });
+        assert.equal(pending.details.pending.length, 1);
+        const replyTo = pending.details.pending[0].id;
+        await assert.rejects(foreignTools.get("subagent_supervisor").execute("synthetic-foreign-reply", { action: "reply", replyTo, message: "Wrong parent" }), /No pending supervisor request/);
+        await assert.rejects(parentTool.execute("synthetic-unknown-reply", { action: "reply", replyTo: "unknown-request", message: "Unknown request" }), /No pending supervisor request/);
+        const reply = { action: "reply", replyTo, message: "Synthetic manually approved decision" };
+        assert.equal((await call("subagent_supervisor", reply)).block, true);
+        let confirmations = 0;
+        ownerSession.extensionRunner.setUIContext({ ...previousUI, confirm: async () => { confirmations++; return true; } });
+        assert.equal((await call("subagent_supervisor", reply))?.block, undefined);
+        assert.equal(confirmations, 1);
+        await parentTool.execute("synthetic-parent-reply", reply);
+        const settled = await decision;
+        assert.equal(settled.details.requestId, replyTo);
+        assert.match(settled.content[0].text, /Synthetic manually approved decision/);
+      } finally {
+        ownerSession.extensionRunner.setUIContext(previousUI);
+        decisionAbort.abort();
+        await decision.catch(() => {});
+        parentChannel.dispose();
+        foreignChannel.dispose();
+      }
+      for (const args of [{ action: "create", name: "unattended-config" }, { workflow: true }, { agent: "synthetic-leaf", context: "fresh", options: { gate: "touch /outside" } }, { agent: "synthetic-leaf", context: "fresh", output: "/outside" }, { agent: "synthetic-leaf", context: "fresh", options: { machine: "remote" } }, { action: "resume", id: "synthetic-run", model: "override" }]) {
+        assert.equal((await call("subagent", args)).block, true);
+      }
+      assert.equal((await call("foreign_mcp", {})).block, true);
+      for (const name of ["write", "bash_unrestricted"]) {
+        const args = name === "write" ? { path: path.join(f.root, "outside"), content: "denied" } : { command: "exit 99" };
+        await assert.rejects(ownerSession.agent.state.tools.find((tool) => tool.name === name).execute("synthetic-denied", args), /denied|approval unavailable/);
+      }
+      assert.equal(providerCalls, 0);
+    } finally { await child.dispose(); }
+  } finally {
+    resetFactory?.();
+    await factory?.dispose();
+    if (supervisorDir) rmSync(supervisorDir, { recursive: true, force: true });
+    inheritance.dispose();
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}));
+
+test("native retained resume receipts authorize only owned blocking waits and survive session reopening", { skip: !unattendedAvailable, timeout: 45_000 }, async () => isolated(async (f) => {
+  const names = ["HOME", "TMPDIR", "PI_OFFLINE", "npm_config_cache", "PI_SUBAGENT_CHILD", "PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT"];
+  const previous = new Map(names.map((name) => [name, process.env[name]]));
+  process.env.HOME = f.root;
+  process.env.TMPDIR = path.join(f.root, "tmp");
+  process.env.PI_OFFLINE = "1";
+  process.env.npm_config_cache = path.join(f.root, "npm-cache");
+  process.env.PI_SUBAGENTS_PI_CODING_AGENT_PACKAGE_ROOT = sdk;
+  delete process.env.PI_SUBAGENT_CHILD;
+  mkdirSync(process.env.TMPDIR);
+  let session;
+  try {
+    const nativePlugin = path.join(f.root, "pi-subagents");
+    cpSync(plugin, nativePlugin, { recursive: true, filter: (source) => path.basename(source) !== "node_modules" });
+    symlinkSync(existsSync(path.join(plugin, "node_modules")) ? path.join(plugin, "node_modules") : path.dirname(plugin), path.join(nativePlugin, "node_modules"));
+    rmSync(path.join(f.agent, "npm/node_modules/pi-subagents"));
+    symlinkSync(nativePlugin, path.join(f.agent, "npm/node_modules/pi-subagents"));
+    const provider = path.join(f.root, "synthetic-provider.ts");
+    const faux = path.join(sdk, "node_modules/@earendil-works/pi-ai/dist/providers/faux.js");
+    writeFileSync(provider, `import { fauxProvider, fauxAssistantMessage } from ${JSON.stringify(faux)};
+export default pi => { const f = fauxProvider({provider:"local-qualification",api:"local-qualification-api",models:[{id:"leaf"}],tokensPerSecond:100000}); f.setResponses(Array.from({length:20},()=>fauxAssistantMessage("Synthetic native leaf result"))); pi.registerProvider(f.provider); };`);
+    mkdirSync(path.join(f.agent, "agents"));
+    writeFileSync(path.join(f.agent, "agents/synthetic-leaf.md"), `---\nname: synthetic-leaf\ndescription: Synthetic local provider leaf\nmodel: local-qualification/leaf\ntools: read,write\nextensions: ${provider}\ninheritProjectContext: false\ninheritGlobalContext: false\ninheritSkills: false\n---\nReturn the synthetic result.\n`);
+    const settings = { extensions: [f.installed, path.join(nativePlugin, "index.js"), provider], cacheWarming: "off", subagents: { disableBuiltins: true, defaultModel: "local-qualification/leaf" } };
+    writeFileSync(path.join(f.agent, "settings.json"), JSON.stringify(settings));
+    const pi = await import(pathToFileURL(path.join(sdk, "dist/index.js")));
+    const { AuthStorage } = await import(pathToFileURL(path.join(sdk, "dist/core/auth-storage.js")));
+    const modelRuntime = await pi.ModelRuntime.create({ credentials: AuthStorage.inMemory(), modelsPath: null, refreshOnCreate: false, allowModelNetwork: false });
+    const manager = pi.SessionManager.create(f.root, path.join(f.root, "sessions"));
+    manager.appendMessage({ role: "user", content: "Synthetic local native pipeline", timestamp: Date.now() });
+    async function open(sessionManager) {
+      const settingsManager = pi.SettingsManager.inMemory(settings);
+      const loader = new pi.DefaultResourceLoader({ cwd: f.root, agentDir: f.agent, settingsManager, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true });
+      await loader.reload();
+      assert.deepEqual(loader.getExtensions().errors, []);
+      const created = await pi.createAgentSession({ cwd: f.root, agentDir: f.agent, settingsManager, resourceLoader: loader, sessionManager, modelRuntime, model: modelRuntime.getModel("openai", "gpt-5") });
+      await created.session.bindExtensions({ mode: "print" });
+      await created.session.setModel(modelRuntime.getModel("local-qualification", "leaf"));
+      created.session.setActiveToolsByName([...created.session.getActiveToolNames(), "subagent", "bg_wait"]);
+      return created.session;
+    }
+    session = await open(manager);
+    let serial = 0;
+    async function invoke(name, args) {
+      const id = `synthetic-call-${++serial}`;
+      const call = { type: "toolCall", id, name, arguments: args };
+      session.sessionManager.appendMessage({ role: "assistant", content: [call], timestamp: Date.now() });
+      const admission = await session.agent.beforeToolCall({ toolCall: call, args });
+      assert.equal(admission?.block, undefined, JSON.stringify(admission));
+      const result = await session.agent.state.tools.find((tool) => tool.name === name).execute(id, args);
+      const finalized = await session.agent.afterToolCall({ toolCall: call, args, result, isError: result.isError === true });
+      const consumed = { ...result, ...finalized };
+      session.sessionManager.appendMessage({ role: "toolResult", toolCallId: id, toolName: name, content: consumed.content, details: consumed.details, isError: consumed.isError === true, timestamp: Date.now() });
+      return consumed;
+    }
+    const initial = await invoke("subagent", { agent: "synthetic-leaf", task: "Initial local synthetic leaf", async: true, options: { context: "fresh", timeoutMs: 10_000 } });
+    const retainedId = initial.content.map((item) => item.text ?? "").join("\n").match(/Async:.*\[([^\]]+)\]/)?.[1];
+    assert.ok(retainedId, JSON.stringify(initial.details));
+    assert.equal(initial.details["agentic-local"].ownerSessionId, manager.getSessionId());
+    await invoke("bg_wait", { id: retainedId, timeoutMs: 15_000 });
+    const resumed = await invoke("subagent", { action: "resume", id: retainedId, message: "Continue the synthetic leaf" });
+    const asyncId = resumed.content.map((item) => item.text ?? "").join("\n").match(/Revived run: ([^\s]+)/)?.[1];
+    assert.ok(asyncId, JSON.stringify(resumed.details));
+    assert.equal(resumed.details["agentic-local"].ownerSessionId, manager.getSessionId());
+    const refused = async (args) => {
+      const result = await session.agent.beforeToolCall({ toolCall: { type: "toolCall", id: "synthetic-wait-refusal", name: "bg_wait", arguments: args }, args });
+      assert.equal(result.block, true);
+    };
+    for (const args of [{ id: "unknown-run" }, { id: asyncId.slice(0, 8) }, { id: asyncId, nonBlocking: true }, { all: true }, { id: asyncId, observer: true }]) await refused(args);
+    const waited = await invoke("bg_wait", { id: asyncId, timeoutMs: 15_000 });
+    assert.ok(waited.details.completions?.some((completion) => completion.id === asyncId || completion.runId === asyncId), JSON.stringify(waited));
+    const status = await invoke("subagent", { action: "status", id: asyncId });
+    assert.ok(status.content.some((item) => /complete|Synthetic native leaf result/i.test(item.text ?? "")), JSON.stringify(status));
+    const file = manager.getSessionFile();
+    const ownerId = manager.getSessionId();
+    await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+    session.dispose();
+    session = await open(pi.SessionManager.open(file));
+    assert.equal(session.sessionManager.getSessionId(), ownerId);
+    const terminalAdmission = await session.agent.beforeToolCall({ toolCall: { type: "toolCall", id: "synthetic-reopened-wait", name: "bg_wait", arguments: { id: asyncId } }, args: { id: asyncId } });
+    assert.equal(terminalAdmission?.block, undefined);
+    const terminal = await invoke("bg_wait", { id: asyncId, timeoutMs: 1_000 });
+    assert.ok(terminal.content.some((item) => /terminal|complete/i.test(item.text ?? "")));
+    await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+    session.dispose();
+    const fork = pi.SessionManager.forkFrom(file, f.root, path.join(f.root, "fork-sessions"));
+    session = await open(fork);
+    assert.notEqual(session.sessionManager.getSessionId(), ownerId);
+    await refused({ id: asyncId });
+  } finally {
+    if (session) { await session.extensionRunner.emit({ type: "session_shutdown", reason: "quit" }); session.dispose(); }
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
   }
 }));
 

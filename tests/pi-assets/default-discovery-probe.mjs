@@ -36,7 +36,12 @@ try {
   // Public queue expansion does not start a turn or request provider credentials.
   await session.steer('/skill:text-prune Tighten the supplied synthetic paragraph.');
   const [textPruneExpansion] = session.getSteeringMessages();
-  console.log(JSON.stringify({ untrusted, trusted, textPruneExpansion }));
+  const orchestrationExpansions = {};
+  for (const name of ['orchestrate-workers']) {
+    await session.steer(`/skill:${name} Inspect the supplied synthetic contract only.`);
+    orchestrationExpansions[name] = session.getSteeringMessages().at(-1);
+  }
+  console.log(JSON.stringify({ untrusted, trusted, textPruneExpansion, orchestrationExpansions }));
 } finally {
   session.dispose();
 }
