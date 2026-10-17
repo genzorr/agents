@@ -202,6 +202,58 @@ test("native read-only subagent discovery needs no approval and cannot authorize
   } finally { inheritance.dispose(); }
 }));
 
+test("native mission bookkeeping runs without approval while execution and goal controls stay manual", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  const native = { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } };
+  const missionId = "synthetic-mission";
+  const queries = [
+    { action: "mission.create", options: { mission: { title: "Synthetic mission" } } },
+    { action: "mission.list", options: { missionScope: "project" } },
+    { action: "mission.list", options: { missionScope: "global" } },
+    { action: "mission.show", options: { missionId } },
+    { action: "mission.update", options: { missionId, missionUpdate: { summary: "Synthetic progress", artifacts: [{ kind: "note", path: "notes.md" }], status: "completed" } } },
+    { action: "mission.resolve-decision", options: { missionId, id: "decision", summary: "Synthetic resolution" } },
+    { action: "mission.attach-run", options: { missionId, id: "synthetic-run", runMode: "single" } },
+    { action: "mission.close", options: { missionId, missionStatus: "completed", summary: "Synthetic completion" } },
+  ];
+  assert.equal(inheritance.allowsNativeTool("mission-session", native, queries.at(-1)), false);
+  await inheritance.start("mission-session");
+  try {
+    for (const input of queries) {
+      assert.equal(inheritance.allowsNativeTool("mission-session", native, input), true, JSON.stringify(input));
+      assert.equal(inheritance.allowsNativeTool("mission-session", native, { action: input.action, ...input.options }), true);
+      assert.equal(inheritance.allowsNativeTool("other-session", native, input), false);
+      assert.equal(inheritance.allowsNativeTool("mission-session", { ...native, sourceInfo: { path: f.entry } }, input), false);
+      for (const extra of [{ workflow: "./run.js" }, { cwd: "/outside" }, { options: { ...input.options, command: "touch /outside" } }, { options: { ...input.options, machine: "remote" } }]) {
+        assert.equal(inheritance.allowsNativeTool("mission-session", native, { ...input, ...extra }), false);
+      }
+    }
+    for (const input of [
+      { action: "mission.close", options: { missionId, missionStatus: "active" } },
+      { action: "mission.list", options: { missionScope: "invalid" } },
+      { action: "mission.create", options: { mission: { title: "Goal", goal: true, budget: { tokens: 100 } } } },
+      { action: "mission.update", options: { missionId, missionUpdate: { goal: true, budget: { tokens: 100 } } } },
+      { action: "mission.update", options: { missionId, missionUpdate: { status: "active" } } },
+      { action: "schedule.run", options: { id: "schedule" } },
+    ]) assert.equal(inheritance.allowsNativeTool("mission-session", native, input), false, JSON.stringify(input));
+
+    const { handleMissionAction } = await sourceExports(f, "src/missions/actions.js", ["handleMissionAction"]);
+    const { flattenSubagentToolOptions } = await sourceExports(f, "src/extension/subagent-options.js", ["flattenSubagentToolOptions"]);
+    const ctx = { cwd: f.root, agentDir: f.agent, currentSessionId: "mission-session" };
+    const invoke = (input) => {
+      assert.equal(inheritance.allowsNativeTool("mission-session", native, input), true);
+      return handleMissionAction(input.action, flattenSubagentToolOptions(input), ctx);
+    };
+    const created = invoke(queries[0]);
+    const id = created.details.missionId;
+    invoke({ action: "mission.update", options: { missionId: id, missionUpdate: { summary: "Finished synthetic work" } } });
+    const closed = invoke({ action: "mission.close", options: { missionId: id } });
+    assert.equal(closed.details.mission.status, "completed");
+    assert.equal(closed.details.mission.summary, "Finished synthetic work");
+    assert.equal(invoke({ action: "mission.show", options: { missionId: id } }).details.mission.status, "completed");
+  } finally { inheritance.dispose(); }
+}));
+
 test("new unattended launches require explicit fresh context despite native configured fork preference", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
   const { resolveSubagentLaunchContext, canPreferFork, loadConfig, getConfigPath, flattenSubagentToolOptions } = await sourceExports(f, [
     { relative: "src/shared/fork-context.js", names: ["resolveSubagentLaunchContext", "canPreferFork"] },
@@ -393,7 +445,7 @@ test("required agentic-local permits native child delegation and bound parent co
       assert.equal(typeof session.agent.beforeToolCall, "function");
       const ownerSession = session;
       const call = (name, args) => ownerSession.agent.beforeToolCall({ toolCall: { type: "toolCall", id: `synthetic-${name}`, name, arguments: args }, args });
-      for (const args of [{ action: "models", agent: "delegate" }, { action: "list" }, { action: "get", agent: "delegate" }, { action: "guide", options: { topic: "tool-reference" } }]) {
+      for (const args of [{ action: "models", agent: "delegate" }, { action: "list" }, { action: "get", agent: "delegate" }, { action: "guide", options: { topic: "tool-reference" } }, { action: "mission.close", options: { missionId: "synthetic-mission" } }]) {
         assert.equal((await call("subagent", args))?.block, undefined, JSON.stringify(args));
       }
       for (const [name, args, source] of [["subagent", { agent: "synthetic-leaf", task: "Synthetic task", async: false, options: { context: "fresh", timeoutMs: 5_000 } }, "<inline:pi-subagents:fanout-child>"], ["contact_supervisor", { reason: "progress_update", message: "Synthetic parent-channel message" }, "<inline:pi-subagents:prompt-runtime>"]]) {

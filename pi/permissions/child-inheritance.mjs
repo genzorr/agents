@@ -10,6 +10,26 @@ function unattendedSubagentInput(sessionId, input, branch) {
   const options = input.options ?? {};
   if (!options || typeof options !== "object" || Array.isArray(options)) return false;
   if (input.action !== undefined) {
+    const missionFields = {
+      "mission.create": ["mission", "missionStatus"],
+      "mission.list": ["missionScope"],
+      "mission.show": ["missionId"],
+      "mission.update": ["missionId", "missionUpdate"],
+      "mission.resolve-decision": ["missionId", "id", "summary"],
+      "mission.attach-run": ["missionId", "id", "runId", "runMode", "dir", "agent", "runStatus"],
+      "mission.close": ["missionId", "missionStatus", "summary"],
+    }[input.action];
+    if (Array.isArray(missionFields)) {
+      if (!Object.keys(input).every((key) => ["action", "options", ...missionFields].includes(key)) || !Object.keys(options).every((key) => missionFields.includes(key))) return false;
+      const values = { ...input, ...options };
+      if (values.missionScope !== undefined && !["project", "global"].includes(values.missionScope)) return false;
+      if (input.action === "mission.close" && values.missionStatus !== undefined && !["completed", "failed", "cancelled"].includes(values.missionStatus)) return false;
+      for (const [field, keys] of [["mission", ["title", "summary", "objective", "labels"]], ["missionUpdate", ["title", "objective", "summary", "labels", "artifacts", "receipts", "decisions", "status"]]]) {
+        if (values[field] !== undefined && (!values[field] || typeof values[field] !== "object" || Array.isArray(values[field]) || !Object.keys(values[field]).every((key) => keys.includes(key)))) return false;
+      }
+      if (values.missionUpdate?.status !== undefined && !["completed", "failed", "cancelled"].includes(values.missionUpdate.status)) return false;
+      return true;
+    }
     if (["list", "get", "models"].includes(input.action)) {
       return Object.keys(input).every((key) => ["action", "agent", "agentScope", "options"].includes(key)) && Object.keys(options).length === 0 && (input.agent === undefined || typeof input.agent === "string") && (input.agentScope === undefined || ["user", "project", "both"].includes(input.agentScope));
     }
