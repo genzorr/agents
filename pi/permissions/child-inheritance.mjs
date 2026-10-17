@@ -3,11 +3,13 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+const QUALIFIED_PI_SUBAGENTS_VERSIONS = Object.freeze(["0.78.0", "0.79.0"]);
+
 export async function loadRequiredChildApi(agentDir) {
   const require = createRequire(path.join(agentDir, "npm", "package.json"));
   const manifest = JSON.parse(readFileSync(path.join(path.dirname(require.resolve("pi-subagents")), "package.json"), "utf8"));
-  if (manifest.name !== "pi-subagents" || manifest.version !== "0.78.0") {
-    throw new Error("agentic-local child inheritance requires qualified pi-subagents 0.78.0");
+  if (manifest.name !== "pi-subagents" || !QUALIFIED_PI_SUBAGENTS_VERSIONS.includes(manifest.version)) {
+    throw new Error(`agentic-local child inheritance requires qualified pi-subagents ${QUALIFIED_PI_SUBAGENTS_VERSIONS.join(" or ")}`);
   }
   const entry = require.resolve("pi-subagents/required-child-extensions");
   const api = await import(pathToFileURL(entry).href);

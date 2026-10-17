@@ -30,7 +30,7 @@ systemctl --user show pi-accounts-refresh.service --property=ActiveState --prope
 python3 scripts/install-pi.py --retire-accounts --dry-run
 python3 scripts/install-pi.py --retire-accounts
 systemctl --user daemon-reload
-npm install --global --prefix "$HOME/.local" https://github.com/genzorr/pi-accounts/releases/download/v0.1.1/pi-accounts-0.1.1.tgz
+npm install --global --prefix "$HOME/.local" https://github.com/genzorr/pi-accounts/releases/download/v0.2.0/pi-accounts-0.2.0.tgz
 pi-accounts status
 pi-accounts maintenance install --dry-run
 pi-accounts maintenance install
@@ -49,3 +49,5 @@ The permission installer preflights all planned changes, serializes invocations 
 A source-version rollback uses the currently installed permission version to uninstall its unchanged owned outputs before installing a known-good version; older installers may reject newer file identities. After accounts have moved to the standalone package, do not run an older all-in-one Agents installer: it would try to recreate the retired external tool. Keep permissions and standalone accounts on their independent update/rollback paths. To remove standalone scheduling safely, use `pi-accounts maintenance disable`, wait for its runner to finish, then `pi-accounts maintenance uninstall` before `npm uninstall --global --prefix "$HOME/.local" pi-accounts`. Those commands preserve credentials and the pool.
 
 This optional permission installer is Linux-only and its suite skips before importing Linux dependencies on other platforms. The separate [catalog distribution](pi-distribution.md) owns global instructions and skills and does not apply permission updates or account migration.
+
+Native Pi/package automation is separate from this permission installer; see [Pi automatic updates](pi-auto-update.md). The standalone account package updates through `pi-accounts update`, preserving its maintenance intent and installation prefix.
