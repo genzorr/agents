@@ -157,7 +157,7 @@ test("unattended native controls require qualified provenance, a current registr
       assert.equal(inheritance.allowsNativeTool("synthetic-policy", { ...native, sourceInfo: { path: f.entry } }, input, branch), false);
       assert.equal(inheritance.allowsNativeTool("different-session", native, input, branch), false);
     }
-    for (const input of [{ action: "children.list" }, { action: "status" }, { action: "status", options: { view: "fleet" } }]) assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input, branch), false);
+    for (const input of [{ action: "status" }, { action: "status", options: { view: "fleet" } }]) assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, input, branch), false);
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "status", id: "owned-run", options: { view: "transcript", lines: 10 } }, branch), true);
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "steer", id: "owned-run", message: "Synthetic correction", options: { mode: "follow_up", ackTimeoutMs: 100 } }, branch), true);
     assert.equal(inheritance.allowsNativeTool("synthetic-policy", native, { action: "steer", id: "owned-run", options: { mode: "plan" } }, branch), false);
@@ -196,9 +196,77 @@ test("native read-only subagent discovery needs no approval and cannot authorize
         assert.equal(inheritance.allowsNativeTool("discovery-session", native, { ...input, ...extra }), false);
       }
     }
-    for (const input of [{ action: "list", capabilities: true }, { action: "create", agent: "delegate" }, { action: "update", agent: "delegate" }, { action: "models", agentScope: "invalid" }, { action: "models", agent: {} }]) {
+    for (const input of [{ action: "create", agent: "delegate" }, { action: "update", agent: "delegate" }, { action: "models", agentScope: "invalid" }, { action: "models", agent: {} }]) {
       assert.equal(inheritance.allowsNativeTool("discovery-session", native, input), false);
     }
+  } finally { inheritance.dispose(); }
+}));
+
+test("routine native calls accept flat and model-options forms with identical authority", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const { SUBAGENT_OPTION_KEYS, flattenSubagentToolOptions } = await sourceExports(f, [
+    { relative: "src/extension/schemas.js", names: ["SUBAGENT_OPTION_KEYS"] },
+    { relative: "src/extension/subagent-options.js", names: ["flattenSubagentToolOptions"] },
+  ]);
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  const native = { name: "subagent", sourceInfo: { path: path.join(plugin, "index.js") } };
+  const receipt = { type: "message", message: { role: "toolResult", toolName: "subagent", details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "forms-session" } } } };
+  await inheritance.start("forms-session");
+  try {
+    const allowed = [
+      { action: "guide", topic: "tool-reference" },
+      { action: "list", capabilities: true, agentScope: "both" },
+      { action: "models", agent: "delegate", agentScope: "user" },
+      { action: "get", agent: "delegate", agentScope: "both" },
+      { action: "doctor" },
+      { action: "doctor", context: "fresh", sessionDir: path.join(f.root, "sessions") },
+      { action: "children.list" },
+      { action: "status", id: "owned-run", view: "transcript", lines: 10 },
+      { action: "debug.run", id: "owned-run" },
+      { action: "command.status", id: "owned-run", toolCallId: "synthetic-command" },
+      { action: "steer", id: "owned-run", message: "Correction", mode: "follow_up", ackTimeoutMs: 100, steeringRecovery: false },
+      { agent: "delegate", task: "Synthetic task", context: "fresh", agentScope: "both", timeoutMs: 1000, model: "openai/gpt-5:high" },
+    ];
+    for (const flat of allowed) {
+      const options = Object.fromEntries(Object.entries(flat).filter(([key]) => SUBAGENT_OPTION_KEYS.includes(key)));
+      const modern = { ...Object.fromEntries(Object.entries(flat).filter(([key]) => !SUBAGENT_OPTION_KEYS.includes(key))), options };
+      assert.deepEqual(flattenSubagentToolOptions(modern), flat);
+      for (const input of [flat, modern]) {
+        assert.equal(inheritance.allowsNativeTool("forms-session", native, input, [receipt]), true, JSON.stringify(input));
+        for (const extra of [{ options: { ...input.options, machine: "remote" } }, { options: { ...input.options, gate: "touch /outside" } }, { options: { ...input.options, output: "/outside" } }]) {
+          assert.equal(inheritance.allowsNativeTool("forms-session", native, { ...input, ...extra }, [receipt]), false);
+        }
+      }
+    }
+    for (const action of ["status", "debug.run", "command.status", "steer", "resume", "stop", "interrupt"]) {
+      assert.equal(inheritance.allowsNativeTool("forms-session", native, { action, id: "foreign-run" }, [receipt]), false);
+    }
+    for (const input of [{ action: "guide", topic: "tool-reference", options: { topic: "configuration" } }, { agent: "delegate", context: "fresh", options: { context: "fork" } }, { action: "steer", id: "owned-run", options: { steeringRecovery: true } }]) {
+      assert.equal(inheritance.allowsNativeTool("forms-session", native, input, [receipt]), false);
+    }
+    for (const input of [{ action: "guide", options: null }, { action: "guide", options: [] }, { action: "guide", options: { options: {} } }, JSON.parse('{"action":"guide","options":{"__proto__":{"topic":"configuration"}}}')]) {
+      assert.equal(inheritance.allowsNativeTool("forms-session", native, input, [receipt]), false);
+    }
+    assert.equal(inheritance.allowsNativeTool("forms-session", native, { agent: "delegate", context: "fresh", options: { context: "fresh" } }), true);
+  } finally { inheritance.dispose(); }
+}));
+
+test("native parent replies and explicit blocking-wait defaults need no approval", { skip: !unattendedAvailable }, async () => isolated(async (f) => {
+  const inheritance = new ChildInheritance(f.agent, f.entry);
+  await inheritance.start("dialogue-session");
+  try {
+    const supervisor = { name: "subagent_supervisor", sourceInfo: { source: "inline", path: "<inline:pi-subagents:prompt-runtime>" } };
+    for (const input of [{ action: "pending" }, { action: "list" }, { action: "status" }, { action: "reply", replyTo: "exact-request", message: "Continue within the assigned scope" }]) {
+      assert.equal(inheritance.allowsNativeTool("dialogue-session", supervisor, input), true);
+      assert.equal(inheritance.allowsNativeTool("dialogue-session", { ...supervisor, sourceInfo: { path: f.entry } }, input), false);
+      assert.equal(inheritance.allowsNativeTool("foreign-session", supervisor, input), false);
+    }
+    for (const input of [{ action: "reply", to: "worker-alias", message: "Wrong selector" }, { action: "reply", message: "No request id" }, { action: "reply", replyTo: "exact-request", message: "" }, { action: "pending", command: "touch /outside" }]) {
+      assert.equal(inheritance.allowsNativeTool("dialogue-session", supervisor, input), false);
+    }
+    const wait = { name: "bg_wait", sourceInfo: { source: "inline", path: "<inline:pi-subagents:prompt-runtime>" } };
+    const branch = [{ type: "message", message: { role: "toolResult", toolName: "subagent", details: { asyncId: "owned-run", "agentic-local": { ownerSessionId: "dialogue-session" } } } }];
+    assert.equal(inheritance.allowsNativeTool("dialogue-session", wait, { id: "owned-run", nonBlocking: false, all: false }, branch), true);
+    for (const input of [{ id: "owned-run", nonBlocking: true }, { id: "owned-run", all: true }, { id: "foreign-run", nonBlocking: false }]) assert.equal(inheritance.allowsNativeTool("dialogue-session", wait, input, branch), false);
   } finally { inheritance.dispose(); }
 }));
 
@@ -211,7 +279,7 @@ test("native mission bookkeeping runs without approval while execution and goal 
     { action: "mission.list", options: { missionScope: "project" } },
     { action: "mission.list", options: { missionScope: "global" } },
     { action: "mission.show", options: { missionId } },
-    { action: "mission.update", options: { missionId, missionUpdate: { summary: "Synthetic progress", artifacts: [{ kind: "note", path: "notes.md" }], status: "completed" } } },
+    { action: "mission.update", options: { missionId, missionUpdate: { summary: "Synthetic progress", artifacts: [{ kind: "note", path: "notes.md" }], status: "active" } } },
     { action: "mission.resolve-decision", options: { missionId, id: "decision", summary: "Synthetic resolution" } },
     { action: "mission.attach-run", options: { missionId, id: "synthetic-run", runMode: "single" } },
     { action: "mission.close", options: { missionId, missionStatus: "completed", summary: "Synthetic completion" } },
@@ -233,7 +301,6 @@ test("native mission bookkeeping runs without approval while execution and goal 
       { action: "mission.list", options: { missionScope: "invalid" } },
       { action: "mission.create", options: { mission: { title: "Goal", goal: true, budget: { tokens: 100 } } } },
       { action: "mission.update", options: { missionId, missionUpdate: { goal: true, budget: { tokens: 100 } } } },
-      { action: "mission.update", options: { missionId, missionUpdate: { status: "active" } } },
       { action: "schedule.run", options: { id: "schedule" } },
     ]) assert.equal(inheritance.allowsNativeTool("mission-session", native, input), false, JSON.stringify(input));
 
@@ -246,7 +313,7 @@ test("native mission bookkeeping runs without approval while execution and goal 
     };
     const created = invoke(queries[0]);
     const id = created.details.missionId;
-    invoke({ action: "mission.update", options: { missionId: id, missionUpdate: { summary: "Finished synthetic work" } } });
+    invoke({ action: "mission.update", options: { missionId: id, missionUpdate: { status: "active", summary: "Finished synthetic work" } } });
     const closed = invoke({ action: "mission.close", options: { missionId: id } });
     assert.equal(closed.details.mission.status, "completed");
     assert.equal(closed.details.mission.summary, "Finished synthetic work");
@@ -436,7 +503,7 @@ test("required agentic-local permits native child delegation and bound parent co
       session = created.session;
       return created;
     } }) });
-    const launch = buildInProcessChildLaunch({ host: "parent", runId, orchestratorIntercomTarget: "synthetic-owner", cwd: f.root, parentSessionId: parentId, childAgentName: "synthetic-owner", childIndex: 0, extensions: [], tools: ["read", "write", "edit", "bash", "bash_unrestricted", "subagent", "contact_supervisor"], inheritProjectContext: false, inheritGlobalContext: false, inheritSkills: false });
+    const launch = buildInProcessChildLaunch({ host: "parent", runId, orchestratorIntercomTarget: "synthetic-owner", cwd: f.root, parentSessionId: parentId, childAgentName: "synthetic-owner", childIndex: 0, extensions: [], tools: ["read", "write", "edit", "bash", "bash_unrestricted", "subagent", "contact_supervisor", "subagent_supervisor"], inheritProjectContext: false, inheritGlobalContext: false, inheritSkills: false });
     supervisorDir = launch.session.runtime.supervisorChannelDir;
     const child = await factory.create(launch.session);
     try {
@@ -519,16 +586,17 @@ test("required agentic-local permits native child delegation and bound parent co
         const replyTo = pending.details.pending[0].id;
         await assert.rejects(foreignTools.get("subagent_supervisor").execute("synthetic-foreign-reply", { action: "reply", replyTo, message: "Wrong parent" }), /No pending supervisor request/);
         await assert.rejects(parentTool.execute("synthetic-unknown-reply", { action: "reply", replyTo: "unknown-request", message: "Unknown request" }), /No pending supervisor request/);
-        const reply = { action: "reply", replyTo, message: "Synthetic manually approved decision" };
-        assert.equal((await call("subagent_supervisor", reply)).block, true);
+        const reply = { action: "reply", replyTo, message: "Synthetic answer within assigned scope" };
+        assert.equal((await call("subagent_supervisor", { action: "pending" }))?.block, undefined, JSON.stringify(ownerSession.getAllTools().find((tool) => tool.name === "subagent_supervisor")?.sourceInfo));
+        assert.equal((await call("subagent_supervisor", reply))?.block, undefined);
         let confirmations = 0;
         ownerSession.extensionRunner.setUIContext({ ...previousUI, confirm: async () => { confirmations++; return true; } });
         assert.equal((await call("subagent_supervisor", reply))?.block, undefined);
-        assert.equal(confirmations, 1);
+        assert.equal(confirmations, 0);
         await parentTool.execute("synthetic-parent-reply", reply);
         const settled = await decision;
         assert.equal(settled.details.requestId, replyTo);
-        assert.match(settled.content[0].text, /Synthetic manually approved decision/);
+        assert.match(settled.content[0].text, /Synthetic answer within assigned scope/);
       } finally {
         ownerSession.extensionRunner.setUIContext(previousUI);
         decisionAbort.abort();
@@ -627,7 +695,7 @@ export default pi => { const f = fauxProvider({provider:"local-qualification",ap
       for (const options of [{ index: 0 }, { childId: "foreign-child" }, { view: "fleet" }]) await refusedControl({ action, id: retainedId, options });
     }
     await refusedControl({ action: "status" });
-    await refusedControl({ action: "children.list" });
+    assert.notEqual((await invoke("subagent", { action: "children.list" })).isError, true);
     manager.appendMessage({ role: "toolResult", toolCallId: "synthetic-legacy-workflow", toolName: "subagent", content: [{ type: "text", text: "Synthetic legacy workflow receipt" }], details: { asyncId: "legacy-workflow" }, isError: false, timestamp: Date.now() });
     for (const action of ["status", "steer", "interrupt", "resume", "stop"]) await refusedControl({ action, id: "legacy-workflow" });
     const previousUI = session.extensionRunner.getUIContext();
@@ -655,7 +723,10 @@ export default pi => { const f = fauxProvider({provider:"local-qualification",ap
       const denied = await session.agent.beforeToolCall({ toolCall: { type: "toolCall", id: "synthetic-laundered-wait", name: "bg_wait", arguments: args }, args });
       assert.equal(denied.block, true);
     }
-    const ownStatus = await invoke("subagent", { action: "status", id: retainedId });
+    for (const args of [{ action: "list", options: { capabilities: true } }, { action: "models", agent: "synthetic-leaf", options: { agentScope: "both" } }, { action: "guide", topic: "tool-reference" }, { action: "doctor" }, { action: "debug.run", id: retainedId }]) {
+      assert.notEqual((await invoke("subagent", args)).isError, true, JSON.stringify(args));
+    }
+    const ownStatus = await invoke("subagent", { action: "status", id: retainedId, view: "transcript", lines: 10 });
     assert.equal(ownStatus.isError, undefined);
     const resumed = await invoke("subagent", { action: "resume", id: retainedId, message: "Continue the synthetic leaf" });
     const asyncId = resumed.content.map((item) => item.text ?? "").join("\n").match(/Revived run: ([^\s]+)/)?.[1];
@@ -666,7 +737,7 @@ export default pi => { const f = fauxProvider({provider:"local-qualification",ap
       assert.equal(result.block, true);
     };
     for (const args of [{ id: "unknown-run" }, { id: asyncId.slice(0, 8) }, { id: asyncId, nonBlocking: true }, { all: true }, { id: asyncId, observer: true }]) await refused(args);
-    const waited = await invoke("bg_wait", { id: asyncId, timeoutMs: 15_000 });
+    const waited = await invoke("bg_wait", { id: asyncId, timeoutMs: 15_000, nonBlocking: false, all: false });
     assert.ok(waited.details.completions?.some((completion) => completion.id === asyncId || completion.runId === asyncId), JSON.stringify(waited));
     const status = await invoke("subagent", { action: "status", id: asyncId });
     assert.ok(status.content.some((item) => /complete|Synthetic native leaf result/i.test(item.text ?? "")), JSON.stringify(status));

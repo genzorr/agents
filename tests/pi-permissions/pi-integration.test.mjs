@@ -41,6 +41,23 @@ test("Pi's real loader registers file guards, denies missing UI, and retains all
   } finally { rmSync(scratch, { recursive: true, force: true }); }
 });
 
+test("Pi built-in tool discovery is automatic while a replacement keeps requiring approval", { skip: !available }, async () => {
+  const scratch = mkdtempSync(path.join(os.tmpdir(), "pi-permission-discovery-"));
+  try {
+    const installed = path.join(scratch, "permissions");
+    cpSync(new URL("../../pi/permissions", import.meta.url), installed, { recursive: true });
+    const { loadExtensions } = await import(pathToFileURL(path.join(sdk, "dist/core/extensions/loader.js")));
+    const loaded = await loadExtensions([path.join(installed, "index.ts")], scratch);
+    assert.deepEqual(loaded.errors, []);
+    const handler = loaded.extensions[0].handlers.get("tool_call")[0];
+    const event = { toolName: "tool_search", input: { query: "thread tools" } };
+    loaded.runtime.getAllTools = () => [{ name: "tool_search", sourceInfo: { path: "builtin:tool-search" } }];
+    assert.equal((await handler(event, { hasUI: false }))?.block, undefined);
+    loaded.runtime.getAllTools = () => [{ name: "tool_search", sourceInfo: { path: "/foreign/tool-search.ts" } }];
+    assert.equal((await handler(event, { hasUI: false })).block, true);
+  } finally { rmSync(scratch, { recursive: true, force: true }); }
+});
+
 test("real Pi file tools deny relative symlink targets whose traversal escapes a writable root", { skip: !available }, async () => {
   const scratch = mkdtempSync(path.join(os.tmpdir(), "pi-permission-relative-link-"));
   try {

@@ -2,14 +2,19 @@ import { readFileSync, realpathSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 
 const QUALIFIED_PI_SUBAGENTS_VERSIONS = Object.freeze(["0.78.0", "0.79.0"]);
 
 function unattendedSubagentInput(sessionId, input, branch) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
-  const options = input.options ?? {};
+  const { options = {}, ...topLevel } = input;
   if (!options || typeof options !== "object" || Array.isArray(options)) return false;
-  if (input.action !== undefined) {
+  for (const [key, value] of Object.entries(options)) {
+    if (key === "options" || (topLevel[key] !== undefined && !isDeepStrictEqual(topLevel[key], value))) return false;
+  }
+  const params = { ...topLevel, ...options };
+  if (params.action !== undefined) {
     const missionFields = {
       "mission.create": ["mission", "missionStatus"],
       "mission.list": ["missionScope"],
@@ -18,31 +23,29 @@ function unattendedSubagentInput(sessionId, input, branch) {
       "mission.resolve-decision": ["missionId", "id", "summary"],
       "mission.attach-run": ["missionId", "id", "runId", "runMode", "dir", "agent", "runStatus"],
       "mission.close": ["missionId", "missionStatus", "summary"],
-    }[input.action];
+    }[params.action];
     if (Array.isArray(missionFields)) {
-      if (!Object.keys(input).every((key) => ["action", "options", ...missionFields].includes(key)) || !Object.keys(options).every((key) => missionFields.includes(key))) return false;
-      const values = { ...input, ...options };
-      if (values.missionScope !== undefined && !["project", "global"].includes(values.missionScope)) return false;
-      if (input.action === "mission.close" && values.missionStatus !== undefined && !["completed", "failed", "cancelled"].includes(values.missionStatus)) return false;
+      if (!Object.keys(params).every((key) => ["action", ...missionFields].includes(key))) return false;
+      if (params.missionScope !== undefined && !["project", "global"].includes(params.missionScope)) return false;
+      if (params.action === "mission.close" && params.missionStatus !== undefined && !["completed", "failed", "cancelled"].includes(params.missionStatus)) return false;
       for (const [field, keys] of [["mission", ["title", "summary", "objective", "labels"]], ["missionUpdate", ["title", "objective", "summary", "labels", "artifacts", "receipts", "decisions", "status"]]]) {
-        if (values[field] !== undefined && (!values[field] || typeof values[field] !== "object" || Array.isArray(values[field]) || !Object.keys(values[field]).every((key) => keys.includes(key)))) return false;
+        if (params[field] !== undefined && (!params[field] || typeof params[field] !== "object" || Array.isArray(params[field]) || !Object.keys(params[field]).every((key) => keys.includes(key)))) return false;
       }
-      if (values.missionUpdate?.status !== undefined && !["completed", "failed", "cancelled"].includes(values.missionUpdate.status)) return false;
       return true;
     }
-    if (["list", "get", "models"].includes(input.action)) {
-      return Object.keys(input).every((key) => ["action", "agent", "agentScope", "options"].includes(key)) && Object.keys(options).length === 0 && (input.agent === undefined || typeof input.agent === "string") && (input.agentScope === undefined || ["user", "project", "both"].includes(input.agentScope));
+    if (["list", "get", "models"].includes(params.action)) {
+      const fields = params.action === "list" ? ["agent", "agentScope", "capabilities"] : ["agent", "agentScope"];
+      return Object.keys(params).every((key) => ["action", ...fields].includes(key)) && (params.agent === undefined || typeof params.agent === "string") && (params.agentScope === undefined || ["user", "project", "both"].includes(params.agentScope)) && (params.capabilities === undefined || typeof params.capabilities === "boolean");
     }
-    if (input.action === "guide") {
-      return Object.keys(input).every((key) => ["action", "options"].includes(key)) && Object.keys(options).every((key) => key === "topic") && (options.topic === undefined || typeof options.topic === "string");
-    }
-    if (!["status", "steer", "interrupt", "resume", "stop"].includes(input.action) || !ownedWorkerReceipt(sessionId, input.id, branch)) return false;
-    const permitted = input.action === "status" ? ["view", "lines"] : input.action === "steer" ? ["mode", "ackTimeoutMs"] : [];
-    return Object.keys(input).every((key) => ["action", "id", "message", "options"].includes(key)) && Object.keys(options).every((key) => permitted.includes(key)) && (options.view === undefined || options.view === "transcript") && (options.mode === undefined || ["steer", "follow_up", "auto"].includes(options.mode));
+    if (params.action === "guide") return Object.keys(params).every((key) => ["action", "topic"].includes(key)) && (params.topic === undefined || typeof params.topic === "string");
+    if (params.action === "doctor") return Object.keys(params).every((key) => ["action", "context", "sessionDir"].includes(key)) && (params.context === undefined || ["fresh", "fork", "profile"].includes(params.context)) && (params.sessionDir === undefined || typeof params.sessionDir === "string");
+    if (params.action === "children.list") return Object.keys(params).length === 1;
+    if (!["status", "debug.run", "command.status", "steer", "interrupt", "resume", "stop"].includes(params.action) || !ownedWorkerReceipt(sessionId, params.id, branch)) return false;
+    const permitted = params.action === "status" ? ["view", "lines"] : params.action === "command.status" ? ["toolCallId"] : params.action === "steer" ? ["mode", "ackTimeoutMs", "steeringRecovery"] : [];
+    return Object.keys(params).every((key) => ["action", "id", "message", ...permitted].includes(key)) && (params.view === undefined || params.view === "transcript") && (params.mode === undefined || ["steer", "follow_up", "auto"].includes(params.mode)) && (params.steeringRecovery === undefined || params.steeringRecovery === false);
   }
-  const limits = ["context", "timeoutMs", "maxRuntimeMs", "toolTimeoutMs", "toolBudget", "checkpointBeforeDeadlineMs"];
-  if (typeof input.agent !== "string" || !input.agent.trim() || !Object.keys(input).every((key) => ["agent", "task", "async", "model", "cwd", "options", ...limits].includes(key)) || !Object.keys(options).every((key) => limits.includes(key))) return false;
-  return (input.context === "fresh" || options.context === "fresh") && [input.context, options.context].every((context) => context === undefined || context === "fresh");
+  const limits = ["context", "timeoutMs", "maxRuntimeMs", "toolTimeoutMs", "toolBudget", "checkpointBeforeDeadlineMs", "agentScope"];
+  return typeof params.agent === "string" && Boolean(params.agent.trim()) && Object.keys(params).every((key) => ["agent", "task", "async", "model", "cwd", ...limits].includes(key)) && params.context === "fresh" && (params.agentScope === undefined || ["user", "project", "both"].includes(params.agentScope));
 }
 
 function ownedWorkerReceipt(sessionId, id, branch) {
@@ -107,13 +110,18 @@ export class ChildInheritance {
       return source?.source === "inline" && source.path === "<inline:pi-subagents:prompt-runtime>";
     }
     if (tool?.name === "bg_wait") {
-      if (!input || !Object.keys(input).every((key) => ["id", "timeoutMs"].includes(key)) || !ownedWorkerReceipt(sessionId, input.id, branch)) return false;
+      if (!input || !Object.keys(input).every((key) => ["id", "timeoutMs", "nonBlocking", "all"].includes(key)) || !ownedWorkerReceipt(sessionId, input.id, branch) || (input.nonBlocking !== undefined && input.nonBlocking !== false) || (input.all !== undefined && input.all !== false)) return false;
       if (source?.source === "inline" && source.path === "<inline:pi-subagents:prompt-runtime>") return true;
-      try { return realpathSync(source?.path ?? "") === this.nativeSubagentEntry; }
-      catch { return false; }
+    } else if (tool?.name === "subagent_supervisor") {
+      if (!input || typeof input !== "object" || Array.isArray(input)) return false;
+      if (["list", "pending", "status"].includes(input.action)) {
+        if (Object.keys(input).length !== 1) return false;
+      } else if (input.action !== "reply" || !Object.keys(input).every((key) => ["action", "replyTo", "message"].includes(key)) || typeof input.replyTo !== "string" || !input.replyTo.trim() || typeof input.message !== "string" || !input.message.trim()) return false;
+      if (source?.source === "inline" && ["<inline:pi-subagents:prompt-runtime>", "<inline:pi-subagents:fanout-child>"].includes(source.path)) return true;
+    } else {
+      if (tool?.name !== "subagent" || !unattendedSubagentInput(sessionId, input, branch)) return false;
+      if (source?.source === "inline" && source.path === "<inline:pi-subagents:fanout-child>") return true;
     }
-    if (tool?.name !== "subagent" || !unattendedSubagentInput(sessionId, input, branch)) return false;
-    if (source?.source === "inline" && source.path === "<inline:pi-subagents:fanout-child>") return true;
     try { return realpathSync(source?.path ?? "") === this.nativeSubagentEntry; }
     catch { return false; }
   }

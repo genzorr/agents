@@ -38,7 +38,7 @@ Use the same commands to update unchanged owned files. To remove, preview `--uni
 
 The permission installer owns only `~/.local/lib/pi-agentic-local/permissions`, its exact settings extension entry, and `.agents-pi-setup.json` plus a temporary recovery journal. It preserves unrelated settings and never reads auth, account pools or sessions. Modified files, symlinks and duplicate entries are conflicts. It recovers interrupted transactions before replanning and refuses externally changed recovery destinations; retain the journal for resolution. For source rollback, uninstall with the current version before installing a known-good permission version. Older all-in-one installers must not recreate retired account tooling.
 
-After restart, run `/agentic-local` to inspect current writable roots and test bash availability. This status is not a persistent host activation guarantee. Read the [permission contract](pi-permissions.md) before relying on enforcement or approving exceptions.
+The extension loads automatically when Pi starts; `/agentic-local` only reports status and probes bash. In T3, select **Full access** to let this extension own approvals; Supervised and Auto-accept edits add T3's separate confirmation hook. The profile is not a T3 dropdown option. Restart an idle Pi backend and resume the same chat after updates; an existing pending prompt keeps the old policy. After restart, optionally run `/agentic-local` to inspect writable roots and test bash availability. This status is not a persistent host activation guarantee. Read the [permission contract](pi-permissions.md) before relying on enforcement or approving exceptions.
 
 ## Optional automatic updates for unprofiled hosts
 
