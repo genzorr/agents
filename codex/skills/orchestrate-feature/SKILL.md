@@ -23,7 +23,7 @@ All existing-task messages, resets and callbacks omit settings overrides, includ
 
 ## Owner contract
 
-Send distilled decisions and accessible authoritative references, not parent history or this outer skill. Include scope/state/authority, criteria and intended-use validation, dependencies/resources, scientific commitments, stop gates and exact delivery. Name the requesting orchestrator/user as the acceptance actor; the owner cannot accept its feature or close its task. The owner receives no ordinary-task-creation authority and may create only authorized native leaves.
+Send distilled decisions and accessible authoritative references, not parent history or this outer skill. Include scope/state/authority, criteria and intended-use validation, dependencies/resources, scientific commitments, stop gates and exact delivery, including the callback/evidence boundary below. Name the requesting orchestrator/user as the acceptance actor; the owner cannot accept its feature or close its task. The owner receives no ordinary-task-creation authority and may create only authorized native leaves.
 
 Transfer **Scope → Plan → Execute → Review → Close** as work phases, not mandatory agents, forms or approval rounds. Scope stays with the user/orchestrator. The owner plans and executes iteratively, reuses approved behavior and obtains required approval for changed commitments. It implements/builds/tests/repairs, integrates and self-reviews, updates affected docs and preserves actual evidence. Review contains independent scrutiny plus intended-use validation; the orchestrator/user handles acceptance and closure. Use project task states rather than inventing new ones.
 
@@ -41,13 +41,19 @@ Keep current intent, authority/freezes, decisions, exact working/tested reposito
 
 Resolve routine friction within scope. Send required gates, decisions/exhausted blockers, urgent invalidation and terminal/partial handoffs, not routine ACK/progress chains. Each callback identifies the feature/owner, outcome, material consequence/gap, action/decision needed from the orchestrator and one complete accessible handoff link. Local user updates follow host requirements.
 
+Keep the callback compact and the durable handoff complete. Inline facts needed to choose or safely take the next action; keep commands, full hashes, test/measurement inventories, receipts and repeated constraints in existing linked records unless a specific item changes that action. Preserve consequential caveats, invalidations and unknown resource disposition inline. If the recipient cannot access a reference, supply the needed evidence or report the access gap. Shorten by selecting facts, never joining words/numbers or dropping labels, punctuation or units; impose no hard length cap.
+
 A ready handoff binds actual tested state, criterion evidence and independent review target/verdict; separates validation evidence from unassessed usefulness; and includes limitations, artifacts, pending decisions and resource disposition. Partial, blocked and failed results name unfulfilled scope and any proposed bounded continuation. The owner reports readiness, not acceptance.
+
+Begin the existing handoff with a complete assessment summary of those facts and the next action, then link supporting detail. Do not duplicate evidence inventories or create another artifact solely to shorten a message.
 
 Use the verified native recipient/action with no settings fields. Create/retain request IDs as the route requires, reuse them for retries and retain actual returned identities. Reconcile uncertain outcomes before retrying. Accepted send proves transport acceptance/dispatch, not receiver assessment, validation or closure. Never fabricate IDs, guess routes or switch operations to bypass failure. Preserve failed payload/error and use only an authorized practical fallback; timeout or uninspected manual state remains unobserved.
 
 ## Orchestrator receives and acts
 
 On each owner return, recover its task/contract and check the expected identity, assignment and applicable target. Read the linked handoff and decision-bearing evidence. Assess promised scope, actual result, required review, limitations and intended-use validation. Use valid checks/review coverage without routinely repeating the technical audit; inspect decisive source/artifacts for a material gap, conflict or claim.
+
+Use the handoff's assessment summary to select supporting evidence relevant to the decision, rather than loading every linked inventory. Missing, stale or contradictory evidence remains a gap to resolve before relying on the affected claim.
 
 Choose and record an actual next action in the existing task:
 
