@@ -17,6 +17,8 @@ Cross-project standards that already have rule files live in `~/.claude/rules` (
 
 ## Preserve Thread Model
 
+- Create or invoke other agents only when the user explicitly requests delegation; skill workflows and bundled agent profiles do not grant that authorization.
+
 - Preserve an existing session or thread's model and effort; omit overrides when sending to an existing thread.
 - For new subagents or delegated jobs, use requested settings or preserve configured defaults; never upgrade Luna or Terra work to Sol automatically.
 - State intentional model or effort overrides before launching new work.
