@@ -256,7 +256,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
 
     def test_review_is_conditional_but_required_feature_review_cannot_be_waived_locally(self) -> None:
         workers = self.section(self.read("codex/skills/orchestrate-workers/SKILL.md"), "Assess returns and obtain review")
-        self.assertIn("normally requires one independent review before completed delivery is ready for validation", workers)
+        self.assertIn("independent review of the final delivered target before reporting readiness for validation", workers)
         self.assertIn("actual task-scoped user request", workers)
         self.assertIn("If absent/unavailable, preserve the required review as pending", workers)
         self.assertIn("only when review is active", workers)
@@ -269,17 +269,30 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("only when established by the product", protocol)
         self.assertIn("void the verdict and recycle the reviewer", protocol)
 
-    def test_review_corrections_bind_complete_target_and_critical_closure(self) -> None:
+    def test_review_corrections_bind_complete_target_and_acceptance_blocking_closure(self) -> None:
         protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
         coverage = self.section(protocol, "Coverage, correction and result")
         self.assertIn("complete target diff with decision-critical dependencies", coverage)
         self.assertIn("recover the exact baseline, findings and applicable coverage", coverage)
         self.assertIn("complete subsequent delta, affected interfaces/invariants/consumers and new verification", coverage)
-        self.assertIn("Critical findings require independent confirmation", coverage)
+        self.assertIn("Findings that block acceptance need independent confirmation of closure regardless of severity label", coverage)
         self.assertIn("owner checks cannot independently clear", coverage)
         self.assertIn("exact target and carried/new coverage", coverage)
         self.assertIn("Missing necessary evidence prevents a supported verdict", coverage)
         self.assertIn("intended-use validation", coverage)
+
+    def test_feature_review_covers_final_delivery_without_expanding_manual_mandates(self) -> None:
+        feature = self.section(self.read("codex/skills/orchestrate-feature/SKILL.md"), "Owner contract")
+        workers = self.section(self.read("codex/skills/orchestrate-workers/SKILL.md"), "Assess returns and obtain review")
+        protocol = self.read("codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md")
+        for text in (feature, workers, protocol):
+            self.assertIn("final delivered target", text)
+            self.assertIn("unless the user explicitly waives review", text)
+            self.assertIn("complete intervening delta and affected surfaces", text)
+            self.assertIn("not after every edit", text)
+        for text in (workers, protocol):
+            self.assertIn("actual checkpoint mandate", text)
+            self.assertIn("unrequested final-state review", text)
 
     def test_origin_receives_assesses_and_continues_without_asking_to_finish(self) -> None:
         feature = self.read("codex/skills/orchestrate-feature/SKILL.md")
@@ -329,6 +342,89 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         owner = self.section(self.read("codex/skills/orchestrate-feature/SKILL.md"), "Owner messages and delivery")
         self.assertIn("one complete accessible handoff link", owner)
         self.assertIn("independent review target/verdict", owner)
+
+    def test_dispatch_narration_rejects_unconditional_full_maps(self) -> None:
+        dispatch_scope = re.compile(
+            r"\b(?:before|prior to)\s+(?:(?:each|every)\s+)?(?:new\s+or\s+reused\s+)?dispatch\b"
+            r"|\b(?:each|every)\s+(?:new\s+or\s+reused\s+)?dispatch(?:es)?\b|\bpre[- ]dispatch\b",
+            re.IGNORECASE,
+        )
+        narration = re.compile(r"\b(?:state|report|echo|recite|restate|repeat|narrate|expose|disclose)\b", re.IGNORECASE)
+        exception_only = re.compile(
+            r"(?=[^.\n]*\bonly\b)(?=[^.\n]*\b(?:overrides?|exceptions?|changed|conflicts?|decision[- ]bearing)\b)"
+            r"|\b(?:unresolved|unobservable|degraded)\b",
+            re.IGNORECASE,
+        )
+
+        def assert_no_full_recital(text: str) -> None:
+            for sentence in re.split(r"[.\n]", text):
+                if not dispatch_scope.search(sentence) or not narration.search(sentence):
+                    continue
+                if not re.search(r"\b(?:lane|role map)\b", sentence, re.IGNORECASE):
+                    continue
+                fields = sum(bool(re.search(rf"\b{field}\b", sentence, re.IGNORECASE)) for field in ("route", "model", "effort", "provenance", "context", "default"))
+                self.assertFalse(fields >= 3 and not exception_only.search(sentence), sentence)
+
+        good = (
+            "Before every dispatch, disclose only consequential role map overrides affecting route, model, effort, provenance and context.",
+            "Before every dispatch, disclose unresolved route, model and effort controls.",
+            "Send the worker a complete assignment contract with route, model, effort, provenance and context before every dispatch.",
+            "Before each dispatch, state the worker route, model, effort and context in its assignment contract.",
+            "When continuity is uncertain, recover the full assignment contract with route, model, effort and context.",
+            "For routine follow-ups, report only changed constraints and decision-bearing deltas.",
+        )
+        bad = (
+            "Before every dispatch, always echo the complete resolved role map, route, model, effort, provenance and context.",
+            "Report the full lane and role map, route, model, effort and context before each dispatch.",
+            "Every new or reused dispatch must restate the role map, route, model and effort when a worker launches.",
+        )
+        for path in ("codex/skills/orchestrate-feature/SKILL.md", "codex/skills/orchestrate-workers/SKILL.md"):
+            text = self.read(path)
+            assert_no_full_recital(text)
+            for clause in good:
+                with self.subTest(path=path, allowed=clause):
+                    assert_no_full_recital(text + "\n" + clause)
+            for clause in bad:
+                with self.subTest(path=path, rejected=clause):
+                    with self.assertRaises(AssertionError):
+                        assert_no_full_recital(text + "\n" + clause)
+
+    def test_reviewer_continuity_rejects_repeated_full_recitals(self) -> None:
+        repeated_full_receipt = re.compile(
+            r"(?:\b(?:after|for)\s+(?:each|every)\s+(?:compatible\s+)?dispatch(?:/classification)?\s+change\b"
+            r"[^.\n]{0,40}(?:always\s+)?(?:restate|report|emit|repeat|include)\b|"
+            r"\b(?:each|every)\s+(?:compatible\s+)?dispatch(?:/classification)?\s+change\b"
+            r"[^.\n]{0,40}(?:always|must|shall|required to)\s+(?:restate|report|emit|repeat|include)\b)"
+            r"(?=[^.\n]*\breviewer\s+identity\b)(?=[^.\n]*\breuse\s+status\b)"
+            r"(?=[^.\n]*\b(?:disposition|reviewed\s+state|exact\s+reviewer\s+profile)\b)[^.\n]*",
+            re.IGNORECASE,
+        )
+        uncertain_recovery = re.compile(r"\bonly\s+(?:when|if)\s+(?:reviewer\s+)?continuity\s+is\s+uncertain\b", re.IGNORECASE)
+
+        def assert_no_repeated_receipt(text: str) -> None:
+            for sentence in re.split(r"[.\n]", text):
+                self.assertFalse(repeated_full_receipt.search(sentence) and not uncertain_recovery.search(sentence), sentence)
+
+        good = (
+            "When reviewer continuity is uncertain, recover the full reviewer identity, reuse status, last review ID, disposition, reviewed state and exact reviewer profile.",
+            "After every compatible dispatch/classification change, report only decision-bearing reviewer state deltas.",
+            "After every compatible dispatch change, report the full reviewer identity, reuse status, disposition and reviewed state only when continuity is uncertain.",
+            "Send a complete review assignment with reviewer identity, reuse status, disposition, reviewed state and exact reviewer profile.",
+        )
+        bad = (
+            "After every compatible dispatch/classification change, restate the full reviewer identity, reuse status, last review ID, disposition, reviewed state and exact reviewer profile.",
+            "Every compatible dispatch/classification change must include the full reviewer identity, reuse status, disposition, reviewed state and exact reviewer profile.",
+        )
+        for path in ("codex/skills/orchestrate-workers/SKILL.md", "codex/skills/orchestrate-workers/references/independent-reviewer-protocol.md"):
+            text = self.read(path)
+            assert_no_repeated_receipt(text)
+            for clause in good:
+                with self.subTest(path=path, allowed=clause):
+                    assert_no_repeated_receipt(text + "\n" + clause)
+            for clause in bad:
+                with self.subTest(path=path, rejected=clause):
+                    with self.assertRaises(AssertionError):
+                        assert_no_repeated_receipt(text + "\n" + clause)
 
     def test_current_docs_reconcile_ownership_and_preserve_history_as_history(self) -> None:
         prd = self.read("docs/orchestrate-feature-prd.md")
