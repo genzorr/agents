@@ -4,7 +4,7 @@
 
 This current Codex-only specification implements the [product contract](orchestrate-feature-prd.md). It supersedes obsolete live requirements preserved compactly in the PRD history; it does not repeat prior migrations or authorize publication, merge, runtime changes or live installation. The two shipped skills remain portable and explicit-only. Project workflow/task state remains authoritative through Scope → Plan → Execute → Review → Close.
 
-Owned artifacts are the `SKILL.md` and `agents/openai.yaml` under `codex/skills/orchestrate-feature` and `codex/skills/orchestrate-workers`, the latter's conditional `references/independent-reviewer-protocol.md`, this PRD/spec pair and directly affected instruction-contract tests. Preserve catalog identities, Pi/Claude/shared counterparts, global instructions, installers and foreign work. Add no controller, ledger, scheduler, dependency, private source bundle or runtime configuration.
+Owned artifacts are the `SKILL.md` and `agents/openai.yaml` under `codex/skills/orchestrate-feature` and `codex/skills/orchestrate-workers`, the latter's conditional `references/independent-reviewer-protocol.md`, this PRD/spec pair, directly affected instruction-contract tests, and the explicit-delegation rule in `codex/AGENTS.md` and `claude/CLAUDE.md`. Preserve catalog identities, Pi/Claude/shared skill counterparts, other global instructions, installers and foreign work. Add no controller, ledger, scheduler, dependency, private source bundle or runtime configuration.
 
 ## Launch and authority contract
 
