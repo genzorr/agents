@@ -5,7 +5,7 @@ description: Compare completed research outputs with source evidence and current
 
 # integrate-research
 
-Use this skill for completed research outputs. Use `distill-source` when a supplied paper, article, documentation page, repository, or skill file still needs to be analyzed for what the project should adapt.
+Use this skill for completed research outputs. For a returned Pro consultation, use `answer-pro`. Use `distill-source` when a supplied paper, article, documentation page, repository, or skill file still needs to be analyzed for what the project should adapt.
 
 ## Invocation
 

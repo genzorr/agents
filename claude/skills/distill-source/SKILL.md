@@ -74,7 +74,7 @@ keep/reject/defer/propose decisions—never only `done`.
 ## Composes with
 
 - `source-capture` — obtains a bounded packet before this skill when the source is not yet readable.
-- `ask-oracle` / `ask-chatgpt-pro` — external deep-research consult beyond the provided source.
+- `ask-pro` — external deep-research consult beyond the provided source.
 - `prepare-dynamic-workflow` — work requiring the larger coordinated preparation described above; a finite supplied source bundle alone is not a trigger.
 - `integrate-research` — completed research reports rather than raw sources.
 - `skill-lifecycle` — evaluates an approved skill delta; this skill only proposes it.

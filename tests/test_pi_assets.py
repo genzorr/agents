@@ -467,7 +467,7 @@ class PiAssetsTest(unittest.TestCase):
         assets = load_catalog(ROOT)
         pi_ids = {a.id for a in assets if a.kind == "skill" and "pi" in a.platforms}
         shared_ids = {a.id for a in assets if a.kind == "skill" and "agents" in a.platforms}
-        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-chatgpt-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune", "orchestrate-feature", "orchestrate-workers"})
+        self.assertEqual(pi_ids, {"integrate-research", "review-change", "ask-pro", "answer-pro", "distill-source", "diagnose", "explain", "architecture-review", "surface-unknowns", "archify", "text-prune", "orchestrate-feature", "orchestrate-workers"})
         self.assertFalse(pi_ids & shared_ids)
         self.assertEqual({p.parent.name for p in (self.home / "skills").glob("*/SKILL.md")}, pi_ids)
         self.assertEqual((self.home / "skills/distill-source/SKILL.md").read_bytes(), (ROOT / "codex/skills/distill-source/SKILL.md").read_bytes())

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Answer Pro"
+  short_description: "Assess a returned Pro consultation."
+  default_prompt: "Use $answer-pro to assess this Pro answer against the questions and current project evidence."

@@ -11,7 +11,7 @@ const root = process.env.PI_SDK_ROOT || join(homedir(), '.local/lib/node_modules
 const { loadSkills, formatSkillsForPrompt } = await import(pathToFileURL(join(root, 'dist/core/skills.js')));
 const { loadProjectContextFiles } = await import(pathToFileURL(join(root, 'dist/core/resource-loader.js')));
 const sharedIds = ['design-experiment', 'docker-optimize', 'logging-optimize', 'piecemeal-growth', 'review-experiment', 'skill-lifecycle'];
-const piIds = ['architecture-review', 'archify', 'ask-chatgpt-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'orchestrate-feature', 'orchestrate-workers', 'review-change', 'surface-unknowns', 'text-prune'];
+const piIds = ['architecture-review', 'archify', 'ask-pro', 'answer-pro', 'diagnose', 'distill-source', 'explain', 'integrate-research', 'orchestrate-feature', 'orchestrate-workers', 'review-change', 'surface-unknowns', 'text-prune'];
 const explicitOnly = ['orchestrate-feature', 'orchestrate-workers', 'surface-unknowns'];
 
 async function materialize(t) {

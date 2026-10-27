@@ -519,28 +519,12 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("downstream consumer or change execution, authority, recovery, verification, or acceptance", text)
         self.assertIn("not a runtime checklist, emitted field, or report", text)
 
-    def test_plain_research_preserves_sufficiency_without_pro_workflow(self) -> None:
-        entrypoint = self.read("shared/skills/ask-chatgpt-pro/SKILL.md")
-        research = self.read("shared/skills/ask-chatgpt-pro/references/plain-research.md")
-        self.assertIn("references/plain-research.md", entrypoint)
-        for field in (
-            "Decision or downstream action",
-            "Evidence standard",
-            "Scope boundaries",
-            "Sufficiency bar",
-            "Unresolved/stop condition",
-        ):
-            self.assertIn(field, research)
-        self.assertIn("final gap review", research)
-        self.assertIn("preserve the gap explicitly", research)
-        self.assertIn("explicit no-decision result", research)
-
     def test_retired_research_and_audit_entries_have_retained_owners(self) -> None:
         catalog = json.loads(self.read("catalog.json"))
         entries = {entry["id"]: entry for entry in catalog["skills"]}
         for retired in ("bro", "research-prompt", "doc-audit", "define-goal"):
             self.assertNotIn(retired, entries)
-        for retained in ("ask-chatgpt-pro", "integrate-research", "review-change", "explain", "zoom-out", "archify"):
+        for retained in ("ask-pro", "answer-pro", "integrate-research", "review-change", "explain", "zoom-out", "archify"):
             self.assertIn(retained, entries)
 
 

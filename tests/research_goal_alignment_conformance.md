@@ -1,5 +1,7 @@
 # Research Goal Alignment Conformance Readout
 
+> Historical record: this describes the retired ask-chatgpt-pro interface; current Pro consultations use ask-pro and answer-pro.
+
 ## Scope and claim boundary
 
 **Method:** Fresh-context behavioral invocation of the updated `ask-chatgpt-pro` and `integrate-research` skill interfaces with each request below. A GPT-6 Astra/high evaluator read the maintained skill sources, produced the actual external-research handoffs or integration disposition, and made no repository or external changes.
