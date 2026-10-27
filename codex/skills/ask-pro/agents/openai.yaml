@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ask Pro"
+  short_description: "Prepare an evidence-grounded Pro handoff."
+  default_prompt: "Use $ask-pro to prepare an evidence-grounded consultation or external research prompt."

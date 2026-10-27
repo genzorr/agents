@@ -98,7 +98,7 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertNotIn("codex", by_id[asset_id].platforms)
                 self.assertNotIn("devin", by_id[asset_id].platforms)
 
-        for asset_id in {"ask-oracle", "ask-chatgpt-pro", "explain", "surface-unknowns", "systemic-diagnosis", "text-prune"}:
+        for asset_id in {"ask-pro", "answer-pro", "explain", "surface-unknowns", "systemic-diagnosis", "text-prune"}:
             with self.subTest(provider_specific=asset_id):
                 self.assertIn("codex", by_id[asset_id].platforms)
                 self.assertNotIn("agents", by_id[asset_id].platforms)
@@ -166,7 +166,7 @@ class AgentsConsolidationTest(unittest.TestCase):
                 self.assertTrue((root / "codex/skills/babysit-pr/SKILL.md").is_file())
                 self.assertTrue((root / "codex/skills/thermo-nuclear-code-quality-review/SKILL.md").is_file())
                 self.assertFalse((root / "devin/skills/babysit-pr").exists())
-                self.assertTrue((root / "codex/skills/ask-oracle/SKILL.md").is_file())
+                self.assertTrue((root / "codex/skills/ask-pro/SKILL.md").is_file())
 
                 for platform in (*order, "claude"):
                     for operation in ("--prune", "--uninstall"):
@@ -193,7 +193,7 @@ class AgentsConsolidationTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((claude_home / "skills/design-experiment/SKILL.md").is_file())
             self.assertTrue((claude_home / "skills/babysit-pr/SKILL.md").is_file())
-            self.assertTrue((claude_home / "skills/ask-oracle/SKILL.md").is_file())
+            self.assertTrue((claude_home / "skills/ask-pro/SKILL.md").is_file())
 
     def test_codex_prune_retires_only_portable_legacy_copy_and_retains_dependent_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

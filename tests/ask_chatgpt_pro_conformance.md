@@ -1,5 +1,7 @@
 # Ask ChatGPT Pro Mode-Aware Conformance Readout
 
+> Historical record: this describes the retired ask-chatgpt-pro interface; current Pro consultations use ask-pro and answer-pro.
+
 ## Scope and claim boundary
 
 **Method:** Single same-agent manual conformance pass against the current `ask-chatgpt-pro` skill contract. Each case was presented as a user request to the skill interface; the resulting consultation classification and generated prompt shape were inspected against the stated contract.

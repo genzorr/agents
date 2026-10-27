@@ -341,7 +341,7 @@ class BoundedCognitionContractsTest(unittest.TestCase):
                 "stop pursuing that branch",
                 "resume it only after the evidence exists",
                 "prototype",
-                "ask-chatgpt-pro",
+                "ask-pro",
                 "design-experiment",
                 'Treat "I don\'t know" as valid information',
                 "preserve a user-owned choice",

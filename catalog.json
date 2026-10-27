@@ -35,33 +35,35 @@
       "tags": ["domain:diagrams", "origin:tt-a1i/archify"]
     },
     {
-      "id": "ask-oracle",
-      "kind": "skill",
-      "platforms": ["codex", "claude"],
-      "owner": "agents",
-      "source": {
-        "codex": [{"path": "shared/skills/ask-oracle", "target": "skills/ask-oracle"}, {"path": "codex/skills/ask-oracle/agents", "target": "skills/ask-oracle/agents"}],
-        "claude": "shared/skills/ask-oracle"
-      },
-      "install_target": {
-        "codex": "skills/ask-oracle",
-        "claude": "skills/ask-oracle"
-      }
-    },
-    {
-      "id": "ask-chatgpt-pro",
+      "id": "answer-pro",
       "kind": "skill",
       "platforms": ["codex", "claude", "pi"],
       "owner": "agents",
       "source": {
-        "codex": [{"path": "shared/skills/ask-chatgpt-pro", "target": "skills/ask-chatgpt-pro"}, {"path": "codex/skills/ask-chatgpt-pro/agents", "target": "skills/ask-chatgpt-pro/agents"}],
-        "claude": "shared/skills/ask-chatgpt-pro",
-        "pi": "shared/skills/ask-chatgpt-pro"
+        "codex": [{"path": "shared/skills/answer-pro", "target": "skills/answer-pro"}, {"path": "codex/skills/answer-pro/agents", "target": "skills/answer-pro/agents"}],
+        "claude": "shared/skills/answer-pro",
+        "pi": "shared/skills/answer-pro"
       },
       "install_target": {
-        "codex": "skills/ask-chatgpt-pro",
-        "claude": "skills/ask-chatgpt-pro",
-        "pi": "skills/ask-chatgpt-pro"
+        "codex": "skills/answer-pro",
+        "claude": "skills/answer-pro",
+        "pi": "skills/answer-pro"
+      }
+    },
+    {
+      "id": "ask-pro",
+      "kind": "skill",
+      "platforms": ["codex", "claude", "pi"],
+      "owner": "agents",
+      "source": {
+        "codex": [{"path": "shared/skills/ask-pro", "target": "skills/ask-pro"}, {"path": "codex/skills/ask-pro/agents", "target": "skills/ask-pro/agents"}],
+        "claude": "shared/skills/ask-pro",
+        "pi": "shared/skills/ask-pro"
+      },
+      "install_target": {
+        "codex": "skills/ask-pro",
+        "claude": "skills/ask-pro",
+        "pi": "skills/ask-pro"
       }
     },
     {
