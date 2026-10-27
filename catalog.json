@@ -360,6 +360,18 @@
       }
     },
     {
+      "id": "replace-orchestrator",
+      "kind": "skill",
+      "platforms": ["codex"],
+      "owner": "agents",
+      "source": {
+        "codex": "codex/skills/replace-orchestrator"
+      },
+      "install_target": {
+        "codex": "skills/replace-orchestrator"
+      }
+    },
+    {
       "id": "review-experiment",
       "kind": "skill",
       "platforms": ["agents", "claude"],
