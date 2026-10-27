@@ -1,0 +1,4 @@
+interface:
+  display_name: "Replace Orchestrator"
+  short_description: "Transfer an ongoing orchestrator role"
+  default_prompt: "Use $replace-orchestrator to transfer this ongoing orchestrator role to a fresh Codex chat."
