@@ -2,6 +2,8 @@
 
 Use this route when the user asks to audit documentation around a topic or decision and no code diff is in scope. It is read-only, does not require a branch, PR, or implementation diff, and reports findings in chat by default.
 
+The parent skill's Review modes and Output rules still apply. A repeat audit uses a new independent agent over the entire original topic/document scope; a focused check after fixing findings is mandatory Fix verification and must be reported under that name.
+
 Parse the topic or decision, seed paths, and scope constraints such as `docs/ only`, `skip research/`, or `implementation docs only`. If the topic is genuinely ambiguous, ask one pointed question; otherwise proceed with the supplied scope.
 
 Search Markdown and reStructuredText in the relevant documentation roots, including `docs/`, `research/`, `drafts/`, `.claude/`, `.codex/`, and `.agents/` when present. Search topic synonyms, then narrow to seed paths, high-match files, and structurally important documents. Follow material cross-references such as links and “see”, “defined in”, or “refer to” pointers. Bound detailed reading to the topic and requested scope; for exhaustive coverage, inspect every in-scope document and disclose any gaps. Read source code only as needed to verify documentation claims.
