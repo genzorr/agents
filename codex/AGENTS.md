@@ -57,6 +57,10 @@ Every changed line should trace to the user's request.
 
 Before reporting done, inspect the diff and make sure each changed line has a task-related reason, and that the change set as a whole addresses the actual request rather than a convenient proxy for it.
 
+## Project Artifacts
+
+Resolve consequential output locations from project guidance/configuration and applicable local bindings; explicitly read the routed optional `AGENTS.local.md` when present. Isolate substantial generated work by task/attempt or native job identity. Leave a usable result, actual locations and remaining retention obligations in the existing work record. Before authorized cleanup or worktree retirement, preserve required bytes, useful partial results and source, and verify live readers/writers and dependencies. Shared resources retain separate owners; none of this grants deletion authority.
+
 ## Code Comments
 
 Comments earn their place by explaining why, not what. Delete anything that restates the code, narrates how the change came about, or records investigation history — that belongs in the commit message or project tracking, not the source.
