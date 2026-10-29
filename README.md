@@ -108,6 +108,10 @@ bash scripts/test-prune-safety.sh
 
 Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](AGENTS.md).
 
+### Local outputs and retention
+
+Installer previews use the selected home variables above; scratch packaging checks use ignored `.scratch-home/` (or an explicitly selected scratch home), and unit tests use temporary fixtures. Record substantial attempts under distinct task/attempt subdirectories, keeping the actual host/path and decisive result in the existing work record. Keep review/recovery evidence through its consumer; record remaining owner and release/reassessment condition before proposing removal. Installed homes and their ownership ledgers are operational state, not task scratch; do not move or delete them as artifact cleanup. Small receipts may stay with the issue/PR or local task; bulky logs and bundles stay in the chosen scratch location. No remote storage binding is required by these local checks.
+
 ### Diagnosis and recovery
 
 For catalog, missing-source, portability, or traveling-reference failures, run the validators above from this checkout; they report the affected asset/path. For an install conflict, select a scratch home with the relevant home variable and run that provider's installer with `--dry-run --diff` to inspect its planned actions without writing. A successful preview has no unresolved conflicts and exits zero; a conflict preserves the destination and reports a non-success result.

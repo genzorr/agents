@@ -17,6 +17,8 @@ Repository `AGENTS.md` is the common project instruction baseline. A project `CL
 
 For diagnosis and investigation closure, follow README's [Diagnosis and recovery](README.md#diagnosis-and-recovery); it links the authoritative installer contract and existing work-record route. For new-project instructions, use [Context File Authoring](docs/context-file-authoring.md). For returned research, use `integrate-research` when available; otherwise compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
 
+Before substantial generated work, follow README’s [local outputs and retention](README.md#local-outputs-and-retention).
+
 ## Installer contract
 
 Follow the [installer contract](docs/skill-installer-contract.md). `catalog.json` defines desired assets; `.agents-install-state.json` records ownership in each selected home. The shell scripts wrap the shared standard-library engine.

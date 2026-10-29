@@ -100,6 +100,12 @@ Does not belong:
 - Detailed architecture prose already owned by maintained project docs. Link its owner; do not substitute today's implementation for an intended contract.
 - Volatile status. Derive it from the project's own tracking state.
 
+## Local Bindings
+
+For necessary user/host path exceptions, use an optional ignored `AGENTS.local.md`, with a small tracked example only when useful. Keep one canonical actual copy per host/checkout family accessible from worktrees; a checkout can link to it. Bindings point to existing configuration/access routes, carry no credentials or authority and cannot override shared policy. Include known remote bindings only where needed; avoid machine inventories and derivable values. Missing bindings do not block ordinary reading/small edits, but consequential unknown destinations must be resolved before launch.
+
+Explicitly route reading from shared project instructions, for example: “Before substantial generated work, read `AGENTS.local.md` if present (worktrees use the canonical checkout copy), then resolve outputs through README's configured output locations; record actual host/path in the task.” Name the real canonical route when adopting this example. Do not assume automatic additive loading or use `AGENTS.override.md` to replace the root baseline. Keep detailed output/retention rules at existing project owners, using supported flags and native roots rather than another settings system.
+
 ## Dual Surface: CLAUDE.md And AGENTS.md
 
 `AGENTS.md` is the common project baseline. Claude's project-instruction selection can load it directly or use `CLAUDE.md`; a compatibility file must preserve access to the baseline. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
