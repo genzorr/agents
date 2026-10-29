@@ -100,6 +100,10 @@ Does not belong:
 - Detailed architecture prose already owned by maintained project docs. Link its owner; do not substitute today's implementation for an intended contract.
 - Volatile status. Derive it from the project's own tracking state.
 
+## Project Artifact Conventions
+
+During setup or relevant output/configuration changes, put self-contained conventions at the project's existing documentation owner: configured/native destinations, launch-time resolution and attempt isolation, useful result/proof routes, retention responsibility and separately authorized retirement. Contributors must not need an OS or Harness checkout to apply project policy. For bulk inputs/outputs prefer configured storage outside code/coordination repositories and disposable worktrees where practical, separating groups with different retention or cleanup owners; reuse native exceptions without moving existing data. Shared instructions route to that local owner. A consuming skill must carry required supporting material and state its installed/source lookup explicitly, rather than assume those documents exist in the consumer project. No new skill, directory taxonomy or parallel record store is required.
+
 ## Local Bindings
 
 For necessary user/host path exceptions, use an optional ignored `AGENTS.local.md`, with a small tracked example only when useful. Keep one canonical actual copy per host/checkout family accessible from worktrees; a checkout can link to it. Bindings point to existing configuration/access routes, carry no credentials or authority and cannot override shared policy. Include known remote bindings only where needed; avoid machine inventories and derivable values. Missing bindings do not block ordinary reading/small edits, but consequential unknown destinations must be resolved before launch.
