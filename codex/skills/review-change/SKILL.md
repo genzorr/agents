@@ -7,6 +7,14 @@ description: Review code changes, diffs, branches, pull requests, implementation
 
 Review the change as a senior engineer with fresh eyes. Default to read-only review; do not edit code unless the user explicitly asks to fix findings.
 
+## Review modes
+
+These modes apply to code reviews and documentation-only audits. State which mode actually ran.
+
+- **Review:** examine the entire resolved change or documentation topic against the original request and contracts.
+- **Repeat review:** start a new independent reviewer agent with a fresh context, who neither implemented the change nor participated in its previous reviews. Give it the original request, contracts, original base/topic/path scope, current target including fixes and new files, and available source evidence; withhold implementation discussion and previous review conclusions until it has formed its own findings. It must review the entire current change against the original base, or the entire original documentation scope. A follow-up to the previous reviewer or a diff of only the latest fixes is not a repeat review. If an independent agent is unavailable or delegation is prohibited, report the repeat review as incomplete rather than substituting self-review.
+- **Fix verification:** after every batch of fixes to review findings, verify each finding's original failure scenario and relevant regressions, and rerun the relevant checks before claiming it closed. Record each finding as closed, still present, or unverified with evidence. The original reviewer may perform this focused follow-up. Call it **Fix verification**; it confirms the fixes within its stated scope and does not replace a requested repeat review. Complete this step before any requested repeat review; if verification is blocked, leave the affected findings unverified.
+
 ## Inputs
 
 The user may provide terse context:
@@ -31,6 +39,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
    - explicit PR URL/number, branch, commit range, path list, or user-provided diff;
    - otherwise current working tree diff;
    - otherwise current branch compared to merge base with the default upstream/base branch.
+   Record the original base and current revision, or identify the working-tree snapshot including untracked files; for a documentation audit, record the topic and document scope. Retain this scope for repeat reviews. Bind findings to the examined version and disclose changes made after that version.
 2. Read project instructions and the smallest set of files needed to understand the change.
 3. Inspect the diff first, then read full surrounding files for changed behavior.
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
@@ -41,7 +50,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
 
 ## Optional Deep Review
 
-Use independent reviewer passes only when the user explicitly asks for multi-agent, deep, parallel, or adversarial review and the runtime supports it.
+Repeat review requires the independent pass defined above. Additional independent passes for an initial or deep review are optional; use them only when the user explicitly asks for multi-agent, deep, parallel, or adversarial review and the runtime supports it.
 
 Recommended independent lenses:
 
@@ -79,7 +88,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 
 ## Output
 
-Lead with findings. Use this format:
+Lead with findings. Report the actual mode, reviewer, target, coverage, and evidence even when there are no findings. Preserve these limits when summarizing delegated results: a clean fix verification must not become a whole-change PASS, and incomplete coverage must remain explicit. Use this format:
 
 ```markdown
 Findings:
@@ -89,11 +98,18 @@ Findings:
   Impact: Concrete failure scenario.
   Fix: Minimal direction.
 
+Review coverage:
+- Mode and reviewer: review / repeat review / fix verification; reviewer identity and fresh or reused context.
+- Target: original base and examined revision/snapshot, or documentation topic and scope.
+- Examined: files and behavior paths actually inspected; omitted scope and remaining gaps.
+- Fix verification, when applicable: each original finding, disposition, and supporting evidence.
+
 Open questions:
 - ...
 
 Verification:
-- Ran: ...
+- Ran in this pass: ...
+- Reused evidence: ... with its source/version and limits.
 - Not run: ... because ...
 ```
 
@@ -108,4 +124,4 @@ Rules:
 
 - Reference file and line for each finding whenever possible.
 - Cap findings at the highest-signal 10 issues.
-- If the user asks to fix, fix only accepted or clearly valid findings, then rerun relevant verification.
+- If the user asks to fix, fix only accepted or clearly valid findings, then complete Fix verification as defined above.
