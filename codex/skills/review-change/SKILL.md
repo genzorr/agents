@@ -44,7 +44,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
 3. Inspect the diff first, then read full surrounding files for changed behavior.
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
 5. Run cheap, relevant read-only checks when practical, such as existing tests/lint for touched areas. Do not run destructive, slow, or environment-mutating commands unless the user asked.
-6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local changes.
+6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, read this skill’s bundled `docs/whole-system-review.md` relative to its installed directory, or repository-root `docs/whole-system-review.md` in the source checkout, and apply its optional lens. Skip it for contained local changes.
 7. Review for the checklist below.
 8. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
 
@@ -78,6 +78,14 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 - **Reviewed behavior spines**: when the change claims a reviewed executable behavior authority, verify that implementation did not weaken it; its supported public seam, controlled boundaries, independent oracle, prohibited shortcuts, and claim ceiling are explicit; one legitimate implementation change remains green; one plausible production defect turns it red; and a detector ledger accounts for every deleted or weakened test. Do not infer oracle independence from a green suite: expected behavior derived from production identifiers, generated keys, internal paths, or source shape is implementation-derived unless that exact shape is a documented contract. When practical, challenge both outcomes in isolated scratch state.
 - **Semantic fidelity**: when the change implements a source or paper, claims a behavior-preserving refactor, or transforms data whose meaning must survive, verify that it names the authoritative source or behavior, preservation obligations, and forbidden approximations, proxies, lossy shortcuts, or unsupported substitutions. When an ordinary happy-path test could accept a plausible semantic shortcut, require discriminating proof—such as a counterexample, differential oracle, round-trip property, or adversarial fixture—that would reject it. Treat missing authority or proof as a finding only when semantic fidelity is material to the claimed outcome.
 
+## Finding Dispositions
+
+Bind each finding to evidence and a concrete failure scenario, and distinguish introduced defects from pre-existing issues. An inherited issue is not automatically in scope; explain why it affects the requested outcome. Keep a meaningful disposition in the existing review/task record: **fixed** with verification evidence, **dismissed** with an evidence-based reason answering the scenario, **authorized deferral** naming the actual decision-maker and retained obligation, or **unresolved**. A proposed fix or passing unrelated check does not close a finding.
+
+Disputed findings return to the actual acceptor under the supplied mandate. Required defects remain acceptance blockers unless an authorized amendment or waiver changes that gate; deferral alone is not acceptance. When independent closure confirmation is required, the executor cannot dismiss or self-verify away that requirement. Fix verification reports closed, still present or unverified consistently with these dispositions.
+
+Repeated defects can justify prevention proposals to the user or an empowered orchestrator. Recurrence grants no authority to edit rules, skills or checks; ordinary repairs already within scope continue.
+
 ## What Not To Flag
 
 - Personal style preferences not backed by project conventions.
@@ -94,9 +102,10 @@ Lead with findings. Report the actual mode, reviewer, target, coverage, and evid
 Findings:
 - [P0] Title
   File: path/to/file.ext:123
-  Problem: What is wrong.
+  Problem: Evidence and what is wrong; introduced or pre-existing.
   Impact: Concrete failure scenario.
   Fix: Minimal direction.
+  Disposition: Fixed / dismissed with evidence-based reason / authorized deferral / unresolved; decision-maker and evidence when applicable.
 
 Review coverage:
 - Mode and reviewer: review / repeat review / fix verification; reviewer identity and fresh or reused context.

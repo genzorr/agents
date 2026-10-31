@@ -12,6 +12,12 @@ Use a separate compatible reviewer with no implementation ownership. New reviewe
 
 Claim hard read-only isolation only when established by the product. Under broader permissions proceed only when hard isolation is unnecessary; compare relevant mutation-sensitive state proportionately and disclose limits. Tests can mutate state: necessary execution needs authority and isolation protecting the target. Distinguish concurrent authorized writes from reviewer mutation.
 
+## Finding quality and correction rounds
+
+Use [Review Change’s finding dispositions](../../review-change/SKILL.md#finding-dispositions) for evidence-backed failure scenarios, introduced/pre-existing scope and fixed, dismissed, authorized-deferred or unresolved findings. Read that section when reporting or resolving findings; it owns the substantive finding rules. Required blocking closure still needs the independent confirmation below, including a disputed dismissal; the actual acceptor resolves disputes and any amendment/waiver within their authority.
+
+Batch coherent repairs and reconsider an unproductive correction approach early. Three correction rounds are a default reconsideration checkpoint, not an unconditional stop, approval gate or instruction to create another actor. Use the current owner/acceptor’s existing authority to change approach or resolve scope; continue authorized repairs when justified. Do not convert a deferred required defect into acceptance or weaken a required fresh whole-change review. Carry applicable coverage and review the complete intervening delta through delivery as below.
+
 ## Coverage, correction and result
 
 Initially inspect actual files/artifacts and the complete target diff with decision-critical dependencies. Assess criteria as satisfied, failed, not assessed or inapplicable with reason. Challenge wrong behavior, ineffective expectations and missing coverage, including a mismatch between a narrow contract and the original need. Sample only interchangeable artifacts with basis/limits. State what intended-use validation the evidence establishes and what remains for the orchestrator/user.
