@@ -7,6 +7,8 @@ description: Review code changes, diffs, branches, pull requests, implementation
 
 Review the change as a senior engineer with fresh eyes. Default to read-only review; do not edit code unless the user explicitly asks to fix findings.
 
+For supporting `docs/*.md`, resolve from this installed skill’s directory, or repository-root `docs/` in the source checkout. References use this same lookup for their conditional guides; do not resolve them from the consumer project’s cwd.
+
 ## Review modes
 
 These modes apply to code reviews and documentation-only audits. State which mode actually ran.
@@ -44,7 +46,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
 3. Inspect the diff first, then read full surrounding files for changed behavior.
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
 5. Run cheap, relevant read-only checks when practical, such as existing tests/lint for touched areas. Do not run destructive, slow, or environment-mutating commands unless the user asked.
-6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, read this skill’s bundled `docs/whole-system-review.md` relative to its installed directory, or repository-root `docs/whole-system-review.md` in the source checkout, and apply its optional lens. Skip it for contained local changes.
+6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, read `docs/whole-system-review.md` using the supporting-document lookup above and apply its optional lens. Skip it for contained local changes.
 7. Review for the checklist below.
 8. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
 
