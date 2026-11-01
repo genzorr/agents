@@ -15,7 +15,7 @@ These modes apply to code reviews and documentation-only audits. State which mod
 
 - **Review:** examine the entire resolved change or documentation topic against the original request and contracts.
 - **Repeat review:** start a new independent reviewer agent with a fresh context, who neither implemented the change nor participated in its previous reviews. Give it the original request, contracts, original base/topic/path scope, current target including fixes and new files, and available source evidence; withhold implementation discussion and previous review conclusions until it has formed its own findings. It must review the entire current change against the original base, or the entire original documentation scope. A follow-up to the previous reviewer or a diff of only the latest fixes is not a repeat review. If an independent agent is unavailable or delegation is prohibited, report the repeat review as incomplete rather than substituting self-review.
-- **Fix verification:** after every batch of fixes to review findings, verify each finding's original failure scenario and relevant regressions, and rerun the relevant checks before claiming it closed. Record each finding as closed, still present, or unverified with evidence. The original reviewer may perform this focused follow-up. Call it **Fix verification**; it confirms the fixes within its stated scope and does not replace a requested repeat review. Complete this step before any requested repeat review; if verification is blocked, leave the affected findings unverified.
+- **Fix verification:** after every batch of fixes to review findings, verify each finding's original failure scenario and relevant regressions, and establish applicable check evidence before claiming it closed. Record each finding as closed, still present, or unverified with evidence. A new substantive verification request uses a fresh independent reviewer context; clarification of an issued report may retain its context. Reuse still-applicable checks and rerun when relevant inputs changed, evidence conflicts or a required check demands it. Call a focused pass **Fix verification**; it does not replace a requested repeat review. A full repeat review may verify fixes in the same pass, with no compulsory separate preceding verification review. Supply original failure scenarios for that verification after the reviewer forms its whole-change findings; if verification is blocked, leave affected findings unverified.
 
 ## Inputs
 
@@ -82,7 +82,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 
 ## Finding Dispositions
 
-Bind each finding to evidence and a concrete failure scenario, and distinguish introduced defects from pre-existing issues. An inherited issue is not automatically in scope; explain why it affects the requested outcome. Keep a meaningful disposition in the existing review/task record: **fixed** with verification evidence, **dismissed** with an evidence-based reason answering the scenario, **authorized deferral** naming the actual decision-maker and retained obligation, or **unresolved**. A proposed fix or passing unrelated check does not close a finding.
+Bind each finding to evidence and a concrete failure scenario, and distinguish introduced defects from pre-existing issues. An inherited issue is not automatically in scope; explain why it affects the requested outcome. Keep a meaningful disposition in the existing review/task record (for Workbench, a separate scoped report owns review subjects/findings; the task records acceptance against retained report/evidence versions): **fixed** with verification evidence, **dismissed** with an evidence-based reason answering the scenario, **authorized deferral** naming the actual decision-maker and retained obligation, or **unresolved**. A proposed fix or passing unrelated check does not close a finding.
 
 Disputed findings return to the actual acceptor under the supplied mandate. Required defects remain acceptance blockers unless an authorized amendment or waiver changes that gate; deferral alone is not acceptance. When independent closure confirmation is required, the executor cannot dismiss or self-verify away that requirement. Fix verification reports closed, still present or unverified consistently with these dispositions.
 
@@ -110,7 +110,7 @@ Findings:
   Disposition: Fixed / dismissed with evidence-based reason / authorized deferral / unresolved; decision-maker and evidence when applicable.
 
 Review coverage:
-- Mode and reviewer: review / repeat review / fix verification; reviewer identity and fresh or reused context.
+- Mode and reviewer: review / repeat review / fix verification; reviewer identity and context freshness; distinguish report clarification from a new substantive request.
 - Target: original base and examined revision/snapshot, or documentation topic and scope.
 - Examined: files and behavior paths actually inspected; omitted scope and remaining gaps.
 - Fix verification, when applicable: each original finding, disposition, and supporting evidence.
