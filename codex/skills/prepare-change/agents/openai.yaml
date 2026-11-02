@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Change"
+  short_description: "Clarify a change before committing to implementation"
+  default_prompt: "Use $prepare-change to clarify this change's requirements, evidence and initial plan; return the preparation deliverable before implementation."

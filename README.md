@@ -76,7 +76,7 @@ Browse the [shared skills](shared/skills/), [Codex skills](codex/skills/), and [
 
 Use [replace-orchestrator](codex/skills/replace-orchestrator/SKILL.md) to transfer a long-running Codex orchestrator role to a fresh chat while preserving active owners and callback continuity.
 
-For a user request to prepare a specification/plan or start a proportionately supervised feature run, use the two [orchestration prompts](docs/orchestration-prompts.md). They are human-facing request examples, not installed skill dependencies or changes to default owner/team settings.
+For unsettled development, optional [prepare-change](codex/skills/prepare-change/SKILL.md) clarifies the need, necessary agreement and evidence before the next commitment. Reuse sufficient preparation and skip it for small settled changes. The [human usage guide](docs/orchestration-prompts.md) shows direct use, preparation before/during a separate-owner assignment and a supervised `orchestrate-feature` request; these examples change no default owner/team settings.
 
 Invoke `test-audit` explicitly to audit a bounded existing suite and plan preservation, repair, consolidation, or removal. It reports by default and continues one coherent cleanup batch when already authorized; it does not replace TDD, change review, or architecture review. Its [common source](shared/skills/test-audit/SKILL.md) is installed into the Codex and Claude provider homes, with explicit-only Codex invocation metadata; shared-home and Devin installation are unsupported.
 

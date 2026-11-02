@@ -1,24 +1,26 @@
-# Orchestration prompts
+# Preparing and orchestrating changes
 
-Use these two requests with the project orchestrator: first prepare the change, then start an authorized implementation run. Supply the project/change context and existing agreements. These are future user requests to copy and adapt, not instructions to execute merely by reading this guide. The second request uses the Codex [orchestrate-feature contract](orchestrate-feature-prd.md); actual supported roles, delivery mechanisms and permissions still govern. Unsupported requested controls need resolution, not silent substitution.
+`prepare-change` is an optional method for turning an unsettled development request into a justified next commitment. Use it directly in the current development chat or before/during an authorized owner assignment; it needs no team, Workbench or private OS checkout. It does not launch an owner. `orchestrate-feature` selects the separate-owner topology and owns supervision; using preparation does not select that topology.
 
-The prompts deliberately request fresh Astra/medium scrutiny for origin preparation/checkpoints and optional Astra/high advice. They preserve existing threads and the skill's default owner/team settings unless separately overridden; they do not change generic role defaults. Neither preparation acceptance nor a positive review grants implementation, merge, deployment or adoption authority.
+| Situation | Useful request |
+| --- | --- |
+| Broad change, unclear behavior or weak success evidence | Use `$prepare-change` to inspect the actual need, requirements/examples and evidence before committing to implementation. |
+| Agreed preparation already supports authorized implementation | Reuse it and proceed within the mandate; do not repeat preparation merely to invoke a skill. Reassess affected work if material evidence changes. |
+| Small settled bug fix with a clear reproducer and expected behavior | Fix and verify directly under existing authorization; no preparation spec, slice or review ritual is needed. |
+| Existing criteria/examples express the complete behavioral agreement | Keep them; do not create a capability-spec file just to fill a template. |
+| Separate owner requested | Invoke `$orchestrate-feature`. Use optional preparation before launch or inside that owner's mandate when a real gap warrants it. |
 
-## Prepare the specification and plan
+A necessary shared capability spec belongs at the project's established owner; tasks/roadmaps hold delivery planning. Preparation-only returns the preparation deliverable. An end-to-end request can continue when sufficiently prepared within existing authority; the method grants no additional permissions. `grill-with-docs` remains available for a deliberate plan/design interview and retains its existing callers; it is no prerequisite here. `answer-pro` assesses a returned consultation rather than wrapping generic preparation.
+
+## Prepare a change directly
+
+For an unsettled request, supply the project/change context and existing agreements:
 
 ```text
-Prepare the change we have been discussing before implementation, using this project's guidance and existing work records.
-
-Inspect the relevant code, specifications and prior decisions. Clarify the actual need and turn it into necessary requirements, concrete examples, important failure cases and meaningful acceptance evidence. Resolve repository facts yourself; bring me consequential product choices with your recommendation. Challenge requirements or mechanisms that add complexity without serving the need.
-
-Update the applicable stable capability spec, or create one at the project's established spec location when needed. Keep current behavior, proposed requirements and suggested implementation choices distinguishable. Reuse one maintained spec rather than making a new file for every task or review round.
-
-Propose an initial delivery plan: outcomes, dependencies and how we will verify correctness and validate usefulness. Use a slice/roadmap and tasks when the scope warrants them and the project supports them. Leave detailed implementation planning for the relevant tasks. Include environment, resource, recovery and stop constraints where they materially affect the work.
-
-I authorize fresh Astra/medium reviewers to challenge the requirements, approach and plan against my actual need and project evidence. Revise until concrete issues are resolved or a genuinely reserved decision is identified; use a new context for each substantive review. An advisor who shaped the design cannot independently certify it. Use a Pro follow-up only if a material unresolved question would benefit from it.
-
-Return the spec, proposed roadmap, review conclusions and remaining decisions with a concise recommendation. State whether the result is a proposal or an agreed contract. Stop before implementing the feature or launching production/costly runs; preparation acceptance alone does not authorize them.
+Use $prepare-change for the change we discussed. Inspect the current code/specs and actual need; return necessary requirements/examples, acceptance evidence, an initial outcome plan and remaining consequential decisions. Stop before implementation.
 ```
+
+Request scoped independent scrutiny explicitly when useful or required, for example: “I authorize fresh Astra/medium reviewers to challenge this preparation and verify substantive corrections.” This is a request-specific profile, not a generic skill default. Without delegation, the method can still prepare and self-review, labeling missing independent coverage honestly; unavailable required review holds only its dependent readiness/action. Unsupported role/delivery controls need resolution rather than silent substitution. To authorize an end-to-end change, say so in the implementation request and carry its real limits; preparation acceptance alone does not grant that authority.
 
 ## Start a supervised run
 
@@ -40,4 +42,6 @@ Proceed through authorized work without another routine GO request. Stop only af
 
 ## Source and rationale
 
-Requested by the user, genzorr, on 2026-11-03 alongside proportionate orchestration preparation/supervision (OS T-136). The aim is to challenge specs and criteria before wrong-scope implementation and select checkpoints where earlier evidence can avoid costly late discoveries, while keeping settled work light. User CogOS questions motivated the requests; they establish no measured effectiveness or successful run. Fresh Astra/medium wording review identified a conditional independent preparation-review request; the corrected second prompt requires that review, and another fresh Astra/medium reviewer closed the finding without new issues. This guide is the maintained human-facing owner; the issued standalone versions and review bases remain retained work evidence. Static packaging and wording review do not establish observed model behavior or grant live installation/publication authority.
+Requested by genzorr on 2026-11-03: T-136 introduced the reviewed preparation/supervision requests; T-137 adds optional `prepare-change` and clear use/skip guidance so ordinary development can reuse the method without adopting a team or mandatory pipeline. The aim is to challenge specs/criteria before wrong-scope implementation and select checkpoints where earlier evidence can prevent costly late discoveries while settled work stays light. User CogOS questions motivated the requests; they establish no measured effectiveness or successful run.
+
+The supervised-run example deliberately requests fresh Astra/medium origin preparation/checkpoint scrutiny and optional Astra/high advice, preserving existing threads and default owner/team settings unless separately overridden. Its earlier conditional independent-preparation-review wording was corrected and independently verified in T-136. These are future user requests to adapt, not instructions to execute by reading the guide; actual supported roles, project permissions and the [orchestration contract](orchestrate-feature-prd.md) govern. This guide is the maintained human-facing owner; earlier issued standalone versions/review bases remain retained work evidence. No installation or publication authority follows.
