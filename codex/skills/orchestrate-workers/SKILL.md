@@ -41,6 +41,8 @@ The standard feature launch request authorizes as many bounded Luna helpers as u
 
 Send a compact question, decisive facts/references, constraints and credible alternatives. Advice grants no approval, external authority or acceptance and cannot replace a user-owned product/scope decision. An advisor that shaped the result cannot be its independent reviewer.
 
+For consequential friction or meaningful existing checkpoints, use [Prepare Change's focused approach review](../prepare-change/SKILL.md#reassess-the-approach) to distinguish repair from a change of approach under the actual mandate. The executing owner initiates authorized advice/review and bounded improvements; carry consequential changes and their authority/basis into the existing record, final handoff and applicable independent review. Manual assistance retains its actual scope; a feature owner retains its origin's acceptance boundary. No extra agent, phase gate or approval follows from reassessment alone.
+
 ## Assignment and continuity
 
 New native workers/advisors/reviewers receive no parent turns (`fork_turns: none` or the supported equivalent). Distill indispensable facts and cite authoritative sources; never paste parent history. Agents remain leaves and return only to their immediate parent through native results/collaboration. No sibling, ordinary-task or higher-orchestrator fallback follows. The coordinator alone steers children and routes dependencies. Launch dependent assignments only after assessing required upstream evidence; provisional results satisfy no dependency.

@@ -12,6 +12,20 @@
 
 A necessary shared capability spec belongs at the project's established owner; tasks/roadmaps hold delivery planning. Preparation-only returns the preparation deliverable. An end-to-end request can continue when sufficiently prepared within existing authority; the method grants no additional permissions. `grill-with-docs` remains available for a deliberate plan/design interview and retains its existing callers; it is no prerequisite here. `answer-pro` assesses a returned consultation rather than wrapping generic preparation.
 
+## Reassess an approach within the assignment
+
+Consequential friction or a meaningful existing checkpoint can warrant [focused approach review](../codex/skills/prepare-change/SKILL.md#reassess-the-approach). Reuse diagnosis, preparation, architecture critique or review as appropriate; an ordinary bug or environment problem does not prove the project or requirement is wrong. This creates no universal checkpoint, new skill or broad-refactor mandate. Ordinary authorized repairs and affected-doc maintenance continue.
+
+In person-assisted work, surface the problem, recommended change and consequences before expanding or changing agreed work. An autonomous roadmap/task assignment can instead explicitly delegate bounded improvements and commitment amendments, for example:
+
+```text
+Within this task's agreed outcome and scientific/external/privacy limits, I authorize bounded improvements to the implementation plan, project architecture, tools and guidance. I also authorize amendments to intermediate delivery commitments where needed to achieve that outcome; do not weaken the outcome, frozen protocol or acceptance/approval boundaries. Bring choices beyond these bounds to me. This grants no native delegation beyond our separately agreed reviewer/advisor permissions.
+
+Record consequential changes and their reason/evidence, authority, old/new requirement/design/guidance basis, verification and remaining assessment in the existing task/roadmap/report. Surface them together in the final handoff and required independent/PR review, not only green code checks; keep routine progress concise.
+```
+
+Adapt the actual permitted bounds; “autonomous” alone grants nothing. Already-authorized improvement/advice/review proceeds without a second routine approval. A feature owner initiates authorized scrutiny and technical changes, returns beyond-feature choices to origin, and never accepts its own feature or launches another ordinary owner. Native children remain leaves; advice that shaped a change cannot be its independent final review. This example is future request text, not permission created by reading this guide.
+
 ## Prepare a change directly
 
 For an unsettled request, supply the project/change context and existing agreements:
@@ -27,7 +41,7 @@ Request scoped independent scrutiny explicitly when useful or required, for exam
 ```text
 Using the reviewed specification and delivery plan, prepare and start the agreed implementation run within our existing scope, permissions and limits.
 
-First check that the applicable requirements, decisions and guiding documents are coherent enough for the next commitment. Reuse the accepted preparation; do not restart it or add ceremony. Resolve local facts and ordinary technical choices yourself. Raise only material unresolved choices outside your authority, with facts, a recommendation and consequences.
+First check that the applicable requirements, decisions and guiding documents are coherent enough for the next commitment. Reuse the accepted preparation; do not restart it or add ceremony. Resolve local facts and ordinary technical choices yourself. Raise only material unresolved choices outside your authority, with facts, a recommendation and consequences. Carry any explicitly agreed improvement/amendment bounds into the owner assignment; do not infer them from the run label.
 
 Prepare your supervision alongside the same delivery roadmap. Select checkpoints where earlier evidence could change a consequential decision or prevent material wasted work before a dependent action. For each, state the result/evidence due, the required review or decision, who decides, and what the owner may continue or must wait for. A bounded or settled run may need only final assessment; duration alone does not require extra stages. Reassess when material assumptions, dependencies, evidence, scope or limits change.
 
@@ -35,7 +49,7 @@ I authorize native reviewers, advisors and bounded assistance needed for this as
 
 Review the run preparation, resolve concrete findings, then launch or resume a separate owner through $orchestrate-feature using its default owner/team settings unless we already selected overrides. Give the owner its relevant scope, criteria, limits, evidence and return/continuation contract. Keep your assessment responsibilities in the existing work record. Establish an actual supported delivery/observation route; do not assume invisible monitoring.
 
-At agreed checkpoints, inspect the owner's result and decisive evidence, obtain the required scoped scrutiny and validation, then continue within authority, return bounded corrections, seek advice or raise a genuinely reserved blocker. Routine owner checks need no extra approval. Partial review or checkpoint acceptance cannot establish completion of the whole feature, merge, deployment or adoption.
+At agreed checkpoints, inspect the owner's result and decisive evidence, including consequential approach/requirement/design/tool/guidance changes and their authority, original/revised basis, reason, verification and remaining assessment. Obtain the required scoped scrutiny and validation, then continue within authority, return bounded corrections, seek advice or raise a genuinely reserved blocker. Routine owner checks need no extra approval. Partial review or checkpoint acceptance cannot establish completion of the whole feature, merge, deployment or adoption.
 
 Proceed through authorized work without another routine GO request. Stop only affected work at a real scope, authority, resource or required-evidence boundary; continue independent work. Preserve useful results and recovery context. Finish by assessing the complete promised outcome and reporting what is accepted, what remains unresolved, and where the supporting evidence lives.
 ```

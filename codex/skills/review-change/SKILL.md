@@ -86,7 +86,7 @@ Bind each finding to evidence and a concrete failure scenario, and distinguish i
 
 Disputed findings return to the actual acceptor under the supplied mandate. Required defects remain acceptance blockers unless an authorized amendment or waiver changes that gate; deferral alone is not acceptance. When independent closure confirmation is required, the executor cannot dismiss or self-verify away that requirement. Fix verification reports closed, still present or unverified consistently with these dispositions.
 
-Repeated defects can justify prevention proposals to the user or an empowered orchestrator. Recurrence grants no authority to edit rules, skills or checks; ordinary repairs already within scope continue.
+Repeated defects can justify preventive improvements under actual accepted scope, including an explicitly granted bounded improvement/amendment mandate; otherwise propose them to the user or an empowered orchestrator. Recurrence or a review role grants no authority to edit rules, skills or checks. Carry consequential changes, their authority and original/revised basis into the reviewed target and final handoff; ordinary repairs already within scope continue.
 
 ## What Not To Flag
 

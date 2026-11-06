@@ -21,6 +21,14 @@ Propose an initial plan of outcomes, dependencies, correctness checks and intend
 
 Independent scrutiny requires actual explicit scoped delegation and supported role controls; loading this skill grants none. When requested/required and authorized, use a fresh independent reviewer for each substantive request, including correction review; an advisor who shaped the result cannot certify it. Use the task's role/profile controls, preserve existing threads' settings and resolve concrete findings against actual evidence. If required scrutiny is unavailable, state the missing coverage and hold only the dependent readiness claim/action; continue unrelated preparation. Self-review is not independent review. Optional scrutiny may be proposed without launching agents or inventing a gate.
 
+## Reassess the approach
+
+Consequential friction or a meaningful existing checkpoint can justify focused approach review. Distinguish an ordinary bug/environment issue from an ineffective plan, missing tools/guidance, an architecture problem or a questionable requirement; struggling alone proves none of these. Reuse `diagnose`, architecture critique or review as appropriate, without a mandatory skill, extra phase gate or automatic broad refactor. Ordinary authorized fixes and affected-doc maintenance continue.
+
+In person-assisted work, surface the problem, recommended change and consequences before expanding or changing agreed work. An autonomous assignment may explicitly delegate bounded plan/architecture/tool/guidance improvements and commitment amendments: proceed within that actual scope without another routine approval, otherwise return the proposal to the real deciding actor. An autonomous label, loaded skill, advisor or reviewer grants no authority or native delegation. Preserve scientific freezes, external/destructive/privacy limits and the intended outcome; never weaken a promise merely to declare success. Feature owners retain their origin's acceptance boundary and cannot create nested ordinary owners.
+
+Record consequential changes concisely in the existing task/roadmap/report: problem/evidence, decision/change and reason, affected old/new requirement/design/tool/guidance basis, verification and remaining assessment. Carry them together into the final handoff and applicable independent/PR review, including changed guidance and commitments rather than only green code checks. Keep progress concise; no parallel ledger or compulsory report follows. Advice that shaped the change cannot supply its independent final scrutiny.
+
 ## Return or continue under the mandate
 
 Return a concise recommendation with the relevant spec/criteria and evidence, initial plan, reviewed scope/findings or missing scrutiny, material assumptions/limits and remaining consequential decisions. State what is proposed versus agreed and the next actor/action. Keep durable details at their existing owners; no separate preparation package is required.
