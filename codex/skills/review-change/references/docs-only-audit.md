@@ -2,7 +2,7 @@
 
 Use this route when the user asks to audit documentation around a topic or decision and no code diff is in scope. It is read-only, does not require a branch, PR, or implementation diff, and reports findings in chat by default.
 
-The parent skill's Review modes and Output rules still apply. A repeat audit uses a new independent agent over the entire original topic/document scope; a focused check after fixing findings is mandatory Fix verification and must be reported under that name.
+The parent skill's Review modes and Output rules still apply. A repeat audit uses a new independent agent over the entire original topic/document scope; fixes require verification of original failure scenarios with applicable evidence. A focused pass is Fix verification; a full repeat audit may verify fixes in the same pass without a separate preceding review. New substantive requests use fresh contexts; clarification of an issued report can retain its context.
 
 Parse the topic or decision, seed paths, and scope constraints such as `docs/ only`, `skip research/`, or `implementation docs only`. If the topic is genuinely ambiguous, ask one pointed question; otherwise proceed with the supplied scope.
 

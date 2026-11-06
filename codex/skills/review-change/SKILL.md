@@ -7,13 +7,15 @@ description: Review code changes, diffs, branches, pull requests, implementation
 
 Review the change as a senior engineer with fresh eyes. Default to read-only review; do not edit code unless the user explicitly asks to fix findings.
 
+For supporting `docs/*.md`, resolve from this installed skill’s directory, or repository-root `docs/` in the source checkout. References use this same lookup for their conditional guides; do not resolve them from the consumer project’s cwd.
+
 ## Review modes
 
 These modes apply to code reviews and documentation-only audits. State which mode actually ran.
 
 - **Review:** examine the entire resolved change or documentation topic against the original request and contracts.
 - **Repeat review:** start a new independent reviewer agent with a fresh context, who neither implemented the change nor participated in its previous reviews. Give it the original request, contracts, original base/topic/path scope, current target including fixes and new files, and available source evidence; withhold implementation discussion and previous review conclusions until it has formed its own findings. It must review the entire current change against the original base, or the entire original documentation scope. A follow-up to the previous reviewer or a diff of only the latest fixes is not a repeat review. If an independent agent is unavailable or delegation is prohibited, report the repeat review as incomplete rather than substituting self-review.
-- **Fix verification:** after every batch of fixes to review findings, verify each finding's original failure scenario and relevant regressions, and rerun the relevant checks before claiming it closed. Record each finding as closed, still present, or unverified with evidence. The original reviewer may perform this focused follow-up. Call it **Fix verification**; it confirms the fixes within its stated scope and does not replace a requested repeat review. Complete this step before any requested repeat review; if verification is blocked, leave the affected findings unverified.
+- **Fix verification:** after every batch of fixes to review findings, verify each finding's original failure scenario and relevant regressions, and establish applicable check evidence before claiming it closed. Record each finding as closed, still present, or unverified with evidence. A new substantive verification request uses a fresh independent reviewer context; clarification of an issued report may retain its context. Reuse still-applicable checks and rerun when relevant inputs changed, evidence conflicts or a required check demands it. Call a focused pass **Fix verification**; it does not replace a requested repeat review. A full repeat review may verify fixes in the same pass, with no compulsory separate preceding verification review. Supply original failure scenarios for that verification after the reviewer forms its whole-change findings; if verification is blocked, leave affected findings unverified.
 
 ## Inputs
 
@@ -44,7 +46,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
 3. Inspect the diff first, then read full surrounding files for changed behavior.
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
 5. Run cheap, relevant read-only checks when practical, such as existing tests/lint for touched areas. Do not run destructive, slow, or environment-mutating commands unless the user asked.
-6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, open `docs/whole-system-review.md` and apply its optional lens. Skip it for contained local changes.
+6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, read `docs/whole-system-review.md` using the supporting-document lookup above and apply its optional lens. Skip it for contained local changes.
 7. Review for the checklist below.
 8. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
 
@@ -78,6 +80,14 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 - **Reviewed behavior spines**: when the change claims a reviewed executable behavior authority, verify that implementation did not weaken it; its supported public seam, controlled boundaries, independent oracle, prohibited shortcuts, and claim ceiling are explicit; one legitimate implementation change remains green; one plausible production defect turns it red; and a detector ledger accounts for every deleted or weakened test. Do not infer oracle independence from a green suite: expected behavior derived from production identifiers, generated keys, internal paths, or source shape is implementation-derived unless that exact shape is a documented contract. When practical, challenge both outcomes in isolated scratch state.
 - **Semantic fidelity**: when the change implements a source or paper, claims a behavior-preserving refactor, or transforms data whose meaning must survive, verify that it names the authoritative source or behavior, preservation obligations, and forbidden approximations, proxies, lossy shortcuts, or unsupported substitutions. When an ordinary happy-path test could accept a plausible semantic shortcut, require discriminating proof—such as a counterexample, differential oracle, round-trip property, or adversarial fixture—that would reject it. Treat missing authority or proof as a finding only when semantic fidelity is material to the claimed outcome.
 
+## Finding Dispositions
+
+Bind each finding to evidence and a concrete failure scenario, and distinguish introduced defects from pre-existing issues. An inherited issue is not automatically in scope; explain why it affects the requested outcome. Keep a meaningful disposition in the existing review/task record (for Workbench, a separate scoped report owns review subjects/findings; the task records acceptance against retained report/evidence versions): **fixed** with verification evidence, **dismissed** with an evidence-based reason answering the scenario, **authorized deferral** naming the actual decision-maker and retained obligation, or **unresolved**. A proposed fix or passing unrelated check does not close a finding.
+
+Disputed findings return to the actual acceptor under the supplied mandate. Required defects remain acceptance blockers unless an authorized amendment or waiver changes that gate; deferral alone is not acceptance. When independent closure confirmation is required, the executor cannot dismiss or self-verify away that requirement. Fix verification reports closed, still present or unverified consistently with these dispositions.
+
+Repeated defects can justify preventive improvements under actual accepted scope, including an explicitly granted bounded improvement/amendment mandate; otherwise propose them to the user or an empowered orchestrator. Recurrence or a review role grants no authority to edit rules, skills or checks. Carry consequential changes, their authority and original/revised basis into the reviewed target and final handoff; ordinary repairs already within scope continue.
+
 ## What Not To Flag
 
 - Personal style preferences not backed by project conventions.
@@ -94,12 +104,13 @@ Lead with findings. Report the actual mode, reviewer, target, coverage, and evid
 Findings:
 - [P0] Title
   File: path/to/file.ext:123
-  Problem: What is wrong.
+  Problem: Evidence and what is wrong; introduced or pre-existing.
   Impact: Concrete failure scenario.
   Fix: Minimal direction.
+  Disposition: Fixed / dismissed with evidence-based reason / authorized deferral / unresolved; decision-maker and evidence when applicable.
 
 Review coverage:
-- Mode and reviewer: review / repeat review / fix verification; reviewer identity and fresh or reused context.
+- Mode and reviewer: review / repeat review / fix verification; reviewer identity and context freshness; distinguish report clarification from a new substantive request.
 - Target: original base and examined revision/snapshot, or documentation topic and scope.
 - Examined: files and behavior paths actually inspected; omitted scope and remaining gaps.
 - Fix verification, when applicable: each original finding, disposition, and supporting evidence.
