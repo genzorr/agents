@@ -57,7 +57,7 @@ Use the verified native recipient/action with no settings fields. Create/retain 
 
 ## Orchestrator receives and acts
 
-On each owner return, recover its task/contract and check the expected identity, assignment and applicable target. Read the linked handoff and decision-bearing evidence. Assess promised scope, actual result, required review, limitations and intended-use validation. Use valid checks/review coverage without routinely repeating the technical audit; inspect decisive source/artifacts for a material gap, conflict or claim.
+On each owner return, recover its task/contract and check the expected identity, assignment and applicable target. Read the linked handoff and decision-bearing evidence. The owner manages technical review coverage; the orchestrator assesses promised scope, actual result, authority, coverage, limitations and intended-use validation. Reuse applicable checks/review rather than commissioning a second technical audit by default; inspect decisive source/artifacts or obtain scoped scrutiny for a material gap, conflict or consequential unreviewed claim.
 
 Use the handoff's assessment summary to select supporting evidence relevant to the decision, rather than loading every linked inventory. Missing, stale or contradictory evidence remains a gap to resolve before relying on the affected claim.
 
