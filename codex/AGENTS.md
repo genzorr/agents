@@ -25,6 +25,8 @@ Do not re-wrap or unwrap prose your task did not otherwise change — that is a 
 
 ## Action Authorization
 
+Before remote access, read the optional `AGENTS.local.md` beside this global file for the user's standing host authorizations.
+
 - For requests to answer, explain, review, diagnose, or plan, inspect the relevant materials and report the result. Do not implement changes unless the request also asks for them.
 - For requests to change, build, or fix, make the requested in-scope local changes and run relevant non-destructive validation without asking first.
 - Require confirmation for external writes, destructive actions, purchases, or material scope expansion unless the current session already authorizes that action and scope. A project or skill policy may impose a stricter gate.
