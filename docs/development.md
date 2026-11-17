@@ -15,6 +15,12 @@ bash scripts/test-prune-safety.sh
 
 Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](../AGENTS.md).
 
+The existing CI workflow runs these validators, tests and installer-ownership checks on Python 3.9 and 3.13. It checks the advertised minimum Python version independently of the maintainer's current interpreter. The workflow selects Ubuntu 22.04 because the [published Python builds](https://github.com/actions/python-versions/blob/main/versions-manifest.json) include that version pair there; moving `ubuntu-latest` to 26.04 made Python 3.9 setup fail before tests ran. To check minimum-version compatibility locally with a uv-managed interpreter:
+
+```sh
+uv run --python 3.9 --no-project python -m unittest discover -s tests
+```
+
 ## Local outputs and retention
 
 Installer previews use the explicit home variables in [installation guidance](installation.md#preview-the-selected-provider); scratch packaging checks use ignored `.scratch-home/` (or an explicitly selected scratch home), and unit tests use temporary fixtures. Record substantial attempts under distinct task/attempt subdirectories, keeping the actual host/path and decisive result in the existing work record. Keep review/recovery evidence through its consumer; record remaining owner and release/reassessment condition before proposing removal. Installed homes and their ownership ledgers are operational state, not task scratch; do not move or delete them as artifact cleanup. Small receipts may stay with the issue/PR or local task; bulky logs and bundles stay in the chosen scratch location. No remote storage binding is required by these local checks.
