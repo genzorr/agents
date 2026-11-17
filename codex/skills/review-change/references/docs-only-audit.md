@@ -10,4 +10,6 @@ Search Markdown and reStructuredText in the relevant documentation roots, includ
 
 Classify only topic-relevant findings as inconsistencies, gaps, stale references, or unresolved-question mismatches. Ground file paths and approximate line numbers in files actually read. When the topic touches `AGENTS.md`, `CLAUDE.md`, platform rules, or skill authoring, read the applicable `docs/context-file-authoring.md` and `docs/skill-authoring-principles.md`; preserve context-file drift checks. When it makes reusable claims or experiment decisions, read `docs/claim-discipline.md` and `docs/experiment-protocol-readout-contract.md` as conditional guidance.
 
+Follow one representative reader task through the affected entry, requirements and command/check routes. Explain any concrete point where the reader must guess, misses an essential prerequisite or cannot carry out the task. For portable copy claims, inspect operative code-formatted dependencies as well as Markdown links, using the literal copied set. Do not treat shorter text or green links as proof of usefulness.
+
 Report findings with severity, evidence, impact, and the relevant cross-reference. State the files scanned and say when no issues were found. Do not ask where to save a report and do not create a findings file unless the user explicitly requests a durable artifact or path.

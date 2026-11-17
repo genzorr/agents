@@ -10,7 +10,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class GoalSolLunaResearchContractsTest(unittest.TestCase):
     def read(self, relative: str) -> str:
-        return (REPO_ROOT / relative).read_text(encoding="utf-8")
+        path = REPO_ROOT / relative
+        text = path.read_text(encoding="utf-8")
+        if relative in {"codex/skills/orchestrate-feature/SKILL.md", "codex/skills/orchestrate-workers/SKILL.md"}:
+            contract = "feature-contract.md" if path.parent.name == "orchestrate-feature" else "worker-contract.md"
+            support = f"references/{contract}"
+            self.assertIn(f"({support}#", text)
+            text += "\n" + (path.parent / support).read_text(encoding="utf-8")
+        return text
 
     def test_goal_prompt_twins_share_one_goal_quality_contract(self) -> None:
         codex = self.read("codex/skills/goal-prompt/SKILL.md")

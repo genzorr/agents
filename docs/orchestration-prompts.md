@@ -12,6 +12,12 @@
 
 A necessary shared capability spec belongs at the project's established owner; tasks/roadmaps hold delivery planning. Preparation-only returns the preparation deliverable. An end-to-end request can continue when sufficiently prepared within existing authority; the method grants no additional permissions. `grill-with-docs` remains available for a deliberate plan/design interview and retains its existing callers; it is no prerequisite here. `answer-pro` assesses a returned consultation rather than wrapping generic preparation.
 
+## Follow a concrete change
+
+For a requested fix restoring invalid-input output preservation, keep the existing promise and implement, diagnose and retest within the mandate; do not create a new preparation or review panel merely because a test failed. For a genuinely unsettled partial-acceptance request, return the old/new promise, known effects on errors/retries and a recommendation before dependent implementation, unless that amendment is already within the assignment.
+
+When writing the resulting docs, follow the [project-writing example](project-documents.md#write-the-behavior-before-the-design). A behavior clause predicts the outcome; architecture explains validation/publication order; development guidance owns supported commands. Review the actual reader path and complete reference bundle, not just the worker's summary or green links. If independent review is required, ordinary feedback does not replace it.
+
 ## Reassess an approach within the assignment
 
 Consequential friction or a meaningful existing checkpoint can warrant [focused approach review](../codex/skills/prepare-change/SKILL.md#reassess-the-approach). Reuse diagnosis, preparation, architecture critique or review as appropriate; an ordinary bug or environment problem does not prove the project or requirement is wrong. This creates no universal checkpoint, new skill or broad-refactor mandate. Ordinary authorized repairs and affected-doc maintenance continue.

@@ -3,34 +3,37 @@ name: prepare-change
 description: Prepare a development change when intended behavior, success evidence or approach is unsettled, or consequential work needs reviewed preparation. Reuse sufficient preparation and skip this method for small settled changes; usable directly or within an existing owner assignment.
 ---
 
+
 # Prepare Change
 
-**Composition role: helper.** Make the next development commitment defensible under the project's workflow. This is optional preparation, not a required pipeline, team launch or implementation mandate. Reuse sufficient existing preparation; a small settled fix can proceed directly under its actual authorization.
+**Composition role: helper.** Use this method when a change needs clearer requirements, examples or a plan. Reuse preparation that already answers those questions. A small settled fix can proceed directly. This method does not authorize implementation, delegation or a new approval stage.
 
-## Establish the need and contract
+<a id="establish-the-need-and-contract"></a>
 
-Inspect relevant code, current specifications, prior decisions and the user's intended use. Resolve repository facts and defensible ordinary technical choices yourself. Identify material ambiguities or failure cases that could change the result; bring consequential user-owned choices with facts, a recommendation and consequences. Hold only work dependent on an unresolved choice or evidence gap. Challenge requirements/mechanisms whose complexity serves no demonstrated need.
+## Read what the change needs to do
 
-Distinguish current behavior, proposed requirements and suggested implementation choices. Define necessary requirements, concrete examples, important failure cases and meaningful acceptance evidence. Verification asks whether the result meets its requirements; validation asks whether those requirements/results serve the intended use. A linked spec or completed template alone proves neither.
+Read how the result will be used, the affected current spec, relevant source and prior decisions. Resolve repository facts and ordinary reversible technical choices yourself. Separate existing promises, proposed behavior and implementation suggestions. A linked spec or filled template alone establishes neither correctness nor usefulness.
 
-Update the applicable maintained capability spec when useful and authorized; create one at the project's established location only when the behavioral agreement needs it. Existing criteria/examples may suffice. Reuse task/spec/decision records rather than a new spec per task or review round. Keep proposals distinct from agreed contracts; preparation acceptance alone does not adopt a shared contract or prove implementation.
+Ask the person responsible when a choice would change the intended result or require permission you do not have. Explain the known facts, your recommendation and its consequences. Continue work that does not depend on the answer. For example, adding a filter must preserve an existing promise to validate the whole input; filtering alone is no reason to reopen that promise.
 
-## Plan and challenge proportionately
+Use the existing spec/task and concrete ordinary, boundary and failure examples to decide how to check the result. Add a capability spec only when the behavior needs a shared written agreement. When a spec needs writing, open `docs/project-documents.md` from the installed skill's directory, or repository-root `docs/` in the source checkout. Its complete example separates requirements from design. Do not resolve supporting docs from the consumer project's cwd.
 
-Propose an initial plan of outcomes, dependencies, correctness checks and intended-use validation. Include environment, resources, recovery and stop limits only where material. Use a roadmap/slice for substantial grouped work when the project supports it; leave detailed implementation planning to the relevant tasks. No universal form or full task tree is required.
+<a id="plan-and-challenge-proportionately"></a>
 
-Independent scrutiny requires actual explicit scoped delegation and supported role controls; loading this skill grants none. When requested/required and authorized, use a fresh independent reviewer for each substantive request, including correction review; an advisor who shaped the result cannot certify it. Use the task's role/profile controls, preserve existing threads' settings and resolve concrete findings against actual evidence. If required scrutiny is unavailable, state the missing coverage and hold only the dependent readiness claim/action; continue unrelated preparation. Self-review is not independent review. Optional scrutiny may be proposed without launching agents or inventing a gate.
+## Plan the work and check the risks
+
+Plan the results, dependencies and checks. Include resources, environment, recovery and stop limits where they affect the work. Preserve scientific freezes, privacy, permission for external/destructive actions and the project's review requirements. Use existing project records; this method requires no universal form or new task tree.
+
+Creating an independent reviewer requires explicit permission to delegate that review and supported tools. When review is requested or required and authorized, use a fresh independent context for each substantive request, including correction review; clarification can retain its issued report's context. An advisor who shaped the result cannot certify it. If required review is unavailable, report what is missing. Do not claim that review is complete or take a step that requires it; continue other authorized work. Self-review is not independent review, and optional advice creates no extra approval gate.
 
 ## Reassess the approach
 
-Consequential friction or a meaningful existing checkpoint can justify focused approach review. Distinguish an ordinary bug/environment issue from an ineffective plan, missing tools/guidance, an architecture problem or a questionable requirement; struggling alone proves none of these. Reuse `diagnose`, architecture critique or review as appropriate, without a mandatory skill, extra phase gate or automatic broad refactor. Ordinary authorized fixes and affected-doc maintenance continue.
+When progress reveals a consequential problem or an existing checkpoint calls for it, read [focused approach review](references/approach-review.md). Diagnose an ordinary bug/environment failure before deciding that the architecture or intended outcome is wrong. Continue implementation, repair, retesting and affected-doc maintenance within scope. Ask the person responsible before changing an agreed promise unless the assignment already authorizes that change.
 
-In person-assisted work, surface the problem, recommended change and consequences before expanding or changing agreed work. An autonomous assignment may explicitly delegate bounded plan/architecture/tool/guidance improvements and commitment amendments: proceed within that actual scope without another routine approval, otherwise return the proposal to the real deciding actor. An autonomous label, loaded skill, advisor or reviewer grants no authority or native delegation. Preserve scientific freezes, external/destructive/privacy limits and the intended outcome; never weaken a promise merely to declare success. Feature owners retain their origin's acceptance boundary and cannot create nested ordinary owners.
+<a id="return-or-continue-under-the-mandate"></a>
 
-Record consequential changes concisely in the existing task/roadmap/report: problem/evidence, decision/change and reason, affected old/new requirement/design/tool/guidance basis, verification and remaining assessment. Carry them together into the final handoff and applicable independent/PR review, including changed guidance and commitments rather than only green code checks. Keep progress concise; no parallel ledger or compulsory report follows. Advice that shaped the change cannot supply its independent final scrutiny.
+## Finish preparation or continue implementation
 
-## Return or continue under the mandate
+If asked only to prepare the change, return the proposed change, examples and checks, initial plan, review results or missing coverage, important assumptions/limits and remaining decisions. Say what is proposed versus agreed and who needs to decide what. Keep supporting evidence in the project's existing records, and stop before implementation.
 
-Return a concise recommendation with the relevant spec/criteria and evidence, initial plan, reviewed scope/findings or missing scrutiny, material assumptions/limits and remaining consequential decisions. State what is proposed versus agreed and the next actor/action. Keep durable details at their existing owners; no separate preparation package is required.
-
-Preparation-only work stops at that deliverable. Already-authorized end-to-end work may continue when sufficiently prepared, without another universal GO; no implementation, external-effect or agent-creation authority arises here. Reassess affected preparation when material assumptions, evidence, scope, dependencies or limits change; continue unaffected authorized work. Use the existing orchestration contract if a separately invoked owner topology needs supervision; preparation itself creates no owner, checkpoint framework or background observer.
+If implementation is already requested and preparation is sufficient, continue implementing, diagnosing failures, fixing them and running relevant checks without asking again for the same work. Revisit the affected plan when assumptions, scope, dependencies or limits change; continue work that does not depend on the unresolved question. The requesting orchestrator/user still decides whether to accept the feature and close its task; the feature owner cannot create nested ordinary owners.

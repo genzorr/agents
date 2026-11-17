@@ -33,3 +33,7 @@ For reviewer mutation preserve evidence, void the verdict and recycle the review
 For clarification of an issued report, recover its identity, target, findings and limits without resetting active work or changing settings. A new substantive request always starts fresh and carries the exact prior basis, original failure scenarios and applicable evidence. Context freshness grants no acceptance power and proves no correctness. Failed or invalid reviewer work remains recorded; never silently replace failure.
 
 Continue unaffected work while required review is pending; only an authorized task-scoped waiver removes it. The actual acceptor resolves findings, checks evidence applicability and performs/obtains missing intended-use validation before recording completed-scope acceptance/closure. Owner/reviewer completion and transport acceptance alone establish none of those decisions. Merge/adoption return to the user in the orchestrator chat.
+
+## Assess the delivered reader path
+
+For documentation or changed operational guidance, follow a real representative task from its entry to the affected contract, supported commands and recovery. Report where the actual reader cannot act or must guess, even if links resolve. For copied guidance, inspect the literal copy and its operative code-formatted references as well as Markdown links. A green packaging check alone does not establish usefulness. Keep scope and scientific/resource/privacy limits explicit; no new review event or outside effect follows from this exercise.

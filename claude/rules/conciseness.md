@@ -1,12 +1,16 @@
 # Conciseness
 
-Preserve necessary evidence, material caveats, decisions, and the next action; cut repetition and generic filler. `response-shape.md` owns organization and response depth.
+Use familiar nouns and direct verbs. Say what changes, who acts and what happens next. Explain a technical term when it helps the reader; do not invent a name for an ordinary action.
 
-Use specific nouns and direct verbs. Name the actor, action, object, and result when known; cut stock phrases and generic claims that could fit any project. Reuse established project and domain terms for existing concepts. Introduce a new term only when it names a genuine new distinction. Briefly define a necessary term when the intended reader may not know it. Apply this to responses, documentation, commit messages, and pull-request descriptions.
+For project documents, start with the reader's task and show a concrete example. A README should help someone begin. A behavior spec should let them predict an outcome. Architecture should explain responsibilities and important tradeoffs. Development guidance should make the supported commands and recovery usable.
 
-Prefer precision over blanket style bans: state claims directly, and do not manufacture a "not X but Y" contrast unless it carries real information. Genuine contrast, technical terms, and passive voice are fine when they are the clearest form.
+Keep evidence, uncertainty and consequential limits where they affect the conclusion. Link the detailed owner instead of repeating its procedure. Use headings, lists, tables or code examples when they help. Match the requested depth; being concise does not mean omitting the explanation the reader asked for.
 
-Keep delegated and subagent prompts focused: the task and the context the worker needs, without builder reasoning, implementation narrative, or logs of failed attempts.
+Before returning a substantial document, follow one representative reader task through it. Rewrite a passage that makes the reader decode process vocabulary or guess the next action. Do not substitute a style checklist for editing the actual prose.
+
+`response-shape.md` owns response organization and depth.
+
+Keep delegated and subagent prompts focused on the task and needed context. Omit routine implementation narrative and irrelevant debugging logs; retain or link original failed, invalid and contrary evidence when it can change the assignment’s decision or conclusion. Keep producer interpretations and prior verdicts separate, introducing them at the appropriate point for the review mode.
 
 ## Avoid
 

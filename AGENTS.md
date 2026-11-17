@@ -1,6 +1,12 @@
 # AGENTS.md
 
-This repository owns generic shared Agents, Codex, Claude, Devin, and Pi assets and their install, uninstall, and validation tools.
+This repository owns the portable project guide, generic shared Agents, Codex, Claude, Devin and Pi assets, and their catalog, installers and validation tools. Use the [README task map](README.md#choose-a-starting-point) to select the relevant route.
+
+## Purpose of the project guide
+
+The [project guide](docs/project-foundations.md) teaches how to structure, write and maintain global and project instructions, skills, behavior specs, architecture, commands and other project documents as a connected whole. Keep that purpose explicit when changing the guide. Explain what belongs where, how readers find it and how changes stay consistent, using concrete examples.
+
+An agent setting up or improving a project uses the relevant authoring guidance to leave useful project instructions and documents. Subsequent agents follow that project's entry to the information their task needs. The guide should help authors build those routes; it should not require every agent to read the whole collection or copy its procedures into AGENTS.md.
 
 ## Boundary
 
@@ -15,9 +21,9 @@ A skill installed under `~/.agents/skills` is a complete provider-neutral asset,
 
 Repository `AGENTS.md` is the common project instruction baseline. A project `CLAUDE.md` may be an import-only compatibility wrapper or carry a real Claude-specific delta; in either case import `@AGENTS.md` before any delta. This repository uses a regular import-only wrapper so Windows checkouts do not depend on Git symlink support. Working symlinks remain appropriate where the supported environment preserves them. Provider global instructions remain separate installed artifacts.
 
-For diagnosis and investigation closure, follow README's [Diagnosis and recovery](README.md#diagnosis-and-recovery); it links the authoritative installer contract and existing work-record route. For new-project instructions, use [Context File Authoring](docs/context-file-authoring.md). For returned research, use `integrate-research` when available; otherwise compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
+For diagnosis and investigation closure, follow [Diagnosis and recovery](docs/development.md#diagnosis-and-recovery); it links the authoritative installer contract and existing work-record route. For new-project instructions, use [Context File Authoring](docs/context-file-authoring.md). For starting or reorganizing project documents, use [Project Foundations](docs/project-foundations.md) and its [complete example](docs/examples/shelf-report/README.md); ordinary behavior changes follow the project’s current spec and command routes; for a bounded maintenance proposal, use [Project Gardening](docs/project-gardening.md). For returned research, use `integrate-research` when available; otherwise compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
 
-Before substantial generated work, follow README’s [local outputs and retention](README.md#local-outputs-and-retention).
+Before substantial generated work, follow [local outputs and retention](docs/development.md#local-outputs-and-retention).
 
 ## Installer contract
 

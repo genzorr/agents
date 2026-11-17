@@ -6,40 +6,31 @@ disable-model-invocation: true
 
 # Orchestrate Feature
 
-A helper for the current main conversation; keep the project workflow as driver. Dispatch one separate ordinary user-openable Pi/T3 conversation, never a native subagent, retained child or transcript fork. The owner integrates, verifies and accepts its feature; main retains cross-feature decisions. Owners use [orchestrate-workers](../orchestrate-workers/SKILL.md), not this helper, and receive no ordinary-thread creation authority.
+A helper for the main Pi/T3 conversation, with the project workflow as driver. Explicit invocation selects one separate ordinary user-openable owner, never a native leaf or transcript fork. Pi's owner integrates, verifies and accepts its feature; main retains cross-feature decisions. In Codex, the requesting orchestrator/user accepts the feature; keep Pi's different responsibility here. Owners use [Orchestrate Workers](../orchestrate-workers/SKILL.md) and cannot create another ordinary owner.
 
-## Resolve before dispatch
+<a id="dispatch-with-the-native-contract"></a>
 
-Use only existing exposed T3 tools. Discover their advertised schemas; missing tools or unavailable approval UI means this route is unavailable, not permission to install/configure a bridge or use another runtime. Every T3 MCP call keeps the current approval policy. This helper uses approval-gated callbacks, not unattended cross-conversation messaging.
+## Launch through Pi’s native tools
 
-Read `orchestrator_capabilities({}).parentThreadId` for the current main identity, then `t3_thread_configuration({})` for its actual provider/model/options. Preserve main's selection. Resolve the owner's exact Pi provider/model/thinking at creation, worker defaults and named overrides independently from explicit operator choices or observable configured defaults. Never substitute an unavailable control or cascade one role's override. Reviewer activation is disabled unless explicitly requested for this feature; only then resolve its separate profile and acceptance target.
+Before dispatch, read [Resolve before dispatch](references/feature-contract.md#resolve-before-dispatch) and [Create or reuse](references/feature-contract.md#create-or-reuse-the-ordinary-owner). Preserve native T3 approval, observable profiles, one writer per shared resource and exact checkout/authority. Reviewer activation remains disabled unless explicitly requested. Missing tools or approval UI block this route; do not substitute another runtime or install a bridge.
 
-Resolve the objective, source/specification, existing checkout/branch, authority, success criteria, dependencies and one writer per shared resource, including Git/build artifacts. Do not infer worktree, commit, push, merge, live-install or additional delegation authority. A different feature requires a fresh invocation.
+The owner implements, diagnoses failures, repairs and retests within its assignment. A progress report or recoverable failure does not require permission again for the same work. Preserve real scientific, resource, privacy and external-effect boundaries. Tell native leaves who accepts their work, which review is required and how to return only to their immediate parent; they do not receive main's callback.
 
-## Create or reuse the ordinary owner
+## Recover and return
 
-Reuse only an exact known compatible idle owner. Inspect its thread and configuration: feature, project/checkout, authority, owner profile and unfinished scope must match. Send a complete reset for a new compatible assignment; same-assignment corrections carry only changed facts. Never silently replace a running or unreachable owner, or change its model/effort to make reuse fit.
+Read [Correct, recover and return](references/feature-contract.md#correct-recover-and-return) before ordinary sends, retries or recovery. Use exact known identities and stable native request keys within their documented caller lifetime, keep follow-ups free of settings overrides and obtain the normal per-call approval. An accepted send does not prove that main read or assessed it. Return the result, needed decision or failed delivery through the supported route; no watcher or restart guarantee follows.
 
-For a new owner use `create_threads` with one entry, a feature title and the compiled launch contract. It inherits the caller's checkout; verify the intended workspace rather than falling back to `t3_thread_launch`, whose default is project root. Send an explicit Pi `target` with the advertised `providerInstanceId`, `model` and complete `options`; native Pi thinking is an option with `id: "thinking"`, not a guessed top-level effort field. Carry only the feature contract, without parent history. Use a stable `clientRequestId` for this logical creation. Retry that key only within the same live MCP caller; idempotency is scoped to that caller, not durable across provider restarts. After restart or uncertain caller continuity, inspect the retained ordinary thread before any retry; unresolved creation stays uncertain rather than creating another owner.
 
-Read the exact ordinary `threadId` from model-visible result text and construct `[title](t3-thread://v1/<threadId>)`. Retain both in the existing task record; native worker run IDs are separate handles. Inspect `t3_thread_configuration({threadId: ownerId})` and public `t3_thread_read` state against the requested profile/workspace. Accepted creation is not proof of model adherence or successful work. A mismatch stops affected work rather than authorizing configuration mutation.
+## Existing links
 
-The launch contract contains:
+<a id="resolve-before-dispatch"></a>
 
-- Objective, source/specification and selected decisions; non-goals, initial checkout/branch/state, owned interfaces and dependencies; verify expected startup controls before edits without disabling them.
-- Exact granted edits, checks, Git/external/live effects and stop conditions; one named writer for shared resources.
-- Owner integration/acceptance responsibility and the governing project workflow; activate `orchestrate-workers` for native leaves only, with fresh assignment context and required permission/instruction controls. Pass the resolved worker defaults/overrides and only an explicitly requested reviewer profile/target. Leaves return only to their owner and never receive main's callback.
-- Observable success, proportionate verification and durable handoff location. Owner handles routine implementation/build/review/CI repairs within scope; escalate exhausted authority, genuine decisions or threatened shared state.
-- Main's exact ordinary thread ID and the approval-gated return contract below. The owner must not invoke this feature helper or create another ordinary owner.
+[Continue: resolve before dispatch](references/feature-contract.md#resolve-before-dispatch).
 
-Report the owner identity/link, scope, creation profile/readback limits and return mode, then return so main stays available. Do not start a watcher or routinely poll the owner.
+<a id="create-or-reuse-the-ordinary-owner"></a>
 
-## Correct, recover and return
+[Continue: create or reuse the ordinary owner](references/feature-contract.md#create-or-reuse-the-ordinary-owner).
 
-Address corrections or ordinary continuation with `t3_thread_send` using only `threadId`, `message`, `mode` and stable `clientRequestId`. `auto` uses native current-state delivery; inspect its actual receipt and state rather than assuming it started, queued or steered. Follow-ups/resets/resumes omit both `model` and `thinking`, and never call a configuration tool. A profile mismatch needs a user decision, not an implicit settings change.
+<a id="correct-recover-and-return"></a>
 
-Routine leaf results and recoverable friction stay inside the owner. Only a real blocker, required decision or classified terminal handoff uses `t3_thread_send` to the fixed main ID, with `mode: "auto"` and a stable request ID for that event. Obtain the normal per-call approval. The message identifies feature/status, outcome or exact decision, material limit and existing evidence link. An accepted send is dispatch, not proof that main consumed or acted on it. Send retry keys have the same live-caller limit as creation; after a caller restart, uncertain delivery requires inspection/manual reconciliation, not automatic resend. Child `contact_supervisor` is not this ordinary return route.
-
-If approval is denied, unavailable or delivery is uncertain, preserve the outcome and receipt in the owner conversation/existing task record and report delivery pending. Do not claim notification, retry under a new identity or bypass approval. The user can open/read that ordinary owner manually; delivery remains unobserved until inspection.
-
-On an explicit status request or missing-delivery recovery, inspect the exact known owner and its native run/result; use an advertised bounded wait only while actively supervising that identified run. Timeout is pending, not completion. Reopen/resume the same ordinary identity with its stored profile and scope; native status/configuration remains authoritative. No subscriptions, observer, parallel ledger, automatic restart replay or exactly-once guarantee is provided. Human UI, model behavior and compaction continuity require later-use qualification.
+[Continue: correct recover and return](references/feature-contract.md#correct-recover-and-return).

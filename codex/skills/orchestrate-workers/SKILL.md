@@ -5,70 +5,43 @@ description: Use explicitly authorized native assistance within the current exec
 
 # Orchestrate Workers
 
-**Composition role: helper.** The current workflow remains the driver through Scope → Plan → Execute → Review → Close. Preparation and technical planning can overlap; the executor maintains its plan as evidence develops. New scope/behavior choices return to their actual authority. Phases create no agent slots or compulsory documents.
+**Composition role: helper.** The current workflow remains the driver. The owner normally investigates, implements, diagnoses failures, repairs, retests, integrates and updates documentation. Delegate a useful separate result only when the user explicitly authorizes that assistance. Missing optional help leaves direct work continuing; missing required independent review stays pending. Manual use creates no ordinary feature owner.
 
-The coordinator may implement/build/test/repair, integrate and self-review. A feature-owner coordinator cannot accept or close its feature: final readiness returns through its outer contract for orchestrator assessment and intended-use validation. Manual use retains the current task's actual authority; it creates no ordinary feature owner by default. Native parentage does not confer acceptance authority.
+## Choose useful assistance
 
-## Authorized roles
+Before creating an agent, read [Authorized roles](references/worker-contract.md#authorized-roles) to decide whether to delegate and resolve exact creation defaults and per-field overrides. Preserve existing threads' model/effort; ordinary follow-ups omit settings fields. Do not create a planner/main worker automatically or manufacture assignments to fill capacity.
 
-Create/invoke agents only under an actual explicit user delegation request, including manual native assistance or a launch carrying that scoped request. Helper/profile presence grants none. Reuse compatible authorization across follow-ups without asking at every dispatch. Missing optional assistance leaves direct execution continuing. A required unavailable role remains pending at its affected boundary; never silently substitute or waive it.
+For an unresolved consequential technical question, read [Advisor on demand](references/worker-contract.md#advisor-on-demand). Make routine settled choices yourself. Advice does not authorize acceptance or a change to the promised outcome.
 
-Keep the coupled investigation/implementation/build/test/repair/integration/documentation/self-review loop with the owner by default. Choose delegation when expected avoided work or delivery benefit exceeds briefing, supervision and integration cost; explain a consequential choice briefly, without scores, dispatch forms or approval questions.
+## Assign and assess
 
-| Situation | Default |
-| --- | --- |
-| Approach evolving; discoveries frequently change implementation | Owner executes |
-| Useful separable result; sufficiently known inputs/interfaces, expected behavior and meaningful checks; little coordination | Bounded helper owns the result and its verification/repair |
-| Substantial coordination across several efforts; coherent execution loop can be delegated | Main worker may be explicitly selected |
-| Task merely long or repository large | Insufficient reason alone for another worker |
+Read [Assignment and continuity](references/worker-contract.md#assignment-and-continuity) before dispatch, reuse or recovery. Name one writer per shared resource, protect foreign work, verify dependencies and preserve scientific/resource limits. Give each fresh native leaf its specific assignment and source references without parent history; they return only to their immediate parent.
 
-Use as many bounded Luna helpers as useful, created/reused on demand without a fixed helper-count cap or per-dispatch permission. Run independent assignments in parallel when resource ownership permits; serialize coupled/shared-resource work. Never manufacture assignments merely to occupy cheap workers. A separate main execution worker or planning agent requires explicit instruction, compatible resource ownership and a named benefit. No automatic main/planning layer or justification for ordinary direct implementation follows.
+Read [Assess returns and obtain review](references/worker-contract.md#assess-returns-and-obtain-review) when work returns or review becomes due. Inspect actual files, meaningful checks and their limits; integrate, correct or continue within the work already authorized. An ordinary failure or progress message does not pause authorized execution. Required independent review of the final result does not replace the requesting orchestrator/user’s acceptance decision; a feature owner cannot accept or close its feature.
 
-| Actual role | Creation default |
-| --- | --- |
-| Bounded helper | `gpt-6-luna` / `xhigh` |
-| Advisor for a consequential unresolved question | `gpt-6.1-sol` / `xhigh` |
-| Required/requested independent reviewer | `gpt-6.1-sol` / `high` |
-| Explicit exceptional main execution worker | `gpt-6.1-sol` / `medium` |
+Only for an active independent-review request, read [the reviewer protocol](references/independent-reviewer-protocol.md). Use fresh contexts for substantive review requests, identify exact targets, verify finding closure and distinguish whole-target review from focused fix verification. Ordinary feedback creates no review panel.
 
-Resolve only used roles. Worker model/effort independently follow role default, explicit general worker override, then matching named-assignment override; advisor/reviewer overrides stay separate. An omitted named field retains the resolved general field; an omitted general field retains its role default; one override never changes another role or the coordinator. Named assignments alone require no launch. Validate exact required route/profile/context controls before creation. Disclose consequential overrides/readback limits once; never silently upgrade or substitute. Accepted creation establishes requested settings, not independent readback.
+Only a direct request naming the ordinary-task route can enable the [manual ordinary-task exception](references/worker-contract.md#existing-manual-ordinary-task-exception). A feature-owner launch cannot use it.
 
-Existing-task corrections, resets, follow-ups and callbacks omit settings overrides, including `model` and `thinking`, even when null. Profiles grant no settings-change authority. Report accidental target/fields/values/outcome without unauthorized restoration.
 
-## Advisor on demand
+## Existing links
 
-The standard feature launch request authorizes as many bounded Luna helpers as useful and advisor consultation as needed, plus required independent review. Create the advisor on first use and reuse it within one unresolved discussion; a substantially new question gets a fresh context; neither launch nor a phase requires consultation. Consult before committing to a consequential technical direction when focused investigation leaves the owner unable to justify a defensible next step: for example an architecture/interface choice, conflicting evidence, verification validity or a difficult failure explanation. Do not wait for repeated failed implementations or consult on routine settled choices.
+<a id="authorized-roles"></a>
 
-Send a compact question, decisive facts/references, constraints and credible alternatives. Advice grants no approval, external authority or acceptance and cannot replace a user-owned product/scope decision. An advisor that shaped the result cannot be its independent reviewer.
+[Continue: authorized roles](references/worker-contract.md#authorized-roles).
 
-For consequential friction or meaningful existing checkpoints, use [Prepare Change's focused approach review](../prepare-change/SKILL.md#reassess-the-approach) to distinguish repair from a change of approach under the actual mandate. The executing owner initiates authorized advice/review and bounded improvements; carry consequential changes and their authority/basis into the existing record, final handoff and applicable independent review. Manual assistance retains its actual scope; a feature owner retains its origin's acceptance boundary. No extra agent, phase gate or approval follows from reassessment alone.
+<a id="advisor-on-demand"></a>
 
-## Assignment and continuity
+[Continue: advisor on demand](references/worker-contract.md#advisor-on-demand).
 
-New native workers/advisors/reviewers receive no parent turns (`fork_turns: none` or the supported equivalent). Distill indispensable facts and cite authoritative sources; never paste parent history. Agents remain leaves and return only to their immediate parent through native results/collaboration. No sibling, ordinary-task or higher-orchestrator fallback follows. The coordinator alone steers children and routes dependencies. Launch dependent assignments only after assessing required upstream evidence; provisional results satisfy no dependency.
+<a id="assignment-and-continuity"></a>
 
-Send the outcome, actual authority, current source/inputs/spec/criteria, owned interfaces/non-goals, dependencies/resources, permitted operations, checks/evidence and stop conditions, relevant profile/context facts and native return. Name any external acceptance actor. The worker owns its permitted execution/verification/repair loop and complete owned-change inspection. Inspect actual decision-bearing artifacts rather than producer signals; sample only interchangeable items with basis/limits. Use consequence tests with independent expectations and real production boundaries; reject implementation-derived oracles unless exact shape is the contract. Trace material error/retry/recovery paths, preserve useful detectors and report coverage gaps. Routine repairs need no ACK.
+[Continue: assignment and continuity](references/worker-contract.md#assignment-and-continuity).
 
-Use one writer per checkout by default. Disjoint edits still need owners for Git/index, generated/build state, databases, ports/devices and shared execution. Serialize conflicts including the parent, protect foreign work and preserve environment/worktree policy. Use existing acquisition/release/recovery tools; verify explicit predecessor dependencies rather than inferring them from idleness. Unknown ownership/cleanup blocks affected work; no force-unlock or invented manager. Preserve scientific freezes, launch/run limits and valid negatives.
+<a id="assess-returns-and-obtain-review"></a>
 
-Reuse reachable compatible helper identities for role, project/checkout, trust, authority, route/profile and recoverable state. Reviewers start fresh for each new substantive request, including requested correction reviews; only clarification of an issued report can retain that context. Advisors retain continuity within one unresolved discussion and start fresh for a substantially new question. These role-specific rules override general identity reuse. Do not reset active work or assign it concurrently. Same-assignment messages carry deltas; new assignments/uncertain continuity need prior disposition, valid carry-over, invalid assumptions/authority and a full current contract. Recycle for material incompatibility, hidden/unreachable state, irrecoverable stale conclusions, repeated critical misses after correction or explicit request, not elapsed time/compaction/ordinary repair. Never silently replace failure.
+[Continue: assess returns and obtain review](references/worker-contract.md#assess-returns-and-obtain-review).
 
-## Assess returns and obtain review
+<a id="existing-manual-ordinary-task-exception"></a>
 
-Retain current intent/authority, decisions, exact working/tested repository/checkout/ref or dirty state, source/spec/input/environment, meaningful failures, remaining work and evidence in existing records. Return outcome/readiness, changed scope, checks/results/coverage, limitations, resource disposition and needed decisions; keep decisive facts inline and larger evidence accessible. Send real blockers, invalidations, useful handoffs and final results, not mirrored completion ACKs. Use native wait surfaces rather than repeated polling; preserve host-required user updates.
-
-Select inline facts for the parent's integration, verification or next decision; keep commands, full hashes, test/measurement inventories and receipts in existing accessible evidence unless a specific item changes that action. Preserve consequential caveats and unknown resource disposition. If a reference is inaccessible to the parent, supply needed evidence or report the access gap. Shorten by selecting facts, never joining words/numbers or dropping labels, punctuation or units; impose no hard length cap or new reporting artifact. Native returns retain the evidence needed to assess the owned result; an ordinary callback uses a compact outcome/caveat, required action and handoff link.
-
-On a native return the coordinator reads and assesses the actual result and decision-critical evidence, then integrates it, sends a bounded correction/continuation, or records the actual blocker/decision. Never treat a returned report as automatic success or relay it without disposition. Reuse checks while source/environment/assumptions/coverage apply; extend for relevant changes, contradictions, missing proof or required gates. Preserve invalidating evidence, contain affected dependents and continue unaffected authorized work. Escalate only an irreducible choice, exhausted authority/recovery or threatened shared state through the governing route.
-
-Use the task/spec and carried prior agreements to settle questions before escalation. Continue routine repairs and delegated choices within authority. Corrections name the remaining outcome, allowed work, applicable evidence, affected checks/review and return condition. The feature owner returns genuinely reserved decisions to its orchestrator with an exact question/recommendation/consequence; native children return only to their parent. Do not ask the user to reauthorize routine continuation or repeat an already agreed answer.
-
-A feature launch normally requires independent review of the final delivered target before reporting readiness for validation, unless the user explicitly waives review. Carry still-applicable independent coverage and obtain independent review of the complete intervening delta and affected surfaces before readiness; batch corrections at a coherent target, not after every edit. Carry its actual task-scoped user request; installing a helper or selecting profiles does not activate it. If absent/unavailable, preserve the required review as pending and prepare a concrete target while unaffected execution continues. Manual use follows its actual checkpoint mandate; it does not inherit an unrequested final-state review or create a reviewer for every subtask. Resolve reviewer controls and load its protocol only when review is active. Only when active read [references/independent-reviewer-protocol.md](references/independent-reviewer-protocol.md).
-
-Request review for a coherent required checkpoint or a named consequential uncertainty that needs independent scrutiny, not merely because a phase changed or a routine repair occurred. The owner checks the candidate and relevant failure/recovery paths first, within authority; missing checks remain explicit. Use the protocol's correction-round guidance when fixes keep introducing failures. Review with a fresh independent identity/context for each new substantive request, including requested correction reviews. Clarifying an issued report can retain its context. Freshness does not create a review event, enlarge scope or require replaying still-valid evidence; an implementer/advisor who shaped the candidate cannot fill it. Findings that block acceptance need independent confirmation of closure regardless of severity label; owner checks cannot replace required independent coverage. A verdict supports scrutiny, not acceptance, validation or release. The owner forwards its attributable target/verdict and evidence through its own outer callback; native children never receive that callback.
-
-The authorized acceptor validates intended usefulness and records the decision. A finished worker/owner chat or passing checks cannot close the feature. The user retains merge/adoption decisions in the orchestrator chat.
-
-## Existing manual ordinary-task exception
-
-Only a direct request naming an ordinary implementation route plus actual creation authority enables this exception; a feature-owner launch cannot use it. Resolve scope/profile, fresh context, writers, acceptance actor and exact authorized origin `threadId`, required `hostId` and native `send_message_to_thread` callback. Verify recipient and route authority before every ordinary send. Send that callback contract instead of native-parent returns. Return the launch response without waiting. The ordinary task alone sends genuine blocker/gate/terminal messages with no settings fields; native transport acceptance is not receiver assessment. Retain stable request/operation IDs and actual ready identities; reconcile uncertain outcomes before retrying with the same ID. Preserve failed payload/error, never switch operations or guess routes to bypass failure, and use only an authorized fallback. Timeout/uninspected state remains unobserved. The coordinator must assess the handoff and act under the task's validation/authority contract. No worktree or wider authority follows.
+[Continue: existing manual ordinary task exception](references/worker-contract.md#existing-manual-ordinary-task-exception).

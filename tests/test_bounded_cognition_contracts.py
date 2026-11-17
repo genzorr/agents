@@ -13,7 +13,11 @@ class BoundedCognitionContractsTest(unittest.TestCase):
 
     def read_skill(self, platform: str, skill: str) -> str:
         source = "shared" if skill in {"surface-unknowns", "systemic-diagnosis"} else platform
-        return self.read(f"{source}/skills/{skill}/SKILL.md")
+        text = self.read(f"{source}/skills/{skill}/SKILL.md")
+        if skill == "review-change":
+            self.assertIn("references/review-checks.md", text)
+            text += "\n" + self.read(f"{source}/skills/{skill}/references/review-checks.md")
+        return text
 
     def test_global_surfaces_encode_local_reasoning_and_bounded_failure(self) -> None:
         codex = self.read("codex/AGENTS.md")

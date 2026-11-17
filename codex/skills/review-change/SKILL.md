@@ -47,7 +47,7 @@ For a code or change review, if there is no discoverable diff, PR, branch compar
 4. Identify intended behavior and risk areas from the user's argument. If the user names focus areas, prioritize them without ignoring obvious high-severity issues elsewhere.
 5. Run cheap, relevant read-only checks when practical, such as existing tests/lint for touched areas. Do not run destructive, slow, or environment-mutating commands unless the user asked.
 6. When the diff changes integration topology, a shared substrate, cross-component coordination/control, or recovery behavior, read `docs/whole-system-review.md` using the supporting-document lookup above and apply its optional lens. Skip it for contained local changes.
-7. Review for the checklist below.
+7. Follow the Review Checklist route below for the affected behavior and reader tasks.
 8. Produce findings first, ordered by severity. If no issues are found, say so clearly and mention any verification gaps.
 
 ## Optional Deep Review
@@ -66,19 +66,7 @@ The main agent must adjudicate reviewer output. Do not blindly relay or apply ev
 
 ## Review Checklist
 
-- **Correctness**: wrong conditions, stale assumptions, broken invariants, off-by-one errors, bad async/order behavior, incorrect state transitions, data loss.
-- **Requirements**: mismatch with user request, task acceptance criteria, docs, API contract, or PR intent. A clean, well-tested implementation of the wrong or narrowed target is still a requirements failure — flag it even if the diff itself is high quality.
-- **Edge cases**: empty/null inputs, boundary sizes, malformed external input, retries, concurrent operations, partial failures.
-- **Security and privacy**: authz/authn gaps, secret leakage, injection, path traversal, unsafe deserialization, excessive logging, PII exposure.
-- **Performance**: avoidable N+1 queries, unbounded loops, repeated expensive work, cache invalidation, large memory spikes, slow startup/build paths.
-- **Interfaces**: breaking API changes, migration gaps, inconsistent names/types, confusing return values, missing compatibility handling.
-- **Maintainability**: over-engineering, duplicated logic, unnecessary abstractions, hidden coupling, complex code where a simpler local pattern exists.
-- **Deliberate simplification**: after a substantial change, identify assumptions, states, branches, wrappers, or repeated knowledge that could be removed within scope while preserving requirements. Check the whole path for hidden rules pushed into callers; fewer lines alone do not establish improvement. A no-change conclusion is valid; flag only concrete task-related opportunities.
-- **Current guidance**: changed documented commands, contracts, ownership boundaries, and workarounds must be reflected in their current authoritative docs in the same change. Preserve historical evidence, distinguish superseded guidance, and remove workarounds whose cause disappeared; do not demand a new instruction for every completed task.
-- **Reuse-before-build**: new code, helpers, CLIs, abstractions, dependencies, or skills that skipped an obvious lower rung — existing repo pattern/tool, standard library, native platform/framework capability, existing dependency, or config/flag/rule change.
-- **Verification**: missing or weak tests for risky behavior, tests that do not exercise the changed contract, CI gaps, and decision-locking assertions that pin a legitimately changeable value, relationship, text, or source shape without naming a production defect and observable consequence. Exact assertions remain valid when the exact value, text, or shape is itself a documented public, safety, compatibility, or shipped-artifact contract.
-- **Reviewed behavior spines**: when the change claims a reviewed executable behavior authority, verify that implementation did not weaken it; its supported public seam, controlled boundaries, independent oracle, prohibited shortcuts, and claim ceiling are explicit; one legitimate implementation change remains green; one plausible production defect turns it red; and a detector ledger accounts for every deleted or weakened test. Do not infer oracle independence from a green suite: expected behavior derived from production identifiers, generated keys, internal paths, or source shape is implementation-derived unless that exact shape is a documented contract. When practical, challenge both outcomes in isolated scratch state.
-- **Semantic fidelity**: when the change implements a source or paper, claims a behavior-preserving refactor, or transforms data whose meaning must survive, verify that it names the authoritative source or behavior, preservation obligations, and forbidden approximations, proxies, lossy shortcuts, or unsupported substitutions. When an ordinary happy-path test could accept a plausible semantic shortcut, require discriminating proof—such as a counterexample, differential oracle, round-trip property, or adversarial fixture—that would reject it. Treat missing authority or proof as a finding only when semantic fidelity is material to the claimed outcome.
+For code/change review, read [review checks](references/review-checks.md) and check the requirements that apply to the change. Inspect intended behavior, actual outcomes, error/recovery paths, independent expectations and affected current guidance, including pages outside the diff. For documentation, follow a representative reader task; working links alone cannot establish usability or complete portable references.
 
 ## Finding Dispositions
 
@@ -98,41 +86,4 @@ Repeated defects can justify preventive improvements under actual accepted scope
 
 ## Output
 
-Lead with findings. Report the actual mode, reviewer, target, coverage, and evidence even when there are no findings. Preserve these limits when summarizing delegated results: a clean fix verification must not become a whole-change PASS, and incomplete coverage must remain explicit. Use this format:
-
-```markdown
-Findings:
-- [P0] Title
-  File: path/to/file.ext:123
-  Problem: Evidence and what is wrong; introduced or pre-existing.
-  Impact: Concrete failure scenario.
-  Fix: Minimal direction.
-  Disposition: Fixed / dismissed with evidence-based reason / authorized deferral / unresolved; decision-maker and evidence when applicable.
-
-Review coverage:
-- Mode and reviewer: review / repeat review / fix verification; reviewer identity and context freshness; distinguish report clarification from a new substantive request.
-- Target: original base and examined revision/snapshot, or documentation topic and scope.
-- Examined: files and behavior paths actually inspected; omitted scope and remaining gaps.
-- Fix verification, when applicable: each original finding, disposition, and supporting evidence.
-
-Open questions:
-- ...
-
-Verification:
-- Ran in this pass: ...
-- Reused evidence: ... with its source/version and limits.
-- Not run: ... because ...
-```
-
-Severity:
-
-- `P0`: critical correctness, security, data loss, or production outage risk.
-- `P1`: likely bug, requirement miss, broken user workflow, or serious maintainability/performance issue.
-- `P2`: meaningful issue that should be fixed before merge if time permits.
-- `P3`: minor cleanup only when useful and clearly tied to the change.
-
-Rules:
-
-- Reference file and line for each finding whenever possible.
-- Cap findings at the highest-signal 10 issues.
-- If the user asks to fix, fix only accepted or clearly valid findings, then complete Fix verification as defined above.
+Read [reporting](references/reporting.md) when returning findings or a clean result. Say which review mode ran, who reviewed it, whether the context was fresh, what was examined or left unchecked, which checks ran or were reused, and what happened to each finding. A clean fix verification cannot become a whole-change PASS. Preserve every unresolved required defect and material gap; no count or length cap removes them.

@@ -1,5 +1,11 @@
 # Orchestrate Feature — Product Requirements
 
+## Find the procedure for the task
+
+The Codex [feature entry](../codex/skills/orchestrate-feature/SKILL.md) routes launch, owner assignment, delivery and origin assessment to its bundled execution contract. The [worker entry](../codex/skills/orchestrate-workers/SKILL.md) routes role selection, assignments, continuity, return assessment and active independent review. Read the relevant procedure before the action it governs; do not load all provider contracts or confuse a source document with authority to dispatch.
+
+Use [the human request examples](orchestration-prompts.md) for preparation versus implementation and explicit delegation. Verification checks the delivered requirement; validation follows the intended user task. For documentation, trace an actual reader from entry to the relevant spec, command/check and recovery. For copied guidance, inspect operative code-formatted dependencies as well as links in the literal copied set. Review remains at coherent required outcomes, with ordinary diagnosis/repair/retest continuing inside existing authority.
+
 ## Current decision and boundary
 
 This is the current Codex product contract for `orchestrate-feature` and `orchestrate-workers`. Preserve the long-lived project orchestrator → separate ordinary feature-owner chat. The owner normally executes the coupled work; native help is selective, advice is available on demand, and completed delivery requires independent review before intended-use validation. The requesting orchestrator/user owns acceptance and closure. This contract grants no live installation, runtime configuration, Git or external-write authority and does not change Pi counterparts.

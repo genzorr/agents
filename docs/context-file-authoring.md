@@ -1,138 +1,98 @@
 # Context File Authoring
 
-Use this portable craft rubric when writing or revising standing instruction files and their conditional references. It covers wording, maintained ownership and provider loading; use the project's own setup policy and existing documentation owners for its procedures. No personal context repository is required. `docs/skill-authoring-principles.md` is the sibling rubric for skills.
+Use this reference when writing or revising agent instructions. The [project-document guide](project-documents.md) explains how to write the README, specs and architecture. This page owns instruction placement, local files, provider wrappers and loading mechanics. It works as an ordinary document; no initializer skill or private context repository is needed.
 
 ## Create Or Update Project Instructions
 
-For a request to initialize or maintain project instructions, use this document directly; no initializer skill or personal context repository is required. Inspect the actual project before writing: existing instructions, README/development docs, package and environment configuration, supported entrypoints, and checks. Verify commands and prerequisites where feasible; label anything unverified rather than inventing a command or constraint.
+Read the actual project entry, relevant docs, command/configuration sources and applicable instructions before writing. Preserve useful names and local commitments. Verify commands where authorized; mark an unverified command or environment rather than inventing one.
 
-Keep `AGENTS.md` as the common project baseline. Preserve useful existing content and names, patch only the affected guidance, and add provider-specific files only for a requested or demonstrated runtime need. Capture purpose, consequential non-obvious constraints, ownership boundaries, and verified entry commands or links; do not enumerate the file tree or fill a template. Ask only when a load-bearing choice belongs to the operator and cannot be resolved from the project.
+Write the project purpose, consequential local boundaries and routes for the reader's tasks. A limited current-docs listing can help discovery; a complete source inventory usually cannot. Link the command owner for setup, checks and diagnosis. Add a narrower instruction only when the subsystem genuinely needs a different rule.
 
-Make diagnosis discoverable from existing development docs: how to reproduce or inspect the relevant component, prerequisites, useful output or state, expected success signals, and safe recovery limits. Prefer the existing CLI or runbook; add a helper only for a demonstrated recurring gap. Generic `diagnose` and `logging-optimize` skills supply methods, not the project's commands. Verify these routes when writing instructions rather than substituting “debug carefully.”
+For example: “Before changing batch import, read `docs/import-batches.md` (example-only). Run the focused checks in `docs/development.md` (example-only). Use an isolated store for demonstrations.” This names the action, relevant owner and boundary before a write. “Follow best practices” does none of those jobs.
 
 ## Current Guidance And Historical Records
 
-Root instructions are entrypoints; maintained project docs own current architecture, commands, contracts, setup, and debugging guidance. Put a subsystem rule near that subsystem only when it genuinely differs. Investigation evidence, past decisions, experiment records, and completed work belong in the project's existing history store, including Harness where used; do not add a parallel `records/` store. Active plans and tasks remain working state. Personal preferences stay in the operator's context source; reusable procedures stay with their source owner.
+Keep current requirements, architecture, commands and recovery at their maintained project owners. Keep active plans and investigation results in the existing work system. Preserve original reports and evidence; a later correction adds context without changing what the original said.
 
-When a change alters a documented command, contract, ownership boundary, or workaround, update its current authoritative guidance in the same change and link to it from other entrypoints. Preserve historical evidence; mark superseded guidance when it remains relevant to interpreting that history. A completed task or transient result is not automatically a new standing instruction.
-
-A verified surprise is a consequential constraint an agent reasonably missed because it was hard to discover. First remove the trap in code, configuration, or a check when feasible. Otherwise place the actionable explanation where the next affected task will encounter it and retain decisive evidence in the existing project record. Repeated costly rediscovery or one consequential non-obvious failure can justify an instruction; an obvious convention cannot. Remove the workaround when its cause disappears. Do not append automatic lesson lists or rewrite unrelated instructions.
+Update a documented fact with the change that affects it. A repeated failure may reveal a missing instruction, but first consider fixing the command, configuration or check that creates the trap. Add the instruction where the next affected task will encounter it, and remove an obsolete workaround when its cause disappears. Finishing a task does not require a new standing rule.
 
 ## Core Test
 
-Standing instructions serve varied tasks; conditional references can be task-specific. Check both accuracy and operational value: what supported task changes because this instruction is present, and what would fail without it?
+Ask what the reader will do differently because of the passage. Keep it if it explains a real boundary, removes a likely mistake or helps find necessary information. If it repeats another page, link that page with a clear reason to open it.
 
-Ask of each line:
-
-- Would the agent do something different without this line?
-- Does an existing artifact already supply this information, and will the supported reader find it before acting?
-- Does this contradict anything else the agent will load in the same session?
-- Is it needed on *every* run, or only on some?
-
-Resolve conflicting instructions at their maintained owner rather than expecting the agent to guess an exception. Use task-triggered routes for detailed guidance; an ordinary Markdown link does not itself load its target.
+Check that the supported reader reaches essential rules before acting. A short entry can still fail if the critical constraint is hidden behind an optional link. Resolve contradictory instructions at their source rather than making each agent guess which one matters.
 
 ## Layers
 
-Give each fact one maintained owner. A root may retain a short boundary or routing reminder when contributors cannot be assumed to load that owner. Remove duplicate procedures, conflicting copies and reminders with no distinct audience or trigger. Before deleting a project rule because a global file repeats it, verify the supported contributors' loading paths; essential standalone boundaries must remain reachable before the relevant action.
+| Location | What belongs there | Example |
+| --- | --- | --- |
+| Provider global source | Cross-project working defaults and actual provider controls | How to continue an authorized fix; provider-specific permission/delegation behavior |
+| Project root entry | Purpose, shared local constraints, relevant reading/command routes | Which record store and checkout to use; isolated demo requirement |
+| Nested instructions | A real area-specific difference | A hardware subtree's required bench procedure before operation |
+| Conditional document | Detailed explanation or procedure needed for certain tasks | Export recovery or instruction loading mechanics |
+| Optional local binding | Necessary machine-specific paths or access routes | An existing output mount or canonical checkout locator |
+| Skill | A reusable procedure with a clear trigger and observable result | Preparing unsettled behavior or reviewing a coherent change |
 
-For repository-managed distribution, reuse portable skill bodies through the catalog rather than maintain separate source forks for each runtime output. Shared-home skills are discovered once as complete implementations; they are not bases for same-name provider overlays. A provider global instruction file can remain a deliberate counterpart when its tools, approvals or child behavior differ, as Pi's global `AGENTS.md` does. Edit the owning source and reconcile its installed outputs through the owning installer.
+Use the narrowest location that still reaches everyone who needs it. Essential contributor constraints cannot depend solely on one person's private globals. A shared boundary reminder may be necessary at entry; do not duplicate its complete procedure there.
 
-The table illustrates Claude's loading surfaces; for another provider, use its supported instruction and reference mechanisms rather than creating Claude files. Provider selection and exclusions matter; see [Loading notes](#loading-notes).
-
-| Layer | Holds | Loading |
-|---|---|---|
-| Harness system prompt | Product behavior. Not yours to edit. | — |
-| Global `~/.claude/CLAUDE.md` (runtime-home) | Cross-project Claude controls without a narrower rule file. | User instruction surface; actual selection depends on runtime configuration and agent type |
-| `~/.claude/rules` (runtime-home) | Cross-project personal standards. | User rules; actual selection depends on runtime configuration and agent type |
-| Project `CLAUDE.md` or selected `AGENTS.md` | Project purpose, essential boundaries and task routes. | Ancestor instructions at launch; nested instructions on demand, subject to selection and exclusions |
-| Traveling docs (`~/.claude/docs` (runtime-home)) | Contracts and rubrics consulted mid-task. | Only when referenced |
-| Skills | Opinionated procedures. | Metadata and body loading depend on runtime and invocation policy |
-| `@` references | Specs, mockups, test suites, code to port. | Expanded with the importing instructions; imported text consumes context |
-
-Push an instruction to the narrowest layer that still reaches the run that needs it.
+Installed files are outputs of their source owner. Change the owning source and reconcile through its supported installer. A shared skill is a complete implementation, not a base to combine with a same-name provider skill. Keep provider counterparts when tools, permissions, invocation or support files differ.
 
 ## Judgement Over Rules
 
-Use principles for choices that legitimately depend on context. Use explicit requirements for safety, authority and operational invariants; state their scope and exceptions. A prohibition with a concrete consequence can be clearer than an abstract principle.
+Explain the behavior and reason in ordinary language. Prefer “Match the surrounding code's comment style; explain surprising constraints” to arbitrary sentence or line limits. Keep explicit safety, privacy, authority and operational rules when their consequence warrants them, with their actual scope and exceptions.
 
-Prefer:
-
-- "Write code that reads like the surrounding code: match its comment density, naming, and idiom."
-
-Avoid:
-
-- "Default to writing no comments. Never write multi-line comment blocks — one short line max."
-
-Keep destructive-command, credential-handling, external-effect and hard operational boundaries explicit. Style guidance should reflect the project's real contract rather than an arbitrary restriction.
-
-An absolute that conflicts with legitimate tasks creates ambiguity; narrow its scope instead of expecting the agent to guess the exception.
+A short absolute is not necessarily simpler than a precise conditional rule. “Never run tests” hides useful distinctions; “Do not start the hardware test without the bench reservation and operator release” states a concrete boundary.
 
 ## Patterns To Reconsider
 
-Reconsider these patterns when they add irrelevant context or duplicate an existing interface; they are not universally obsolete.
-
-| Pattern | Alternative when applicable |
-|---|---|
-| Enumerate rules for every case | State a scoped principle while retaining consequential requirements |
-| Give examples of tool/format usage | Keep examples that disambiguate a non-obvious command, format or boundary; omit ones that duplicate a clear interface |
-| Put everything upfront so it is never missed | Keep essential boundaries at entry; route detailed guidance by task |
-| Repeat key instructions in several places | One maintained owner, with boundary reminders where audience or loading requires them |
-| Size the file by project LOC | Include what supported tasks need, without line or word quotas |
-| Ship a template to fill in | Write the specific repo's actual constraints |
-| Instruction files as an investigation log | Retain standing guidance here; keep evidence and results in the existing record store |
+| Pattern | Better fit when applicable |
+| --- | --- |
+| Everything loaded at startup | Essential boundaries at entry, with task-specific links for details |
+| A second full procedure in every project | One maintained procedure plus the project's concrete commands and limits |
+| Root instructions as an investigation diary | Current routes here, original evidence in the existing record owner |
+| Identical provider files maintained separately | Common project baseline plus supported wrappers or a real provider delta |
+| A template with empty required sections | The information this project's readers actually need |
+| A rule for every observed failure | Fix the recurring mechanism; preserve a scoped explanation only where needed |
 
 ## What Belongs In Root Project Instructions
 
-Briefly say what the repo is for. Keep essential boundaries and consequential shared constraints, then route tasks to their detailed owners. A pure index can hide a boundary until after an action violates it.
+State what the repository owns and what contributors must know before changes. Give task-directed routes to behavior, architecture, commands and records. Include a supported command directly when it is short and important to get right; otherwise route to its owner.
 
-Belongs:
-
-- Non-obvious invariants ("`harness-core` must stay zero-dependency").
-- Commands that are not guessable, and the ones that are expensive to get wrong.
-- Traps with consequences ("killing the local orchestrator does not stop the remote run").
-- Layout choices an agent would otherwise violate ("all types in one file, nowhere else").
-- Required checks, their triggers and limits, or a direct route to their maintained commands.
-
-Does not belong:
-
-- Inventories and explanations that add no operational value beyond existing artifacts. A concise supported command or consequential constraint can still establish the project contract.
-- Duplicate procedures or reminders with no distinct audience or trigger. Do not depend on an operator's private globals for essential project boundaries.
-- Detailed architecture prose already owned by maintained project docs. Link its owner; do not substitute today's implementation for an intended contract.
-- Volatile status. Derive it from the project's own tracking state.
+Keep the full architecture, volatile status and historical argument elsewhere. Do not strip an essential boundary merely because a global file repeats it; an independent contributor may not have that global file.
 
 ## Project Artifact Conventions
 
-During setup or relevant output/configuration changes, put self-contained conventions at the project's existing documentation owner: configured/native destinations, launch-time resolution and attempt isolation, useful result/proof routes, retention responsibility and separately authorized retirement. Contributors must not need an OS or Harness checkout to apply project policy. For bulk inputs/outputs prefer configured storage outside code/coordination repositories and disposable worktrees where practical, separating groups with different retention or cleanup owners; reuse native exceptions without moving existing data. Shared instructions route to that local owner. A consuming skill must carry required supporting material and state its installed/source lookup explicitly, rather than assume those documents exist in the consumer project. No new skill, directory taxonomy or parallel record store is required.
+The project's development/operations page should identify supported input/output locations, prerequisites, large-work resource limits and retention responsibility. Use native flags and configuration. Name actual host and output locations in the existing task for substantial runs; a path in a record does not back up its bytes.
+
+Preserve useful partial results, unpublished source and live dependencies before separately authorized cleanup. Shared caches, controller state and retained results can have different owners. A worktree or completed task does not grant deletion authority.
 
 ## Local Bindings
 
-For necessary user/host path exceptions, use an optional ignored `AGENTS.local.md`, with a small tracked example only when useful. Keep one canonical actual copy per host/checkout family accessible from worktrees; a checkout can link to it. Bindings point to existing configuration/access routes, carry no credentials or authority and cannot override shared policy. Include known remote bindings only where needed; avoid machine inventories and derivable values. Missing bindings do not block ordinary reading/small edits, but consequential unknown destinations must be resolved before launch.
+Create an ignored `AGENTS.local.md` only when there is real local information to keep there. A project with no machine-specific exceptions needs no local file or empty example. Local bindings hold locators and applicable setup facts, not credentials, a second policy or new permission.
 
-Explicitly route reading from shared project instructions, for example: “Before substantial generated work, read `AGENTS.local.md` if present (worktrees use the canonical checkout copy), then resolve outputs through README's configured output locations; record actual host/path in the task.” Name the real canonical route when adopting this example. Do not assume automatic additive loading or use `AGENTS.override.md` to replace the root baseline. Keep detailed output/retention rules at existing project owners, using supported flags and native roots rather than another settings system.
+Explicitly route the read before it matters: “Before a large run, read `AGENTS.local.md` if present, then resolve outputs through development guidance.” Missing local bindings do not block reading or ordinary small edits. Resolve a consequential unknown destination before executing the dependent run.
+
+If several worktrees use one binding, identify the real canonical copy and make it reachable by the project's supported arrangement. Do not assume all providers load `AGENTS.local.md` automatically. Do not use a provider's override filename as an additive local note; it may replace the shared baseline.
 
 ## Dual Surface: CLAUDE.md And AGENTS.md
 
-`AGENTS.md` is the common project baseline. Claude's project-instruction selection can load it directly or use `CLAUDE.md`; a compatibility file must preserve access to the baseline. A repo serving both must not hand-maintain two copies; they drift, and the drift is silent.
+Use one common project baseline. In a project that needs a Claude compatibility entry, the regular file can contain:
 
-- Content identical → a regular `CLAUDE.md` containing only `@AGENTS.md` is a first-class compatibility option, including when there is no Claude-specific delta. Prefer this import-only wrapper for repositories supporting Windows.
-- A **symlink** from `CLAUDE.md` to `AGENTS.md` is also appropriate when every supported checkout preserves symlinks. Keep a working link in such an environment rather than changing it for symmetry.
-- A genuine Claude-only delta exists → `CLAUDE.md` holds `@AGENTS.md` plus only the delta.
+```text
+@AGENTS.md
+```
 
-With Git symlink support disabled, Windows can check out a committed link as a regular file containing its target filename rather than the baseline instructions. A regular import wrapper avoids that failure. See Anthropic's [shared-file guidance](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools); wrapper contents and import-path resolution can be checked locally, while actual loading must be confirmed in the target provider session.
-
-A Claude-only delta is real when it concerns harness-specific behavior: background tasks, subagent delegation, tool semantics. It is not real when it is the same repo knowledge reworded.
-
-Claude `@` imports keep one maintained source. Imported text expands with the importing instructions and consumes context; a startup import is not progressive disclosure. Resolve paths relative to the importing file, not the working directory; nesting is limited to four hops. Remove unnecessary text or defer genuinely conditional material instead of moving it into an unconditional import.
+Put a genuine Claude-only delta below the import. A working symlink can remain where supported; a regular import wrapper avoids reliance on Git symlink support in Windows checkouts. Do not maintain two copies of the same project prose. Provider global files remain separate artifacts.
 
 ## Progressive Disclosure
 
-Move genuinely conditional material out of the always-loaded layer; check the actual loading chain. Choose by trigger, not a universal ranking:
+The [document-writing page](project-documents.md#find-the-document-before-reading-it) owns filename discovery and task-based reading. For instructions, distinguish these mechanisms:
 
-- **Task-directed link:** name when to open a maintained document. Use it when relevance follows a task rather than a path. This rubric's [Claim breadth](#claim-breadth) route names when to open `docs/claim-discipline.md`, the maintained owner for generalizing observations into reusable guidance.
-- **Runtime import:** loads the target with the importing instructions. Use it to preserve a common baseline, not to defer unrelated procedures.
-- **Path-scoped or nested instructions:** use a real subsystem boundary and the target provider's supported discovery behavior. A filename's location alone does not establish that every runtime discovers it before an action.
+- A **task-directed Markdown link** says when to open a document; it is not an automatic import.
+- A **runtime import** loads text with the importing file. It preserves a shared baseline but does not defer its context cost.
+- **Nested or path-scoped instructions** depend on the provider's actual discovery and access rules. A file existing in a directory does not prove it was loaded before every tool action.
 
-Keep routes reachable before the relevant action. Avoid reading loops and blanket instructions to read every linked guide. Do not externalize material needed on every run just to shorten a file.
+Keep essential pre-action rules reachable. Avoid a link cycle that sends a reader from the project guide to the authoring guide and back before either answers the question. Do not externalize always-needed text merely to meet a line quota.
 
 ## Loading Notes
 
@@ -147,39 +107,23 @@ For other providers, check their supported discovery and reference mechanisms be
 
 ## Claim breadth
 
-When a context-file proposal generalizes from observed behavior, conditionally open the Agents-owned `docs/claim-discipline.md` reference before choosing its loading layer. The broader the loading surface, the more evidence is required that the rule applies across that surface. Keep behavior project-, path-, task-, or skill-specific until independent evidence justifies broader placement.
+When observations are becoming a reusable instruction or default, open [Claim Discipline](claim-discipline.md). The broader the loading surface, the more evidence is required that the rule applies across that surface. Keep project-specific evidence scoped to that project unless a broader basis supports a broader rule. Preserve actual privacy, authority and scientific commitments; uncertainty about effectiveness does not remove those boundaries.
 
 ## Environment Activation
 
-Inspect the project's actual execution path before adding activation. A virtual environment alone does not imply a session hook: commands such as `uv run`, an explicit environment interpreter, or an existing launcher can already select the correct environment. Preserve a working path and verify that supported commands use the intended interpreter and dependencies.
+Start with the existing execution path. A native launcher, `uv run` or an explicit environment interpreter may already select dependencies correctly. Prefer repairing that path over a repeated reminder to activate something before each call.
 
-For Claude Code only, when project commands depend on shell activation that is otherwise missing, a `SessionStart` hook can append the verified activation command to `$CLAUDE_ENV_FILE` for subsequent Bash calls. This is a conditional Claude configuration example, not a requirement for Codex or Devin projects:
-
-```json
-"hooks": {
-  "SessionStart": [{
-    "hooks": [{
-      "type": "command",
-      "command": "echo 'ACTIVATION_CMD' >> \"$CLAUDE_ENV_FILE\""
-    }]
-  }]
-}
-```
-
-Prefer a reliable launcher or runtime-supported environment setup over a reminder to activate before every call. Document the supported execution command and prerequisites; do not add Claude hooks to a Codex/Devin-only project or replace a working explicit environment command merely because a virtual environment exists.
+A provider hook is a conditional implementation choice when the supported launcher genuinely needs it. Inspect that provider's current documented interface and the selected environment before adding or changing a hook. This guide adds no startup hook or runtime setting.
 
 ## References
 
-Prefer the artifact that answers the question: code for implemented behavior, tests for checked outcomes, specifications for intended contracts, and prose for purpose, rationale and constraints. Mockups, porting examples and rubrics can make an ambiguous target concrete. Link maintained owners rather than copying them; no artifact type universally outranks the others.
+Read code/configuration for implemented behavior, specs for intended behavior, checks for exercised outcomes and records for provenance. None universally replaces the others. The [skill authoring reference](skill-authoring-principles.md) applies when the work is a reusable skill; it is not required for ordinary project docs.
 
 ## Pruning
 
-Use the duplication, sediment, no-op and sprawl questions in `docs/skill-authoring-principles.md` §Pruning, with the ownership and reach qualifications in [Layers](#layers). Two failure modes need particular care in context files:
+Remove duplicated procedures, obsolete workarounds and text that does not help the supported task. Preserve essential boundary reminders for distinct readers. Inspect affected links, wrapper targets and distributed dependencies before removing a source.
 
-- **Cross-layer duplication** — remove competing procedures and copies without a distinct consumer; preserve essential standalone boundary reminders. Verify supported loading paths before deleting a broader or narrower copy.
-- **Stale authority** — resolve disagreement between current guidance, accepted contracts and implementation at the affected owner. Code shows implemented behavior; it does not automatically override an intended contract or safety boundary. Mark proposals and superseded guidance explicitly.
-
-Inspect the full affected diff, links, wrapper targets and distributed reference closure. Walk representative tasks from entry to the affected owner, retaining boundaries, prerequisites, checks and recovery limits without unrelated loading. Use existing proportional checks; do not add tests that merely freeze prose. Verify actual loading in a fresh target-provider session when runtime behavior changes: Claude's `/context` lists memory files. Static link and packaging checks are not live loading evidence; protected runtime files and transcripts retain their applicable read gates.
+Walk representative tasks after rewriting. A static link or catalog check establishes reachability/packaging; it does not show that a provider loaded the file or followed it. A loader change needs a fresh supported runtime check under its actual permissions. Use the applicable authority for protected settings, transcripts or credentials when performing that check.
 
 ## Attribution
 
