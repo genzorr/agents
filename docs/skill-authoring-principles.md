@@ -1,8 +1,6 @@
 # Skill Authoring Principles
 
-Use this as the craft rubric when creating, reviewing, or slimming repo-managed skills.
-`skill-creator` owns the mechanics of making a skill. `skill-lifecycle` owns the policy and
-audit gates. This document names the smaller writing decisions that make a skill predictable.
+Use this reference when writing, reviewing or simplifying repository-managed skills. Follow the owning repository’s supported creation, lifecycle and installation rules. An available `skill-creator` or `skill-lifecycle` procedure can help; this document is usable without either installed skill. It explains the writing and composition choices, and does not install anything or grant authority.
 
 ## Core Test
 
@@ -37,6 +35,8 @@ For model-invoked descriptions:
 
 ## Composition Roles
 
+Composition roles describe how authorized procedures combine. They grant no action, delegation or acceptance authority and create no additional gates. The actual assignment determines permitted scope, the acceptance actor and completion obligations; a delegating owner can remain subject to acceptance by its origin.
+
 Skills compose. Name the role a skill plays when combined with others, so an agent running
 several at once knows which one is in charge.
 
@@ -48,8 +48,7 @@ several at once knows which one is in charge.
   never takes lifecycle ownership and never relaxes a protocol.
 - **Helper** — performs one bounded sub-step on request (create a task, critique a diff, run a
   search) and returns. The caller stays the driver.
-- **Protocol** — a strict rule set that must hold regardless of what else runs (task-backed
-  implementation, ledgers, review gates). It is authoritative; other roles work within it.
+- **Protocol** — an applicable rule set that other roles preserve within the actual assignment and instruction hierarchy. Classification alone establishes neither authority nor a requirement for ledgers or review gates.
 
 Precedence when roles combine: **protocol > driver > router > helper > lens.** Exactly one
 skill drives unless a router is actively selecting and handing off. Lenses and helpers compose
@@ -63,15 +62,13 @@ the orchestrator and owns the outcome. This is different from a router: a router
 only until it hands off to the selected driver. Apply this discipline whenever a driver delegates
 to a worker agent.
 
-- **Worker output is evidence, not a verdict.** The orchestrator owns acceptance: verify the
-  actual result — diff, files changed, checks re-run — never a worker's self-report.
+- **Worker output is evidence, not a verdict.** The delegating agent assesses the actual result — diff, files changed, checks and limits — rather than merely forwarding a self-report. Acceptance stays with the actor named by the actual assignment.
 - **Every delegation prompt carries its contract:** objective, scope and ownership, permissions
   (read-only vs. write, commit/lifecycle authority), success criteria, required proof, and
   return format. A prompt missing any of these under-specifies the work.
 - **Broad discovery narrows into an exact follow-up.** A scout or survey result is an input to
   a specific next action, not a finish line.
-- **Launching is not finishing.** Orchestration is incomplete while a worker is merely running;
-  it completes only when the returned work is reviewed, accepted, and integrated.
+- **Launching is not finishing.** Assess returned work against the promised scope and required review. Integration, adoption and closure are completion obligations only when included in that scope; a valid negative investigation or bounded review can finish without implementation integration.
 
 ## Information Hierarchy
 

@@ -9,3 +9,7 @@ Require inspection of the actual complete target. On a correction round, reuse v
 Return ship, fix-first or rethink with precise findings, decisive evidence and residual limits. Incomplete execution returns blocked or failed, not acceptance. Reviewer mutation voids the verdict; preserve evidence and resolve restoration within authority before accepting the target. Do not claim hard read-only isolation unless the host supplies it.
 
 The coordinator resolves corrections and integration; workers perform authorized repairs. Requested final-state review requires closure of acceptance-critical findings and review of later material deltas before affected acceptance. Continue unaffected authorized work while review is pending. Reuse a compatible reviewer across rounds; independence comes from separate identity, fresh context and no implementation ownership, not a model name. The reviewer reports only to its immediate coordinator.
+
+## Assess the delivered reader path
+
+For documentation or changed operational guidance, follow a real representative task from its entry to the affected contract, supported commands and recovery. Report where the actual reader cannot act or must guess, even if links resolve. For copied guidance, inspect the literal copy and its operative code-formatted references as well as Markdown links. A green packaging check alone does not establish usefulness. Keep scope and scientific/resource/privacy limits explicit; no new review event or outside effect follows from this exercise.

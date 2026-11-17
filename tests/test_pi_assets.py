@@ -17,7 +17,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from scripts.agent_catalog import CatalogError, load_catalog, validate_catalog
+from scripts.agent_catalog import CatalogError, desired_files as catalog_desired_files, load_catalog, validate_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 HARNESS_PI_REPO = Path(os.environ.get("HARNESS_PI_REPO", str(ROOT.parent / "harness-pi-support")))
@@ -478,9 +478,10 @@ class PiAssetsTest(unittest.TestCase):
                     path = ROOT / "docs" / f"{name}.md"
                     expected[f"docs/{name}.md"] = (stat.S_IMODE(path.stat().st_mode), path.read_bytes())
             if identity == "text-prune":
-                for name in ("skill-authoring-principles", "context-file-authoring", "claim-discipline", "experiment-protocol-readout-contract"):
-                    path = ROOT / "docs" / f"{name}.md"
-                    expected[f"docs/{name}.md"] = (stat.S_IMODE(path.stat().st_mode), path.read_bytes())
+                for target, item in catalog_desired_files(ROOT, assets, "pi").items():
+                    prefix = f"skills/{identity}/docs/"
+                    if target.startswith(prefix):
+                        expected[target.removeprefix(f"skills/{identity}/")] = (item.mode, item.source.read_bytes())
             self.assertEqual(inventory(self.home / "skills" / identity), expected)
         for deferred in ("tdd", "ask-oracle"):
             self.assertFalse((self.home / "skills" / deferred).exists())

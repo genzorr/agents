@@ -2,12 +2,13 @@
 
 import importlib.util
 import json
+import posixpath
 import re
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.agent_catalog import desired_files, load_catalog, validate_catalog
+from scripts.agent_catalog import desired_files, line_reference_classification, load_catalog, validate_catalog
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -204,22 +205,34 @@ class SkillValidatorContractsTest(unittest.TestCase):
     def test_home_root_documents_have_reachable_non_skill_consumers(self) -> None:
         assets = load_catalog(REPO_ROOT)
         references = re.compile(r"docs/[A-Za-z0-9/_.-]+\.md")
-        for platform in ("agents", "codex", "claude", "devin"):
+        links = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+        for platform in ("agents", "codex", "claude", "devin", "pi"):
             with self.subTest(platform=platform):
                 files = desired_files(REPO_ROOT, assets, platform)
                 documents = {target for target, output in files.items() if output.asset.kind == "traveling_document"}
                 pending = []
                 for output in files.values():
                     if output.asset.kind not in {"skill", "traveling_document"}:
-                        pending.extend(references.findall(output.source.read_text(encoding="utf-8")))
+                        text = output.source.read_text(encoding="utf-8")
+                        pending.extend(match.group() for match in references.finditer(text) if line_reference_classification(text, match.start(), match.end()) != "example-only")
                 reachable = set()
                 while pending:
                     target = pending.pop()
                     if target in reachable:
                         continue
-                    self.assertIn(target, documents, f"{platform}: missing home-root reference {target}")
+                    self.assertIn(target, documents, f"{platform}: missing distributed reference {target}")
                     reachable.add(target)
-                    pending.extend(references.findall(files[target].source.read_text(encoding="utf-8")))
+                    if not target.endswith(".md"):
+                        continue
+                    text = files[target].source.read_text(encoding="utf-8")
+                    for link in links.findall(text):
+                        path = link.split("#", 1)[0]
+                        if not path or ":" in path or path.startswith("/"):
+                            continue
+                        pending.append(posixpath.normpath(posixpath.join(posixpath.dirname(target), path)))
+                    for match in references.finditer(text):
+                        if (match.start() == 0 or text[match.start() - 1] != "/") and line_reference_classification(text, match.start(), match.end()) != "example-only":
+                            pending.append(match.group())
                 self.assertEqual(documents, reachable, f"{platform}: home-root docs without a consumer")
 
     def test_user_home_dependency_requires_path_local_classification(self) -> None:

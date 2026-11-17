@@ -1,121 +1,58 @@
-# Agents for Codex, Claude, Devin, and Pi
+<a id="agents-for-codex-claude-devin-and-pi"></a>
 
-Reusable skills, commands, subagents, global instructions, configuration, and notification hooks for Codex, Claude Code, Devin CLI, and Pi. The installers copy cataloged assets into independent shared or provider homes and preserve modified or unmanaged files.
+# Agents
+
+Agents maintains reusable project guidance and generic agent assets for Codex, Claude, Devin and Pi. It also owns the tools that install its cataloged assets while preserving modified and foreign files.
+
+## Choose a starting point
+
+| You want to… | Start here |
+| --- | --- |
+| Structure or improve a project's instructions and documentation | [Project guide](docs/project-foundations.md), or open the [complete small example](docs/examples/shelf-report/README.md) first |
+| Write project or global agent instructions | [Context File Authoring](docs/context-file-authoring.md) |
+| Find a reusable procedure | [Toolbox by task](docs/toolbox.md) |
+| Install, update or remove Agents-owned assets | [Installation](docs/installation.md), then the applicable provider's preview |
+| Change this repository | [AGENTS.md](AGENTS.md) and [development guidance](docs/development.md) |
+| Inspect possible repository repairs | [Optional gardening](docs/project-gardening.md); discovered repairs are proposed first |
+
+The project guide is ordinary Markdown and needs no installation, private OS or Workbench. Its [distribution list](docs/project-guide-distribution.md) includes the supporting references. Projects keep their actual requirements, architecture, commands and work records.
+
+## Source ownership
+
+Edit generic assets here. Installed copies are derivatives managed by the owning installer. A complete shared skill and a same-name provider skill are not overlaid; provider counterparts can differ in tools, invocation, permissions and model controls.
+
+Harness keeps its runtime-specific assets and parser/CLI. Session Harvester keeps its harvesting skill. BB keeps its runtime-specific instructions and skills. Agents' catalog must not install or remove another owner's assets. The [installer contract](docs/skill-installer-contract.md) owns the detailed behavior.
+
+Local maintainers may use ignored `docs/harness/` when present. Public contributors can use the issue or PR record; private coordination is not needed to understand this repository.
 
 ## Install
 
-Requires Python 3.9 or newer. The installer uses the Python standard library; no Python packages are required.
-
-Review the [Codex instructions](codex/AGENTS.md), [Claude instructions](claude/CLAUDE.md), [Devin instructions](devin/AGENTS.md), [Devin defaults](devin/config.json), [Pi instructions](pi/AGENTS.md), and [asset catalog](catalog.json) before installing. These are opinionated workflows and global defaults. Some skills require separately installed tools or services; see each skill's `SKILL.md` for its requirements.
-
-Portable skills have one managed runtime location at `~/.agents/skills`, which Codex, Devin and Pi discover natively. Claude receives managed copies under `~/.claude/skills`; its current documented discovery paths do not include the global shared directory. Provider-specific skills remain complete, unique assets under their provider home and are never overlaid on a same-name shared skill. Skills that require another runtime skill remain provider assets until their complete dependency chain is proven portable; for example, `babysit-pr` and `thermo-nuclear-code-quality-review` remain Codex/Claude assets because both require `review-change`.
-
-From a local checkout, preview the changes first:
-
-```bash
-bash scripts/install-codex.sh --dry-run --diff
-bash scripts/install-claude.sh --dry-run --diff
-bash scripts/install-agents.sh --dry-run --diff
-bash scripts/install-devin.sh --dry-run --diff
-bash scripts/install-pi-assets.sh --dry-run --diff
-```
-
-Then run the installer for the platform you use:
-
-```bash
-bash scripts/install-agents.sh
-bash scripts/install-codex.sh
-bash scripts/install-devin.sh
-bash scripts/install-pi-assets.sh
-# Claude does not consume ~/.agents/skills, so its provider installer includes managed skill copies:
-bash scripts/install-claude.sh
-```
-
-The default destinations are `~/.agents`, `~/.codex`, `~/.claude`, `${XDG_CONFIG_HOME:-~/.config}/devin` (or `%APPDATA%\devin` on Windows), and `~/.pi/agent`. Set `AGENTS_HOME`, `CODEX_HOME`, `CLAUDE_HOME`, installer-specific `DEVIN_HOME`, or `PI_CODING_AGENT_DIR` to use another directory. The shared installer is deliberately independent: provider install, prune, and uninstall commands never mutate `~/.agents`, so provider homes can be installed or removed in either order without competing for shared state. For an isolated trial:
-
-```bash
-CODEX_HOME="$PWD/.scratch-home/codex" bash scripts/install-codex.sh
-CLAUDE_HOME="$PWD/.scratch-home/claude" bash scripts/install-claude.sh
-AGENTS_HOME="$PWD/.scratch-home/agents" bash scripts/install-agents.sh
-DEVIN_HOME="$PWD/.scratch-home/devin" bash scripts/install-devin.sh
-PI_CODING_AGENT_DIR="$PWD/.scratch-home/pi" bash scripts/install-pi-assets.sh
-```
-
-Pi asset setup uses the POSIX entrypoint; native Windows Pi setup is unsupported. For the other providers on native Windows, use the PowerShell entry points:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1 --dry-run --diff
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex.ps1
-# For Claude, use scripts\install-claude.ps1 instead.
-# The shared and Devin twins are scripts\install-agents.ps1 and scripts\install-devin.ps1.
-```
-
-Set `$env:AGENTS_HOME`, `$env:CODEX_HOME`, `$env:CLAUDE_HOME`, or `$env:DEVIN_HOME` to override the corresponding Windows destination.
-
-When migrating an existing Codex installation, install the shared surface first, verify it, then preview and run `install-codex.sh --prune`. The explicit prune removes only unchanged skills that moved to the shared surface; `babysit-pr` and `thermo-nuclear-code-quality-review` remain desired Codex assets and are retained. Modified or foreign copies remain conflicts and are preserved. If an earlier consolidation preview removed either dependent skill from the Codex home, re-run the Codex installer before pruning the shared home so the provider copy is restored before its stale shared copy is removed.
+Read [installation and preview](docs/installation.md#preview-the-selected-provider) before changing a runtime home.
 
 ## Update and remove
 
-Re-run the installer after updating your checkout. Install is copy-based and idempotent. Edit source files in this repository rather than installed copies; locally modified destinations are reported as conflicts and preserved.
+Use [update and recovery](docs/installation.md#update-prune-or-remove). Preserve managed-state evidence and conflicts; an absent catalog entry is not permission to delete foreign files.
 
-`--dry-run` and `--diff` are read-only. `--prune` removes unchanged, previously managed files no longer in that home's catalog. `--uninstall` removes unchanged managed assets and reconciles managed Claude hook settings or Devin config values. Both preserve modified and foreign files. Preview either operation before applying it:
+## Project foundations
 
-```bash
-bash scripts/install-codex.sh --uninstall --dry-run --diff
-```
+The [project guide](docs/project-foundations.md) explains how to structure, write and maintain global and project instructions, skills, behavior specs, architecture, commands and other project documents. It teaches what belongs where, how agents find the relevant detail and how changes stay consistent. An author uses the guide to improve a project's own reading routes; subsequent work follows those routes rather than rereading the whole guide. The [complete example](docs/examples/shelf-report/README.md) shows a small connected document set.
 
-The Claude installer merges its notification hooks while preserving unrelated settings. See the [installer contract](docs/skill-installer-contract.md) for conflict handling and recovery.
+To discuss adopting the approach elsewhere, share the guide and its [reusable handoff prompt](docs/project-foundations.md#use-this-approach-in-a-repository).
+
+For optional BB gardening setup, use [its separate guide](docs/project-gardening-bb.md).
 
 ## Skills and configuration
 
-To create or maintain project `AGENTS.md` and provider-specific context, use [Context File Authoring](docs/context-file-authoring.md). It covers inspecting the real project, verified commands, current documentation versus historical records, and maintaining guidance when behavior changes. The separate `codex-project-init` skill is retired in favor of this standalone route. Existing installed copies are reconciled by the normal Codex installer `--prune` ownership checks; modified or foreign copies are preserved for operator review.
-
-The Codex and Devin global instructions and Claude's implementation rule point to that guide only when authoring project instructions. Each provider installer delivers the guide and its conditional reference dependencies under that provider home's `docs/`; skill-relative copies keep their existing separate catalog ownership. The guide is read on demand, without an automatic startup import. For returned research, Codex and Claude retain `integrate-research`; when that skill is unavailable, compare the answer with the original question and current evidence, separate proposals from decisions, and update only authorized owners.
-
-Browse the [shared skills](shared/skills/), [Codex skills](codex/skills/), and [Claude skills](claude/skills/). Same-name provider skills can intentionally differ. A catalog entry is shared only when its complete installed behavior is provider-neutral; tool names, frontmatter, permissions, invocation, model behavior, and runtime metadata are reasons to retain complete provider twins.
-
-Use [replace-orchestrator](codex/skills/replace-orchestrator/SKILL.md) to transfer a long-running Codex orchestrator role to a fresh chat while preserving active owners and callback continuity.
-
-Invoke `test-audit` explicitly to audit a bounded existing suite and plan preservation, repair, consolidation, or removal. It reports by default and continues one coherent cleanup batch when already authorized; it does not replace TDD, change review, or architecture review. Its [common source](shared/skills/test-audit/SKILL.md) is installed into the Codex and Claude provider homes, with explicit-only Codex invocation metadata; shared-home and Devin installation are unsupported.
-
-The Devin installer copies a complete [Devin-specific global instruction layer](devin/AGENTS.md) to `AGENTS.md` in the Devin home (by default `~/.config/devin/AGENTS.md`); it is a provider twin, not a symlink or forced copy of the Codex or Claude source. Project `AGENTS.md` files remain the repository-specific instruction surface. The installer also leaf-merges [safe defaults](devin/config.json) into `config.json`: standard `AGENTS.md` project rules stay enabled, and foreign-tool imports are disabled to avoid duplicate rules, skills, hooks, and MCP configuration. Unrelated strict-JSON settings, including an operator-selected model or permission mode, are preserved. A differing unmanaged value, a modified managed value, invalid JSON, or JSON-with-comments is preserved as a conflict rather than reformatted or overwritten. Authentication and credentials are never managed. Model and permission selection belong to the invoking workflow rather than this global interoperability config.
-
-Invoke [piecemeal-growth](shared/skills/piecemeal-growth/SKILL.md) by name or explicitly request “piecemeal growth”, “piecemeal mode”, or “piecemeal mentality” as the approach to design, implementation, refactoring, or review. This task-scoped lens grounds complexity in present requirements and credible failures while preserving the full contract; the current workflow stays in charge. Concept discussion and ordinary coding requests do not activate it. It installs in the shared Agents home for Codex and Devin discovery and as a Claude copy.
-
-Optional [Codex permission profiles](scripts/install-codex-permissions.py) and [Claude auto-mode settings](docs/claude-auto-mode.md) have separate setup paths and are not applied by the asset installer. The Codex installer validates its complete prospective config in an isolated temporary `CODEX_HOME` before writing, and `--dry-run` validates without creating a destination or backup.
-
-[Pi setup](docs/pi-setup.md) covers catalog assets, optional Linux permissions and native automatic updates. [catalog.json](catalog.json) defines skill membership; skills own their prerequisites. Harness assets remain with their owning repository. The separate [pi-accounts package](https://github.com/genzorr/pi-accounts#readme) owns accounts and hourly maintenance. See the [permission contract](docs/pi-permissions.md) before relying on enforcement and [legacy migration/recovery](docs/pi-distribution.md) only for earlier layouts. Live changes require operator authorization.
-
-```bash
-CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py
-CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-thread-bridge
-CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --configure-app-defaults
-CODEX_HOME="$HOME/.codex" python3 scripts/install-codex-permissions.py --approve-codex-app-tools
-```
-
-`--configure-thread-bridge` patches the existing bridge server's created-task defaults and approval mode. `--configure-app-defaults` patches only `apps._default`. `--approve-codex-app-tools` approves the bundled Codex App MCP tools that otherwise prompt. Each option preserves unrelated app, tool, and MCP settings. See the [bridge and permission configuration contract](docs/codex-thread-bridge.md).
+Use the [task-based toolbox](docs/toolbox.md). It distinguishes existing procedures from planned consolidation; runtime-specific setup remains at its current owner.
 
 ## Development
 
-Read [AGENTS.md](AGENTS.md) before changing the repository. Validate source changes with:
-
-```bash
-python3 scripts/validate_catalog.py
-python3 scripts/validate_skills.py
-python3 -m unittest discover -s tests
-bash scripts/test-prune-safety.sh
-```
-
-Exercise installer changes against scratch homes before any live installation. Cross-repository ownership checks and optional local work tracking are maintainer checks documented in [AGENTS.md](AGENTS.md).
+Use [development guidance](docs/development.md) for checks and source changes.
 
 ### Local outputs and retention
 
-Installer previews use the selected home variables above; scratch packaging checks use ignored `.scratch-home/` (or an explicitly selected scratch home), and unit tests use temporary fixtures. Record substantial attempts under distinct task/attempt subdirectories, keeping the actual host/path and decisive result in the existing work record. Keep review/recovery evidence through its consumer; record remaining owner and release/reassessment condition before proposing removal. Installed homes and their ownership ledgers are operational state, not task scratch; do not move or delete them as artifact cleanup. Small receipts may stay with the issue/PR or local task; bulky logs and bundles stay in the chosen scratch location. No remote storage binding is required by these local checks.
+[Outputs and retention](docs/development.md#local-outputs-and-retention) owns the actual guidance.
 
 ### Diagnosis and recovery
 
-For catalog, missing-source, portability, or traveling-reference failures, run the validators above from this checkout; they report the affected asset/path. For an install conflict, select a scratch home with the relevant home variable and run that provider's installer with `--dry-run --diff` to inspect its planned actions without writing. A successful preview has no unresolved conflicts and exits zero; a conflict preserves the destination and reports a non-success result.
-
-Current desired assets come from `catalog.json`; each selected home's `.agents-install-state.json` records historical ownership and last-installed signatures. Use [the installer contract](docs/skill-installer-contract.md) to distinguish a modified owned file, an unmanaged destination, and an invalid ledger or adapter. Do not delete or rewrite state to bypass a conflict: it is the evidence prune/uninstall need for safe recovery. There is no force option. Restore a known-good source version and preview reconciliation, or have the operator resolve the conflicting destination explicitly. Live-home mutation still requires operator approval.
-
-Keep symptom, command/environment, decisive evidence, cause or remaining hypotheses, and outcome in the existing project work record. Local maintainers use ignored `docs/harness/` when present; public contributors can use the issue or PR record. Promote only verified reusable conclusions into current guidance, and update that guidance when a command or recovery boundary changes.
+[Diagnosis and recovery](docs/development.md#diagnosis-and-recovery) owns the procedure. These headings retain existing inbound links.

@@ -65,7 +65,7 @@ Harness should use this reference when an observation becomes an Evidence interp
 
 Session-harvester should use this reference at synthesis and promotion, after extraction has preserved session evidence. Candidate rules should carry their tested scope, evidence lineages, alternatives, counterevidence, explicit non-claims, target cases, and guardrail cases. Repeated sessions from one project do not become cross-project guidance automatically, and no candidate becomes an installed rule without the existing routing and adoption authority.
 
-Agents remains the portable authoring and review owner. Harness remains the durable-record owner, and session-harvester remains the session-induction owner. Downstream consumers should link to this path rather than copy a second claim-selection method.
+Agents remains the portable authoring and review owner. Each project selects its durable-record owner; use Harness where the project uses it, or its existing issue, PR or task store. Session-harvester remains the session-induction owner. Downstream consumers should link to this path rather than copy a second claim-selection method.
 
 ## Boundaries and provenance
 
