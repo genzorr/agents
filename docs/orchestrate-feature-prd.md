@@ -56,11 +56,11 @@ The coordinator assesses actual native returns and evidence, then integrates, co
 | Role | Creation default |
 | --- | --- |
 | Project orchestrator | Preserve current model and effort |
-| Ordinary feature owner | `gpt-6.1-sol` / `medium` |
+| Ordinary feature owner | `gpt-6.2-sol` / `medium` |
 | Bounded native helper | `gpt-6-luna` / `xhigh` |
-| Independent native reviewer | `gpt-6.1-sol` / `high` |
-| Native advisor | `gpt-6.1-sol` / `xhigh` |
-| Explicitly selected main worker | `gpt-6.1-sol` / `medium` |
+| Independent native reviewer | `gpt-6.2-sol` / `high` |
+| Native advisor | `gpt-6.2-sol` / `xhigh` |
+| Explicitly selected main worker | `gpt-6.2-sol` / `medium` |
 
 Resolve only roles actually used. Explicit per-field role overrides remain independent. For an actual worker assignment resolve each field in order: role default → explicit general worker override → matching named-assignment override. Missing fields inherit the applicable role/general field; labels alone require no launch. Preserve override provenance without eager unused role maps. Exact unsupported controls fail honestly; never silently substitute or upgrade Luna. Accepted creation establishes requested settings, not independent readback. An explicit orchestrator profile is a precondition, never authority to mutate the existing chat.
 

@@ -206,9 +206,9 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         profiles = self.section(workers, "Authorized roles")
         # These identifiers are the selected public creation contract, not runtime availability claims.
         self.assertIn("Bounded helper | `gpt-6-luna` / `xhigh`", profiles)
-        self.assertIn("independent reviewer | `gpt-6.1-sol` / `high`", profiles)
-        self.assertIn("unresolved question | `gpt-6.1-sol` / `xhigh`", profiles)
-        self.assertIn("main execution worker | `gpt-6.1-sol` / `medium`", profiles)
+        self.assertIn("independent reviewer | `gpt-6.2-sol` / `high`", profiles)
+        self.assertIn("unresolved question | `gpt-6.2-sol` / `xhigh`", profiles)
+        self.assertIn("main execution worker | `gpt-6.2-sol` / `medium`", profiles)
         precedence = ("role default", "explicit general worker override", "matching named-assignment override")
         positions = [profiles.index(term) for term in precedence]
         self.assertEqual(positions, sorted(positions))
@@ -218,7 +218,7 @@ class GoalSolLunaResearchContractsTest(unittest.TestCase):
         self.assertIn("never silently upgrade or substitute", profiles)
         self.assertIn("not independent readback", profiles)
         feature = self.section(self.read("codex/skills/orchestrate-feature/SKILL.md"), "Prepare and launch")
-        self.assertIn("`gpt-6.1-sol` / `medium`", feature)
+        self.assertIn("`gpt-6.2-sol` / `medium`", feature)
         self.assertIn("Preserve the orchestrator's exact settings", feature)
         self.assertIn("stop on mismatch or an unobservable explicit requirement", feature)
 

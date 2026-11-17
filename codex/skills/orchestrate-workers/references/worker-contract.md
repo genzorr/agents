@@ -22,9 +22,9 @@ Use as many bounded Luna helpers as useful, created/reused on demand without a f
 | Actual role | Creation default |
 | --- | --- |
 | Bounded helper | `gpt-6-luna` / `xhigh` |
-| Advisor for a consequential unresolved question | `gpt-6.1-sol` / `xhigh` |
-| Required/requested independent reviewer | `gpt-6.1-sol` / `high` |
-| Explicit exceptional main execution worker | `gpt-6.1-sol` / `medium` |
+| Advisor for a consequential unresolved question | `gpt-6.2-sol` / `xhigh` |
+| Required/requested independent reviewer | `gpt-6.2-sol` / `high` |
+| Explicit exceptional main execution worker | `gpt-6.2-sol` / `medium` |
 
 Resolve only used roles. Worker model/effort independently follow role default, explicit general worker override, then matching named-assignment override; advisor/reviewer overrides stay separate. An omitted named field retains the resolved general field; an omitted general field retains its role default; one override never changes another role or the coordinator. Named assignments alone require no launch. Validate exact required route/profile/context controls before creation. Disclose consequential overrides/readback limits once; never silently upgrade or substitute. Accepted creation establishes requested settings, not independent readback.
 
